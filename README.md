@@ -132,7 +132,7 @@ $ kubectl apply -f ./services/example.yaml
 ```
 Run next command to get `example` service IP:
 ```
-$ get svc example -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
+$ kubectl get svc example -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
 After it ONLYOFFICE DocumentServer Example will be available at `http://EXAMPLE-SERVICE-IP/` in web browser.
