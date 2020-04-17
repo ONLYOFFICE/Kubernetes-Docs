@@ -29,7 +29,13 @@ $ kubectl apply -f ./pvc/ds-files.yaml
 ```
 Note: Default `nfs` Persistent Volume Claim is 5Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE`.
 
-### 2. Deploy RabbitMQ
+### 2. Deploy ONLYOFFICE DocumentServer parameters
+Deploy DocumentServer configmap:
+```
+$ kubectl apply -f ./configmaps/documentserver.yaml
+```
+
+### 3. Deploy RabbitMQ
 Deploy message broker pod:
 ```
 $ kubectl apply -f ./pods/mb.yaml
@@ -39,7 +45,7 @@ Deploy `mb` service:
 $ kubectl apply -f ./services/mb.yaml
 ```
 
-### 3. Deploy Redis
+### 4. Deploy Redis
 Deploy lock storage pod:
 ```
 $ kubectl apply -f ./pods/ls.yaml
@@ -49,7 +55,7 @@ Deploy `ls` service:
 $ kubectl apply -f ./services/ls.yaml
 ```
 
-### 4. Deploy PostgreSQL
+### 5. Deploy PostgreSQL
 Deploy data base pod:
 ```
 $ kubectl apply -f ./pods/db.yaml
@@ -69,10 +75,6 @@ $ kubectl apply -f ./configmaps/license.yaml
 ```
 
 ### 2. Deploy DocumentServer
-Deploy DocumentServer configmap:
-```
-$ kubectl apply -f ./configmaps/documentserver.yaml
-```
 
 Deploy docservice deployment:
 ```
