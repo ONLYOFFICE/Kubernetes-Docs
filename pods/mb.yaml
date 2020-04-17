@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mb
+  labels:
+    app: mb
+spec:
+  containers:
+    - name: mb
+      image: rabbitmq
+      ports:
+      - containerPort: 5672

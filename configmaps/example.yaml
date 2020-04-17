@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example
+data:
+data:
+  DS_URL: http://example.com/

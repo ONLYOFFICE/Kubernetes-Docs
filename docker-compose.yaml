@@ -1,0 +1,150 @@
+version: '2.3'
+services:
+  proxy:
+    container_name: proxy
+    build:
+      context: .
+      target: proxy
+    image: ${COMPANY_NAME}/4testing-ds-base:proxy
+    environment:
+      - DOCSERVICE_HOST_PORT=docservice:8000
+      - SPELLCHECKER_HOST_PORT=spellchecker:8080
+      - EXAMPLE_HOST_PORT=example:3000
+    stdin_open: true
+    restart: always
+    ports:
+      - '80:8888'
+#    volumes:
+#      - /etc/${COMPANY_NAME}
+#      - /var/www/${COMPANY_NAME}/Data
+#      - ./var/lib/ds:/var/lib/${COMPANY_NAME}/documentserver/App_Data/cache/files
+#      - ./var/lib/example:/var/www/${COMPANY_NAME}/documentserver-example/public/files
+#      - /usr/share/fonts
+#      - ./http-upstream.conf:/etc/nginx/includes/http-upstream.conf
+       
+  docservice:
+    build:
+      context: .
+      target: docservice
+    image: ${COMPANY_NAME}/4testing-ds-base:docservice
+    container_name: docservice
+    environment:
+      - DB_HOST=postgresql
+      - DB_NAME=mydb
+      - DB_USER=myuser
+      - REDIST_SERVER_HOST=redis
+      - AMQP_URI=amqp://guest:guest@rabbitmq
+    depends_on:
+      - proxy
+      - postgresql
+      - redis
+      - rabbitmq
+    stdin_open: true
+    restart: always
+    expose:
+      - '8000'
+    volumes_from:
+     - proxy
+
+  converter:
+    build:
+      context: .
+      target: converter
+    image: ${COMPANY_NAME}/4testing-ds-base:converter
+    container_name: converter
+    environment:
+      - DB_HOST=postgresql
+      - DB_NAME=mydb
+      - DB_USER=myuser
+      - REDIST_SERVER_HOST=redis
+      - AMQP_URI=amqp://guest:guest@rabbitmq
+    depends_on:
+      - proxy
+      - postgresql
+      - redis
+      - rabbitmq
+    stdin_open: true
+    restart: always
+    volumes_from:
+     - proxy
+
+  spellchecker:
+    build:
+      context: .
+      target: spellchecker
+    image: ${COMPANY_NAME}/4testing-ds-base:spellchecker
+    container_name: spellchecker
+    environment:
+      - DB_HOST=postgresql
+      - DB_NAME=mydb
+      - DB_USER=myuser
+      - REDIST_SERVER_HOST=redis
+      - AMQP_URI=amqp://guest:guest@rabbitmq
+    depends_on:
+      - proxy
+      - postgresql
+      - redis
+      - rabbitmq
+    stdin_open: true
+    restart: always
+    expose:
+      - '8080'
+    volumes_from:
+     - proxy
+
+  example:
+    build:
+      context: .
+      target: example
+    image: ${COMPANY_NAME}/4testing-ds-base:example
+    container_name: example
+    environment:
+      - DB_HOST=postgresql
+      - DB_NAME=mydb
+      - DB_USER=myuser
+      - REDIST_SERVER_HOST=redis
+      - AMQP_URI=amqp://guest:guest@rabbitmq
+    depends_on:
+      - proxy
+      - postgresql
+      - redis
+      - rabbitmq
+    stdin_open: true
+    restart: always
+    expose:
+      - '3000'
+    volumes_from:
+     - proxy
+
+  redis:
+    container_name: redis
+    image: redis
+    restart: always
+    expose:
+      - '6379'
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq
+    restart: always
+    expose:
+      - '5672'
+
+  postgresql:
+    container_name: postgresql
+    build:
+      context: .
+      target: db
+    image: ${COMPANY_NAME}/4testing-ds-base:db
+    environment:
+      - POSTGRES_DB=mydb
+      - POSTGRES_USER=myuser
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    restart: always
+    expose:
+      - '5432'
+    volumes:
+      - postgresql_data:/var/lib/postgresql
+
+volumes:
+  postgresql_data:

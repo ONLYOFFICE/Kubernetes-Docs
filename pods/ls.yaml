@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ls
+  labels:
+    app: ls
+spec:
+  containers:
+    - name: ls
+      image: redis
+      ports:
+      - containerPort: 6379
