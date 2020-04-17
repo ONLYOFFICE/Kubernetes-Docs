@@ -107,7 +107,7 @@ $ kubectl apply -f ./services/documentserver.yaml
 ```
 Run next command to get `documentserver` service IP:
 ```
-$ get svc documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
+$ kubectl get svc documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
 After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-SERVICE-IP/`
