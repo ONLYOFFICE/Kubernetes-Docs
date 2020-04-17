@@ -17,12 +17,14 @@ Install `nfs` Persistent Storage Class
 $ helm install nfs-server stable/nfs-server-provisioner \
   --set persistence.enabled=true,persistence.storageClass=PERSISTENT_STORAGE_CLASS,persistence.size=PERSISTENT_SIZE
 ```
+
 - `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetus cluster
+
+  Persistent Storage Classes for different providers:
+  - Digital Ocean: `do-block-storage`
+
 - `PERSISTENT_SIZE` is the total size of all Persistent Storages for nfs Persistent Storage Class. You can express size as a plain integer one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `200Gi`.
 
-Persistent Storage Classes for different providers:
-- Digital Ocean: `do-block-storage`
- 
 Create Persistent Volume Claim
 ```
 $ kubectl apply -f ./pvc/ds-files.yaml
