@@ -119,7 +119,7 @@ You can use DocumentServer IP or domain name associated with this IP you got in 
 
 Deploy example configmap:
 ```
-$ kubectl apply -f ./configmaps/documentserver.yaml
+$ kubectl apply -f ./configmaps/example.yaml
 ```
 
 Deploy example pod:
