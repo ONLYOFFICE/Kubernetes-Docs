@@ -40,6 +40,8 @@ spec:
         - name: docservice
           image: onlyoffice/4testing-ds-docservice:latest
           envFrom:
+          - secretRef:
+              name: db
           - configMapRef:
               name: documentserver
           volumeMounts:
