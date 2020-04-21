@@ -25,6 +25,8 @@ spec:
         - name: converter
           image: onlyoffice/4testing-ds-converter:latest
           envFrom:
+          - secretRef:
+              name: db
           - configMapRef:
               name: documentserver
           volumeMounts:
