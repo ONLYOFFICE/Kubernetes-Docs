@@ -54,7 +54,7 @@ $ kubectl apply -f ./services/ls.yaml
 ### 4. Deploy PostgreSQL
 Create secret `db` with database user name and password
 ```
-kubectl create secret generic db \
+$ kubectl create secret generic db \
   --from-literal=DB_USER=MYUSER \
   --from-literal=DB_PWD=MYUSERPWD
 ```
