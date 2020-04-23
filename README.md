@@ -85,6 +85,15 @@ Deploy DocumentServer configmap:
 ```
 $ kubectl apply -f ./configmaps/documentserver.yaml
 ```
+
+Create `jwt` secret with JWT parameters
+```
+$ kubectl create secret generic jwt \
+  --from-literal=JWT_ENABLED=true \
+  --from-literal=JWT_SECRET=MYSECRET
+```
+`MYSECRET` is the secret key to validate the JSON Web Token in the request to the ONLYOFFICE Document Server.
+
 ### 3. Deploy DocumentServer
 
 Deploy docservice deployment:
