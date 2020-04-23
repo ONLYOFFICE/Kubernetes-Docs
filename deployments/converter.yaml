@@ -27,6 +27,8 @@ spec:
           envFrom:
           - secretRef:
               name: db
+          - secretRef:
+              name: jwt
           - configMapRef:
               name: documentserver
           volumeMounts:

@@ -13,6 +13,8 @@ spec:
     - name: example
       image: onlyoffice/4testing-ds-example:latest
       envFrom:
+        - secretRef:
+            name: jwt
         - configMapRef:
             name: example
       ports:
