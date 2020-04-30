@@ -6,16 +6,23 @@ metadata:
     app: example
 spec:
   volumes:
-    - name: example
+    - name: nginx-conf
       configMap:
         name: example
   containers:
+    - name: proxy
+      image: nginx
+      ports:
+        - containerPort: 8888      
+      volumeMounts:
+      - name: nginx-conf
+        mountPath: /etc/nginx/conf.d/nginx.conf
+        subPath: nginx.conf
+        readOnly: true
+
+
     - name: example
       image: onlyoffice/4testing-ds-example:latest
       envFrom:
         - secretRef:
             name: jwt
-        - configMapRef:
-            name: example
-      ports:
-        - containerPort: 3000
