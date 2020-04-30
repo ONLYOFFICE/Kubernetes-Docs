@@ -165,3 +165,24 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 ```
 
 After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
+
+### 6. Expose DocumentServer via HTTPS
+
+Create `tls` secret with ssl certificate inside.
+
+Put ssl certificate and private key into `tls.crt` and `tls.key` file and than run:
+```
+$ kubectl create secret generic tls \
+  --from-file=./tls.crt \
+  --from-file=./tls.key
+```
+
+Open `./ingresses/documentserver-ssl.yaml` and type your domain name instead of `example.com`
+
+Deploy documentserver ingress
+
+```
+$ kubectl apply -f ./ingresses/documentserver-ssl.yaml
+```
+
+After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
