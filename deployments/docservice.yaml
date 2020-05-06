@@ -26,8 +26,8 @@ spec:
           persistentVolumeClaim:
             claimName: ds-files
         - name: ds-license
-          configMap:
-            name: license
+          secret:
+            secretName: license
       containers:
         - name: proxy
           image: onlyoffice/4testing-ds-proxy:latest

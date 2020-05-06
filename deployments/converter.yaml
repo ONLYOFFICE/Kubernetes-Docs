@@ -19,8 +19,8 @@ spec:
           persistentVolumeClaim:
             claimName: ds-files
         - name: ds-license
-          configMap:
-            name: license
+          secret:
+            secretName: license
       containers:
         - name: converter
           image: onlyoffice/4testing-ds-converter:latest
