@@ -93,10 +93,6 @@ Otherwise create empty secret `license` with follow command:
 $ kubectl create secret generic license
 ```
 
-Deploy the license configmap:
-```
-$ kubectl apply -f ./configmaps/license.yaml
-```
 ### 2. Deploy ONLYOFFICE DocumentServer parameters
 Deploy DocumentServer configmap:
 ```
