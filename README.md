@@ -81,7 +81,18 @@ $ kubectl apply -f ./services/db.yaml
 ## Deploy ONLYOFFICE DocumentServer
 
 ### 1. Deploy ONLYOFFICE DocumentServer license
-If you have valid ONLYOFFICE DocumentServer license, put it to `data.license.lic` field in `./configmaps/license.yaml` file. Otherwise keep this that unchanged.
+If you have valid ONLYOFFICE DocumentServer license, create secret `license` from file.
+```
+$ kubectl create secret generic license \
+  --from-file=./license.lic
+```
+Note: The source license file name should be 'license.lic' because this name would be used as a field in created secret.
+
+Otherwise create empty secret `license` with follow command:
+```
+$ kubectl create secret generic license
+```
+
 Deploy the license configmap:
 ```
 $ kubectl apply -f ./configmaps/license.yaml
