@@ -185,4 +185,11 @@ Deploy documentserver ingress
 $ kubectl apply -f ./ingresses/documentserver-ssl.yaml
 ```
 
+Run next command to get `documentserver` ingress IP:
+```
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
+```
+
+Associate `documentserver` ingress IP with your domain name through your DNS provider.
+
 After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
