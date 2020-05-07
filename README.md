@@ -34,7 +34,7 @@ Note: Default `nfs` Persistent Volume Claim is 5Gi. You can change it in `./pvc/
 
 To install the Nginx Ingress Controller to your cluster, run the following command:
 ```
-$ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true
+$ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
 ### 3. Deploy RabbitMQ
@@ -58,24 +58,30 @@ $ kubectl apply -f ./services/ls.yaml
 ```
 
 ### 5. Deploy PostgreSQL
-Create secret `db` with database user name and password
+Download ONLYOFFICE DocumentServer database scheme:
 ```
-$ kubectl create secret generic db \
-  --from-literal=DB_USER=MYUSER \
-  --from-literal=DB_PWD=MYUSERPWD
+wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
 ```
-`MYUSER` and `MYPASSWORD` are database superuser name and password.
+Create a config map from it:
+```
+$ kubectl create configmap init-db-scripts \
+  --from-file=./createdb.sql
+```
+Create secret `postgresql` with database superuser password:
+```
+$ kubectl create secret generic postgresql \
+  --from-literal=postgresql-password=POSTGRESPASSWORD
+```
+`POSTGRESPASSWORD` is database superuser password.
 
 Note:
 Special characters such as $, \, *, and ! will be interpreted by your shell and require escaping. In most shells, the easiest way to escape the password is to surround it with single quotes (')
 
-Deploy data base pod:
+To install the PostgreSQL to your cluster, run the following command:
+
 ```
-$ kubectl apply -f ./pods/db.yaml
-```
-Deploy `db` service:
-```
-$ kubectl apply -f ./services/db.yaml
+$ helm install postgresql stable/postgresql \
+  --set initdbScriptsConfigMap=init-db-scripts,existingSecret=postgresql,postgresqlDatabase=postgres
 ```
 
 ## Deploy ONLYOFFICE DocumentServer

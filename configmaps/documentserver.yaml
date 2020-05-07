@@ -3,7 +3,8 @@ kind: ConfigMap
 metadata:
   name: documentserver
 data:
-  DB_HOST: db
+  DB_USER: postgres
+  DB_HOST: postgresql
   DB_PORT: "5432"
   REDIST_SERVER_HOST: ls
   AMQP_URI: "amqp://guest:guest@mb"

@@ -24,9 +24,13 @@ spec:
       containers:
         - name: converter
           image: onlyoffice/4testing-ds-converter:latest
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password 
           envFrom:
-          - secretRef:
-              name: db
           - secretRef:
               name: jwt
           - configMapRef:

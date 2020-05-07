@@ -39,9 +39,13 @@ spec:
 
         - name: docservice
           image: onlyoffice/4testing-ds-docservice:latest
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password         
           envFrom:
-          - secretRef:
-              name: db
           - secretRef:
               name: jwt
           - configMapRef:
@@ -55,9 +59,13 @@ spec:
 
         - name: spellchecker
           image: onlyoffice/4testing-ds-spellchecker:latest
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password  
           envFrom:
-          - secretRef:
-              name: db
           - secretRef:
               name: jwt
           - configMapRef:
