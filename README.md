@@ -224,7 +224,7 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 
 After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
 
-### 5.1 Expose DocumentServer via HTTPS
+#### 5.1 Expose DocumentServer via HTTPS
 
 Create `tls` secret with ssl certificate inside.
 
