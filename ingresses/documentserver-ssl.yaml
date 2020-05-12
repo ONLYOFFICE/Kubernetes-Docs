@@ -7,10 +7,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - example.com
+    - kube-ds.teamlab.info
     secretName: tls
   rules:
-  - host: example.com
+  - host: kube-ds.teamlab.info
     http:
       paths:
       - path: /
