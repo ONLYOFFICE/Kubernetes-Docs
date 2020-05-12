@@ -22,6 +22,7 @@ $ helm install nfs-server stable/nfs-server-provisioner \
 
   Persistent Storage Classes for different providers:
   - Digital Ocean: `do-block-storage`
+  - IBM Cloud: Default `ibmc-file-bronze`. [More storage classes](https://cloud.ibm.com/docs/containers?topic=containers-file_storage)
 
 - `PERSISTENT_SIZE` is the total size of all Persistent Storages for nfs Persistent Storage Class. You can express size as a plain integer one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `200Gi`.
 
