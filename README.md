@@ -109,6 +109,25 @@ $ helm install postgresql bitnami/postgresql-ha \
   --set postgresql.initdbScriptsCM=init-db-scripts,postgresql.existingSecret=postgresql
 ```
 
+### 6. Deploy StatsD
+*This step is optional. You can skip #6 step at all if you don't wanna run StatsD*
+
+Deploy StatsD configmap:
+```
+$ kubectl apply -f ./configmaps/statsd.yaml
+```
+Deploy StatsD pod:
+```
+$ kubectl apply -f ./pods/statsd.yaml
+```
+Deploy `statsd` service:
+```
+$ kubectl apply -f ./services/statsd.yaml
+```
+Allow statsD metrics in ONLYOFFICE DocumentServer:
+
+Put `data.METRICS_ENABLED` field in ./configmaps/documentserver.yaml file to `"true"` value
+
 ## Deploy ONLYOFFICE DocumentServer
 
 ### 1. Deploy ONLYOFFICE DocumentServer license
