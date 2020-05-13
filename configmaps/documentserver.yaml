@@ -8,3 +8,5 @@ data:
   DB_PORT: "5432"
   REDIST_SERVER_HOST: ls
   AMQP_URI: "amqp://guest:guest@mb"
+  METRICS_HOST: statsd
+  METRICS_ENABLED: "false"
