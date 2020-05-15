@@ -22,6 +22,7 @@ $ helm install nfs-server stable/nfs-server-provisioner \
 - `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetus cluster
 
   Persistent Storage Classes for different providers:
+  - Amazon EKS: `gp2`
   - Digital Ocean: `do-block-storage`
   - IBM Cloud: Default `ibmc-file-bronze`. [More storage classes](https://cloud.ibm.com/docs/containers?topic=containers-file_storage)
   - minikube: `standard`
@@ -243,6 +244,14 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 
 After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
 
+If ingress IP is empty try getting `documentserver` ingress hostname
+
+```bash
+kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+```
+
+In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
+
 #### 5.1 Expose DocumentServer via HTTPS
 
 Create `tls` secret with ssl certificate inside.
@@ -269,6 +278,12 @@ Run next command to get `documentserver` ingress IP:
 $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
-Associate `documentserver` ingress IP with your domain name through your DNS provider.
+If ingress IP is empty try getting `documentserver` ingress hostname
+
+```bash
+kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+```
+
+Associate `documentserver` ingress IP or hostname with your domain name through your DNS provider.
 
 After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
