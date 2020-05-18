@@ -61,16 +61,12 @@ $ kubectl apply -f ./services/mb.yaml
 
 ### 4. Deploy Redis
 
-Deploy lock storage pod:
+To install the Redis to your cluster, run the following command:
 
 ```bash
-$ kubectl apply -f ./pods/ls.yaml
-```
-
-Deploy `ls` service:
-
-```bash
-$ kubectl apply -f ./services/ls.yaml
+$ helm install redis stable/redis \
+  --set cluster.enabled=false \
+  --set usePassword=false
 ```
 
 ### 5. Deploy PostgreSQL

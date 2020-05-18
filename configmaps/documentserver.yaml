@@ -6,7 +6,7 @@ data:
   DB_USER: postgres
   DB_HOST: postgresql
   DB_PORT: "5432"
-  REDIST_SERVER_HOST: ls
+  REDIST_SERVER_HOST: redis-master
   AMQP_URI: "amqp://guest:guest@mb"
   METRICS_HOST: statsd
   METRICS_ENABLED: "false"
