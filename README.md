@@ -92,19 +92,22 @@ Create secret `postgresql` with database superuser password:
 
 ```bash
 $ kubectl create secret generic postgresql \
-  --from-literal=postgresql-password=POSTGRESPASSWORD
+  --from-literal=postgresql-password=POSTGRESPASSWORD \
+  --from-literal=repmgr-password=REPMGRPASSWORD
 ```
 
-`POSTGRESPASSWORD` is database superuser password.
+`POSTGRESPASSWORD` is database superuser password. `REPMGRPASSWORD` is database replication manager user password.
 
 Note:
 Special characters such as $, \, *, and ! will be interpreted by your shell and require escaping. In most shells, the easiest way to escape the password is to surround it with single quotes (')
 
-To install the PostgreSQL to your cluster, run the following command:
+Install the PostgreSQL HA helm chart with a release name `postgresql`:
 
-```
-$ helm install postgresql stable/postgresql \
-  --set initdbScriptsConfigMap=init-db-scripts,existingSecret=postgresql,postgresqlDatabase=postgres
+```bash
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+
+$ helm install postgresql bitnami/postgresql-ha \
+  --set postgresql.initdbScriptsCM=init-db-scripts,postgresql.existingSecret=postgresql
 ```
 
 ### 6. Deploy StatsD

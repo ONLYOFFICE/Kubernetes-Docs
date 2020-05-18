@@ -4,7 +4,7 @@ metadata:
   name: documentserver
 data:
   DB_USER: postgres
-  DB_HOST: postgresql
+  DB_HOST: postgresql-postgresql-ha-pgpool
   DB_PORT: "5432"
   REDIST_SERVER_HOST: ls
   AMQP_URI: "amqp://guest:guest@mb"
