@@ -85,23 +85,12 @@ $ kubectl create configmap init-db-scripts \
   --from-file=./createdb.sql
 ```
 
-Create secret `postgresql` with database superuser password:
-
-```bash
-$ kubectl create secret generic postgresql \
-  --from-literal=postgresql-password=POSTGRESPASSWORD
-```
-
-`POSTGRESPASSWORD` is database superuser password.
-
-Note:
-Special characters such as $, \, *, and ! will be interpreted by your shell and require escaping. In most shells, the easiest way to escape the password is to surround it with single quotes (')
-
 To install the PostgreSQL to your cluster, run the following command:
 
 ```
 $ helm install postgresql stable/postgresql \
-  --set initdbScriptsConfigMap=init-db-scripts,existingSecret=postgresql,postgresqlDatabase=postgres
+  --set initdbScriptsConfigMap=init-db-scripts \
+  --set postgresqlDatabase=postgres
 ```
 
 See more detail about install PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
