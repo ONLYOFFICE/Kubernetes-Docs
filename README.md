@@ -51,17 +51,12 @@ See more detail about install Nginx Ingress via Helm [here](https://github.com/h
 
 ### 3. Deploy RabbitMQ
 
-Deploy message broker pod:
+To install the RabbitMQ to your cluster, run the following command:
 
 ```bash
-$ kubectl apply -f ./pods/mb.yaml
+$ helm install rabbitmq stable/rabbitmq
 ```
-
-Deploy `mb` service:
-
-```bash
-$ kubectl apply -f ./services/mb.yaml
-```
+See more detail about install RabbitMQ via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq#rabbitmq).
 
 ### 4. Deploy Redis
 

@@ -29,7 +29,12 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: postgresql
-                key: postgresql-password 
+                key: postgresql-password
+          - name: AMQP_PWD
+            valueFrom:
+              secretKeyRef:
+                name: rabbitmq
+                key: rabbitmq-password
           envFrom:
           - secretRef:
               name: jwt
