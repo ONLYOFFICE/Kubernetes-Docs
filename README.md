@@ -16,7 +16,9 @@ Install NFS Server Provisioner
 
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
-  --set persistence.enabled=true,persistence.storageClass=PERSISTENT_STORAGE_CLASS,persistence.size=PERSISTENT_SIZE
+  --set persistence.enabled=true \
+  --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
+  --set persistence.size=PERSISTENT_SIZE
 ```
 
 - `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetus cluster
@@ -27,7 +29,7 @@ $ helm install nfs-server stable/nfs-server-provisioner \
   - IBM Cloud: Default `ibmc-file-bronze`. [More storage classes](https://cloud.ibm.com/docs/containers?topic=containers-file_storage)
   - minikube: `standard`
 
-- `PERSISTENT_SIZE` is the total size of all Persistent Storages for nfs Persistent Storage Class. You can express size as a plain integer one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `200Gi`.
+- `PERSISTENT_SIZE` is the total size of all Persistent Storages for nfs Persistent Storage Class. You can express size as a plain integer one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `8Gi`.
 
 See more detail about install NFS Server Provisioner via Helm [here](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner#nfs-server-provisioner).
 
@@ -37,7 +39,7 @@ Create Persistent Volume Claim
 $ kubectl apply -f ./pvc/ds-files.yaml
 ```
 
-Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE`.
+Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE`. Recommended use at least 8Gi of persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
 
 ### 2. Installing the Kubernetes Nginx Ingress Controller
 
@@ -90,8 +92,13 @@ To install the PostgreSQL to your cluster, run the following command:
 ```
 $ helm install postgresql stable/postgresql \
   --set initdbScriptsConfigMap=init-db-scripts \
-  --set postgresqlDatabase=postgres
+  --set postgresqlDatabase=postgres \
+  --set persistence.size=PERSISTENT_SIZE
 ```
+
+Here `PERSISTENT_SIZE` is a size for PostgreSQL persistent volume. For example: `8Gi`.
+
+Recommended use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
 
 See more detail about install PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
 
