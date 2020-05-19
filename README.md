@@ -37,7 +37,7 @@ Create Persistent Volume Claim
 $ kubectl apply -f ./pvc/ds-files.yaml
 ```
 
-Note: Default `nfs` Persistent Volume Claim is 5Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE`.
+Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE`.
 
 ### 2. Installing the Kubernetes Nginx Ingress Controller
 
