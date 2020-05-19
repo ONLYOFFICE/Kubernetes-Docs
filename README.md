@@ -12,7 +12,7 @@ This repository contains a set of files to deploy ONLYOFFICE DocumentServer into
 
 ### 1. Install Persistent Storage
 
-Install `nfs` Persistent Storage Class
+Install NFS Server Provisioner
 
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
@@ -29,6 +29,8 @@ $ helm install nfs-server stable/nfs-server-provisioner \
 
 - `PERSISTENT_SIZE` is the total size of all Persistent Storages for nfs Persistent Storage Class. You can express size as a plain integer one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `200Gi`.
 
+See more detail about install NFS Server Provisioner via Helm [here](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner#nfs-server-provisioner).
+
 Create Persistent Volume Claim
 
 ```bash
@@ -44,6 +46,8 @@ To install the Nginx Ingress Controller to your cluster, run the following comma
 ```bash
 $ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
+
+See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
 
 ### 3. Deploy RabbitMQ
 
@@ -68,6 +72,8 @@ $ helm install redis stable/redis \
   --set cluster.enabled=false \
   --set usePassword=false
 ```
+
+See more detail about install Redis via Helm [here](https://github.com/helm/charts/tree/master/stable/redis#redis).
 
 ### 5. Deploy PostgreSQL
 
@@ -102,6 +108,8 @@ To install the PostgreSQL to your cluster, run the following command:
 $ helm install postgresql stable/postgresql \
   --set initdbScriptsConfigMap=init-db-scripts,existingSecret=postgresql,postgresqlDatabase=postgres
 ```
+
+See more detail about install PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
 
 ### 6. Deploy StatsD
 *This step is optional. You can skip #6 step at all if you don't wanna run StatsD*
