@@ -39,7 +39,7 @@ Create Persistent Volume Claim
 $ kubectl apply -f ./pvc/ds-files.yaml
 ```
 
-Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE`. Recommended use at least 8Gi of persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
+Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
 
 ### 2. Installing the Kubernetes Nginx Ingress Controller
 
