@@ -160,16 +160,42 @@ $ kubectl create secret generic jwt \
 
 ### 3. Deploy DocumentServer
 
-Deploy docservice deployment:
+Deploy `docservice` deployment:
 
 ```bash
 $ kubectl apply -f ./deployments/docservice.yaml
 ```
 
-Deploy converter deployment:
+Verify that the `docservice` deployment is running the desired number of pods with the following command.
+
+```bash
+$ kubectl get deployment docservice
+```
+
+Output
+
+```
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+docservice  2/2     2            2           1m
+```
+
+Deploy `converter` deployment:
 
 ```bash
 $ kubectl apply -f ./deployments/converter.yaml
+```
+
+Verify that the `converter` deployment is running the desired number of pods with the following command.
+
+```bash
+$ kubectl get deployment converter
+```
+
+Output
+
+```
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+converter   2/2     2            2           1m
 ```
 
 `docservice` and `converter` deployments consist of 2 pods each other by default.
