@@ -198,6 +198,17 @@ NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 converter   2/2     2            2           1m
 ```
 
+Deploy documentserver service:
+
+```bash
+$ kubectl apply -f ./services/documentserver.yaml
+```
+
+### 4. Scale DocumentServer (optional)
+
+*This step is optional. You can skip #4 step at all if you wanna use default deployment settings.*
+
+#### 4.1 Manual scaling
 `docservice` and `converter` deployments consist of 2 pods each other by default.
 
 To scale `docservice` deployment use follow command:
@@ -214,15 +225,38 @@ The same to scale `converter` deployment:
 $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 ```
 
-Deploy documentserver service:
+#### 4.2 Auto scaling
+Also you can scale deployments automaticaly depend on CPU utilization.
+
+*Note: You should have Kubernetes Metrics Server installed in your Kubernetes Cluster. See info about Kubernetes Metrics Server [here](https://github.com/kubernetes-sigs/metrics-server#kubernetes-metrics-server).*
 
 ```bash
-$ kubectl apply -f ./services/documentserver.yaml
+$ kubectl autoscale deployment <docservice | converter> \
+  [--min=MIN_POD_COUNT] \
+  --max=MAX_POD_COUNT \
+  [--cpu-percent=CPU]
+```
+ - `MIN_POD_COUNT` is the lower limit for the number of pods that can be set by the autoscaler. If it's not specified or negative, the server will apply a default value.
+ - `MAX_POD_COUNT` is the upper limit for the number of pods that can be set by the autoscaler. Required.
+ - `CPU` is the target average CPU utilization (represented as a percent of requested CPU) over all the pods.
+
+Examples:
+
+Auto scale a deployment `docservice`, with the number of pods between 2 and 10 with default autoscaling policy:
+
+```bash
+$ kubectl autoscale deployment docservice --min=2 --max=10
 ```
 
-### 4. Deploy DocumentServer Example (optional)
+Auto scale a a deployment `converter`, with the number of pods between 1 and 5, target CPU utilization at 80%:
 
-*This step is optional. You can skip #4 step at all if you don't wanna run DocumentServer Example*
+```bash
+$ kubectl autoscale deployment converter --max=5 --cpu-percent=80
+```
+
+### 5. Deploy DocumentServer Example (optional)
+
+*This step is optional. You can skip #5 step at all if you don't wanna run DocumentServer Example*
 
 Deploy example configmap:
 
@@ -242,11 +276,11 @@ Deploy example service:
 $ kubectl apply -f ./services/example.yaml
 ```
 
-### 5. Expose DocumentServer
+### 6. Expose DocumentServer
 
-#### 5.1 Expose DocumentServer via HTTP
+#### 6.1 Expose DocumentServer via HTTP
 
-*You should skip #5.1 step if you are going expose DocumentServer via HTTPS*
+*You should skip #6.1 step if you are going expose DocumentServer via HTTPS*
 
 Deploy documentserver ingress
 
@@ -270,7 +304,7 @@ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*]
 
 In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
 
-#### 5.1 Expose DocumentServer via HTTPS
+#### 6.2 Expose DocumentServer via HTTPS
 
 Create `tls` secret with ssl certificate inside.
 
