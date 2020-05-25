@@ -30,7 +30,7 @@ spec:
             secretName: license
       containers:
         - name: proxy
-          image: onlyoffice/4testing-ds-proxy:latest
+          image: onlyoffice/4testing-ds-proxy:5.5.3
           ports:
             - containerPort: 8888
           volumeMounts:
@@ -38,7 +38,7 @@ spec:
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
 
         - name: docservice
-          image: onlyoffice/4testing-ds-docservice:latest
+          image: onlyoffice/4testing-ds-docservice:5.5.3
           env:
           - name: DB_PWD
             valueFrom:
@@ -63,7 +63,7 @@ spec:
             readOnly: true
 
         - name: spellchecker
-          image: onlyoffice/4testing-ds-spellchecker:latest
+          image: onlyoffice/4testing-ds-spellchecker:5.5.3
           env:
           - name: DB_PWD
             valueFrom:

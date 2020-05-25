@@ -1,10 +1,10 @@
-# ONLYOFFICE DocumentServer for Kubernetus
+# ONLYOFFICE DocumentServer for Kubernetes
 
-This repository contains a set of files to deploy ONLYOFFICE DocumentServer into Kubernetus cluster.
+This repository contains a set of files to deploy ONLYOFFICE DocumentServer into Kubernetes cluster.
 
 ## Introduction
 
-- You must have Kubernetes installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to setup a Kubernetus.
+- You must have Kubernetes installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to setup a Kubernetes.
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
 - You should install Helm v3, please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
 
@@ -21,7 +21,7 @@ $ helm install nfs-server stable/nfs-server-provisioner \
   --set persistence.size=PERSISTENT_SIZE
 ```
 
-- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetus cluster
+- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetes cluster
 
   Persistent Storage Classes for different providers:
   - Amazon EKS: `gp2`

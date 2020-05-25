@@ -22,7 +22,7 @@ spec:
 
 
     - name: example
-      image: onlyoffice/4testing-ds-example:latest
+      image: onlyoffice/4testing-ds-example:5.5.3
       envFrom:
         - secretRef:
             name: jwt
