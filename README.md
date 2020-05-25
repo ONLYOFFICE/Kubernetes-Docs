@@ -211,7 +211,26 @@ NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 converter   2/2     2            2           1m
 ```
 
-`docservice` and `converter` deployments consist of 2 pods each other by default.
+Deploy `spellchecker` deployment:
+
+```bash
+$ kubectl apply -f ./deployments/spellchecker.yaml
+```
+
+Verify that the `spellchecker` deployment is running the desired number of pods with the following command.
+
+```bash
+$ kubectl get deployment spellchecker
+```
+
+Output
+
+```
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+spellchecker   2/2     2            2           1m
+```
+
+`docservice`, `converter` and `spellchecker` deployments consist of 2 pods each other by default.
 
 To scale `docservice` deployment use follow command:
 
@@ -221,16 +240,26 @@ $ kubectl scale -n default deployment docservice --replicas=POD_COUNT
 
 where `POD_COUNT` is number of `docservice` pods
 
-The same to scale `converter` deployment:
+The same to scale `converter` and `spellchecker` deployment:
 
 ```bash
 $ kubectl scale -n default deployment converter --replicas=POD_COUNT
+```
+
+```bash
+$ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
 ```
 
 Deploy documentserver service:
 
 ```bash
 $ kubectl apply -f ./services/documentserver.yaml
+```
+
+Deploy spellchecker service:
+
+```bash
+$ kubectl apply -f ./services/spellchecker.yaml
 ```
 
 ### 4. Deploy DocumentServer Example (optional)

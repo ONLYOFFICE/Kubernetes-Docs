@@ -12,3 +12,4 @@ data:
   AMQP_PROTO: amqp
   METRICS_HOST: statsd
   METRICS_ENABLED: "false"
+  SPELLCHECKER_HOST_PORT: spellchecker:8080

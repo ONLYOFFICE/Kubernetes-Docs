@@ -33,6 +33,9 @@ spec:
           image: onlyoffice/4testing-ds-proxy:5.5.3
           ports:
             - containerPort: 8888
+          envFrom:
+          - configMapRef:
+              name: documentserver
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
@@ -61,17 +64,3 @@ spec:
           - name: ds-license
             mountPath: /var/www/onlyoffice/Data
             readOnly: true
-
-        - name: spellchecker
-          image: onlyoffice/4testing-ds-spellchecker:5.5.3
-          env:
-          - name: DB_PWD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql
-                key: postgresql-password  
-          envFrom:
-          - secretRef:
-              name: jwt
-          - configMapRef:
-              name: documentserver
