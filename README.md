@@ -173,6 +173,31 @@ $ kubectl create secret generic jwt \
 
 ### 3. Deploy DocumentServer
 
+Deploy `spellchecker` deployment:
+
+```bash
+$ kubectl apply -f ./deployments/spellchecker.yaml
+```
+
+Verify that the `spellchecker` deployment is running the desired number of pods with the following command.
+
+```bash
+$ kubectl get deployment spellchecker
+```
+
+Output
+
+```
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+spellchecker   2/2     2            2           1m
+```
+
+Deploy spellchecker service:
+
+```bash
+$ kubectl apply -f ./services/spellchecker.yaml
+```
+
 Deploy `docservice` deployment:
 
 ```bash
@@ -211,25 +236,6 @@ NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 converter   2/2     2            2           1m
 ```
 
-Deploy `spellchecker` deployment:
-
-```bash
-$ kubectl apply -f ./deployments/spellchecker.yaml
-```
-
-Verify that the `spellchecker` deployment is running the desired number of pods with the following command.
-
-```bash
-$ kubectl get deployment spellchecker
-```
-
-Output
-
-```
-NAME           READY   UP-TO-DATE   AVAILABLE   AGE
-spellchecker   2/2     2            2           1m
-```
-
 `docservice`, `converter` and `spellchecker` deployments consist of 2 pods each other by default.
 
 To scale `docservice` deployment use follow command:
@@ -254,12 +260,6 @@ Deploy documentserver service:
 
 ```bash
 $ kubectl apply -f ./services/documentserver.yaml
-```
-
-Deploy spellchecker service:
-
-```bash
-$ kubectl apply -f ./services/spellchecker.yaml
 ```
 
 ### 4. Deploy DocumentServer Example (optional)
