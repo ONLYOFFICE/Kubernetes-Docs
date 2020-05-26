@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spellchecker
+  labels:
+    app: spellchecker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spellchecker
+  template:
+    metadata:
+      labels:
+        app: spellchecker
+    spec:
+      volumes:
+        - name: ds-license
+          secret:
+            secretName: license
+      containers:
+        - name: spellchecker
+          image: onlyoffice/4testing-ds-spellchecker:5.5.3
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password  
+          envFrom:
+          - secretRef:
+              name: jwt
+          - configMapRef:
+              name: documentserver
+          ports:
+            - containerPort: 8080        
