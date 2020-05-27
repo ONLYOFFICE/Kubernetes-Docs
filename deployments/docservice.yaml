@@ -42,6 +42,8 @@ spec:
 
         - name: docservice
           image: onlyoffice/4testing-ds-docservice:5.5.3
+          ports:
+            - containerPort: 8000
           env:
           - name: DB_PWD
             valueFrom:
