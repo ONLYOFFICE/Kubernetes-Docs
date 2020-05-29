@@ -59,7 +59,7 @@ ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX   
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
 ```bash
-$ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true,controller.replicaCount=2
+$ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true,controller.kind=DaemonSet,controller.service.type=NodePort,controller.daemonset.useHostPort=true,controller.service.enabled=false
 ```
 
 See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
