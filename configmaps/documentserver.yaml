@@ -13,3 +13,4 @@ data:
   METRICS_HOST: statsd
   METRICS_ENABLED: "false"
   SPELLCHECKER_HOST_PORT: spellchecker:8080
+  EXAMPLE_HOST_PORT: example:8080
