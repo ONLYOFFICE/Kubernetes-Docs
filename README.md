@@ -274,6 +274,9 @@ $ kubectl apply -f ./services/example.yaml
 #### 5.1 Expose DocumentServer via Service (HTTP Only)
 *You should skip #5.1 step if you are going expose DocumentServer via HTTPS*
 
+This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
+Use this type of exposure if you use external TLS termination, and don't have another WEB application in k8s cluster.
+
 Deploy `documentserver` service:
 
 ```bash
@@ -319,6 +322,9 @@ $ kubectl apply -f ./services/documentserver.yaml
 
 *You should skip #5.2.2 step if you are going expose DocumentServer via HTTPS*
 
+This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
+Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
+
 Deploy documentserver ingress
 
 ```bash
@@ -342,6 +348,8 @@ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*]
 In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
 
 #### 5.2.3 Expose DocumentServer via HTTPS
+
+This type of exposure to enable internal TLS termination for DocumentServer.
 
 Create `tls` secret with ssl certificate inside.
 
