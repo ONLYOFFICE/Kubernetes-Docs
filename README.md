@@ -55,17 +55,7 @@ NAME       STATUS   VOLUME                                     CAPACITY   ACCESS
 ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
 ```
 
-### 2. Installing the Kubernetes Nginx Ingress Controller
-
-To install the Nginx Ingress Controller to your cluster, run the following command:
-
-```bash
-$ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true,controller.replicaCount=2
-```
-
-See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
-
-### 3. Deploy RabbitMQ
+### 2. Deploy RabbitMQ
 
 To install the RabbitMQ to your cluster, run the following command:
 
@@ -74,7 +64,7 @@ $ helm install rabbitmq stable/rabbitmq
 ```
 See more detail about install RabbitMQ via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq#rabbitmq).
 
-### 4. Deploy Redis
+### 3. Deploy Redis
 
 To install the Redis to your cluster, run the following command:
 
@@ -86,7 +76,7 @@ $ helm install redis stable/redis \
 
 See more detail about install Redis via Helm [here](https://github.com/helm/charts/tree/master/stable/redis#redis).
 
-### 5. Deploy PostgreSQL
+### 4. Deploy PostgreSQL
 
 Download ONLYOFFICE DocumentServer database scheme:
 
@@ -116,7 +106,7 @@ Recommended use at least 2Gi of persistent storage for every 100 active users of
 
 See more detail about install PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
 
-### 6. Deploy StatsD
+### 5. Deploy StatsD
 *This step is optional. You can skip #6 step at all if you don't wanna run StatsD*
 
 Deploy StatsD configmap:
@@ -257,12 +247,6 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 $ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
 ```
 
-Deploy documentserver service:
-
-```bash
-$ kubectl apply -f ./services/documentserver.yaml
-```
-
 ### 4. Deploy DocumentServer Example (optional)
 
 *This step is optional. You can skip #4 step at all if you don't wanna run DocumentServer Example*
@@ -287,9 +271,53 @@ $ kubectl apply -f ./services/example.yaml
 
 ### 5. Expose DocumentServer
 
-#### 5.1 Expose DocumentServer via HTTP
-
+#### 5.1 Expose DocumentServer via Service (HTTP Only)
 *You should skip #5.1 step if you are going expose DocumentServer via HTTPS*
+
+Deploy `documentserver` service:
+
+```bash
+$ kubectl apply -f ./services/documentserver-lb.yaml
+```
+
+Run next command to get `documentserver` service IP:
+
+```bash
+$ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
+```
+
+After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-SERVICE-IP/`.
+
+If service IP is empty try getting `documentserver` service hostname
+
+```bash
+kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+```
+
+In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-SERVICE-HOSTNAME/`.
+
+
+#### 5.2 Expose DocumentServer via Ingress
+
+### 5.2.1 Installing the Kubernetes Nginx Ingress Controller
+
+To install the Nginx Ingress Controller to your cluster, run the following command:
+
+```bash
+$ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true,controller.replicaCount=2
+```
+
+See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
+
+Deploy `documentserver` service:
+
+```bash
+$ kubectl apply -f ./services/documentserver.yaml
+```
+
+#### 5.2.2 Expose DocumentServer via HTTP
+
+*You should skip #5.2.2 step if you are going expose DocumentServer via HTTPS*
 
 Deploy documentserver ingress
 
@@ -313,7 +341,7 @@ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*]
 
 In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
 
-#### 5.1 Expose DocumentServer via HTTPS
+#### 5.2.3 Expose DocumentServer via HTTPS
 
 Create `tls` secret with ssl certificate inside.
 
