@@ -18,7 +18,3 @@ spec:
         backend:
           serviceName: documentserver
           servicePort: 8888
-      - path: /example
-        backend:
-          serviceName: example
-          servicePort: 8888
