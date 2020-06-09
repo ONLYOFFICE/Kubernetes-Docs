@@ -299,7 +299,7 @@ In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERV
 
 #### 5.2 Expose DocumentServer via Ingress
 
-### 5.2.1 Installing the Kubernetes Nginx Ingress Controller
+#### 5.2.1 Installing the Kubernetes Nginx Ingress Controller
 
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
