@@ -55,14 +55,17 @@ NAME       STATUS   VOLUME                                     CAPACITY   ACCESS
 ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
 ```
 
-### 2. Deploy RabbitMQ
+### 2. Deploy RabbitMQ High Available
 
-To install the RabbitMQ to your cluster, run the following command:
+To install the RabbitMQ High Available to your cluster, run the following command:
 
 ```bash
-$ helm install rabbitmq stable/rabbitmq
+$ helm install rabbitmq-ha stable/rabbitmq-ha \
+  --set prometheus.operator.enabled=false \
+  --set persistentVolume.enabled=true \
+  --set rabbitmqUsername=user
 ```
-See more detail about install RabbitMQ via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq#rabbitmq).
+See more detail about install RabbitMQ High Available via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq-ha).
 
 ### 3. Deploy Redis
 
