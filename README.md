@@ -60,7 +60,7 @@ ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX   
 To install the RabbitMQ to your cluster, run the following command:
 
 ```bash
-$ helm install rabbitmq-ha -f values/rabbitmq.yaml stable/rabbitmq-ha \
+$ helm install rabbitmq-ha -f values/rabbitmq.yaml stable/rabbitmq-ha
 ```
 See more detail about install RabbitMQ via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq-ha).
 
