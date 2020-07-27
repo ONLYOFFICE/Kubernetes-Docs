@@ -71,7 +71,7 @@ To install the Redis to your cluster, run the following commands:
 ```bash
 $ helm repo add dandydev https://dandydeveloper.github.io/charts
 $ helm repo update
-$ helm install redis-ha -f values/redis.yaml stable/redis-ha
+$ helm install redis-ha -f values/redis.yaml dandydev/redis-ha
 ```
 
 See more detail about install Redis via Helm [here](https://github.com/DandyDeveloper/charts/tree/master/charts/redis-ha).
