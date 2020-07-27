@@ -69,12 +69,10 @@ See more detail about install RabbitMQ via Helm [here](https://github.com/helm/c
 To install the Redis to your cluster, run the following command:
 
 ```bash
-$ helm install redis stable/redis \
-  --set cluster.enabled=false \
-  --set usePassword=false
+$ helm install redis-ha -f values/redis.yaml stable/redis-ha
 ```
 
-See more detail about install Redis via Helm [here](https://github.com/helm/charts/tree/master/stable/redis#redis).
+See more detail about install Redis via Helm [here](https://github.com/helm/charts/tree/master/stable/redis-ha).
 
 ### 4. Deploy PostgreSQL
 

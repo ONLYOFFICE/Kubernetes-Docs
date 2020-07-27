@@ -6,7 +6,7 @@ data:
   DB_USER: postgres
   DB_HOST: postgresql
   DB_PORT: "5432"
-  REDIST_SERVER_HOST: redis-master
+  REDIST_SERVER_HOST: redis-ha-haproxy
   AMQP_HOST: rabbitmq
   AMQP_USER: user
   AMQP_PROTO: amqp
