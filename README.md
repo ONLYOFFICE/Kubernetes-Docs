@@ -189,6 +189,12 @@ Deploy spellchecker service:
 $ kubectl apply -f ./services/spellchecker.yaml
 ```
 
+Deploy example service:
+
+```bash
+$ kubectl apply -f ./services/example.yaml
+```
+
 Deploy `docservice` deployment:
 
 ```bash
@@ -261,12 +267,6 @@ Deploy example pod:
 
 ```bash
 $ kubectl apply -f ./pods/example.yaml
-```
-
-Deploy example service:
-
-```bash
-$ kubectl apply -f ./services/example.yaml
 ```
 
 ### 5. Expose DocumentServer
