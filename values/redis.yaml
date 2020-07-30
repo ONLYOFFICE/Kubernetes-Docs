@@ -1,3 +1,12 @@
 haproxy:
   enabled: true
   replicas: 1
+sysctlImage:
+  enabled: true
+  mountHostSys: true
+  command:
+    - /bin/sh
+    - -xc
+    - |-
+      sysctl -w net.core.somaxconn=10000
+      echo never > /host-sys/kernel/mm/transparent_hugepage/enabled
