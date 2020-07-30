@@ -5,6 +5,7 @@ metadata:
   labels:
     app: example
 spec:
+  containers:
     - name: example
       image: onlyoffice/4testing-ds-example:5.5.3
       ports:
