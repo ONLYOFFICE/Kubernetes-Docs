@@ -1,0 +1,18 @@
+rabbitmqUsername: user
+persistentVolume:
+  enabled: true
+prometheus:
+  operator:
+    enabled: false
+definitions:
+  policies: |-
+    {
+      "name": "ha-amq",
+      "pattern": ".*",
+      "vhost": "/",
+      "definition": {
+        "ha-mode": "all",
+        "ha-sync-mode": "automatic",
+        "ha-sync-batch-size": 1
+      }
+    }
