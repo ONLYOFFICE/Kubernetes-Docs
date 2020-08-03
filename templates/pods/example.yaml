@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example
+  labels:
+    app: example
+spec:
+  containers:
+    - name: example
+      image: onlyoffice/4testing-ds-example:5.5.3
+      ports:
+        - containerPort: 3000
+      envFrom:
+        - secretRef:
+            name: jwt
+        - configMapRef:
+              name: example
