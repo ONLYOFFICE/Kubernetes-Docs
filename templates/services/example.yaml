@@ -1,10 +1,10 @@
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
-  name: example
+  name: {{ .Values.example.name }}
 spec:
   selector:
-    app: example
+    app: {{ .Values.example.app }}
   ports:
     - name: http
       protocol: TCP

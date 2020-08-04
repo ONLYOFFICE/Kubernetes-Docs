@@ -1,0 +1,19 @@
+{{- if .Values.statsd.install -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: statsd
+spec:
+  selector:
+    app: statsd
+  ports:
+    - name: udp
+      protocol: UDP
+      port: 8125
+      targetPort: 8125
+    - name: tcp
+      protocol: TCP
+      port: 8126
+      targetPort: 8126
+  type: ClusterIP
+{{- end -}}

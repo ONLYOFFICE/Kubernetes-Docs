@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: converter
+  name: {{ .Values.converter.name }}
   labels:
-    app: converter
+    app: {{ .Values.converter.app }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.converter.replicas }}
   selector:
     matchLabels:
-      app: converter
+      app: {{ .Values.converter.app }}
   template:
     metadata:
       labels:
-        app: converter
+        app: {{ .Values.converter.app }}
     spec:
       volumes:
-        - name: ds-files
+        - name: {{ .Values.pvc.name }}
           persistentVolumeClaim:
-            claimName: ds-files
+            claimName: {{ .Values.pvc.name }}
         - name: ds-license
           secret:
             secretName: license
       containers:
         - name: converter
-          image: onlyoffice/4testing-ds-converter:5.5.3
+          image: {{ .Values.converter.converterContainerImage }}
           env:
           - name: DB_PWD
             valueFrom:
@@ -39,10 +39,10 @@ spec:
           - secretRef:
               name: jwt
           - configMapRef:
-              name: documentserver
+              name: {{ .Values.docservice.configMap }}
           volumeMounts:
-          - name: ds-files
-            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          - name: {{ .Values.pvc.name }}
+            mountPath: {{ .Values.pvc.mountPath }}
           - name: ds-license
             mountPath: /var/www/onlyoffice/Data
             readOnly: true

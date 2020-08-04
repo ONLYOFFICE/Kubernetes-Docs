@@ -1,0 +1,13 @@
+{{- if .Values.statsd.install -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: statsd
+data:
+  config.js: |-
+    {
+      port: 8125
+    , flushInterval: 600000
+    , backends: [ "./backends/console" ]
+    }
+{{- end }}

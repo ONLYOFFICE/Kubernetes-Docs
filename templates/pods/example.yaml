@@ -1,17 +1,19 @@
+{{- if .Values.example.install -}}
 apiVersion: v1
 kind: Pod
 metadata:
-  name: example
+  name: {{ .Values.example.name }}
   labels:
-    app: example
+    app: {{ .Values.example.app }}
 spec:
   containers:
-    - name: example
-      image: onlyoffice/4testing-ds-example:5.5.3
+    - name: {{ .Values.example.containerName }}
+      image: {{ .Values.example.containerImage | quote }}
       ports:
-        - containerPort: 3000
+        - containerPort: {{ .Values.example.containerPort }}
       envFrom:
         - secretRef:
-            name: jwt
+            name: {{ .Values.example.environmentSecretReference }}
         - configMapRef:
-              name: example
+              name: {{ .Values.example.environmentConfigMapReference }}
+{{- end -}}

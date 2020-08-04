@@ -1,0 +1,27 @@
+{{- if .Values.statsd.install -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: statsd
+  labels:
+    app: statsd
+spec:
+  volumes:
+    - name: statsd-conf
+      configMap:
+        name: statsd
+  containers:
+    - name: statsd
+      image: statsd/statsd:latest
+      ports:
+        - containerPort: 8125
+          protocol: UDP
+        - containerPort: 8126
+          protocol: TCP
+      volumeMounts:
+      - name: statsd-conf
+        mountPath: /usr/src/app/config.js
+        subPath: config.js
+        readOnly: true
+{{- end -}}
+

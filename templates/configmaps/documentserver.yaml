@@ -3,14 +3,14 @@ kind: ConfigMap
 metadata:
   name: documentserver
 data:
-  DB_USER: postgres
-  DB_HOST: postgresql
-  DB_PORT: "5432"
-  REDIST_SERVER_HOST: redis-master
-  AMQP_HOST: rabbitmq
-  AMQP_USER: user
-  AMQP_PROTO: amqp
-  METRICS_HOST: statsd
-  METRICS_ENABLED: "false"
-  SPELLCHECKER_HOST_PORT: spellchecker:8080
-  EXAMPLE_HOST_PORT: example:8080
+  DB_USER: {{ .Values.connections.postgresDBUser }}
+  DB_HOST: {{ .Values.connections.postgresDBHost }}
+  DB_PORT: {{ .Values.connections.postgresDBPort | quote}}
+  REDIST_SERVER_HOST: {{ .Values.connections.redistServerHost }}
+  AMQP_HOST: {{ .Values.connections.rabbitmqHost }}
+  AMQP_USER: {{ .Values.connections.rabbitmqUser }}
+  AMQP_PROTO: {{ .Values.connections.rabbitmqPROTO }}
+  METRICS_HOST: {{ .Values.connections.metricsHost }}
+  METRICS_ENABLED: {{ .Values.connections.metricsEnabled | quote}}
+  SPELLCHECKER_HOST_PORT: {{ .Values.connections.spellcheckerHostPort | quote}}
+  EXAMPLE_HOST_PORT: {{ .Values.connections.exampleHostPort | quote}}

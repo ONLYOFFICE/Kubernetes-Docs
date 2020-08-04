@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spellchecker
+  name: {{ .Values.spellchecker.name }}
   labels:
-    app: spellchecker
+    app: {{ .Values.spellchecker.app }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.spellchecker.replicas }}
   selector:
     matchLabels:
-      app: spellchecker
+      app: {{ .Values.spellchecker.app }}
   template:
     metadata:
       labels:
-        app: spellchecker
+        app: {{ .Values.spellchecker.app }}
     spec:
       volumes:
         - name: ds-license
@@ -20,7 +20,7 @@ spec:
             secretName: license
       containers:
         - name: spellchecker
-          image: onlyoffice/4testing-ds-spellchecker:5.5.3
+          image: {{ .Values.spellchecker.spellcheckerContainerImage }}
           env:
           - name: DB_PWD
             valueFrom:
@@ -31,6 +31,6 @@ spec:
           - secretRef:
               name: jwt
           - configMapRef:
-              name: documentserver
+              name: {{ .Values.docservice.configMap }}
           ports:
-            - containerPort: 8080        
+            - containerPort: {{ .Values.spellchecker.spellcheckerContainerPort }}

@@ -1,8 +1,8 @@
+{{- if .Values.example.install -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: example
+  name: {{ .Values.example.name }}
 data:
-data:
-  DS_URL: /
-
+  DS_URL: {{ .Values.example.DSURL | quote }}
+{{- end -}}

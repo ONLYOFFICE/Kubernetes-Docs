@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: docservice
+  name: {{ .Values.docservice.name }}
   labels:
-    app: docservice
+    app: {{ .Values.docservice.app }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.docservice.replicas }}
   selector:
     matchLabels:
-      app: docservice
+      app: {{ .Values.docservice.app }}
   template:
     metadata:
       labels:
-        app: docservice
+        app: {{ .Values.docservice.app }}
     spec:
       # topologySpreadConstraints:
       # - maxSkew: 1
@@ -22,28 +22,28 @@ spec:
           # matchLabels:
             # app: docservice
       volumes:
-        - name: ds-files
+        - name: {{ .Values.pvc.name }}
           persistentVolumeClaim:
-            claimName: ds-files
+            claimName: {{ .Values.pvc.name }}
         - name: ds-license
           secret:
             secretName: license
       containers:
         - name: proxy
-          image: onlyoffice/4testing-ds-proxy:5.5.3
+          image: {{ .Values.docservice.proxyContainerImage }}
           ports:
-            - containerPort: 8888
+            - containerPort: {{ .Values.docservice.proxyContainerPort }}
           envFrom:
           - configMapRef:
-              name: documentserver
+              name: {{ .Values.docservice.configMap }}
           volumeMounts:
-          - name: ds-files
-            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          - name: {{ .Values.pvc.name }}
+            mountPath: {{ .Values.pvc.mountPath }}
 
         - name: docservice
-          image: onlyoffice/4testing-ds-docservice:5.5.3
+          image: {{ .Values.docservice.docserviceContainerImage }}
           ports:
-            - containerPort: 8000
+            - containerPort: {{ .Values.docservice.docserviceContainerPort }}
           env:
           - name: DB_PWD
             valueFrom:
@@ -59,10 +59,10 @@ spec:
           - secretRef:
               name: jwt
           - configMapRef:
-              name: documentserver
+              name: {{ .Values.docservice.configMap }}
           volumeMounts:
-          - name: ds-files
-            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          - name: {{ .Values.pvc.name }}
+            mountPath: {{ .Values.pvc.mountPath }}
           - name: ds-license
             mountPath: /var/www/onlyoffice/Data
             readOnly: true
