@@ -1,4 +1,4 @@
-{{- if .Values.statsd.install -}}
+{{- if .Values.connections.metricsEnabled -}}
 apiVersion: v1
 kind: Service
 metadata:

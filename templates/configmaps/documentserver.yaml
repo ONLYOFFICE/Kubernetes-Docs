@@ -3,13 +3,13 @@ kind: ConfigMap
 metadata:
   name: documentserver
 data:
-  DB_USER: {{ .Values.connections.postgresDBUser }}
-  DB_HOST: {{ .Values.connections.postgresDBHost }}
-  DB_PORT: {{ .Values.connections.postgresDBPort | quote}}
+  DB_USER: {{ .Values.connections.dbUser }}
+  DB_HOST: {{ .Values.connections.dbHost }}
+  DB_PORT: {{ .Values.connections.dbPort | quote}}
   REDIST_SERVER_HOST: {{ .Values.connections.redistServerHost }}
-  AMQP_HOST: {{ .Values.connections.rabbitmqHost }}
-  AMQP_USER: {{ .Values.connections.rabbitmqUser }}
-  AMQP_PROTO: {{ .Values.connections.rabbitmqPROTO }}
+  AMQP_HOST: {{ .Values.connections.amqpHost }}
+  AMQP_USER: {{ .Values.connections.amqpUser }}
+  AMQP_PROTO: {{ .Values.connections.amqpProto }}
   METRICS_HOST: {{ .Values.connections.metricsHost }}
   METRICS_ENABLED: {{ .Values.connections.metricsEnabled | quote}}
   SPELLCHECKER_HOST_PORT: {{ .Values.connections.spellcheckerHostPort | quote}}

@@ -1,16 +1,16 @@
 connections:
-  postgresDBUser: postgres
-  postgresDBHost: postgresql
-  postgresDBPort: "5432"
+  dbUser: postgres
+  dbHost: postgresql
+  dbPort: "5432"
 
   redistServerHost: redis-master
 
-  rabbitmqHost: rabbitmq
-  rabbitmqUser: user
-  rabbitmqPROTO: ampq
+  amqpHost: rabbitmq
+  amqpUser: user
+  amqpProto: ampq
 
   metricsHost: statsd
-  metricsEnabled: "false"
+  metricsEnabled: false
 
   spellcheckerHostPort: spellchecker:8080
 
@@ -67,13 +67,6 @@ secrets:
     immutable: true
     jwtEnabled: true
     jwtSecret: MYSECRET
-
-statsd:
-  install: true
-  name: statsd
-  app: statsd
-  udpPort: 8125
-  tcpPort: 8126
 
 ingress:
   install: false

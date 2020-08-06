@@ -28,8 +28,14 @@ spec:
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
-                name: postgresql
+                name: {{ .Values.connections.dbHost }}
+                {{ if eq .Values.connections.dbHost "postgresql" }}
                 key: postgresql-password
+                {{ else if eq .Values.connections.dbHost "mysql" }}
+                key: mysql-root-password
+                {{ else if eq .Values.connections.dbHost "mariadb" }}
+                key: mariadb-root-password
+                {{ end }}
           - name: AMQP_PWD
             valueFrom:
               secretKeyRef:
