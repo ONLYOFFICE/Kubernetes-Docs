@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: documentserver
+spec:
+  selector:
+    app: docservice
+  ports:
+    - name: http
+      protocol: {{ .Values.exposing.dsServiceProtocol }}
+      port: {{ .Values.exposing.dsServicePort }}
+      targetPort: {{ .Values.exposing.dsServiceTargetPort }} 
+  type: {{ .Values.exposing.dsServiceType }}

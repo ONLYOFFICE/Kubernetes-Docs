@@ -1,6 +1,8 @@
 connections:
-  dbUser: postgres
+  dbDefault: true
+  dbType: postgres
   dbHost: postgresql
+  dbUser: postgres
   dbPort: "5432"
 
   redistServerHost: redis-master
@@ -20,7 +22,6 @@ pvc:
   name: ds-files
   storageClassName: "nfs"
   storage: 6Gi
-  mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
 
 example:
   install: false
@@ -67,7 +68,18 @@ secrets:
     immutable: true
     jwtEnabled: true
     jwtSecret: MYSECRET
+  
+  database:
+    name: dbSecret
+    dbUser: postgres
+    dbPassword: postgres
 
-ingress:
-  install: false
-  https: false
+
+exposing:
+  ingress: false
+
+  dsServiceType: LoadBalancer
+  dsServicePort: 80
+  dsServiceTargetPort: 8888
+  dsServiceProtocol: TCP
+  

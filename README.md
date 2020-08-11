@@ -106,168 +106,92 @@ Recommended use at least 2Gi of persistent storage for every 100 active users of
 
 See more detail about install PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
 
-### 5. Deploy StatsD
-*This step is optional. You can skip #6 step at all if you don't wanna run StatsD*
-
-Deploy StatsD configmap:
-```
-$ kubectl apply -f ./configmaps/statsd.yaml
-```
-Deploy StatsD pod:
-```
-$ kubectl apply -f ./pods/statsd.yaml
-```
-Deploy `statsd` service:
-```
-$ kubectl apply -f ./services/statsd.yaml
-```
-Allow statsD metrics in ONLYOFFICE DocumentServer:
-
-Put `data.METRICS_ENABLED` field in ./configmaps/documentserver.yaml file to `"true"` value
 
 ## Deploy ONLYOFFICE DocumentServer
 
-### 1. Deploy ONLYOFFICE DocumentServer license
+### 1. Deploy DocumentServer
 
-- If you have valid ONLYOFFICE DocumentServer license, create secret `license` from file.
-
-    ```bash
-    $ kubectl create secret generic license \
-      --from-file=./license.lic
-    ```
-
-    Note: The source license file name should be 'license.lic' because this name would be used as a field in created secret.
-
-- If you have no ONLYOFFICE DocumentServer license, create empty secret `license` with follow command:
-
-    ```bash
-    $ kubectl create secret generic license
-    ```
-
-### 2. Deploy ONLYOFFICE DocumentServer parameters
-
-Deploy DocumentServer configmap:
+To install the RabbitMQ to your cluster, run the following command:
 
 ```bash
-$ kubectl apply -f ./configmaps/documentserver.yaml
+$ helm install documentserver ./kube-documentserver
 ```
 
-Create `jwt` secret with JWT parameters
+### 2. Example deployment (optional)
+
+To deploy example set `example.install` parameter to true:
 
 ```bash
-$ kubectl create secret generic jwt \
-  --from-literal=JWT_ENABLED=true \
-  --from-literal=JWT_SECRET=MYSECRET
+$ helm install documentserver ./kube-documentserver --set example.install=true
 ```
 
-`MYSECRET` is the secret key to validate the JSON Web Token in the request to the ONLYOFFICE Document Server.
-
-### 3. Deploy DocumentServer
-
-Deploy `spellchecker` deployment:
-
+### 3. StatsD deployment (optional)
+To deploy StatsD set `connections.metricsEnabled` to true:
 ```bash
-$ kubectl apply -f ./deployments/spellchecker.yaml
+$ helm install documentserver ./kube-documentserver --set connections.metricsEnables=true
 ```
 
-Verify that the `spellchecker` deployment is running the desired number of pods with the following command.
 
-```bash
-$ kubectl get deployment spellchecker
-```
+### 4. Available Configuration Parameters
+**connections** section with parameters that configure connections to DB,ampq, etc.
+- **dbHost** : The database name. Supported values are `postgres`, `mariadb` or `mysql`. Defaults to `postgres`.
+- **dbUser** : The database user. Defaults to 'postgres'.
+- **dbPort** : database port. Defaults to '5432'.
+- **redistServerHost** : 
+- **ampqHost** : message-broker type. Rabbitmq and activemq are supported. Defaults to 'rabbitmq'.
+- **ampqUser** : messabe-broker user. Defaults to 'user'.
+- **ampqProto** : messabe-broker protocol. defaults to 'ampq'.
+- **metricsEnabled** : 
+- **metricsHost** :
+- **spellcheckerHostPort** :
+- **exampleHostPort** : example:8080
 
-Output
+**pvc** : section with parameters that configure persistent volume claims
+- **name** : name of the claim. Defaults to `ds-files`.
+- **storegaClassName** : Defaults to `"nfs"`.
+- **storage** : Defaults to `6Gi`.
+- **mountPath** : 
 
-```
-NAME           READY   UP-TO-DATE   AVAILABLE   AGE
-spellchecker   2/2     2            2           1m
-```
+**example** : section with example parameters
+- **install** : Specifies the installation of example. Defaults to `false`.
+- **name** : The name of the example service.
+- **containerName** : The container name of example service. Defaults to `example`.
+- **containerImage** : 
+- **containerPort** : 
+- **environmentSecretReference** :
+- **environmentConfigMapReference** :
+- **DSURL** :
 
-Deploy spellchecker service:
+**docservice**: 
+- **name** : 
+- **app** :
+- **replicas** :
+- **configMap** :
+- **proxyContainerImage** :
+- **proxyContainerPort** :
+- **docserviceContainerImage** :
+- **docserviceContainerPort** :
 
-```bash
-$ kubectl apply -f ./services/spellchecker.yaml
-```
+**converter** :
+- **name** :
+- **app** :
+- **replicas** : 
+- **converterContainerImage** :
 
-Deploy example service:
+**spellchecker** :
+- **name** :
+- **app** :
+- **replicas** :
+- **spellcheckerContainerImage** :
+- **spellcheckerContainerPort** :
 
-```bash
-$ kubectl apply -f ./services/example.yaml
-```
-
-Deploy `docservice` deployment:
-
-```bash
-$ kubectl apply -f ./deployments/docservice.yaml
-```
-
-Verify that the `docservice` deployment is running the desired number of pods with the following command.
-
-```bash
-$ kubectl get deployment docservice
-```
-
-Output
-
-```
-NAME        READY   UP-TO-DATE   AVAILABLE   AGE
-docservice  2/2     2            2           1m
-```
-
-Deploy `converter` deployment:
-
-```bash
-$ kubectl apply -f ./deployments/converter.yaml
-```
-
-Verify that the `converter` deployment is running the desired number of pods with the following command.
-
-```bash
-$ kubectl get deployment converter
-```
-
-Output
-
-```
-NAME        READY   UP-TO-DATE   AVAILABLE   AGE
-converter   2/2     2            2           1m
-```
-
-`docservice`, `converter` and `spellchecker` deployments consist of 2 pods each other by default.
-
-To scale `docservice` deployment use follow command:
-
-```bash
-$ kubectl scale -n default deployment docservice --replicas=POD_COUNT
-```
-
-where `POD_COUNT` is number of `docservice` pods
-
-The same to scale `converter` and `spellchecker` deployment:
-
-```bash
-$ kubectl scale -n default deployment converter --replicas=POD_COUNT
-```
-
-```bash
-$ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
-```
-
-### 4. Deploy DocumentServer Example (optional)
-
-*This step is optional. You can skip #4 step at all if you don't wanna run DocumentServer Example*
-
-Deploy example configmap:
-
-```bash
-$ kubectl apply -f ./configmaps/example.yaml
-```
-
-Deploy example pod:
-
-```bash
-$ kubectl apply -f ./pods/example.yaml
-```
+**secrets** :
+- **jwt** :
+- **name** : 
+- **type** :
+- **immutable** :
+- **jwtEnabled** :
+- **jwtSecret** :
 
 ### 5. Expose DocumentServer
 

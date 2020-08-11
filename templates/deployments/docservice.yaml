@@ -38,24 +38,23 @@ spec:
               name: {{ .Values.docservice.configMap }}
           volumeMounts:
           - name: {{ .Values.pvc.name }}
-            mountPath: {{ .Values.pvc.mountPath }}
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
 
         - name: docservice
           image: {{ .Values.docservice.docserviceContainerImage }}
           ports:
             - containerPort: {{ .Values.docservice.docserviceContainerPort }}
           env:
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.database.name }}
+                key: {{ .Values.secrets.database.dbUser }}
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.connections.dbHost }}
-                {{ if eq .Values.connections.dbHost "postgresql" }}
-                key: postgresql-password
-                {{ else if eq .Values.connections.dbHost "mysql" }}
-                key: mysql-root-password
-                {{ else if eq .Values.connections.dbHost "mariadb" }}
-                key: mariadb-root-password
-                {{ end }}
+                name: {{ .Values.secrets.database.name }}
+                key: {{ .Values.secrets.database.dbPassword }}
           - name: AMQP_PWD
             valueFrom:
               secretKeyRef:
@@ -68,7 +67,7 @@ spec:
               name: {{ .Values.docservice.configMap }}
           volumeMounts:
           - name: {{ .Values.pvc.name }}
-            mountPath: {{ .Values.pvc.mountPath }}
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
           - name: ds-license
             mountPath: /var/www/onlyoffice/Data
             readOnly: true
