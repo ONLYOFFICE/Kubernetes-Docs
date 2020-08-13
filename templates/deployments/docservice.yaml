@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.docservice.name }}
+  name: docservice
   labels:
-    app: {{ .Values.docservice.app }}
+    app: docservice
 spec:
   replicas: {{ .Values.docservice.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.docservice.app }}
+      app: docservice
   template:
     metadata:
       labels:
-        app: {{ .Values.docservice.app }}
+        app: docservice
     spec:
       # topologySpreadConstraints:
       # - maxSkew: 1
@@ -35,7 +35,7 @@ spec:
             - containerPort: {{ .Values.docservice.proxyContainerPort }}
           envFrom:
           - configMapRef:
-              name: {{ .Values.docservice.configMap }}
+              name: documentserver
           volumeMounts:
           - name: {{ .Values.pvc.name }}
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
@@ -45,16 +45,6 @@ spec:
           ports:
             - containerPort: {{ .Values.docservice.docserviceContainerPort }}
           env:
-          - name: DB_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.secrets.database.name }}
-                key: {{ .Values.secrets.database.dbUser }}
-          - name: DB_PWD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.secrets.database.name }}
-                key: {{ .Values.secrets.database.dbPassword }}
           - name: AMQP_PWD
             valueFrom:
               secretKeyRef:
@@ -63,8 +53,9 @@ spec:
           envFrom:
           - secretRef:
               name: jwt
+              name: dbsecret
           - configMapRef:
-              name: {{ .Values.docservice.configMap }}
+              name: documentserver
           volumeMounts:
           - name: {{ .Values.pvc.name }}
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files

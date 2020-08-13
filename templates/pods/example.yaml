@@ -4,16 +4,16 @@ kind: Pod
 metadata:
   name: {{ .Values.example.name }}
   labels:
-    app: {{ .Values.example.app }}
+    app: {{ .Values.example.name }}
 spec:
   containers:
-    - name: {{ .Values.example.containerName }}
+    - name: {{ .Values.example.name }}
       image: {{ .Values.example.containerImage | quote }}
       ports:
         - containerPort: {{ .Values.example.containerPort }}
       envFrom:
         - secretRef:
-            name: {{ .Values.example.environmentSecretReference }}
+            name: jwt
         - configMapRef:
-              name: {{ .Values.example.environmentConfigMapReference }}
+              name: {{ .Values.example.name }}
 {{- end -}}

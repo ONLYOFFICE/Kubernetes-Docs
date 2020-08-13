@@ -2,7 +2,6 @@ connections:
   dbDefault: true
   dbType: postgres
   dbHost: postgresql
-  dbUser: postgres
   dbPort: "5432"
 
   redistServerHost: redis-master
@@ -26,19 +25,12 @@ pvc:
 example:
   install: false
   name: example
-  app: example
-  containerName: example
   containerImage: onlyoffice/4testing-ds-example:5.5.3
   containerPort: 3000
-  environmentSecretReference: jwt
-  environmentConfigMapReference: example
   DSURL: "/example"
 
 docservice:
-  name: docservice
-  app: docservice
   replicas: 2
-  configMap: documentserver
 
   proxyContainerImage: onlyoffice/4testing-ds-proxy:5.5.3
   proxyContainerPort: 8888
@@ -47,32 +39,25 @@ docservice:
   docserviceContainerPort: 8000
 
 converter:
-  name: converter
-  app: converter
   replicas: 2
 
   converterContainerImage: onlyoffice/4testing-ds-converter:5.5.3
 
 spellchecker:
-  name: spellchecker
-  app: spellchecker
   replicas: 2
 
   spellcheckerContainerImage: onlyoffice/4testing-ds-spellchecker:5.5.3
   spellcheckerContainerPort: 8080
 
-secrets:
-  jwt:
-    name: jwt
-    type: Opaque
-    immutable: true
-    jwtEnabled: true
-    jwtSecret: MYSECRET
+jwt:
+  name: jwt
+  jwtEnabled: true
+  jwtSecret: MYSECRET
   
-  database:
-    name: dbSecret
-    dbUser: postgres
-    dbPassword: postgres
+database:
+  name: dbsecret
+  dbUser: postgres
+  dbPassword: SEzdYV4PYX
 
 
 exposing:

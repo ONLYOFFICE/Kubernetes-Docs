@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.spellchecker.name }}
+  name: spellchecker
   labels:
-    app: {{ .Values.spellchecker.app }}
+    app: spellchecker
 spec:
   replicas: {{ .Values.spellchecker.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.spellchecker.app }}
+      app: spellchecker
   template:
     metadata:
       labels:
-        app: {{ .Values.spellchecker.app }}
+        app: spellchecker
     spec:
       volumes:
         - name: ds-license
@@ -31,6 +31,6 @@ spec:
           - secretRef:
               name: jwt
           - configMapRef:
-              name: {{ .Values.docservice.configMap }}
+              name: documentserver
           ports:
             - containerPort: {{ .Values.spellchecker.spellcheckerContainerPort }}

@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.converter.name }}
+  name: converter
   labels:
-    app: {{ .Values.converter.app }}
+    app: converter
 spec:
   replicas: {{ .Values.converter.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.converter.app }}
+      app: converter
   template:
     metadata:
       labels:
-        app: {{ .Values.converter.app }}
+        app: converter
     spec:
       volumes:
         - name: {{ .Values.pvc.name }}
@@ -25,16 +25,6 @@ spec:
         - name: converter
           image: {{ .Values.converter.converterContainerImage }}
           env:
-          - name: DB_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.secrets.database.name }}
-                key: {{ .Values.secrets.database.dbUser }}
-          - name: DB_PWD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.secrets.database.name }}
-                key: {{ .Values.secrets.database.dbPassword }}
           - name: AMQP_PWD
             valueFrom:
               secretKeyRef:
@@ -43,8 +33,9 @@ spec:
           envFrom:
           - secretRef:
               name: jwt
+              name: dbsecret
           - configMapRef:
-              name: {{ .Values.docservice.configMap }}
+              name: documentserver
           volumeMounts:
           - name: {{ .Values.pvc.name }}
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files 
