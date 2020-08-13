@@ -111,7 +111,7 @@ See more detail about install PostgreSQL via Helm [here](https://github.com/helm
 
 ### 1. Deploy DocumentServer
 
-To install the RabbitMQ to your cluster, run the following command:
+To install the RabbitMQ to your cluster, run the folowing command:
 
 ```bash
 $ helm install documentserver ./kube-documentserver
@@ -133,65 +133,48 @@ $ helm install documentserver ./kube-documentserver --set connections.metricsEna
 
 
 ### 4. Available Configuration Parameters
-**connections** section with parameters that configure connections to DB,ampq, etc.
-- **dbHost** : The database name. Supported values are `postgres`, `mariadb` or `mysql`. Defaults to `postgres`.
-- **dbUser** : The database user. Defaults to 'postgres'.
-- **dbPort** : database port. Defaults to '5432'.
-- **redistServerHost** : 
-- **ampqHost** : message-broker type. Rabbitmq and activemq are supported. Defaults to 'rabbitmq'.
-- **ampqUser** : messabe-broker user. Defaults to 'user'.
-- **ampqProto** : messabe-broker protocol. defaults to 'ampq'.
-- **metricsEnabled** : 
-- **metricsHost** :
-- **spellcheckerHostPort** :
-- **exampleHostPort** : example:8080
 
-**pvc** : section with parameters that configure persistent volume claims
-- **name** : name of the claim. Defaults to `ds-files`.
-- **storegaClassName** : Defaults to `"nfs"`.
-- **storage** : Defaults to `6Gi`.
-- **mountPath** : 
+| Parameter                          | Description                                      | Default                                     |
+|------------------------------------|--------------------------------------------------|---------------------------------------------|
+| .connections.dbHost                | IP address or the name of the database           | postgres                                    |
+| .connections.dbPort                | database server port number                      | 5432                                        |
+| .connections.redistServerHost      | IP address or the name of the redis host         | redis-master                                |
+| .connections.ampqHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
+| .connections.ampqUser              | messabe-broker user                              | user                                        |
+| .connections.ampqProto             | messabe-broker protocol                          | ampq                                        |
+| .connections.metricsEnabled        | Statsd installation                              | false                                       |
+| .connections.metricsHost           | IP address or the name of the metrics host       | statsd                                      |
+| .connections.spellcheckerHostPort  | spellchecker host name and port                  | spellchecker:8080                           |
+| .connections.exampleHostPort       | example host name and port                       | example:8080                                |
+| .pvc.name                          | name of the persistent volume claim              | ds-files                                    |
+| .pvc.storageClassName              | storage class name                               | "nfs"                                       |
+| .pvc.storage                       | storage volume size                              | 6Gi                                         |
+| .example.install                   | Choise of example installation                   | false                                       |
+| .example.containerImage            | example container image name                     | onlyoffice/4testing-ds-example:5.5.3        |
+| .example.containerPort             | example container port number                    | 3000                                        |
+| .example.DSURL                     | example url                                      | /example                                    |
+| .docservice.replicas               | docservice replicas quantity                     | 2                                           |
+| .docservice.proxyContainerImage    | docservice proxy container image name            | onlyoffice/4testing-ds-proxy:5.5.3          |
+| .docservice.proxyContainerPort     | docservice proxy container port number           | 8888                                        |
+| .docservice.containerImage         | docservice container image name                  | onlyoffice/4testing-ds-docservice:5.5.3     |
+| .docservice.containerPort          | docservice container port number                 | 8000                                        |
+| .converter.replicas                | converter replicas quantity                      | 2                                           |
+| .converter.containerImage          | converter container image name                   | onlyoffice/4testing-ds-converter:5.5.3      |
+| .spellchecker.replicas             | spellchecker replicas quantity                   | 2                                           |
+| .spellchecker.containerImage       | spellchecker container image name                | onlyoffice/4testing-ds-spellchecker:5.5.3   |
+| .spellchecker.containerPort        | spellchecker container port number               | 8080                                        |
+| .jwt.name                          | jwt secret name                                  | jwt                                         |
+| .jwt.jwtEnabled                    | jwt enabling parameter                           | true                                        |
+| .jwt.jwtSecret                     | jwt secret                                       | MYSECRET                                    |
+| .database.name                     | database secret name                             | dbsecret                                    |
+| .database.dbUser                   | database user                                    | postgres                                    |
+| .database.dbPassword               | database password                                | postgres                                    |
+| .exposing.ingress                  | installation of ingress service                  | false                                       |
+| .exposing.dsServiceType            | documentserver service type                      | LoadBalancer                                |
+| .exposing.dsServicePort            | documentserver service port                      | 80                                          |
+| .exposing.dsServiceTargetPort      | documentserver service target port               | 8888                                        |
+| .exposing.dsServiceProtocol        | documentserver service protocol                  | TCP                                         |
 
-**example** : section with example parameters
-- **install** : Specifies the installation of example. Defaults to `false`.
-- **name** : The name of the example service.
-- **containerName** : The container name of example service. Defaults to `example`.
-- **containerImage** : 
-- **containerPort** : 
-- **environmentSecretReference** :
-- **environmentConfigMapReference** :
-- **DSURL** :
-
-**docservice**: 
-- **name** : 
-- **app** :
-- **replicas** :
-- **configMap** :
-- **proxyContainerImage** :
-- **proxyContainerPort** :
-- **docserviceContainerImage** :
-- **docserviceContainerPort** :
-
-**converter** :
-- **name** :
-- **app** :
-- **replicas** : 
-- **converterContainerImage** :
-
-**spellchecker** :
-- **name** :
-- **app** :
-- **replicas** :
-- **spellcheckerContainerImage** :
-- **spellcheckerContainerPort** :
-
-**secrets** :
-- **jwt** :
-- **name** : 
-- **type** :
-- **immutable** :
-- **jwtEnabled** :
-- **jwtSecret** :
 
 ### 5. Expose DocumentServer
 
@@ -307,4 +290,4 @@ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*]
 
 Associate `documentserver` ingress IP or hostname with your domain name through your DNS provider.
 
-After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
+After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.l

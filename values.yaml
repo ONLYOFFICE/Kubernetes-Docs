@@ -4,7 +4,7 @@ connections:
   dbHost: postgresql
   dbPort: "5432"
 
-  redistServerHost: redis-master
+  redisServerHost: redis-master
 
   amqpHost: rabbitmq
   amqpUser: user
@@ -35,19 +35,19 @@ docservice:
   proxyContainerImage: onlyoffice/4testing-ds-proxy:5.5.3
   proxyContainerPort: 8888
 
-  docserviceContainerImage: onlyoffice/4testing-ds-docservice:5.5.3
-  docserviceContainerPort: 8000
+  containerImage: onlyoffice/4testing-ds-docservice:5.5.3
+  containerPort: 8000
 
 converter:
   replicas: 2
 
-  converterContainerImage: onlyoffice/4testing-ds-converter:5.5.3
+  containerImage: onlyoffice/4testing-ds-converter:5.5.3
 
 spellchecker:
   replicas: 2
 
-  spellcheckerContainerImage: onlyoffice/4testing-ds-spellchecker:5.5.3
-  spellcheckerContainerPort: 8080
+  containerImage: onlyoffice/4testing-ds-spellchecker:5.5.3
+  containerPort: 8080
 
 jwt:
   name: jwt
@@ -57,7 +57,7 @@ jwt:
 database:
   name: dbsecret
   dbUser: postgres
-  dbPassword: SEzdYV4PYX
+  dbPassword: postgres
 
 
 exposing:

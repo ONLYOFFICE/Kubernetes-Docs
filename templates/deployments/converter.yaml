@@ -23,7 +23,7 @@ spec:
             secretName: license
       containers:
         - name: converter
-          image: {{ .Values.converter.converterContainerImage }}
+          image: {{ .Values.converter.containerImage }}
           env:
           - name: AMQP_PWD
             valueFrom:

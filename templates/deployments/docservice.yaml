@@ -41,9 +41,9 @@ spec:
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
 
         - name: docservice
-          image: {{ .Values.docservice.docserviceContainerImage }}
+          image: {{ .Values.docservice.containerImage }}
           ports:
-            - containerPort: {{ .Values.docservice.docserviceContainerPort }}
+            - containerPort: {{ .Values.docservice.containerPort }}
           env:
           - name: AMQP_PWD
             valueFrom:

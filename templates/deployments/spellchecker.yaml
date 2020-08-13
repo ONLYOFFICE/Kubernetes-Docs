@@ -20,7 +20,7 @@ spec:
             secretName: license
       containers:
         - name: spellchecker
-          image: {{ .Values.spellchecker.spellcheckerContainerImage }}
+          image: {{ .Values.spellchecker.containerImage }}
           env:
           - name: DB_PWD
             valueFrom:
@@ -33,4 +33,4 @@ spec:
           - configMapRef:
               name: documentserver
           ports:
-            - containerPort: {{ .Values.spellchecker.spellcheckerContainerPort }}
+            - containerPort: {{ .Values.spellchecker.containerPort }}

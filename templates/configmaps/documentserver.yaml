@@ -5,7 +5,7 @@ metadata:
 data:
   DB_HOST: {{ .Values.connections.dbHost }}
   DB_PORT: {{ .Values.connections.dbPort | quote}}
-  REDIST_SERVER_HOST: {{ .Values.connections.redistServerHost }}
+  REDIS_SERVER_HOST: {{ .Values.connections.redisServerHost }}
   AMQP_HOST: {{ .Values.connections.amqpHost }}
   AMQP_USER: {{ .Values.connections.amqpUser }}
   AMQP_PROTO: {{ .Values.connections.amqpProto }}
