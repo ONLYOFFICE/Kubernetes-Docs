@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.pvc.name }}
+  name: ds-files
 spec:
-  storageClassName: {{ .Values.pvc.storageClassName }}
+  storageClassName: {{ .Values.persistance.storageClass }}
   accessModes:
     - ReadWriteMany
   volumeMode: Filesystem
   resources:
     requests:
-      storage: {{ .Values.pvc.storage }}
+      storage: {{ .Values.persistance.size }}

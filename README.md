@@ -37,22 +37,22 @@ See more detail about install NFS Server Provisioner via Helm [here](https://git
 Create Persistent Volume Claim
 
 ```bash
-$ kubectl apply -f ./pvc/ds-files.yaml
+$ kubectl apply -f ./persistance/ds-files.yaml
 ```
 
-Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
+Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./persistance/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
 
 Verify `ds-files` status
 
 ```bash
-$ kubectl get pvc ds-files
+$ kubectl get persistance ds-files
 ```
 
 Output
 
 ```
 NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
+ds-files   Bound    persistance-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
 ```
 
 ### 2. Deploy RabbitMQ
@@ -134,46 +134,34 @@ $ helm install documentserver ./kube-documentserver --set connections.metricsEna
 
 ### 4. Available Configuration Parameters
 
-| Parameter                          | Description                                      | Default                                     |
-|------------------------------------|--------------------------------------------------|---------------------------------------------|
-| .connections.dbHost                | IP address or the name of the database           | postgres                                    |
-| .connections.dbPort                | database server port number                      | 5432                                        |
-| .connections.redistServerHost      | IP address or the name of the redis host         | redis-master                                |
-| .connections.ampqHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
-| .connections.ampqUser              | messabe-broker user                              | user                                        |
-| .connections.ampqProto             | messabe-broker protocol                          | ampq                                        |
-| .connections.metricsEnabled        | Statsd installation                              | false                                       |
-| .connections.metricsHost           | IP address or the name of the metrics host       | statsd                                      |
-| .connections.spellcheckerHostPort  | spellchecker host name and port                  | spellchecker:8080                           |
-| .connections.exampleHostPort       | example host name and port                       | example:8080                                |
-| .pvc.name                          | name of the persistent volume claim              | ds-files                                    |
-| .pvc.storageClassName              | storage class name                               | "nfs"                                       |
-| .pvc.storage                       | storage volume size                              | 6Gi                                         |
-| .example.install                   | Choise of example installation                   | false                                       |
-| .example.containerImage            | example container image name                     | onlyoffice/4testing-ds-example:5.5.3        |
-| .example.containerPort             | example container port number                    | 3000                                        |
-| .example.DSURL                     | example url                                      | /example                                    |
-| .docservice.replicas               | docservice replicas quantity                     | 2                                           |
-| .docservice.proxyContainerImage    | docservice proxy container image name            | onlyoffice/4testing-ds-proxy:5.5.3          |
-| .docservice.proxyContainerPort     | docservice proxy container port number           | 8888                                        |
-| .docservice.containerImage         | docservice container image name                  | onlyoffice/4testing-ds-docservice:5.5.3     |
-| .docservice.containerPort          | docservice container port number                 | 8000                                        |
-| .converter.replicas                | converter replicas quantity                      | 2                                           |
-| .converter.containerImage          | converter container image name                   | onlyoffice/4testing-ds-converter:5.5.3      |
-| .spellchecker.replicas             | spellchecker replicas quantity                   | 2                                           |
-| .spellchecker.containerImage       | spellchecker container image name                | onlyoffice/4testing-ds-spellchecker:5.5.3   |
-| .spellchecker.containerPort        | spellchecker container port number               | 8080                                        |
-| .jwt.name                          | jwt secret name                                  | jwt                                         |
-| .jwt.jwtEnabled                    | jwt enabling parameter                           | true                                        |
-| .jwt.jwtSecret                     | jwt secret                                       | MYSECRET                                    |
-| .database.name                     | database secret name                             | dbsecret                                    |
-| .database.dbUser                   | database user                                    | postgres                                    |
-| .database.dbPassword               | database password                                | postgres                                    |
-| .exposing.ingress                  | installation of ingress service                  | false                                       |
-| .exposing.dsServiceType            | documentserver service type                      | LoadBalancer                                |
-| .exposing.dsServicePort            | documentserver service port                      | 80                                          |
-| .exposing.dsServiceTargetPort      | documentserver service target port               | 8888                                        |
-| .exposing.dsServiceProtocol        | documentserver service protocol                  | TCP                                         |
+| Parameter                         | Description                                      | Default                                     |
+|-----------------------------------|--------------------------------------------------|---------------------------------------------|
+| connections.dbHost                | IP address or the name of the database           | postgres                                    |
+| connections.dbPort                | database server port number                      | 5432                                        |
+| connections.dbUser                | database user                                    | postgres                                    |
+| connections.dbPassword            | database password                                | postgres                                    |
+| connections.redistServerHost      | IP address or the name of the redis host         | redis-master                                |
+| connections.ampqHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
+| connections.ampqUser              | messabe-broker user                              | user                                        |
+| connections.ampqProto             | messabe-broker protocol                          | ampq                                        |
+| connections.metricsEnabled        | Statsd installation                              | false                                       |
+| persistance.name                  | name of the persistent volume claim              | ds-files                                    |
+| persistance.storageClass          | storage class name                               | "nfs"                                       |
+| persistance.size                  | storage volume size                              | 6Gi                                         |
+| example.enable                    | Choise of example installation                   | false                                       |
+| example.containerImage            | example container image name                     | onlyoffice/4testing-ds-example:5.5.3        |
+| docservice.replicas               | docservice replicas quantity                     | 2                                           |
+| docservice.proxyContainerImage    | docservice proxy container image name            | onlyoffice/4testing-ds-proxy:5.5.3          |
+| docservice.containerImage         | docservice container image name                  | onlyoffice/4testing-ds-docservice:5.5.3     |
+| converter.replicas                | converter replicas quantity                      | 2                                           |
+| converter.containerImage          | converter container image name                   | onlyoffice/4testing-ds-converter:5.5.3      |
+| spellchecker.replicas             | spellchecker replicas quantity                   | 2                                           |
+| spellchecker.containerImage       | spellchecker container image name                | onlyoffice/4testing-ds-spellchecker:5.5.3   |
+| jwt.jwtEnabled                    | jwt enabling parameter                           | true                                        |
+| jwt.jwtSecret                     | jwt secret                                       | MYSECRET                                    |
+| service.ingress                   | installation of ingress service                  | false                                       |
+| service.dsServiceType             | documentserver service type                      | LoadBalancer                                |
+| service.dsServicePort             | documentserver service port                      | 80                                          |
 
 
 ### 5. Expose DocumentServer

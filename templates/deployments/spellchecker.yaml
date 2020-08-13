@@ -33,4 +33,4 @@ spec:
           - configMapRef:
               name: documentserver
           ports:
-            - containerPort: {{ .Values.spellchecker.containerPort }}
+            - containerPort: 8080 

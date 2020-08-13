@@ -15,9 +15,9 @@ spec:
         app: converter
     spec:
       volumes:
-        - name: {{ .Values.pvc.name }}
+        - name: ds-files
           persistentVolumeClaim:
-            claimName: {{ .Values.pvc.name }}
+            claimName: ds-files
         - name: ds-license
           secret:
             secretName: license
@@ -37,7 +37,7 @@ spec:
           - configMapRef:
               name: documentserver
           volumeMounts:
-          - name: {{ .Values.pvc.name }}
+          - name: ds-files
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files 
           - name: ds-license
             mountPath: /var/www/onlyoffice/Data

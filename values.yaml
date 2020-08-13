@@ -1,7 +1,7 @@
 connections:
-  dbDefault: true
-  dbType: postgres
   dbHost: postgresql
+  dbUser: postgres
+  dbPassword: postgres
   dbPort: "5432"
 
   redisServerHost: redis-master
@@ -10,61 +10,38 @@ connections:
   amqpUser: user
   amqpProto: ampq
 
-  metricsHost: statsd
-  metricsEnabled: false
+persistance:
+  storageClass: "nfs"
+  size: 6Gi
 
-  spellcheckerHostPort: spellchecker:8080
-
-  exampleHostPort: example:8080
-
-pvc:
-  name: ds-files
-  storageClassName: "nfs"
-  storage: 6Gi
+metrics:
+  enabled: false
 
 example:
-  install: false
+  enabled: false
   name: example
   containerImage: onlyoffice/4testing-ds-example:5.5.3
-  containerPort: 3000
-  DSURL: "/example"
 
 docservice:
   replicas: 2
-
   proxyContainerImage: onlyoffice/4testing-ds-proxy:5.5.3
-  proxyContainerPort: 8888
-
   containerImage: onlyoffice/4testing-ds-docservice:5.5.3
-  containerPort: 8000
 
 converter:
   replicas: 2
-
   containerImage: onlyoffice/4testing-ds-converter:5.5.3
 
 spellchecker:
   replicas: 2
-
   containerImage: onlyoffice/4testing-ds-spellchecker:5.5.3
-  containerPort: 8080
 
 jwt:
-  name: jwt
   jwtEnabled: true
   jwtSecret: MYSECRET
-  
-database:
-  name: dbsecret
-  dbUser: postgres
-  dbPassword: postgres
 
-
-exposing:
+service:
   ingress: false
 
   dsServiceType: LoadBalancer
   dsServicePort: 80
-  dsServiceTargetPort: 8888
-  dsServiceProtocol: TCP
   

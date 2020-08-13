@@ -1,4 +1,4 @@
-{{- if .Values.example.install -}}
+{{- if .Values.example.enabled -}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -10,7 +10,7 @@ spec:
     - name: {{ .Values.example.name }}
       image: {{ .Values.example.containerImage | quote }}
       ports:
-        - containerPort: {{ .Values.example.containerPort }}
+        - containerPort: 3000
       envFrom:
         - secretRef:
             name: jwt

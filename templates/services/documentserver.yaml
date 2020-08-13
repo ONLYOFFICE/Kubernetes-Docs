@@ -7,7 +7,7 @@ spec:
     app: docservice
   ports:
     - name: http
-      protocol: {{ .Values.exposing.dsServiceProtocol }}
-      port: {{ .Values.exposing.dsServicePort }}
-      targetPort: {{ .Values.exposing.dsServiceTargetPort }} 
-  type: {{ .Values.exposing.dsServiceType }}
+      protocol: TCP
+      port: {{ .Values.service.dsServicePort }}
+      targetPort: 8888 
+  type: {{ .Values.service.dsServiceType }}
