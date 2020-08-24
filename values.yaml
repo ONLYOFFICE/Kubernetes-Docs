@@ -40,8 +40,12 @@ jwt:
   jwtSecret: MYSECRET
 
 service:
-  ingress: false
-
   dsServiceType: LoadBalancer
   dsServicePort: 80
-  
+
+ingress:
+  enabled: false
+  ssl: false
+  host: example.com
+  secret: tls
+
