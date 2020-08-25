@@ -139,42 +139,6 @@ To deploy StatsD set `connections.metricsEnabled` to true:
 $ helm install documentserver ./kube-documentserver --set connections.metricsEnables=true
 ```
 
-
-### 5. Available Configuration Parameters
-
-| Parameter                         | Description                                      | Default                                     |
-|-----------------------------------|--------------------------------------------------|---------------------------------------------|
-| connections.dbHost                | IP address or the name of the database           | postgres                                    |
-| connections.dbPort                | database server port number                      | 5432                                        |
-| connections.dbUser                | database user                                    | postgres                                    |
-| connections.dbPassword            | database password                                | postgres                                    |
-| connections.redistServerHost      | IP address or the name of the redis host         | redis-master                                |
-| connections.ampqHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
-| connections.ampqUser              | messabe-broker user                              | user                                        |
-| connections.ampqProto             | messabe-broker protocol                          | ampq                                        |
-| persistance.storageClass          | storage class name                               | "nfs"                                       |
-| persistance.size                  | storage volume size                              | 6Gi                                         |
-| metrics.enabled                   | Statsd installation                              | false                                       |
-| example.enabled                   | Choise of example installation                   | false                                       |
-| example.name                      | Example name                                     | example                                     |
-| example.containerImage            | example container image name                     | onlyoffice/4testing-ds-example:5.5.3        |
-| docservice.replicas               | docservice replicas quantity                     | 2                                           |
-| docservice.proxyContainerImage    | docservice proxy container image name            | onlyoffice/4testing-ds-proxy:5.5.3          |
-| docservice.containerImage         | docservice container image name                  | onlyoffice/4testing-ds-docservice:5.5.3     |
-| converter.replicas                | converter replicas quantity                      | 2                                           |
-| converter.containerImage          | converter container image name                   | onlyoffice/4testing-ds-converter:5.5.3      |
-| spellchecker.replicas             | spellchecker replicas quantity                   | 2                                           |
-| spellchecker.containerImage       | spellchecker container image name                | onlyoffice/4testing-ds-spellchecker:5.5.3   |
-| jwt.jwtEnabled                    | jwt enabling parameter                           | true                                        |
-| jwt.jwtSecret                     | jwt secret                                       | MYSECRET                                    |
-| service.type                      | documentserver service type                      | ClusterIP                                   |
-| service.port                      | documentserver service port                      | 80                                          |
-| ingress.enabled                   | installation of ingress service                  | false                                       |
-| ingress.ssl.enabled               | installation ssl for ingress service             | false                                       |
-| ingress.ssl.host                  | host for ingress ssl                             | example.com                                 |
-| ingress.ssl.secret                | secret name for ssl                              | tls                                         |
-
-
 ### 5. Expose DocumentServer
 
 #### 5.1 Expose DocumentServer via Service (HTTP Only)
@@ -285,3 +249,39 @@ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*]
 Associate `documentserver` ingress IP or hostname with your domain name through your DNS provider.
 
 After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.l
+
+### 6. Available Configuration Parameters
+
+| Parameter                         | Description                                      | Default                                     |
+|-----------------------------------|--------------------------------------------------|---------------------------------------------|
+| connections.dbHost                | IP address or the name of the database           | postgres                                    |
+| connections.dbPort                | database server port number                      | 5432                                        |
+| connections.dbUser                | database user                                    | postgres                                    |
+| connections.dbPassword            | database password                                | postgres                                    |
+| connections.redistServerHost      | IP address or the name of the redis host         | redis-master                                |
+| connections.ampqHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
+| connections.ampqUser              | messabe-broker user                              | user                                        |
+| connections.ampqProto             | messabe-broker protocol                          | ampq                                        |
+| persistance.storageClass          | storage class name                               | "nfs"                                       |
+| persistance.size                  | storage volume size                              | 6Gi                                         |
+| metrics.enabled                   | Statsd installation                              | false                                       |
+| example.enabled                   | Choise of example installation                   | false                                       |
+| example.name                      | Example name                                     | example                                     |
+| example.containerImage            | example container image name                     | onlyoffice/4testing-ds-example:5.5.3        |
+| docservice.replicas               | docservice replicas quantity                     | 2                                           |
+| docservice.proxyContainerImage    | docservice proxy container image name            | onlyoffice/4testing-ds-proxy:5.5.3          |
+| docservice.containerImage         | docservice container image name                  | onlyoffice/4testing-ds-docservice:5.5.3     |
+| converter.replicas                | converter replicas quantity                      | 2                                           |
+| converter.containerImage          | converter container image name                   | onlyoffice/4testing-ds-converter:5.5.3      |
+| spellchecker.replicas             | spellchecker replicas quantity                   | 2                                           |
+| spellchecker.containerImage       | spellchecker container image name                | onlyoffice/4testing-ds-spellchecker:5.5.3   |
+| jwt.jwtEnabled                    | jwt enabling parameter                           | true                                        |
+| jwt.jwtSecret                     | jwt secret                                       | MYSECRET                                    |
+| service.type                      | documentserver service type                      | ClusterIP                                   |
+| service.port                      | documentserver service port                      | 80                                          |
+| ingress.enabled                   | installation of ingress service                  | false                                       |
+| ingress.ssl.enabled               | installation ssl for ingress service             | false                                       |
+| ingress.ssl.host                  | host for ingress ssl                             | example.com                                 |
+| ingress.ssl.secret                | secret name for ssl                              | tls                                         |
+
+
