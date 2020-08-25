@@ -16,9 +16,9 @@ Install NFS Server Provisioner
 
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
-  --set persistence.enabled=true \
-  --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set persistence.size=PERSISTENT_SIZE
+  --set persistance.enabled=true \
+  --set persistance.storageClass=PERSISTENT_STORAGE_CLASS \
+  --set persistance.size=PERSISTENT_SIZE
 ```
 
 - `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetes cluster
@@ -117,7 +117,15 @@ To install the RabbitMQ to your cluster, run the folowing command:
 $ helm install documentserver ./kube-documentserver
 ```
 
-### 2. Example deployment (optional)
+### 2. Custom database and/or AM (optional)
+
+If your database located outside of current kubernetes container or has custom connection, set it in `connections` parameters, for example:
+
+```bash
+$ helm install documentserver ./kube-documentserver --set connections.dbHost=examplehost --set connections.dbPassword=exampledbpassword
+```
+
+### 3. Example deployment (optional)
 
 To deploy example set `example.install` parameter to true:
 
@@ -125,14 +133,14 @@ To deploy example set `example.install` parameter to true:
 $ helm install documentserver ./kube-documentserver --set example.install=true
 ```
 
-### 3. StatsD deployment (optional)
+### 4. StatsD deployment (optional)
 To deploy StatsD set `connections.metricsEnabled` to true:
 ```bash
 $ helm install documentserver ./kube-documentserver --set connections.metricsEnables=true
 ```
 
 
-### 4. Available Configuration Parameters
+### 5. Available Configuration Parameters
 
 | Parameter                         | Description                                      | Default                                     |
 |-----------------------------------|--------------------------------------------------|---------------------------------------------|
@@ -144,11 +152,11 @@ $ helm install documentserver ./kube-documentserver --set connections.metricsEna
 | connections.ampqHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
 | connections.ampqUser              | messabe-broker user                              | user                                        |
 | connections.ampqProto             | messabe-broker protocol                          | ampq                                        |
-| connections.metricsEnabled        | Statsd installation                              | false                                       |
-| persistance.name                  | name of the persistent volume claim              | ds-files                                    |
 | persistance.storageClass          | storage class name                               | "nfs"                                       |
 | persistance.size                  | storage volume size                              | 6Gi                                         |
-| example.enable                    | Choise of example installation                   | false                                       |
+| metrics.enabled                   | Statsd installation                              | false                                       |
+| example.enabled                   | Choise of example installation                   | false                                       |
+| example.name                      | Example name                                     | example                                     |
 | example.containerImage            | example container image name                     | onlyoffice/4testing-ds-example:5.5.3        |
 | docservice.replicas               | docservice replicas quantity                     | 2                                           |
 | docservice.proxyContainerImage    | docservice proxy container image name            | onlyoffice/4testing-ds-proxy:5.5.3          |
@@ -159,9 +167,12 @@ $ helm install documentserver ./kube-documentserver --set connections.metricsEna
 | spellchecker.containerImage       | spellchecker container image name                | onlyoffice/4testing-ds-spellchecker:5.5.3   |
 | jwt.jwtEnabled                    | jwt enabling parameter                           | true                                        |
 | jwt.jwtSecret                     | jwt secret                                       | MYSECRET                                    |
-| service.ingress                   | installation of ingress service                  | false                                       |
-| service.dsServiceType             | documentserver service type                      | LoadBalancer                                |
-| service.dsServicePort             | documentserver service port                      | 80                                          |
+| service.type                      | documentserver service type                      | ClusterIP                                   |
+| service.port                      | documentserver service port                      | 80                                          |
+| ingress.enabled                   | installation of ingress service                  | false                                       |
+| ingress.ssl.enabled               | installation ssl for ingress service             | false                                       |
+| ingress.ssl.host                  | host for ingress ssl                             | example.com                                 |
+| ingress.ssl.secret                | secret name for ssl                              | tls                                         |
 
 
 ### 5. Expose DocumentServer
@@ -172,10 +183,11 @@ $ helm install documentserver ./kube-documentserver --set connections.metricsEna
 This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
 Use this type of exposure if you use external TLS termination, and don't have another WEB application in k8s cluster.
 
-Deploy `documentserver` service:
+To expose DocumentServer via service set `service.type` parameter to LoadBalancer:
 
 ```bash
-$ kubectl apply -f ./services/documentserver-lb.yaml
+$ helm install documentserver ./kube-documentserver --set service.type=LoadBalancer
+
 ```
 
 Run next command to get `documentserver` service IP:
@@ -207,12 +219,6 @@ $ helm install nginx-ingress stable/nginx-ingress --set controller.publishServic
 
 See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
 
-Deploy `documentserver` service:
-
-```bash
-$ kubectl apply -f ./services/documentserver.yaml
-```
-
 #### 5.2.2 Expose DocumentServer via HTTP
 
 *You should skip #5.2.2 step if you are going expose DocumentServer via HTTPS*
@@ -220,10 +226,11 @@ $ kubectl apply -f ./services/documentserver.yaml
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
-Deploy documentserver ingress
+To expose DocumentServer via ingress HTTP set `ingress.enabled` parameter to true:
 
 ```bash
-$ kubectl apply -f ./ingresses/documentserver.yaml
+$ helm install documentserver ./kube-documentserver --set ingress.enabled=true
+
 ```
 
 Run next command to get `documentserver` ingress IP:
@@ -256,12 +263,11 @@ $ kubectl create secret generic tls \
   --from-file=./tls.key
 ```
 
-Open `./ingresses/documentserver-ssl.yaml` and type your domain name instead of `example.com`
-
-Deploy documentserver ingress
+To expose DocumentServer via ingress HTTPS set `ingress.enabled` parameter to true, `ingress.ssl.enabled` to true and change default  value for host:
 
 ```bash
-$ kubectl apply -f ./ingresses/documentserver-ssl.yaml
+$ helm install documentserver ./kube-documentserver --set ingress.enabled=true --set ingress.ssl.enabled=true --set ingress.ssl.host=example.com
+
 ```
 
 Run next command to get `documentserver` ingress IP:

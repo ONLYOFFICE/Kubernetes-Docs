@@ -40,12 +40,13 @@ jwt:
   jwtSecret: MYSECRET
 
 service:
-  dsServiceType: LoadBalancer
-  dsServicePort: 80
+  type: ClusterIP 
+  port: 80
 
 ingress:
   enabled: false
-  ssl: false
-  host: example.com
-  secret: tls
+  ssl:
+    enabled: false
+    host: example.com
+    secret: tls
 
