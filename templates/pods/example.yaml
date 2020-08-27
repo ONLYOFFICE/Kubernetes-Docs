@@ -2,12 +2,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ .Values.example.name }}
+  name: example
   labels:
-    app: {{ .Values.example.name }}
+    app: example
 spec:
   containers:
-    - name: {{ .Values.example.name }}
+    - name: example
       image: {{ .Values.example.containerImage | quote }}
       ports:
         - containerPort: 3000
@@ -15,5 +15,5 @@ spec:
         - secretRef:
             name: jwt
         - configMapRef:
-              name: {{ .Values.example.name }}
+              name: example
 {{- end -}}

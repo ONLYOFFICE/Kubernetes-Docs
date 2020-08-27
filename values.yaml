@@ -1,14 +1,14 @@
 connections:
   dbHost: postgresql
   dbUser: postgres
-  dbPassword: SEzdYV4PYX
+  dbPassword: postgres 
   dbPort: "5432"
 
   redisServerHost: redis-master
   
   amqpHost: rabbitmq
   amqpUser: user
-  amqpPassword: 7tfOOCiqMk
+  amqpPassword: rabbitmq 
   amqpProto: ampq
 
 persistance:
@@ -20,7 +20,6 @@ metrics:
 
 example:
   enabled: false
-  name: example
   containerImage: onlyoffice/4testing-ds-example:5.5.3
 
 docservice:
@@ -41,7 +40,7 @@ jwt:
   secret: MYSECRET
 
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 80
 
 ingress:

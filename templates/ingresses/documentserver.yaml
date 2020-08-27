@@ -21,4 +21,11 @@ spec:
         backend:
           serviceName: documentserver
           servicePort: 8888
+      {{ if .Values.example.enabled }}
+      - path: /example
+        backend:
+          serviceName: example
+          servicePort: 3000
+      {{ end }}
+
 {{ end }}

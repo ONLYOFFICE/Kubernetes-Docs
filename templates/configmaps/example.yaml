@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.example.name }}
+  name: example
 data:
   DS_URL: "/example"
 {{- end -}}
