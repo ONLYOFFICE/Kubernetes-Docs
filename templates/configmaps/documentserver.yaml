@@ -3,11 +3,14 @@ kind: ConfigMap
 metadata:
   name: documentserver
 data:
+  {{ if .Values.connections.dbDefault }}
+  DB_USER: {{ .Values.connections.dbUser }}
+  AMQP_USER: {{ .Values.connections.amqpUser }}
+  {{ end }}
   DB_HOST: {{ .Values.connections.dbHost }}
   DB_PORT: {{ .Values.connections.dbPort | quote}}
   REDIS_SERVER_HOST: {{ .Values.connections.redisServerHost }}
   AMQP_HOST: {{ .Values.connections.amqpHost }}
-  AMQP_USER: {{ .Values.connections.amqpUser }}
   AMQP_PROTO: {{ .Values.connections.amqpProto }}
   METRICS_HOST: statsd
   METRICS_ENABLED: {{ .Values.metrics.enabled | quote}}

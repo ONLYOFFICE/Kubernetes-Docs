@@ -119,11 +119,13 @@ $ helm install documentserver ./kube-documentserver
 
 ### 2. Custom database and/or AM (optional)
 
-If your database located outside of current kubernetes container or has custom connection, set it in `connections` parameters, for example:
+If your database and/or AM located outside of current kubernetes cluster or has custom connection, set it in `connections` parameters, for example:
 
 ```bash
-$ helm install documentserver ./kube-documentserver --set connections.dbHost=examplehost --set connections.dbPassword=exampledbpassword
+$ helm install documentserver ./kube-documentserver --set connections.dbDefault=false --set connections.dbHost=examplehost --set connections.dbPassword=exampledbpassword
 ```
+
+The same goes for amqp parameters.
 
 ### 3. Example deployment (optional)
 
@@ -254,14 +256,17 @@ After it ONLYOFFICE DocumentServer will be available at `https://your-domain-nam
 
 | Parameter                         | Description                                      | Default                                     |
 |-----------------------------------|--------------------------------------------------|---------------------------------------------|
+| connections.dbDefault             | specify if db in current cluster                 | true                                        |
 | connections.dbHost                | IP address or the name of the database           | postgres                                    |
 | connections.dbPort                | database server port number                      | 5432                                        |
 | connections.dbUser                | database user                                    | postgres                                    |
 | connections.dbPassword            | database password                                | postgres                                    |
 | connections.redistServerHost      | IP address or the name of the redis host         | redis-master                                |
-| connections.ampqHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
-| connections.ampqUser              | messabe-broker user                              | user                                        |
-| connections.ampqProto             | messabe-broker protocol                          | ampq                                        |
+| connections.amqpDefault           | specify if amqp in current cluster               | true                                        |
+| connections.amqpHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
+| connections.amqpUser              | messabe-broker user                              | user                                        |
+| connections.amqpPassword          | amqp password                                    | rabbitmq                                    |
+| connections.amqpProto             | messabe-broker protocol                          | ampq                                        |
 | persistance.storageClass          | storage class name                               | "nfs"                                       |
 | persistance.size                  | storage volume size                              | 6Gi                                         |
 | metrics.enabled                   | Statsd installation                              | false                                       |
@@ -275,8 +280,8 @@ After it ONLYOFFICE DocumentServer will be available at `https://your-domain-nam
 | converter.containerImage          | converter container image name                   | onlyoffice/4testing-ds-converter:5.5.3      |
 | spellchecker.replicas             | spellchecker replicas quantity                   | 2                                           |
 | spellchecker.containerImage       | spellchecker container image name                | onlyoffice/4testing-ds-spellchecker:5.5.3   |
-| jwt.jwtEnabled                    | jwt enabling parameter                           | true                                        |
-| jwt.jwtSecret                     | jwt secret                                       | MYSECRET                                    |
+| jwt.enabled                       | jwt enabling parameter                           | true                                        |
+| jwt.secret                        | jwt secret                                       | MYSECRET                                    |
 | service.type                      | documentserver service type                      | ClusterIP                                   |
 | service.port                      | documentserver service port                      | 80                                          |
 | ingress.enabled                   | installation of ingress service                  | false                                       |
