@@ -24,31 +24,10 @@ spec:
       containers:
         - name: converter
           image: {{ .Values.converter.containerImage }}
-          env:
-          {{ if .Values.connections.dbDefault }}
-          - name: DB_PWD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql
-                key: postgresql-password
-          {{ end }}
-
-          {{ if .Values.connections.amqpDefault }}
-          - name: AMQP_PWD
-            valueFrom:
-              secretKeyRef:
-                name: rabbitmq
-                key: rabbitmq-password
-          {{ end }}
           envFrom:
           - secretRef:
-              {{ if not .Values.connections.dbDefault }} 
               name: dbsecret
-              {{ end }}
-
-              {{ if not .Values.connections.amqpDefault }}
               name: amqpsecret
-              {{ end }}
               name: jwt
           - configMapRef:
               name: documentserver

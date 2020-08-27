@@ -111,10 +111,17 @@ See more detail about install PostgreSQL via Helm [here](https://github.com/helm
 
 ### 1. Deploy DocumentServer
 
-To install the RabbitMQ to your cluster, run the folowing command:
-
+To get postgresql and rabbitmq passwords, run the following commands:
 ```bash
-$ helm install documentserver ./kube-documentserver
+$ kubectl get secret postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode
+```
+```bash
+$ kubectl get secret rabbitmq -o jsonpath="{.data.rabbitmq-password}" | base64 --decode
+```
+
+Then, to install the RabbitMQ to your cluster, run the folowing command:
+```bash
+$ helm install documentserver ./kube-documentserver --set connections.dbPassword=`password` --set connections.amqpPassword=`password`
 ```
 
 ### 2. Custom database and/or AM (optional)
@@ -122,7 +129,7 @@ $ helm install documentserver ./kube-documentserver
 If your database and/or AM located outside of current kubernetes cluster or has custom connection, set it in `connections` parameters, for example:
 
 ```bash
-$ helm install documentserver ./kube-documentserver --set connections.dbDefault=false --set connections.dbHost=examplehost --set connections.dbPassword=exampledbpassword
+$ helm install documentserver ./kube-documentserver --set connections.dbHost=examplehost --set connections.dbUser=exampleuser
 ```
 
 The same goes for amqp parameters.
@@ -256,13 +263,11 @@ After it ONLYOFFICE DocumentServer will be available at `https://your-domain-nam
 
 | Parameter                         | Description                                      | Default                                     |
 |-----------------------------------|--------------------------------------------------|---------------------------------------------|
-| connections.dbDefault             | specify if db in current cluster                 | true                                        |
 | connections.dbHost                | IP address or the name of the database           | postgres                                    |
 | connections.dbPort                | database server port number                      | 5432                                        |
 | connections.dbUser                | database user                                    | postgres                                    |
 | connections.dbPassword            | database password                                | postgres                                    |
 | connections.redistServerHost      | IP address or the name of the redis host         | redis-master                                |
-| connections.amqpDefault           | specify if amqp in current cluster               | true                                        |
 | connections.amqpHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
 | connections.amqpUser              | messabe-broker user                              | user                                        |
 | connections.amqpPassword          | amqp password                                    | rabbitmq                                    |

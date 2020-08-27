@@ -21,19 +21,9 @@ spec:
       containers:
         - name: spellchecker
           image: {{ .Values.spellchecker.containerImage }}
-          env:
-          {{ if .Values.connections.dbDefault }}
-          - name: DB_PWD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql
-                key: postgresql-password  
-          {{ end }}
           envFrom:
           - secretRef:
-              {{ if not .Values.connections.dbDefault }}
               name: dbsecret
-              {{ end }}
               name: jwt
           - configMapRef:
               name: documentserver

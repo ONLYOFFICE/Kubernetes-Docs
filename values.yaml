@@ -1,16 +1,14 @@
 connections:
-  dbDefault: true
   dbHost: postgresql
   dbUser: postgres
-  dbPassword: postgres
+  dbPassword: SEzdYV4PYX
   dbPort: "5432"
 
   redisServerHost: redis-master
   
-  amqpDefault: true
   amqpHost: rabbitmq
   amqpUser: user
-  amqpPassword: rabbitmq
+  amqpPassword: 7tfOOCiqMk
   amqpProto: ampq
 
 persistance:
@@ -43,7 +41,7 @@ jwt:
   secret: MYSECRET
 
 service:
-  type: ClusterIP 
+  type: LoadBalancer
   port: 80
 
 ingress:
