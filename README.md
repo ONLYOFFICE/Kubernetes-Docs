@@ -64,6 +64,12 @@ $ helm install rabbitmq stable/rabbitmq
 ```
 See more detail about install RabbitMQ via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq#rabbitmq).
 
+To get rabbitmq password, run the following command:
+
+```bash
+$ kubectl get secret rabbitmq -o jsonpath="{.data.rabbitmq-password}" | base64 --decode
+```
+
 ### 3. Deploy Redis
 
 To install the Redis to your cluster, run the following command:
@@ -106,20 +112,18 @@ Recommended use at least 2Gi of persistent storage for every 100 active users of
 
 See more detail about install PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
 
+To get postgresql password, run the following command:
+
+```bash
+$ kubectl get secret postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode
+```
+
 
 ## Deploy ONLYOFFICE DocumentServer
 
 ### 1. Deploy DocumentServer
 
-To get postgresql and rabbitmq passwords, run the following commands:
-```bash
-$ kubectl get secret postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode
-```
-```bash
-$ kubectl get secret rabbitmq -o jsonpath="{.data.rabbitmq-password}" | base64 --decode
-```
-
-Then, to install the RabbitMQ to your cluster, run the folowing command:
+To install the RabbitMQ to your cluster, run the folowing command (passwords of db and amqp is required):
 ```bash
 $ helm install documentserver ./kube-documentserver --set connections.dbPassword=`password` --set connections.amqpPassword=`password`
 ```
