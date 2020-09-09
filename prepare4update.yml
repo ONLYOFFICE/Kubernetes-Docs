@@ -18,7 +18,7 @@ spec:
           command: ["bash"]
           args: ["-c", "apt update; 
             apt install -y curl wget postgresql-client; 
-            curl http://localhost:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
+            curl http://docservice:8888/internal/cluster/inactive -X PUT -s -o /dev/null; 
             rm -rf /var/lib/onlyoffice/documentserver/App_Data/cache/files/*;
             wget  -P /tmp https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql;
             PGPASSWORD=SEzdYV4PYX psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
