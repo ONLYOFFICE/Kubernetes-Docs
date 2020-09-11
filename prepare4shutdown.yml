@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: prepare4update
+  name: prepare4shutdown
 spec:
   template:
     spec:
@@ -10,8 +10,11 @@ spec:
           persistentVolumeClaim:
             claimName: ds-files
       containers:
-        - name: prepare4update
+        - name: prepare4shutdown
           image: postgres
+          envFrom:
+          - secretRef:
+              name: dbsecret
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
@@ -21,6 +24,6 @@ spec:
             curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
             rm -rf /var/lib/onlyoffice/documentserver/App_Data/cache/files/*;
             wget  -P /tmp https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql;
-            PGPASSWORD=HEumlfzF2F psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
+            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
             echo work done"]
       restartPolicy: Never
