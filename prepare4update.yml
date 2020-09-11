@@ -11,16 +11,16 @@ spec:
             claimName: ds-files
       containers:
         - name: prepare4update
-          image: ubuntu
+          image: postgres
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
           command: ["bash"]
           args: ["-c", "apt update; 
-            apt install -y curl wget postgresql-client; 
-            curl http://docservice:8888/internal/cluster/inactive -X PUT -s -o /dev/null; 
+            apt install -y curl wget;
+            curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
             rm -rf /var/lib/onlyoffice/documentserver/App_Data/cache/files/*;
             wget  -P /tmp https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql;
-            PGPASSWORD=SEzdYV4PYX psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
+            PGPASSWORD=HEumlfzF2F psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
             echo work done"]
       restartPolicy: Never

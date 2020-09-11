@@ -1,4 +1,4 @@
-{{- if .Values.example.enabled -}}
+{{ if .Values.example.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -15,5 +15,5 @@ spec:
         - secretRef:
             name: jwt
         - configMapRef:
-              name: example
-{{- end -}}
+            name: example
+{{ end }}

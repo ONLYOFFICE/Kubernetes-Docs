@@ -27,7 +27,9 @@ spec:
           envFrom:
           - secretRef:
               name: dbsecret
+          - secretRef:
               name: amqpsecret
+          - secretRef:
               name: jwt
           - configMapRef:
               name: documentserver

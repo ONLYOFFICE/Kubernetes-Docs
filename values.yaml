@@ -9,7 +9,7 @@ connections:
   amqpHost: rabbitmq
   amqpUser: user
   amqpPassword: rabbitmq 
-  amqpProto: ampq
+  amqpProto: amqp
 
 persistance:
   storageClass: "nfs"

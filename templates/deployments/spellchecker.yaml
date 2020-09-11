@@ -23,8 +23,9 @@ spec:
           image: {{ .Values.spellchecker.containerImage }}
           envFrom:
           - secretRef:
-              name: dbsecret
               name: jwt
+          - secretRef:
+              name: dbsecret
           - configMapRef:
               name: documentserver
           ports:
