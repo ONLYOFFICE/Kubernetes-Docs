@@ -385,7 +385,7 @@ Associate `documentserver` ingress IP or hostname with your domain name through 
 
 After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
 
-#### 6. Preraring for update
+#### 6. Preparing for update
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in database.
 In order for its to work you have to deploy docservice first, if you had not already done it:
@@ -407,7 +407,7 @@ Run the job:
 $ kubectl apply -f ./jobs/prepare4shutdown.yml
 ```
 
-After successful run job automaticly removes its pod, but you have to clean the job itself manually:
+After successful run job automaticly terminates its pod, but you have to clean the job itself manually:
 ```bash
 $ kubectl delete job prepare4update
 ```
