@@ -384,3 +384,17 @@ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*]
 Associate `documentserver` ingress IP or hostname with your domain name through your DNS provider.
 
 After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
+
+#### 6. Preraring for update
+
+The next script creates a job, which shuts down the service, clears the cache files and clears tables in database.
+In order for its to work you have to deploy docservice first, if you had not already done it:
+```bash
+$ kubectl apply -f ./services/docservice.yaml
+```
+
+Run next command to run the job:
+
+```bash
+$ kubectl apply -f ./jobs/prepare4shutdown.yml
+```

@@ -3,7 +3,6 @@ kind: Job
 metadata:
   name: prepare4shutdown
 spec:
-  ttlSecondsAfterFinished: 100
   template:
     spec:
       volumes:
@@ -13,6 +12,9 @@ spec:
         - name: remove-db-scripts
           configMap:
             name: remove-db-scripts
+        - name: init-db-scripts
+          configMap:
+            name: init-db-scripts
       containers:
         - name: prepare4shutdown
           image: postgres
@@ -31,13 +33,16 @@ spec:
           - name: remove-db-scripts
             mountPath: "/tmp/removetbl.sql"
             subPath: "removetbl.sql"
+          - name: init-db-scripts
+            mountPath: "/tmp/createdb.sql"
+            subPath: "createdb.sql"
 
           command: ["bash"]
           args: ["-c", "apt update;
-            apt install curl;
+            apt -y install curl;
             curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
             rm -rf /var/lib/onlyoffice/documentserver/App_Data/cache/files/*;
             PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
-            ls -l /tmp;
+            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/createdb.sql;
             echo work done"]
       restartPolicy: Never
