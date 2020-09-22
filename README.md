@@ -392,9 +392,22 @@ In order for its to work you have to deploy docservice first, if you had not alr
 ```bash
 $ kubectl apply -f ./services/docservice.yaml
 ```
+Download ONLYOFFICE DocumentServer database script for database cleaning:
+```bash
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+```
 
-Run next command to run the job:
+Create a config map from it:
+```bash
+$ kubectl create configmap remove-dc-scripts --from-file=./removetbl.sql
+```
+Run the job:
 
 ```bash
 $ kubectl apply -f ./jobs/prepare4shutdown.yml
+```
+
+After successful run job automaticly removes its pod, but you have to clean the job itself manually:
+```bash
+$ kubectl delete job prepare4update
 ```
