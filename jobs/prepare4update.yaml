@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prepare4update
+spec:
+  template:
+    spec:
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: ds-files
+        - name: remove-db-scripts
+          configMap:
+            name: remove-db-scripts
+        - name: init-db-scripts
+          configMap:
+            name: init-db-scripts
+      containers:
+        - name: prepare4update
+          image: postgres
+          envFrom:
+          - configMapRef:
+              name: documentserver
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          - name: remove-db-scripts
+            mountPath: "/tmp/removetbl.sql"
+            subPath: "removetbl.sql"
+          - name: init-db-scripts
+            mountPath: "/tmp/createdb.sql"
+            subPath: "createdb.sql"
+
+          command: ["bash"]
+          args: ["-c", "apt update;
+            apt -y install curl;
+            curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
+            rm -rf /var/lib/onlyoffice/documentserver/App_Data/cache/files/*;
+            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
+            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/createdb.sql;
+            echo work done"]
+      restartPolicy: Never
