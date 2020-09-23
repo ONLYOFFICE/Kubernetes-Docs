@@ -391,7 +391,8 @@ Associate `documentserver` ingress IP or hostname with your domain name through 
 
 After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
 
-### 6. Preparing for update
+### 6. Update ONLYOFFICE DocumentServer
+#### 6.1 Preparing for update
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in database.
 Download ONLYOFFICE DocumentServer database script for database cleaning:
@@ -417,3 +418,18 @@ After successful run job automaticly terminates its pod, but you have to clean t
 ```bash
 $ kubectl delete job prepare4update
 ```
+#### 6.2 Update DocumentServer images
+
+Update deployment images:
+```
+$ kubectl set image deployment/spellchecker \
+  spellchecker=onlyoffice/4testing-ds-spellchecker:DOCUMENTSERVER_VERSION
+
+$ kubectl set image deployment/converter \
+  converter=onlyoffice/4testing-ds-converter:DOCUMENTSERVER_VERSION
+
+$ kubectl set image deployment/docservice \
+  docservice=onlyoffice/4testing-ds-docservice:DOCUMENTSERVER_VERSION \
+  proxy=onlyoffice/4testing-ds-proxy:DOCUMENTSERVER_VERSION
+```
+`DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE DocumentServer.
