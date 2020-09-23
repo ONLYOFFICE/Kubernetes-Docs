@@ -395,6 +395,7 @@ After it ONLYOFFICE DocumentServer will be available at `https://your-domain-nam
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in database.
 Download ONLYOFFICE DocumentServer database script for database cleaning:
+
 ```bash
 $ wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
 ```

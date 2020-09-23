@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: prepare4shutdown
+  name: prepare4update
 spec:
   template:
     spec:
@@ -16,7 +16,7 @@ spec:
           configMap:
             name: init-db-scripts
       containers:
-        - name: prepare4shutdown
+        - name: prepare4update
           image: postgres
           envFrom:
           - configMapRef:
