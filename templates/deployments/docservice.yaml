@@ -5,7 +5,7 @@ metadata:
   labels:
     app: docservice
 spec:
-  replicas: 2
+  replicas: {{ .Values.docservice.replicas }}
   selector:
     matchLabels:
       app: docservice
@@ -30,9 +30,9 @@ spec:
             secretName: license
       containers:
         - name: proxy
-          image: onlyoffice/4testing-ds-proxy:5.5.3
+          image: {{ .Values.docservice.proxyContainerImage }}
           ports:
-            - containerPort: 8888
+            - containerPort: 8888 
           envFrom:
           - configMapRef:
               name: documentserver
@@ -41,21 +41,14 @@ spec:
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
 
         - name: docservice
-          image: onlyoffice/4testing-ds-docservice:5.5.3
+          image: {{ .Values.docservice.containerImage }}
           ports:
-            - containerPort: 8000
-          env:
-          - name: DB_PWD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql
-                key: postgresql-password
-          - name: AMQP_PWD
-            valueFrom:
-              secretKeyRef:
-                name: rabbitmq
-                key: rabbitmq-password
+            - containerPort: 8000 
           envFrom:
+          - secretRef:
+              name: dbsecret
+          - secretRef:
+              name: amqpsecret
           - secretRef:
               name: jwt
           - configMapRef:

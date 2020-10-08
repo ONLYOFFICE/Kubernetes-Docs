@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: documentserver
+data:
+  DB_HOST: {{ .Values.connections.dbHost }}
+  DB_PORT: {{ .Values.connections.dbPort | quote}}
+  REDIST_SERVER_HOST: {{ .Values.connections.redisServerHost }}
+  AMQP_HOST: {{ .Values.connections.amqpHost }}
+  AMQP_PROTO: {{ .Values.connections.amqpProto }}
+  METRICS_HOST: statsd
+  METRICS_ENABLED: {{ .Values.metrics.enabled | quote}}
+  SPELLCHECKER_HOST_PORT: spellchecker:8080 
+  EXAMPLE_HOST_PORT: example:3000

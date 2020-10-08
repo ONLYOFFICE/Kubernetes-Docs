@@ -1,0 +1,52 @@
+connections:
+  dbHost: postgresql
+  dbUser: postgres
+  dbPassword: postgres 
+  dbPort: "5432"
+
+  redisServerHost: redis-master
+  
+  amqpHost: rabbitmq
+  amqpUser: user
+  amqpPassword: rabbitmq 
+  amqpProto: amqp
+
+persistance:
+  storageClass: "nfs"
+  size: 6Gi
+
+metrics:
+  enabled: false
+
+example:
+  enabled: false
+  containerImage: onlyoffice/4testing-ds-example:5.5.3
+
+docservice:
+  replicas: 2
+  proxyContainerImage: onlyoffice/4testing-ds-proxy:5.5.3
+  containerImage: onlyoffice/4testing-ds-docservice:5.5.3
+
+converter:
+  replicas: 2
+  containerImage: onlyoffice/4testing-ds-converter:5.5.3
+
+spellchecker:
+  replicas: 2
+  containerImage: onlyoffice/4testing-ds-spellchecker:5.5.3
+
+jwt:
+  enabled: true
+  secret: MYSECRET
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  ssl:
+    enabled: false
+    host: example.com
+    secret: tls
+

@@ -1,3 +1,4 @@
+{{- if .Values.metrics.enabled -}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -22,3 +23,5 @@ spec:
         mountPath: /usr/src/app/config.js
         subPath: config.js
         readOnly: true
+{{- end -}}
+

@@ -16,9 +16,9 @@ Install NFS Server Provisioner
 
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
-  --set persistence.enabled=true \
-  --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set persistence.size=PERSISTENT_SIZE
+  --set persistance.enabled=true \
+  --set persistance.storageClass=PERSISTENT_STORAGE_CLASS \
+  --set persistance.size=PERSISTENT_SIZE
 ```
 
 - `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetes cluster
@@ -37,22 +37,22 @@ See more detail about install NFS Server Provisioner via Helm [here](https://git
 Create Persistent Volume Claim
 
 ```bash
-$ kubectl apply -f ./pvc/ds-files.yaml
+$ kubectl apply -f ./persistance/ds-files.yaml
 ```
 
-Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
+Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./persistance/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
 
 Verify `ds-files` status
 
 ```bash
-$ kubectl get pvc ds-files
+$ kubectl get persistance ds-files
 ```
 
 Output
 
 ```
 NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
+ds-files   Bound    persistance-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
 ```
 
 ### 2. Deploy RabbitMQ
@@ -63,6 +63,12 @@ To install the RabbitMQ to your cluster, run the following command:
 $ helm install rabbitmq stable/rabbitmq
 ```
 See more detail about install RabbitMQ via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq#rabbitmq).
+
+To get rabbitmq password, run the following command:
+
+```bash
+$ kubectl get secret rabbitmq -o jsonpath="{.data.rabbitmq-password}" | base64 --decode
+```
 
 ### 3. Deploy Redis
 
@@ -106,173 +112,43 @@ Recommended use at least 2Gi of persistent storage for every 100 active users of
 
 See more detail about install PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
 
-### 5. Deploy StatsD
-*This step is optional. You can skip #6 step at all if you don't wanna run StatsD*
+To get postgresql password, run the following command:
 
-Deploy StatsD configmap:
+```bash
+$ kubectl get secret postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode
 ```
-$ kubectl apply -f ./configmaps/statsd.yaml
-```
-Deploy StatsD pod:
-```
-$ kubectl apply -f ./pods/statsd.yaml
-```
-Deploy `statsd` service:
-```
-$ kubectl apply -f ./services/statsd.yaml
-```
-Allow statsD metrics in ONLYOFFICE DocumentServer:
-
-Put `data.METRICS_ENABLED` field in ./configmaps/documentserver.yaml file to `"true"` value
 
 ## Deploy ONLYOFFICE DocumentServer
 
-### 1. Deploy ONLYOFFICE DocumentServer license
+### 1. Deploy DocumentServer
 
-- If you have valid ONLYOFFICE DocumentServer license, create secret `license` from file.
+To install the RabbitMQ to your cluster, run the folowing command (passwords of db and amqp is required):
+```bash
+$ helm install documentserver ./kube-documentserver --set connections.dbPassword=`password` --set connections.amqpPassword=`password`
+```
 
-    ```bash
-    $ kubectl create secret generic license \
-      --from-file=./license.lic
-    ```
+### 2. Custom database and/or AM (optional)
 
-    Note: The source license file name should be 'license.lic' because this name would be used as a field in created secret.
-
-- If you have no ONLYOFFICE DocumentServer license, create empty secret `license` with follow command:
-
-    ```bash
-    $ kubectl create secret generic license
-    ```
-
-### 2. Deploy ONLYOFFICE DocumentServer parameters
-
-Deploy DocumentServer configmap:
+If your database and/or AM located outside of current kubernetes cluster or has custom connection, set it in `connections` parameters, for example:
 
 ```bash
-$ kubectl apply -f ./configmaps/documentserver.yaml
+$ helm install documentserver ./kube-documentserver --set connections.dbHost=examplehost --set connections.dbUser=exampleuser
 ```
 
-Create `jwt` secret with JWT parameters
+The same goes for amqp parameters.
+
+### 3. Example deployment (optional)
+
+To deploy example set `example.install` parameter to true:
 
 ```bash
-$ kubectl create secret generic jwt \
-  --from-literal=JWT_ENABLED=true \
-  --from-literal=JWT_SECRET=MYSECRET
+$ helm install documentserver ./kube-documentserver --set example.install=true
 ```
 
-`MYSECRET` is the secret key to validate the JSON Web Token in the request to the ONLYOFFICE Document Server.
-
-### 3. Deploy DocumentServer
-
-Deploy `spellchecker` deployment:
-
+### 4. StatsD deployment (optional)
+To deploy StatsD set `connections.metricsEnabled` to true:
 ```bash
-$ kubectl apply -f ./deployments/spellchecker.yaml
-```
-
-Verify that the `spellchecker` deployment is running the desired number of pods with the following command.
-
-```bash
-$ kubectl get deployment spellchecker
-```
-
-Output
-
-```
-NAME           READY   UP-TO-DATE   AVAILABLE   AGE
-spellchecker   2/2     2            2           1m
-```
-
-Deploy spellchecker service:
-
-```bash
-$ kubectl apply -f ./services/spellchecker.yaml
-```
-
-Deploy example service:
-
-```bash
-$ kubectl apply -f ./services/example.yaml
-```
-
-Deploy docservice:
-
-```bash
-$ kubectl apply -f ./services/docservice.yaml
-```
-
-Deploy `docservice` deployment:
-
-```bash
-$ kubectl apply -f ./deployments/docservice.yaml
-```
-
-Verify that the `docservice` deployment is running the desired number of pods with the following command.
-
-```bash
-$ kubectl get deployment docservice
-```
-
-Output
-
-```
-NAME        READY   UP-TO-DATE   AVAILABLE   AGE
-docservice  2/2     2            2           1m
-```
-
-Deploy `converter` deployment:
-
-```bash
-$ kubectl apply -f ./deployments/converter.yaml
-```
-
-Verify that the `converter` deployment is running the desired number of pods with the following command.
-
-```bash
-$ kubectl get deployment converter
-```
-
-Output
-
-```
-NAME        READY   UP-TO-DATE   AVAILABLE   AGE
-converter   2/2     2            2           1m
-```
-
-`docservice`, `converter` and `spellchecker` deployments consist of 2 pods each other by default.
-
-To scale `docservice` deployment use follow command:
-
-```bash
-$ kubectl scale -n default deployment docservice --replicas=POD_COUNT
-```
-
-where `POD_COUNT` is number of `docservice` pods
-
-The same to scale `converter` and `spellchecker` deployment:
-
-```bash
-$ kubectl scale -n default deployment converter --replicas=POD_COUNT
-```
-
-```bash
-$ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
-```
-
-### 4. Deploy DocumentServer Example (optional)
-
-*This step is optional. You can skip #4 step at all if you don't wanna run DocumentServer Example*
-
-Deploy example configmap:
-
-```bash
-$ kubectl apply -f ./configmaps/example.yaml
-```
-
-Deploy example pod:
-
-```bash
-$ kubectl apply -f ./pods/example.yaml
+$ helm install documentserver ./kube-documentserver --set connections.metricsEnables=true
 ```
 
 ### 5. Expose DocumentServer
@@ -283,10 +159,11 @@ $ kubectl apply -f ./pods/example.yaml
 This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
 Use this type of exposure if you use external TLS termination, and don't have another WEB application in k8s cluster.
 
-Deploy `documentserver` service:
+To expose DocumentServer via service set `service.type` parameter to LoadBalancer:
 
 ```bash
-$ kubectl apply -f ./services/documentserver-lb.yaml
+$ helm install documentserver ./kube-documentserver --set service.type=LoadBalancer
+
 ```
 
 Run next command to get `documentserver` service IP:
@@ -318,12 +195,6 @@ $ helm install nginx-ingress stable/nginx-ingress --set controller.publishServic
 
 See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
 
-Deploy `documentserver` service:
-
-```bash
-$ kubectl apply -f ./services/documentserver.yaml
-```
-
 #### 5.2.2 Expose DocumentServer via HTTP
 
 *You should skip #5.2.2 step if you are going expose DocumentServer via HTTPS*
@@ -331,10 +202,11 @@ $ kubectl apply -f ./services/documentserver.yaml
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
-Deploy documentserver ingress
+To expose DocumentServer via ingress HTTP set `ingress.enabled` parameter to true:
 
 ```bash
-$ kubectl apply -f ./ingresses/documentserver.yaml
+$ helm install documentserver ./kube-documentserver --set ingress.enabled=true
+
 ```
 
 Run next command to get `documentserver` ingress IP:
@@ -367,12 +239,11 @@ $ kubectl create secret generic tls \
   --from-file=./tls.key
 ```
 
-Open `./ingresses/documentserver-ssl.yaml` and type your domain name instead of `example.com`
-
-Deploy documentserver ingress
+To expose DocumentServer via ingress HTTPS set `ingress.enabled` parameter to true, `ingress.ssl.enabled` to true and change default  value for host:
 
 ```bash
-$ kubectl apply -f ./ingresses/documentserver-ssl.yaml
+$ helm install documentserver ./kube-documentserver --set ingress.enabled=true --set ingress.ssl.enabled=true --set ingress.ssl.host=example.com
+
 ```
 
 Run next command to get `documentserver` ingress IP:
@@ -390,6 +261,42 @@ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*]
 Associate `documentserver` ingress IP or hostname with your domain name through your DNS provider.
 
 After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
+
+### 6. Available Configuration Parameters
+
+| Parameter                         | Description                                      | Default                                     |
+|-----------------------------------|--------------------------------------------------|---------------------------------------------|
+| connections.dbHost                | IP address or the name of the database           | postgres                                    |
+| connections.dbPort                | database server port number                      | 5432                                        |
+| connections.dbUser                | database user                                    | postgres                                    |
+| connections.dbPassword            | database password                                | postgres                                    |
+| connections.redistServerHost      | IP address or the name of the redis host         | redis-master                                |
+| connections.amqpHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
+| connections.amqpUser              | messabe-broker user                              | user                                        |
+| connections.amqpPassword          | amqp password                                    | rabbitmq                                    |
+| connections.amqpProto             | messabe-broker protocol                          | ampq                                        |
+| persistance.storageClass          | storage class name                               | "nfs"                                       |
+| persistance.size                  | storage volume size                              | 6Gi                                         |
+| metrics.enabled                   | Statsd installation                              | false                                       |
+| example.enabled                   | Choise of example installation                   | false                                       |
+| example.name                      | Example name                                     | example                                     |
+| example.containerImage            | example container image name                     | onlyoffice/4testing-ds-example:5.5.3        |
+| docservice.replicas               | docservice replicas quantity                     | 2                                           |
+| docservice.proxyContainerImage    | docservice proxy container image name            | onlyoffice/4testing-ds-proxy:5.5.3          |
+| docservice.containerImage         | docservice container image name                  | onlyoffice/4testing-ds-docservice:5.5.3     |
+| converter.replicas                | converter replicas quantity                      | 2                                           |
+| converter.containerImage          | converter container image name                   | onlyoffice/4testing-ds-converter:5.5.3      |
+| spellchecker.replicas             | spellchecker replicas quantity                   | 2                                           |
+| spellchecker.containerImage       | spellchecker container image name                | onlyoffice/4testing-ds-spellchecker:5.5.3   |
+| jwt.enabled                       | jwt enabling parameter                           | true                                        |
+| jwt.secret                        | jwt secret                                       | MYSECRET                                    |
+| service.type                      | documentserver service type                      | ClusterIP                                   |
+| service.port                      | documentserver service port                      | 80                                          |
+| ingress.enabled                   | installation of ingress service                  | false                                       |
+| ingress.ssl.enabled               | installation ssl for ingress service             | false                                       |
+| ingress.ssl.host                  | host for ingress ssl                             | example.com                                 |
+| ingress.ssl.secret                | secret name for ssl                              | tls                                         |
+
 
 ### 6. Update ONLYOFFICE DocumentServer
 #### 6.1 Preparing for update
@@ -410,7 +317,7 @@ $ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
 Run the job:
 
 ```bash
-$ kubectl apply -f ./jobs/prepare4update.yaml
+$ kubectl apply -f ./prepare4update.yaml
 ```
 
 After successful run job automaticly terminates its pod, but you have to clean the job itself manually:

@@ -1,8 +1,8 @@
+{{- if .Values.metrics.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: statsd
-data:
 data:
   config.js: |-
     {
@@ -10,3 +10,4 @@ data:
     , flushInterval: 600000
     , backends: [ "./backends/console" ]
     }
+{{- end }}

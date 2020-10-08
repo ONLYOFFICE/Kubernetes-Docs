@@ -3,10 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: ds-files
 spec:
-  storageClassName: "nfs"
+  storageClassName: {{ .Values.persistance.storageClass }}
   accessModes:
     - ReadWriteMany
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 8Gi
+      storage: {{ .Values.persistance.size }}

@@ -1,3 +1,4 @@
+{{ if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -6,15 +7,18 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: 100m
 spec:
-  tls:
+  {{ if .Values.ingress.ssl.enabled }}
+  tls: 
   - hosts:
-    - example.com
-    secretName: tls
+    - {{ .Values.ingress.ssl.host }}
+    secretName: {{ .Values.ingress.ssl.secret }}
+  {{ end }}
   rules:
-  - host: example.com
+  - host:
     http:
       paths:
       - path: /
         backend:
           serviceName: documentserver
           servicePort: 8888
+{{ end }}

@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prepare4shutdown
+spec:
+  template:
+    spec:
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: ds-files
+      containers:
+        - name: prepare4shutdown
+          image: postgres
+          envFrom:
+          - secretRef:
+              name: dbsecret
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          command: ["bash"]
+          args: ["-c", "apt update; 
+            apt install -y curl wget;
+            curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
+            rm -rf /var/lib/onlyoffice/documentserver/App_Data/cache/files/*;
+            wget  -P /tmp https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql;
+            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
+            echo work done"]
+      restartPolicy: Never

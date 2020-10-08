@@ -1,8 +1,8 @@
+{{ if .Values.example.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: example
 data:
-data:
   DS_URL: /
-
+{{ end }}

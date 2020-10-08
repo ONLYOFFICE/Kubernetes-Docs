@@ -5,7 +5,7 @@ metadata:
   labels:
     app: spellchecker
 spec:
-  replicas: 2
+  replicas: {{ .Values.spellchecker.replicas }}
   selector:
     matchLabels:
       app: spellchecker
@@ -20,17 +20,13 @@ spec:
             secretName: license
       containers:
         - name: spellchecker
-          image: onlyoffice/4testing-ds-spellchecker:5.5.3
-          env:
-          - name: DB_PWD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql
-                key: postgresql-password  
+          image: {{ .Values.spellchecker.containerImage }}
           envFrom:
           - secretRef:
               name: jwt
+          - secretRef:
+              name: dbsecret
           - configMapRef:
               name: documentserver
           ports:
-            - containerPort: 8080        
+            - containerPort: 8080 

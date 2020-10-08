@@ -1,3 +1,4 @@
+{{ if .Values.example.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -7,11 +8,12 @@ metadata:
 spec:
   containers:
     - name: example
-      image: onlyoffice/4testing-ds-example:5.5.3
+      image: {{ .Values.example.containerImage | quote }}
       ports:
         - containerPort: 3000
       envFrom:
         - secretRef:
             name: jwt
         - configMapRef:
-              name: example
+            name: example
+{{ end }}

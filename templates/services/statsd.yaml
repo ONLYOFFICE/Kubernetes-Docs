@@ -1,5 +1,6 @@
-kind: Service
+{{- if .Values.metrics.enabled -}}
 apiVersion: v1
+kind: Service
 metadata:
   name: statsd
 spec:
@@ -15,3 +16,4 @@ spec:
       port: 8126
       targetPort: 8126
   type: ClusterIP
+{{- end -}}
