@@ -265,7 +265,7 @@ $ oc scale deployment spellchecker --replicas=POD_COUNT
 Deploy example configmap:
 
 ```bash
-$ create configmap exapmle --from-file=./configmaps/example.yaml
+$ oc create configmap exapmle --from-file=./configmaps/example.yaml
 ```
 
 Deploy example pod:
