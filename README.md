@@ -7,6 +7,7 @@ This repository contains a set of files to deploy ONLYOFFICE DocumentServer into
 - You must have Kubernetes installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to setup a Kubernetes.
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
 - You should install Helm v3, please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
+- If you're using Openshift instead of Kubernetes, use [this](openshift/README.md) instructions to deploy DocumentServer.
 
 ## Deploy prerequisites
 
