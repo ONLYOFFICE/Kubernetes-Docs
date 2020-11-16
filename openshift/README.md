@@ -1,13 +1,12 @@
-# ONLYOFFICE DocumentServer for Kubernetes
+# ONLYOFFICE DocumentServer for Openshift
 
-This repository contains a set of files to deploy ONLYOFFICE DocumentServer into Kubernetes cluster.
+This repository contains a set of files to deploy ONLYOFFICE DocumentServer into Openshift cluster.
 
 ## Introduction
 
-- You must have Kubernetes installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to setup a Kubernetes.
-- You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
+- You must have Openshift installed. Please, checkout [the reference](https://docs.openshift.com/container-platform/3.6/getting_started/install_openshift.html) to setup an Openshift.
+- Or you should also have a local configured Minishift. See [this](https://docs.okd.io/3.11/minishift/getting-started/installing.html) guide how to install and configure Minishift.
 - You should install Helm v3, please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
-- If you're using Openshift instead of Kubernetes, use [this](openshift/README.md) instructions to deploy DocumentServer.
 
 ## Deploy prerequisites
 
@@ -22,7 +21,7 @@ $ helm install nfs-server stable/nfs-server-provisioner \
   --set persistence.size=PERSISTENT_SIZE
 ```
 
-- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetes cluster
+- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Openshift cluster
 
   Persistent Storage Classes for different providers:
   - Amazon EKS: `gp2`
@@ -38,7 +37,7 @@ See more detail about install NFS Server Provisioner via Helm [here](https://git
 Create Persistent Volume Claim
 
 ```bash
-$ kubectl apply -f ./pvc/ds-files.yaml
+$  oc create -f ./pvc/ds-files.yaml
 ```
 
 Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/ds-files.yaml` file in `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
@@ -46,7 +45,7 @@ Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `./pvc/
 Verify `ds-files` status
 
 ```bash
-$ kubectl get pvc ds-files
+$ oc get pvc ds-files
 ```
 
 Output
@@ -88,7 +87,7 @@ wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresq
 Create a config map from it:
 
 ```bash
-$ kubectl create configmap init-db-scripts \
+$ oc create configmap init-db-scripts \
   --from-file=./createdb.sql
 ```
 
@@ -112,15 +111,15 @@ See more detail about install PostgreSQL via Helm [here](https://github.com/helm
 
 Deploy StatsD configmap:
 ```
-$ kubectl apply -f ./configmaps/statsd.yaml
+$ oc create configmap --from-file=./configmaps/statsd.yaml
 ```
 Deploy StatsD pod:
 ```
-$ kubectl apply -f ./pods/statsd.yaml
+$ oc create -f ./pods/statsd.yaml
 ```
 Deploy `statsd` service:
 ```
-$ kubectl apply -f ./services/statsd.yaml
+$ oc create -f ./services/statsd.yaml
 ```
 Allow statsD metrics in ONLYOFFICE DocumentServer:
 
@@ -133,8 +132,7 @@ Put `data.METRICS_ENABLED` field in ./configmaps/documentserver.yaml file to `"t
 - If you have valid ONLYOFFICE DocumentServer license, create secret `license` from file.
 
     ```bash
-    $ kubectl create secret generic license \
-      --from-file=./license.lic
+    $ oc create -f ./license.lic
     ```
 
     Note: The source license file name should be 'license.lic' because this name would be used as a field in created secret.
@@ -142,7 +140,7 @@ Put `data.METRICS_ENABLED` field in ./configmaps/documentserver.yaml file to `"t
 - If you have no ONLYOFFICE DocumentServer license, create empty secret `license` with follow command:
 
     ```bash
-    $ kubectl create secret generic license
+    $ oc create secret generic license
     ```
 
 ### 2. Deploy ONLYOFFICE DocumentServer parameters
@@ -150,13 +148,13 @@ Put `data.METRICS_ENABLED` field in ./configmaps/documentserver.yaml file to `"t
 Deploy DocumentServer configmap:
 
 ```bash
-$ kubectl apply -f ./configmaps/documentserver.yaml
+$ oc create configmap documentserver --from-file=./configmaps/documentserver.yaml
 ```
 
 Create `jwt` secret with JWT parameters
 
 ```bash
-$ kubectl create secret generic jwt \
+$ oc create secret generic jwt \
   --from-literal=JWT_ENABLED=true \
   --from-literal=JWT_SECRET=MYSECRET
 ```
@@ -168,13 +166,13 @@ $ kubectl create secret generic jwt \
 Deploy `spellchecker` deployment:
 
 ```bash
-$ kubectl apply -f ./deployments/spellchecker.yaml
+$ oc create -f ./deployments/spellchecker.yaml
 ```
 
 Verify that the `spellchecker` deployment is running the desired number of pods with the following command.
 
 ```bash
-$ kubectl get deployment spellchecker
+$ oc get deployment spellchecker
 ```
 
 Output
@@ -187,31 +185,31 @@ spellchecker   2/2     2            2           1m
 Deploy spellchecker service:
 
 ```bash
-$ kubectl apply -f ./services/spellchecker.yaml
+$ oc create -f ./services/spellchecker.yaml
 ```
 
 Deploy example service:
 
 ```bash
-$ kubectl apply -f ./services/example.yaml
+$ oc create -f ./services/example.yaml
 ```
 
 Deploy docservice:
 
 ```bash
-$ kubectl apply -f ./services/docservice.yaml
+$ oc create -f ./services/docservice.yaml
 ```
 
 Deploy `docservice` deployment:
 
 ```bash
-$ kubectl apply -f ./deployments/docservice.yaml
+$ oc create -f ./deployments/docservice.yaml
 ```
 
 Verify that the `docservice` deployment is running the desired number of pods with the following command.
 
 ```bash
-$ kubectl get deployment docservice
+$ oc get deployment docservice
 ```
 
 Output
@@ -224,13 +222,13 @@ docservice  2/2     2            2           1m
 Deploy `converter` deployment:
 
 ```bash
-$ kubectl apply -f ./deployments/converter.yaml
+$ oc create -f ./deployments/converter.yaml
 ```
 
 Verify that the `converter` deployment is running the desired number of pods with the following command.
 
 ```bash
-$ kubectl get deployment converter
+$ oc get deployment converter
 ```
 
 Output
@@ -245,7 +243,7 @@ converter   2/2     2            2           1m
 To scale `docservice` deployment use follow command:
 
 ```bash
-$ kubectl scale -n default deployment docservice --replicas=POD_COUNT
+$ oc scale deployment docservice --replicas=POD_COUNT
 ```
 
 where `POD_COUNT` is number of `docservice` pods
@@ -253,11 +251,11 @@ where `POD_COUNT` is number of `docservice` pods
 The same to scale `converter` and `spellchecker` deployment:
 
 ```bash
-$ kubectl scale -n default deployment converter --replicas=POD_COUNT
+$ oc scale  deployment converter --replicas=POD_COUNT
 ```
 
 ```bash
-$ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
+$ oc scale deployment spellchecker --replicas=POD_COUNT
 ```
 
 ### 4. Deploy DocumentServer Example (optional)
@@ -267,13 +265,13 @@ $ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
 Deploy example configmap:
 
 ```bash
-$ kubectl apply -f ./configmaps/example.yaml
+$ oc create configmap exapmle --from-file=./configmaps/example.yaml
 ```
 
 Deploy example pod:
 
 ```bash
-$ kubectl apply -f ./pods/example.yaml
+$ oc create -f ./pods/example.yaml
 ```
 
 ### 5. Expose DocumentServer
@@ -287,13 +285,13 @@ Use this type of exposure if you use external TLS termination, and don't have an
 Deploy `documentserver` service:
 
 ```bash
-$ kubectl apply -f ./services/documentserver-lb.yaml
+$ oc create -f ./services/documentserver-lb.yaml
 ```
 
 Run next command to get `documentserver` service IP:
 
 ```bash
-$ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
+$ oc get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
 After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-SERVICE-IP/`.
@@ -301,7 +299,7 @@ After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-S
 If service IP is empty try getting `documentserver` service hostname
 
 ```bash
-kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ oc get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-SERVICE-HOSTNAME/`.
@@ -309,7 +307,7 @@ In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERV
 
 #### 5.2 Expose DocumentServer via Ingress
 
-#### 5.2.1 Installing the Kubernetes Nginx Ingress Controller
+#### 5.2.1 Installing the Openshift Nginx Ingress Controller
 
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
@@ -322,7 +320,7 @@ See more detail about install Nginx Ingress via Helm [here](https://github.com/h
 Deploy `documentserver` service:
 
 ```bash
-$ kubectl apply -f ./services/documentserver.yaml
+$ oc create -f ./services/documentserver.yaml
 ```
 
 #### 5.2.2 Expose DocumentServer via HTTP
@@ -335,13 +333,13 @@ Use this type if you use external TLS termination and when you have several WEB 
 Deploy documentserver ingress
 
 ```bash
-$ kubectl apply -f ./ingresses/documentserver.yaml
+$ oc create -f ./ingresses/documentserver.yaml
 ```
 
 Run next command to get `documentserver` ingress IP:
 
 ```bash
-$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
+$ oc get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
 After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
@@ -349,7 +347,7 @@ After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-I
 If ingress IP is empty try getting `documentserver` ingress hostname
 
 ```bash
-kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ oc get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
@@ -363,7 +361,7 @@ Create `tls` secret with ssl certificate inside.
 Put ssl certificate and private key into `tls.crt` and `tls.key` file and than run:
 
 ```bash
-$ kubectl create secret generic tls \
+$ oc create secret generic tls \
   --from-file=./tls.crt \
   --from-file=./tls.key
 ```
@@ -373,19 +371,19 @@ Open `./ingresses/documentserver-ssl.yaml` and type your domain name instead of 
 Deploy documentserver ingress
 
 ```bash
-$ kubectl apply -f ./ingresses/documentserver-ssl.yaml
+$ oc create -f ./ingresses/documentserver-ssl.yaml
 ```
 
 Run next command to get `documentserver` ingress IP:
 
 ```bash
-$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
+$ oc get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
 If ingress IP is empty try getting `documentserver` ingress hostname
 
 ```bash
-kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ oc get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 Associate `documentserver` ingress IP or hostname with your domain name through your DNS provider.
@@ -405,31 +403,31 @@ $ wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgre
 Create a config map from it:
 
 ```bash
-$ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
+$ oc create configmap remove-db-scripts --from-file=./removetbl.sql
 ```
 
 Run the job:
 
 ```bash
-$ kubectl apply -f ./jobs/prepare4update.yaml
+$ oc create -f ./jobs/prepare4update.yaml
 ```
 
 After successful run job automaticly terminates its pod, but you have to clean the job itself manually:
 
 ```bash
-$ kubectl delete job prepare4update
+$ oc delete job prepare4update
 ```
 #### 6.2 Update DocumentServer images
 
 Update deployment images:
 ```
-$ kubectl set image deployment/spellchecker \
+$ oc set image deployment/spellchecker \
   spellchecker=onlyoffice/4testing-ds-spellchecker:DOCUMENTSERVER_VERSION
 
-$ kubectl set image deployment/converter \
+$ oc set image deployment/converter \
   converter=onlyoffice/4testing-ds-converter:DOCUMENTSERVER_VERSION
 
-$ kubectl set image deployment/docservice \
+$ oc set image deployment/docservice \
   docservice=onlyoffice/4testing-ds-docservice:DOCUMENTSERVER_VERSION \
   proxy=onlyoffice/4testing-ds-proxy:DOCUMENTSERVER_VERSION
 ```
