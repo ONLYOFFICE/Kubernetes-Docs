@@ -1,6 +1,6 @@
-# ONLYOFFICE DocumentServer for Kubernetes
+# ONLYOFFICE DocumentServer for Openshift
 
-This repository contains a set of files to deploy ONLYOFFICE DocumentServer into Kubernetes cluster.
+This repository contains a set of files to deploy ONLYOFFICE DocumentServer into Openshift cluster.
 
 ## Introduction
 
@@ -21,7 +21,7 @@ $ helm install nfs-server stable/nfs-server-provisioner \
   --set persistence.size=PERSISTENT_SIZE
 ```
 
-- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetes cluster
+- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Openshift cluster
 
   Persistent Storage Classes for different providers:
   - Amazon EKS: `gp2`
@@ -307,7 +307,7 @@ In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERV
 
 #### 5.2 Expose DocumentServer via Ingress
 
-#### 5.2.1 Installing the Kubernetes Nginx Ingress Controller
+#### 5.2.1 Installing the Openshift Nginx Ingress Controller
 
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
