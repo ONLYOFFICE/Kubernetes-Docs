@@ -30,7 +30,7 @@ spec:
             secretName: license
       containers:
         - name: proxy
-          image: onlyoffice/docs-proxy:6.0.2
+          image: onlyoffice/docs-proxy-de:6.0.2
           ports:
             - containerPort: 8888
           envFrom:
