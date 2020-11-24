@@ -30,7 +30,7 @@ spec:
             secretName: license
       containers:
         - name: proxy
-          image: onlyoffice/4testing-ds-proxy:6.0.0
+          image: onlyoffice/docs-proxy:6.0.2
           ports:
             - containerPort: 8888
           envFrom:
@@ -41,7 +41,7 @@ spec:
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
 
         - name: docservice
-          image: onlyoffice/4testing-ds-docservice:6.0.0
+          image: onlyoffice/docs-docservice-de:6.0.2
           ports:
             - containerPort: 8000
           env:
