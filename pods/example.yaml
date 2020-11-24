@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
     - name: example
-      image: onlyoffice/4testing-ds-example:6.0.0
+      image: onlyoffice/docs-example-de:6.0.2
       ports:
         - containerPort: 3000
       envFrom:
