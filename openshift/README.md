@@ -111,7 +111,7 @@ See more detail about install PostgreSQL via Helm [here](https://github.com/helm
 
 Deploy StatsD configmap:
 ```
-$ oc create configmap statsd --from-file=./configmaps/statsd.yaml
+$ oc create configmap --from-file=./configmaps/statsd.yaml
 ```
 Deploy StatsD pod:
 ```
