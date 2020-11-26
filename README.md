@@ -424,13 +424,13 @@ $ kubectl delete job prepare4update
 Update deployment images:
 ```
 $ kubectl set image deployment/spellchecker \
-  spellchecker=onlyoffice/4testing-ds-spellchecker:DOCUMENTSERVER_VERSION
+  spellchecker=onlyoffice/docs-spellchecker-de:DOCUMENTSERVER_VERSION
 
 $ kubectl set image deployment/converter \
-  converter=onlyoffice/4testing-ds-converter:DOCUMENTSERVER_VERSION
+  converter=onlyoffice/docs-converter-de:DOCUMENTSERVER_VERSION
 
 $ kubectl set image deployment/docservice \
-  docservice=onlyoffice/4testing-ds-docservice:DOCUMENTSERVER_VERSION \
-  proxy=onlyoffice/4testing-ds-proxy:DOCUMENTSERVER_VERSION
+  docservice=onlyoffice/docs-docservice-de:DOCUMENTSERVER_VERSION \
+  proxy=onlyoffice/docs-proxy-de:DOCUMENTSERVER_VERSION
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE DocumentServer.
