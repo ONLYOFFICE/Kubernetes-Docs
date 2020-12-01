@@ -23,7 +23,7 @@ spec:
             secretName: license
       containers:
         - name: converter
-          image: onlyoffice/docs-converter-de:6.0.2
+          image: onlyoffice/docs-converter-de:6.0.2.5
           env:
           - name: DB_PWD
             valueFrom:
