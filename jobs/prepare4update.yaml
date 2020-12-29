@@ -41,7 +41,7 @@ spec:
           args: ["-c", "apt update;
             apt -y install curl;
             curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
-            rm -rf /var/lib/onlyoffice/documentserver/App_Data/cache/files/*;
+            find /var/lib/onlyoffice/documentserver/App_Data/cache/files/ -type f -not -name 'errors' -not -name 'forgotten' -delete;
             PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
             PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/createdb.sql;
             echo work done"]
