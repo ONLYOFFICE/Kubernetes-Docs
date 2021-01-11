@@ -15,6 +15,9 @@ spec:
         - name: init-db-scripts
           configMap:
             name: init-db-scripts
+        - name: prepare4update-script
+          configMap:
+            name: prepare4update-script
       containers:
         - name: prepare4update
           image: postgres
@@ -31,18 +34,13 @@ spec:
           - name: ds-files
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
           - name: remove-db-scripts
-            mountPath: "/tmp/removetbl.sql"
-            subPath: "removetbl.sql"
+            mountPath: /sql/removetbl/
           - name: init-db-scripts
-            mountPath: "/tmp/createdb.sql"
-            subPath: "createdb.sql"
+            mountPath: /sql/createdb/
+          - name: prepare4update-script
+            mountPath: /scripts/
 
-          command: ["bash"]
-          args: ["-c", "apt update;
-            apt -y install curl;
-            curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
-            find /var/lib/onlyoffice/documentserver/App_Data/cache/files/ -type f -not -name 'errors' -not -name 'forgotten' -delete;
-            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
-            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/createdb.sql;
-            echo work done"]
+          command: 
+          - /bin/bash
+          - /scripts/prepare4update-script.sh
       restartPolicy: Never

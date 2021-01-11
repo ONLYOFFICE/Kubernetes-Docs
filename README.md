@@ -408,6 +408,11 @@ Create a config map from it:
 $ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
 ```
 
+Load shell script for job to run as configmap:
+```bash
+$ kubectl create configmap prepare4update-script --from-file=./scripts/prepare4update-script.sh
+```
+
 Run the job:
 
 ```bash
