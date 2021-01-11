@@ -14,6 +14,6 @@ done
 
 
 PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl/removetbl.sql;
-PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl/createdb.sql;
+PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb/createdb.sql;
 
 echo work done
