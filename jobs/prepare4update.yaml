@@ -31,9 +31,11 @@ spec:
           - name: ds-files
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
           - name: remove-db-scripts
-            mountPath: /sql/removetbl/
+            mountPath: /sql/removetbl.sql
+            subPath: removetbl.sql
           - name: init-db-scripts
-            mountPath: /sql/createdb/
+            mountPath: /sql/createdb.sql
+            subPath: createdb.sql
 
           command: ["/bin/bash"]
           args:
@@ -58,8 +60,8 @@ spec:
                 esac;
               done;
 
-              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl/removetbl.sql;
-              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb/createdb.sql;
+              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql;
+              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql;
 
               echo work done;
 
