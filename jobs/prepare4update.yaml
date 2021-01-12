@@ -31,18 +31,40 @@ spec:
           - name: ds-files
             mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
           - name: remove-db-scripts
-            mountPath: "/tmp/removetbl.sql"
-            subPath: "removetbl.sql"
+            mountPath: /sql/removetbl.sql
+            subPath: removetbl.sql
           - name: init-db-scripts
-            mountPath: "/tmp/createdb.sql"
-            subPath: "createdb.sql"
+            mountPath: /sql/createdb.sql
+            subPath: createdb.sql
 
-          command: ["bash"]
-          args: ["-c", "apt update;
-            apt -y install curl;
-            curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
-            rm -rf /var/lib/onlyoffice/documentserver/App_Data/cache/files/*;
-            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/removetbl.sql;
-            PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/tmp/createdb.sql;
-            echo work done"]
+          command: ["/bin/bash"]
+          args:
+            - -c
+            - >
+              apt update && apt -y install curl bash && bash -c
+              curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
+
+              FILES_DIR=/var/lib/onlyoffice/documentserver/App_Data/cache/files/;
+              for ENTRY in `ls $FILES_DIR`; do
+                case $ENTRY in
+
+                  errors)
+                    ;;
+
+                  forgotten)
+                    ;;
+
+                  *)
+                    rm -rfv $FILES_DIR$ENTRY
+                    ;;
+                esac;
+              done;
+
+              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql;
+              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql;
+
+              echo work done;
+
+
+
       restartPolicy: Never
