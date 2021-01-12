@@ -10,7 +10,7 @@ spec:
           persistentVolumeClaim:
             claimName: ds-files
         - name: remove-db-scripts
-          configMap:
+          configMap: 
             name: remove-db-scripts
         - name: init-db-scripts
           configMap:
@@ -41,10 +41,14 @@ spec:
           args:
             - -c
             - >
-              apt update && apt -y install curl bash && bash -c
+              apt update && apt -y install curl;
               curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
 
-              FILES_DIR=/var/lib/onlyoffice/documentserver/App_Data/cache/files/;
+              FILES_DIR=/var/lib/onlyoffice/documentserver/App_Data/cache/files;
+              BACKUP_DIR=backup/$(date +"%d_%m_%Y");
+              mkdir -p $FILES_DIR/$BACKUP_DIR/files;
+              chown -R 101 $FILES_DIR/backup;
+
               for ENTRY in `ls $FILES_DIR`; do
                 case $ENTRY in
 
@@ -54,17 +58,20 @@ spec:
                   forgotten)
                     ;;
 
+                  backup)
+                    ;;
+
                   *)
-                    rm -rfv $FILES_DIR$ENTRY
+                  mv -v $FILES_DIR/$ENTRY $FILES_DIR/$BACKUP_DIR/files/
                     ;;
                 esac;
               done;
 
-              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql;
-              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql;
+              PGPASSWORD=$DB_PWD pg_dump --host=$DB_HOST --user=$DB_USER -F c $DB_USER > $FILES_DIR/$BACKUP_DIR/backup_$(date +"%d_%m_%Y_%H:%M").dump;
+              
+              PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --file=/sql/removetbl.sql;
+              PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --file=/sql/createdb.sql;
 
               echo work done;
-
-
 
       restartPolicy: Never
