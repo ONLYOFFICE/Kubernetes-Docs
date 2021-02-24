@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: documentserver
@@ -11,6 +11,9 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: documentserver
-          servicePort: 8888
+          service:
+            name: documentserver
+            port:
+              number: 8888
