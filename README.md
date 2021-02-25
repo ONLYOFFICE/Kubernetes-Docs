@@ -384,6 +384,9 @@ $ kubectl apply -f ./services/documentserver.yaml
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
+*Note: In all the steps below concerning Nginx Ingress for kubernetes versions below 1.19, deploy must be performed from the `./ingresses/below-1_19` directory.
+For example: `$ kubectl apply -f ./ingresses/below-1_19/documentserver.yaml`*
+
 #### 5.2.2.1 Deploy documentserver ingress:
 
 ```bash
@@ -406,16 +409,26 @@ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*]
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
 
-#### 5.2.2.2 Deploy documentserver with Prometheus and Grafana ingress:
+#### 5.2.2.2 Deploy Prometheus and Grafana ingress:
 *This step is optional. You can skip step  #5.2.2.2 if you don't need access to the Prometheus and Grafana web interface via Nginx Ingress*
 
-Open `./ingresses/documentserver_prometheus_grafana.yaml` and type your domain name instead of `example.com`
+Open `./ingresses/prometheus.yaml` and `./ingresses/grafana.yaml` and type your domain name instead of `example.com`.
+
+Deploy Prometheus ingress:
 
 ```bash
-$ kubectl apply -f ./ingresses/documentserver_prometheus_grafana.yaml
+$ kubectl apply -f ./ingresses/prometheus.yaml
 ```
 
-In this case, you will also have access to Prometheus at `http://prometheus.your-domain-name/` and Grafana at `http://grafana.your-domain-name/`
+Deploy Grafana ingress:
+
+```bash
+$ kubectl apply -f ./ingresses/grafana.yaml
+```
+
+Associate the ingress IP or hostname obtained from the step #5.2.2.1 with your domain name through your DNS provider.
+
+After that you will have access to Prometheus at `http://prometheus.your-domain-name/` and Grafana at `http://grafana.your-domain-name/`
 
 #### 5.2.3 Expose DocumentServer via HTTPS
 
@@ -431,9 +444,9 @@ $ kubectl create secret generic tls \
   --from-file=./tls.key
 ```
 
-Open `./ingresses/documentserver-ssl.yaml` and type your domain name instead of `example.com`
-
 #### 5.2.3.1 Deploy documentserver ingress
+
+Open `./ingresses/documentserver-ssl.yaml` and type your domain name instead of `example.com`
 
 ```bash
 $ kubectl apply -f ./ingresses/documentserver-ssl.yaml
@@ -455,17 +468,59 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
-#### 5.2.3.2 Deploy documentserver with Prometheus and Grafana ingress:
+#### 5.2.3.2 Deploy Prometheus and Grafana ingress:
 *This step is optional. You can skip step  #5.2.3.2 if you don't need access to the Prometheus and Grafana web interface via Nginx Ingress*
 
+Open `./ingresses/prometheus-ssl.yaml` and `./ingresses/grafana-ssl.yaml` and type your domain name instead of `example.com`.
+
+Note: The `tls` secret generated in step  #5.2.3 must contain entries for the subdomains used in `prometheus-ssl.yaml` and `grafana-ssl.yaml`.
+
+Deploy Prometheus ingress:
+
 ```bash
-$ kubectl apply -f ./ingresses/documentserver_prometheus_grafana-ssl.yaml
+$ kubectl apply -f ./ingresses/prometheus-ssl.yaml
 ```
 
-In this case, you will also have access to Prometheus at `https:///prometheus.your-domain-name/` and Grafana at `https://grafana.your-domain-name/`
+Deploy Grafana ingress:
+
+```bash
+$ kubectl apply -f ./ingresses/grafana-ssl.yaml
+```
+
+Associate the ingress IP or hostname obtained from the step #5.2.3.1 with your domain name through your DNS provider.
+
+After that you will have access to Prometheus at `https:///prometheus.your-domain-name/` and Grafana at `https://grafana.your-domain-name/`
 
 ### 6. View gathered metrics in Grafana
 *This step is optional. Its purpose is to show how to integrate Grafana with Prometheus and how to add dashboards to visualize metrics gathered by Prometheus*
+
+#### 6.1 Integrate Grafana with Prometheus
+
+Go to the address `http://grafana.your-domain-name/`
+
+Login - admin
+
+To get the password, run the following command:
+```
+kubectl get secret grafana-admin --namespace default -o jsonpath="{.data.GF_SECURITY_ADMIN_PASSWORD}" | base64 --decode
+```
+In the sidebar, select Configuration (gear) - Preferences. On the Data Sources tab, add Prometheus, in the HTTP section, specify `prometheus-server` in the URL field.
+Save your changes.
+
+#### 6.2 Adding dashboards to Grafana
+
+In the sidebar, select Dashboards (square) - Manage - Import. Enter the `number` in the import field and click Load.
+
+- `number` is the number of the dashboard available for adding from the Grafana [website](https://grafana.com/grafana/dashboards).
+
+  number for external components installed in the cluster:
+  - Redis Dashboard for Prometheus Redis Exporter: `11835`
+  - RabbitMQ-Overview: `10991`
+  - PostgreSQL Database: `9628`
+  - NGINX Ingress controller: `9614`
+
+Select `Prometheus` as the `data source` and click Import. The added dashboards will display the metrics received from Prometheus after a while.
+
 
 ### 7. Update ONLYOFFICE Docs
 #### 7.1 Preparing for update
