@@ -1,23 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: documentserver
+  name: prometheus
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: 100m
 spec:
   tls:
   - hosts:
-    - example.com
+    - prometheus.example.com
     secretName: tls
   rules:
-  - host: example.com
+  - host: prometheus.example.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: documentserver
+            name: prometheus-server
             port:
-              number: 8888
+              number: 80
