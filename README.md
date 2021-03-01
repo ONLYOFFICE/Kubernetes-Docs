@@ -11,7 +11,16 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 
 ## Deploy prerequisites
 
-### 1. Install Persistent Storage
+### 1. Add Helm repositories
+
+```bash
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+$ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+$ helm repo add stable https://charts.helm.sh/stable
+$ helm repo update
+```
+
+### 2. Install Persistent Storage
 
 Install NFS Server Provisioner
 
@@ -56,28 +65,30 @@ NAME       STATUS   VOLUME                                     CAPACITY   ACCESS
 ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
 ```
 
-### 2. Deploy RabbitMQ
+### 3. Deploy RabbitMQ
 
 To install RabbitMQ to your cluster, run the following command:
 
 ```bash
-$ helm install rabbitmq stable/rabbitmq
+$ helm install rabbitmq bitnami/rabbitmq
 ```
-See more details about installing RabbitMQ via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq#rabbitmq).
 
-### 3. Deploy Redis
+See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/rabbitmq#rabbitmq).
+
+### 4. Deploy Redis
 
 To install Redis to your cluster, run the following command:
 
 ```bash
-$ helm install redis stable/redis \
+$ helm install redis bitnami/redis \
   --set cluster.enabled=false \
-  --set usePassword=false
+  --set usePassword=false \
+  --set image.tag=5.0.7-debian-10-r51 \
 ```
 
-See more details about installing Redis via Helm [here](https://github.com/helm/charts/tree/master/stable/redis#redis).
+See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/redis).
 
-### 4. Deploy PostgreSQL
+### 5. Deploy PostgreSQL
 
 Download the ONLYOFFICE Docs database scheme:
 
@@ -95,7 +106,7 @@ $ kubectl create configmap init-db-scripts \
 To install PostgreSQL to your cluster, run the following command:
 
 ```
-$ helm install postgresql stable/postgresql \
+$ helm install postgresql bitnami/postgresql \
   --set initdbScriptsConfigMap=init-db-scripts \
   --set postgresqlDatabase=postgres \
   --set persistence.size=PERSISTENT_SIZE
@@ -105,9 +116,9 @@ Here `PERSISTENT_SIZE` is a size for the PostgreSQL persistent volume. For examp
 
 It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
 
-See more details about installing PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
+See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
-### 5. Deploy StatsD
+### 6. Deploy StatsD
 *This step is optional. You can skip step  #5 at all if you don't want to run StatsD*
 
 Deploy the StatsD configmap:
@@ -314,10 +325,10 @@ In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVIC
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
 ```bash
-$ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true,controller.replicaCount=2
+$ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
-See more details about installing Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
+See more details about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
 
 Deploy the `documentserver` service:
 
