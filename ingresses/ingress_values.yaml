@@ -1,0 +1,10 @@
+controller:
+  publishService:
+    enabled: true
+  replicaCount: 2
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '10254'

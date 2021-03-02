@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+spec:
+  tls:
+  - hosts:
+    - example.com
+    secretName: tls
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /grafana/
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 80
