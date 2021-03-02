@@ -343,6 +343,9 @@ $ kubectl apply -f ./services/documentserver.yaml
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
+*Note: In all the steps below concerning Nginx Ingress for kubernetes versions below 1.19, deploy must be performed from the `./ingresses/before-1.19` directory.
+For example: `$ kubectl apply -f ./ingresses/before-1.19/documentserver.yaml`*
+
 Deploy documentserver ingress:
 
 ```bash
