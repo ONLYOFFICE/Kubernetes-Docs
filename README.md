@@ -127,7 +127,7 @@ Note: Set the `metrics.enabled=true` for enable exposing PostgreSQL metrics to b
 
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
-### 6. Deploy Prometheus
+### 6. Deploy Prometheus (optional)
 *This step is optional. You can skip step  #6 if you don't want enable exposing metrics to be gathered by Prometheus*
 
 To install Prometheus to your cluster, run the following command:
@@ -465,7 +465,7 @@ Note: It is assumed that step #5.2.1 has already been completed.
 *You should skip step #6.1 if you are going to expose Grafana via HTTPS*
 
 *Note: In all the steps below concerning Nginx Ingress for kubernetes versions below 1.19, deploy must be performed from the `./ingresses/before-1.19` directory.
-For example: `$ kubectl apply -f ./ingresses/before-1.19/documentserver.yaml`*
+For example: `$ kubectl apply -f ./ingresses/before-1.19/grafana.yaml`*
 
 Deploy Grafana ingress:
 
