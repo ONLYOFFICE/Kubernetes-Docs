@@ -2,7 +2,7 @@
 
 This repository contains a set of files to deploy ONLYOFFICE Docs into a Kubernetes cluster.
 
-Contents
+## Contents
 * [Introduction](#introduction)
 * [Deploy prerequisites](#deploy-prerequisites)
     - [Add Helm repositories](#1-add-helm-repositories)
@@ -357,7 +357,7 @@ After that, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVICE-
 If the service IP is empty, try getting the `documentserver` service hostname:
 
 ```bash
-kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVICE-HOSTNAME/`.
@@ -413,7 +413,7 @@ After that, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
@@ -449,7 +449,7 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 Associate the `documentserver` ingress IP or hostname with your domain name through your DNS provider.
