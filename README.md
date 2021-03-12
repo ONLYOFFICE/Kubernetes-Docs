@@ -110,7 +110,7 @@ $ helm install rabbitmq bitnami/rabbitmq \
   --set metrics.enabled=false
 ```
 
-Note: Set the `metrics.enabled=true` for enable exposing RabbitMQ metrics to be gathered by Prometheus.
+Note: Set the `metrics.enabled=true` to enable exposing RabbitMQ metrics to be gathered by Prometheus.
 
 See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/rabbitmq#rabbitmq).
 
@@ -126,7 +126,7 @@ $ helm install redis bitnami/redis \
   --set metrics.enabled=false
 ```
 
-Note: Set the `metrics.enabled=true` for enable exposing Redis metrics to be gathered by Prometheus.
+Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gathered by Prometheus.
 
 See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/redis).
 
@@ -159,7 +159,7 @@ Here `PERSISTENT_SIZE` is a size for the PostgreSQL persistent volume. For examp
 
 It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
 
-Note: Set the `metrics.enabled=true` for enable exposing PostgreSQL metrics to be gathered by Prometheus.
+Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be gathered by Prometheus.
 
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
@@ -372,7 +372,7 @@ To install the Nginx Ingress Controller to your cluster, run the following comma
 $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
-Note: To install Nginx Ingress with the same parameters and with enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
+Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
 
 ```bash
 $ helm install nginx-ingress -f ./ingresses/ingress_values.yaml ingress-nginx/ingress-nginx
@@ -386,7 +386,7 @@ Deploy the `documentserver` service:
 $ kubectl apply -f ./services/documentserver.yaml
 ```
 
-*Note: In all the steps below concerning Nginx Ingress for kubernetes versions below 1.19, deploy must be performed from the `./ingresses/before-1.19` directory.
+*Note: In all the steps below concerning Nginx Ingress for Kubernetes versions below 1.19, deploy must be performed from the `./ingresses/before-1.19` directory.
 For example: `$ kubectl apply -f ./ingresses/before-1.19/documentserver.yaml`*
 
 #### 5.2.2 Expose DocumentServer via HTTP
@@ -533,7 +533,7 @@ Create the Grafana configmap:
 $ kubectl apply -f ./configmaps/grafana.yaml
 ```
 
-Сreate a secret that contains Prometheus as Data sources Grafana:
+Сreate a secret that contains Prometheus as Grafana Data sources:
 
 ```
 $ kubectl apply -f ./secrets/grafana-datasource.yaml
@@ -555,7 +555,7 @@ $ helm install grafana bitnami/grafana \
 
 #### 2.3 Deploy Grafana with the installation of ready-made dashboards
 
-Run the script `./get_dashboard.sh`, which in `JSON` format will download ready-made dashboards from the Grafana [website](https://grafana.com/grafana/dashboards),
+Run the `./get_dashboard.sh` script, which will download ready-made dashboards in `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them.
 
 ```
