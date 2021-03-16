@@ -10,7 +10,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     - [Deploy RabbitMQ](#3-deploy-rabbitmq)
     - [Deploy Redis](#4-deploy-redis)
     - [Deploy PostgreSQL](#5-deploy-postgresql)
-    - [Deploy StatsD](#6-deploy-statsd)
+    - [Deploy StatsD exporter](#6-deploy-statsd-exporter)
 * [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
     - [Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
     - [Deploy the ONLYOFFICE Docs parameters](#2-deploy-the-onlyoffice-docs-parameters)
@@ -163,21 +163,17 @@ Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be
 
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
-### 6. Deploy StatsD
-*This step is optional. You can skip step [#6](#6-deploy-statsd) at all if you don't want to run StatsD*
+### 6. Deploy StatsD exporter
+*This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) at all if you don't want to run StatsD exporter*
 
-Deploy the StatsD configmap:
+To install StatsD exporter to your cluster, run the following command:
 ```
-$ kubectl apply -f ./configmaps/statsd.yaml
+$ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
+  --set statsd.udpPort=8125 \
+  --set statsd.tcpPort=8126 \
+  --set statsd.eventFlushInterval=30000ms
 ```
-Deploy the StatsD pod:
-```
-$ kubectl apply -f ./pods/statsd.yaml
-```
-Deploy the `statsd` service:
-```
-$ kubectl apply -f ./services/statsd.yaml
-```
+
 Allow the StatsD metrics in ONLYOFFICE Docs:
 
 Set the `data.METRICS_ENABLED` field in the ./configmaps/documentserver.yaml file to the `"true"` value
@@ -555,11 +551,11 @@ $ helm install grafana bitnami/grafana \
 
 #### 2.3 Deploy Grafana with the installation of ready-made dashboards
 
-Run the `./get_dashboard.sh` script, which will download ready-made dashboards in `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
-make the necessary edits to them and create a configmap from them.
+Run the `./metrics/get_dashboard.sh` script, which will download ready-made dashboards in `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
+make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-$ ./get_dashboard.sh
+$ ./metrics/get_dashboard.sh
 ```
 
 To install Grafana to your cluster, run the following command:
@@ -582,7 +578,9 @@ $ helm install grafana bitnami/grafana \
   --set dashboardsConfigMaps[4].configMapName=dashboard-postgresql \
   --set dashboardsConfigMaps[4].fileName=dashboard-postgresql.json \
   --set dashboardsConfigMaps[5].configMapName=dashboard-nginx-ingress \
-  --set dashboardsConfigMaps[5].fileName=dashboard-nginx-ingress.json
+  --set dashboardsConfigMaps[5].fileName=dashboard-nginx-ingress.json \
+  --set dashboardsConfigMaps[5].configMapName=dashboard-documentserver \
+  --set dashboardsConfigMaps[5].fileName=documentserver-statsd-exporter.json
 ```
 
 After executing this command, the following dashboards will be imported into Grafana:
@@ -593,6 +591,7 @@ After executing this command, the following dashboards will be imported into Gra
   - RabbitMQ-Overview
   - PostgreSQL Database
   - NGINX Ingress controller
+  - DocumentServer
 
 See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
 
