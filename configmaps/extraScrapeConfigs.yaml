@@ -1,0 +1,5 @@
+- job_name: 'statsd'
+  scrape_interval: 30s
+  static_configs:
+    - targets:
+      - statsd-exporter-prometheus-statsd-exporter:9102
