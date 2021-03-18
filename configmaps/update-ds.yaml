@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: update-ds
+data:
+  update.sh: |-
+    #!/bin/bash
+    apt update
+    apt -y install curl bash
+    curlout="$(curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s)"
+    if [[ "${curlout}" != "true" ]]; then
+      echo -e "\e[0;31m The server could not be disabled. Exit \e[0m"
+      exit 1
+    else 
+      FILES_DIR=/var/lib/onlyoffice/documentserver/App_Data/cache/files/
+      for ENTRY in `ls $FILES_DIR`; do
+        case $ENTRY in
+          errors)
+            ;;
+          forgotten)
+            ;;
+          *)
+            rm -rfv $FILES_DIR$ENTRY
+            ;;
+        esac
+      done
+      PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql
+      PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql
+      echo work done    
+    fi

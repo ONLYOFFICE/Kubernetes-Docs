@@ -15,6 +15,10 @@ spec:
         - name: init-db-scripts
           configMap:
             name: init-db-scripts
+        - name: update-scripts
+          configMap:
+            name: update-ds
+            defaultMode: 0755
       containers:
         - name: prepare4update
           image: postgres
@@ -36,35 +40,9 @@ spec:
           - name: init-db-scripts
             mountPath: /sql/createdb.sql
             subPath: createdb.sql
-
-          command: ["/bin/bash"]
-          args:
-            - -c
-            - >
-              apt update && apt -y install curl bash && bash -c
-              curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s -o /dev/null; 
-
-              FILES_DIR=/var/lib/onlyoffice/documentserver/App_Data/cache/files/;
-              for ENTRY in `ls $FILES_DIR`; do
-                case $ENTRY in
-
-                  errors)
-                    ;;
-
-                  forgotten)
-                    ;;
-
-                  *)
-                    rm -rfv $FILES_DIR$ENTRY
-                    ;;
-                esac;
-              done;
-
-              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql;
-              PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql;
-
-              echo work done;
-
-
-
+          - name: update-scripts
+            mountPath: /sql/update.sh
+            subPath: update.sh
+          command: ["/bin/sh", "-c"]
+          args: ["/sql/update.sh"]
       restartPolicy: Never
