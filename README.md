@@ -2,6 +2,42 @@
 
 This repository contains a set of files to deploy ONLYOFFICE Docs into a Kubernetes cluster.
 
+## Contents
+* [Introduction](#introduction)
+* [Deploy prerequisites](#deploy-prerequisites)
+    - [Add Helm repositories](#1-add-helm-repositories)
+    - [Install Persistent Storage](#2-install-persistent-storage)
+    - [Deploy RabbitMQ](#3-deploy-rabbitmq)
+    - [Deploy Redis](#4-deploy-redis)
+    - [Deploy PostgreSQL](#5-deploy-postgresql)
+    - [Deploy StatsD exporter](#6-deploy-statsd-exporter)
+* [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
+    - [Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
+    - [Deploy the ONLYOFFICE Docs parameters](#2-deploy-the-onlyoffice-docs-parameters)
+    - [Deploy DocumentServer](#3-deploy-documentserver)
+    - [Deploy the DocumentServer Example (optional)](#4-deploy-the-documentserver-example-optional)
+    - [Expose DocumentServer](#5-expose-documentserver)
+        + [Expose DocumentServer via Service (HTTP Only)](#51-expose-documentserver-via-service-http-only)
+        + [Expose DocumentServer via Ingress](#52-expose-documentserver-via-ingress)
+            1. [Installing the Kubernetes Nginx Ingress Controller](#521-installing-the-kubernetes-nginx-ingress-controller)
+            2. [Expose DocumentServer via HTTP](#522-expose-documentserver-via-http)
+            3. [Expose DocumentServer via HTTPS](#523-expose-documentserver-via-https)
+    - [Update ONLYOFFICE Docs](#6-update-onlyoffice-docs)
+        + [Preparing for update](#61-preparing-for-update)
+        + [Update the DocumentServer images](#62-update-the-documentserver-images)
+* [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
+    - [Deploy Prometheus](#1-deploy-prometheus)
+        + [Add Helm repositories](#11-add-helm-repositories)
+        + [Installing Prometheus](#12-installing-prometheus)
+    - [Deploy Grafana](#2-deploy-grafana)
+        + [Preparing for deploy](#21-preparing-for-deploy)
+        + [Deploy Grafana without installing ready-made dashboards](#22-deploy-grafana-without-installing-ready-made-dashboards)
+        + [Deploy Grafana with the installation of ready-made dashboards](#23-deploy-grafana-with-the-installation-of-ready-made-dashboards)
+    - [Expose Grafana via Ingress](#3-expose-grafana-via-ingress)
+        + [Expose Grafana via HTTP](#31-expose-grafana-via-http)
+        + [Expose Grafana via HTTPS](#32-expose-grafana-via-https)
+    - [View gathered metrics in Grafana](#4-view-gathered-metrics-in-grafana)
+
 ## Introduction
 
 - You must have Kubernetes installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to set up Kubernetes.
@@ -11,7 +47,16 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 
 ## Deploy prerequisites
 
-### 1. Install Persistent Storage
+### 1. Add Helm repositories
+
+```bash
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+$ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+$ helm repo add stable https://charts.helm.sh/stable
+$ helm repo update
+```
+
+### 2. Install Persistent Storage
 
 Install NFS Server Provisioner
 
@@ -56,28 +101,36 @@ NAME       STATUS   VOLUME                                     CAPACITY   ACCESS
 ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
 ```
 
-### 2. Deploy RabbitMQ
+### 3. Deploy RabbitMQ
 
 To install RabbitMQ to your cluster, run the following command:
 
 ```bash
-$ helm install rabbitmq stable/rabbitmq
+$ helm install rabbitmq bitnami/rabbitmq \
+  --set metrics.enabled=false
 ```
-See more details about installing RabbitMQ via Helm [here](https://github.com/helm/charts/tree/master/stable/rabbitmq#rabbitmq).
 
-### 3. Deploy Redis
+Note: Set the `metrics.enabled=true` to enable exposing RabbitMQ metrics to be gathered by Prometheus.
+
+See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/rabbitmq#rabbitmq).
+
+### 4. Deploy Redis
 
 To install Redis to your cluster, run the following command:
 
 ```bash
-$ helm install redis stable/redis \
+$ helm install redis bitnami/redis \
   --set cluster.enabled=false \
-  --set usePassword=false
+  --set usePassword=false \
+  --set image.tag=5.0.7-debian-10-r51 \
+  --set metrics.enabled=false
 ```
 
-See more details about installing Redis via Helm [here](https://github.com/helm/charts/tree/master/stable/redis#redis).
+Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gathered by Prometheus.
 
-### 4. Deploy PostgreSQL
+See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/redis).
+
+### 5. Deploy PostgreSQL
 
 Download the ONLYOFFICE Docs database scheme:
 
@@ -85,7 +138,7 @@ Download the ONLYOFFICE Docs database scheme:
 wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
 ```
 
-Create a config map from it:
+Create a configmap from it:
 
 ```bash
 $ kubectl create configmap init-db-scripts \
@@ -95,33 +148,32 @@ $ kubectl create configmap init-db-scripts \
 To install PostgreSQL to your cluster, run the following command:
 
 ```
-$ helm install postgresql stable/postgresql \
+$ helm install postgresql bitnami/postgresql \
   --set initdbScriptsConfigMap=init-db-scripts \
   --set postgresqlDatabase=postgres \
-  --set persistence.size=PERSISTENT_SIZE
+  --set persistence.size=PERSISTENT_SIZE \
+  --set metrics.enabled=false
 ```
 
 Here `PERSISTENT_SIZE` is a size for the PostgreSQL persistent volume. For example: `8Gi`.
 
 It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
 
-See more details about installing PostgreSQL via Helm [here](https://github.com/helm/charts/tree/master/stable/postgresql#postgresql).
+Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be gathered by Prometheus.
 
-### 5. Deploy StatsD
-*This step is optional. You can skip step  #5 at all if you don't want to run StatsD*
+See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
-Deploy the StatsD configmap:
+### 6. Deploy StatsD exporter
+*This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) at all if you don't want to run StatsD exporter*
+
+To install StatsD exporter to your cluster, run the following command:
 ```
-$ kubectl apply -f ./configmaps/statsd.yaml
+$ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
+  --set statsd.udpPort=8125 \
+  --set statsd.tcpPort=8126 \
+  --set statsd.eventFlushInterval=30000ms
 ```
-Deploy the StatsD pod:
-```
-$ kubectl apply -f ./pods/statsd.yaml
-```
-Deploy the `statsd` service:
-```
-$ kubectl apply -f ./services/statsd.yaml
-```
+
 Allow the StatsD metrics in ONLYOFFICE Docs:
 
 Set the `data.METRICS_ENABLED` field in the ./configmaps/documentserver.yaml file to the `"true"` value
@@ -262,7 +314,7 @@ $ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
 
 ### 4. Deploy the DocumentServer Example (optional)
 
-*This step is optional. You can skip step  #4 at all if you don't want to run the DocumentServer Example*
+*This step is optional. You can skip step [#4](#4-deploy-the-documentserver-example-optional) at all if you don't want to run the DocumentServer Example*
 
 Deploy the example configmap:
 
@@ -279,7 +331,7 @@ $ kubectl apply -f ./pods/example.yaml
 ### 5. Expose DocumentServer
 
 #### 5.1 Expose DocumentServer via Service (HTTP Only)
-*You should skip step  #5.1 if you are going to expose DocumentServer via HTTPS*
+*You should skip step [#5.1](#51-expose-documentserver-via-service-http-only) if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
 Use this type of exposure if you use external TLS termination, and don't have another WEB application in the k8s cluster.
@@ -301,11 +353,10 @@ After that, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVICE-
 If the service IP is empty, try getting the `documentserver` service hostname:
 
 ```bash
-kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVICE-HOSTNAME/`.
-
 
 #### 5.2 Expose DocumentServer via Ingress
 
@@ -314,10 +365,16 @@ In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVIC
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
 ```bash
-$ helm install nginx-ingress stable/nginx-ingress --set controller.publishService.enabled=true,controller.replicaCount=2
+$ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
-See more details about installing Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
+Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
+
+```bash
+$ helm install nginx-ingress -f ./ingresses/ingress_values.yaml ingress-nginx/ingress-nginx
+```
+
+See more details about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
 
 Deploy the `documentserver` service:
 
@@ -325,9 +382,12 @@ Deploy the `documentserver` service:
 $ kubectl apply -f ./services/documentserver.yaml
 ```
 
+*Note: In all the steps below concerning Nginx Ingress for Kubernetes versions below 1.19, deploy must be performed from the `./ingresses/before-1.19` directory.
+For example: `$ kubectl apply -f ./ingresses/before-1.19/documentserver.yaml`*
+
 #### 5.2.2 Expose DocumentServer via HTTP
 
-*You should skip step #5.2.2 if you are going to expose DocumentServer via HTTPS*
+*You should skip step [#5.2.2](#522-expose-documentserver-via-http) if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
@@ -349,7 +409,7 @@ After that, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
@@ -385,7 +445,7 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 Associate the `documentserver` ingress IP or hostname with your domain name through your DNS provider.
@@ -425,6 +485,7 @@ After successful run, the job automaticly terminates its pod, but you have to cl
 ```bash
 $ kubectl delete job prepare4update
 ```
+
 #### 6.2 Update the DocumentServer images
 
 Update deployment images:
@@ -440,3 +501,149 @@ $ kubectl set image deployment/docservice \
   proxy=onlyoffice/docs-proxy-de:DOCUMENTSERVER_VERSION
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
+
+## Using Prometheus to collect metrics with visualization in Grafana (optional)
+*This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
+
+### 1. Deploy Prometheus
+
+#### 1.1 Add Helm repositories
+
+```bash
+$ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+$ helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
+$ helm repo update
+```
+
+#### 1.2 Installing Prometheus
+
+To install Prometheus to your cluster, run the following command:
+
+```bash
+$ helm install prometheus prometheus-community/prometheus
+```
+
+See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
+
+### 2. Deploy Grafana
+
+#### 2.1 Preparing for deploy
+
+Create the Grafana configmap:
+
+```
+$ kubectl apply -f ./configmaps/grafana.yaml
+```
+
+Сreate a secret that contains Prometheus as Grafana Data sources:
+
+```
+$ kubectl apply -f ./secrets/grafana-datasource.yaml
+```
+
+#### 2.2 Deploy Grafana without installing ready-made dashboards
+
+*You should skip step [#2.2](#22-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
+
+To install Grafana to your cluster, run the following command:
+
+```bash
+$ helm install grafana bitnami/grafana \
+  --set service.port=80 \
+  --set config.useGrafanaIniFile=true \
+  --set config.grafanaIniConfigMap=grafana-ini \
+  --set datasources.secretName=grafana-datasource
+```
+
+#### 2.3 Deploy Grafana with the installation of ready-made dashboards
+
+Run the `./metrics/get_dashboard.sh` script, which will download ready-made dashboards in `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
+make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
+
+```
+$ ./metrics/get_dashboard.sh
+```
+
+To install Grafana to your cluster, run the following command:
+
+```bash
+$ helm install grafana bitnami/grafana \
+  --set service.port=80 \
+  --set config.useGrafanaIniFile=true \
+  --set config.grafanaIniConfigMap=grafana-ini \
+  --set datasources.secretName=grafana-datasource \
+  --set dashboardsProvider.enabled=true \
+  --set dashboardsConfigMaps[0].configMapName=dashboard-node-exporter \
+  --set dashboardsConfigMaps[0].fileName=dashboard-node-exporter.json \
+  --set dashboardsConfigMaps[1].configMapName=dashboard-deployment \
+  --set dashboardsConfigMaps[1].fileName=dashboard-deployment.json \
+  --set dashboardsConfigMaps[2].configMapName=dashboard-redis \
+  --set dashboardsConfigMaps[2].fileName=dashboard-redis.json \
+  --set dashboardsConfigMaps[3].configMapName=dashboard-rabbitmq \
+  --set dashboardsConfigMaps[3].fileName=dashboard-rabbitmq.json \
+  --set dashboardsConfigMaps[4].configMapName=dashboard-postgresql \
+  --set dashboardsConfigMaps[4].fileName=dashboard-postgresql.json \
+  --set dashboardsConfigMaps[5].configMapName=dashboard-nginx-ingress \
+  --set dashboardsConfigMaps[5].fileName=dashboard-nginx-ingress.json \
+  --set dashboardsConfigMaps[5].configMapName=dashboard-documentserver \
+  --set dashboardsConfigMaps[5].fileName=documentserver-statsd-exporter.json
+```
+
+After executing this command, the following dashboards will be imported into Grafana:
+
+  - Node Exporter
+  - Deployment Statefulset Daemonset
+  - Redis Dashboard for Prometheus Redis Exporter
+  - RabbitMQ-Overview
+  - PostgreSQL Database
+  - NGINX Ingress controller
+  - DocumentServer
+
+See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
+
+### 3 Expose Grafana via Ingress
+
+*This step is optional. You can skip step [#3](#3-expose-grafana-via-ingress) if you don't want to use Nginx Ingress to access the Grafana web interface*
+
+Note: It is assumed that step [#5.2.1](#521-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
+
+*Note: In all the steps below concerning Nginx Ingress for kubernetes versions below 1.19, deploy must be performed from the `./ingresses/before-1.19` directory.
+For example: `$ kubectl apply -f ./ingresses/before-1.19/grafana.yaml`*
+
+#### 3.1 Expose Grafana via HTTP
+*You should skip step [#3.1](#31-expose-grafana-via-http) if you are going to expose Grafana via HTTPS*
+
+Deploy Grafana ingress:
+
+```bash
+$ kubectl apply -f ./ingresses/grafana.yaml
+```
+
+After that you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
+
+#### 3.2 Expose Grafana via HTTPS
+
+Note: It is assumed that step [#5.2.3](#523-expose-documentserver-via-https) has already been completed.
+
+Open `./ingresses/grafana-ssl.yaml` and type your domain name instead of `example.com`.
+
+Deploy Grafana ingress:
+
+```bash
+$ kubectl apply -f ./ingresses/grafana-ssl.yaml
+```
+
+After that you will have access to Grafana at `https://your-domain-name/grafana/`
+
+### 4. View gathered metrics in Grafana
+
+Go to the address `http(s)://your-domain-name/grafana/`
+
+Login - admin
+
+To get the password, run the following command:
+```
+$ kubectl get secret grafana-admin --namespace default -o jsonpath="{.data.GF_SECURITY_ADMIN_PASSWORD}" | base64 --decode
+```
+
+In the dashboard section, you will see the added dashboards that will display the metrics received from Prometheus.

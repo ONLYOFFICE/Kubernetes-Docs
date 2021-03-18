@@ -10,7 +10,7 @@ data:
   AMQP_HOST: rabbitmq
   AMQP_USER: user
   AMQP_PROTO: amqp
-  METRICS_HOST: statsd
+  METRICS_HOST: statsd-exporter-prometheus-statsd-exporter
   METRICS_ENABLED: "false"
   SPELLCHECKER_HOST_PORT: spellchecker:8080
   EXAMPLE_HOST_PORT: example:3000
