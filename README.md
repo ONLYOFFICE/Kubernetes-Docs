@@ -402,10 +402,16 @@ Download the ONLYOFFICE Docs database script for database cleaning:
 $ wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
 ```
 
-Create a config map from it:
+Create a configmap from it:
 
 ```bash
 $ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
+```
+
+Create a configmap containing the update script:
+
+```bash
+$ kubectl apply -f ./configmaps/update-ds.yaml
 ```
 
 Run the job:
