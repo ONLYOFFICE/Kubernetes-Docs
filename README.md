@@ -11,6 +11,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     - [Deploy Redis](#4-deploy-redis)
     - [Deploy PostgreSQL](#5-deploy-postgresql)
     - [Deploy StatsD exporter](#6-deploy-statsd-exporter)
+        + [Add Helm repositories](#61-add-helm-repositories)
+        + [Installing StatsD exporter](#62-installing-statsd-exporter)
 * [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
     - [Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
     - [Deploy the ONLYOFFICE Docs parameters](#2-deploy-the-onlyoffice-docs-parameters)
@@ -165,6 +167,15 @@ See more details about installing PostgreSQL via Helm [here](https://github.com/
 
 ### 6. Deploy StatsD exporter
 *This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) at all if you don't want to run StatsD exporter*
+
+#### 6.1 Add Helm repositories
+
+```bash
+$ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+$ helm repo update
+```
+
+#### 6.2 Installing StatsD exporter
 
 To install StatsD exporter to your cluster, run the following command:
 ```
@@ -510,7 +521,6 @@ $ kubectl set image deployment/docservice \
 #### 1.1 Add Helm repositories
 
 ```bash
-$ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 $ helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
 $ helm repo update
 ```
