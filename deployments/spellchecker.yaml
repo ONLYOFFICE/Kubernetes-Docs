@@ -20,7 +20,7 @@ spec:
             secretName: license
       containers:
         - name: spellchecker
-          image: onlyoffice/docs-spellchecker-de:6.0.2.5
+          image: onlyoffice/docs-spellchecker-de:6.2.1.94
           env:
           - name: DB_PWD
             valueFrom:
