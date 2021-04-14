@@ -1,6 +1,6 @@
 # ONLYOFFICE Docs for Kubernetes
 
-This repository contains a set of files to deploy ONLYOFFICE Docs into a Kubernetes cluster and OpenShift cluster.
+This repository contains a set of files to deploy ONLYOFFICE Docs into a Kubernetes cluster or OpenShift cluster.
 
 ## Contents
 * [Introduction](#introduction)
@@ -42,8 +42,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 
 ## Introduction
 
-- If the deploy will be executed in a Kubernetes cluster, it must be installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to set up Kubernetes.
-- If the deploy will be executed in a OpenShift cluster, it must be installed. Please, checkout [the reference](https://docs.openshift.com/container-platform/4.7/installing/index.html) to setup an OpenShift.
+- You must have a Kubernetes or OpenShift cluster installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to set up Kubernetes. Please, checkout [the reference](https://docs.openshift.com/container-platform/4.7/installing/index.html) to setup OpenShift.
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
 - You should install Helm v3. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
 - If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. It is also assumed that the user from whom the installation is performed has the role of the cluster admin. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
@@ -63,7 +62,7 @@ $ helm repo update
 
 Install NFS Server Provisioner
 
-Note: When installing NFS Server Provider, Storage Classes - NFS is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html)
+Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html)
 
 Note: When installing to an OpenShift cluster, run the following command `oc adm policy add-scc-to-group anyuid system:authenticated` to be able to run Images with any UID.
 
