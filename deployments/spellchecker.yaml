@@ -54,5 +54,5 @@ spec:
             httpGet:
               path: /index.html
               port: 8080
-            failureThreshold: 50
+            failureThreshold: 30
             periodSeconds: 10
