@@ -33,6 +33,20 @@ spec:
           image: onlyoffice/docs-proxy-de:6.2.1.94
           ports:
             - containerPort: 8888
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /index.html
+              port: 8888
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /index.html
+              port: 8888
+            failureThreshold: 30
+            periodSeconds: 10
           envFrom:
           - configMapRef:
               name: documentserver
@@ -44,6 +58,28 @@ spec:
           image: onlyoffice/docs-docservice-de:6.2.1.94
           ports:
             - containerPort: 8000
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /index.html
+              port: 8000
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /index.html
+              port: 8000
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /index.html
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 10
           env:
           - name: DB_PWD
             valueFrom:
