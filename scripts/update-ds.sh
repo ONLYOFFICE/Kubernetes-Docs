@@ -9,7 +9,7 @@ else
   DOCUMENTSERVER_VERSION=$1
 fi
 
-preparing_for_update(){
+prepare_for_update(){
   kubectl get job | grep -iq prepare4update
   if [ $? -eq 0 ]; then
     echo A Job named prepareupdate exists. Exit
@@ -21,7 +21,7 @@ preparing_for_update(){
   fi
 }
 
-creating_job(){
+create_job(){
   kubectl apply -f ./jobs/prepare4update.yaml
   sleep 5
   PODNAME="$(kubectl get pod | grep -i prepare4update | awk '{print $1}')"
@@ -34,11 +34,11 @@ error_in_job(){
   kubectl logs "${PODNAME}"
 }
 
-deleting_job(){
+delete_job(){
   kubectl delete job prepare4update
 }
 
-updating(){
+update_images(){
   kubectl set image deployment/spellchecker \
     spellchecker=onlyoffice/docs-spellchecker-de:${DOCUMENTSERVER_VERSION}
   kubectl set image deployment/converter \
@@ -48,7 +48,7 @@ updating(){
     proxy=onlyoffice/docs-proxy-de:${DOCUMENTSERVER_VERSION}
 }
 
-checking_the_status(){
+check_status(){
   while true; do
   	  STATUS="$(kubectl get pod "${PODNAME}" |  awk '{print $3}' | sed -n '$p')"
       case $STATUS in
@@ -62,8 +62,8 @@ checking_the_status(){
             echo Status of the prepare4update POD: $STATUS
             LOGOUT="$(kubectl logs "${PODNAME}" | sed -n '$p')"
             if [ "${LOGOUT}" == "$LOGOUT_STR" ]; then
-              deleting_job
-              updating
+              delete_job
+              update_images
               echo -e "\e[0;32m The Job update was completed successfully. Wait until all containers with the new version of the images have the READY status. \e[0m"
               exit 0
             else
@@ -80,6 +80,6 @@ checking_the_status(){
       esac
   done
 }
-preparing_for_update
-creating_job
-checking_the_status
+prepare_for_update
+create_job
+check_status
