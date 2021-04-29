@@ -11,7 +11,12 @@ data:
     if [[ "${curlout}" != "true" ]]; then
       echo -e "\e[0;31m The server could not be disabled \e[0m"
       exit 1
-    else 
+    else
+      pg_isready -h postgresql -p 5432
+      if [ $? -ne 0 ]; then
+        echo -e "\e[0;31m DB is not available \e[0m"
+        exit 1
+      fi
       FILES_DIR=/var/lib/onlyoffice/documentserver/App_Data/cache/files/
       ls $FILES_DIR > /dev/null
       if [ $? -ne 0 ]; then
@@ -29,13 +34,7 @@ data:
             ;;
         esac
       done
-      pg_isready -h postgresql -p 5432
-      if [ $? -ne 0 ]; then
-        echo -e "\e[0;31m DB is not available \e[0m"
-        exit 1
-      else
-        PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql
-        PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql
-      fi
+      PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql
+      PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql
       echo work done
     fi
