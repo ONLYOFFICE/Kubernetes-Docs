@@ -3,6 +3,7 @@ kind: Job
 metadata:
   name: prepare4update
 spec:
+  backoffLimit: 2
   template:
     spec:
       volumes:
