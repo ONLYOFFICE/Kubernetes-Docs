@@ -9,10 +9,15 @@ data:
     apt -y install curl bash
     curlout="$(curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s)"
     if [[ "${curlout}" != "true" ]]; then
-      echo -e "\e[0;31m The server could not be disabled. Exit \e[0m"
+      echo -e "\e[0;31m The server could not be disabled \e[0m"
       exit 1
     else 
       FILES_DIR=/var/lib/onlyoffice/documentserver/App_Data/cache/files/
+      ls $FILES_DIR > /dev/null
+      if [ $? -ne 0 ]; then
+        echo -e "\e[0;31m Error accessing the $FILES_DIR directory \e[0m"
+        exit 1
+      fi
       for ENTRY in `ls $FILES_DIR`; do
         case $ENTRY in
           errors)
@@ -24,7 +29,13 @@ data:
             ;;
         esac
       done
-      PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql
-      PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql
-      echo work done    
+      pg_isready -h postgresql -p 5432
+      if [ $? -ne 0 ]; then
+        echo -e "\e[0;31m DB is not available \e[0m"
+        exit 1
+      else
+        PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql
+        PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql
+      fi
+      echo work done
     fi

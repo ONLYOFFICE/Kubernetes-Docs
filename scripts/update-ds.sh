@@ -74,7 +74,7 @@ echo "Getting the prepare4update POD status..."
 POD_STATUS=$(check_prepare4update_pod_status)
 if [[ "$POD_STATUS" == "error" ]]; then
   print_error_message
-elif [[ "$POD_STATUS" == "completed" ]]; then
+else
   delete_prepare4update_job
   update_images
   echo -e "\e[0;32m The Job update was completed successfully. Wait until all containers with the new version of the images have the READY status. \e[0m"
