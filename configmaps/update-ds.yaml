@@ -12,7 +12,7 @@ data:
       echo -e "\e[0;31m The server could not be disabled \e[0m"
       exit 1
     else
-      pg_isready -h postgresql -p 5432
+      PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres -c "\dt" > /dev/null
       if [ $? -ne 0 ]; then
         echo -e "\e[0;31m DB is not available \e[0m"
         exit 1
