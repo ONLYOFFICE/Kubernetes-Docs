@@ -26,7 +26,7 @@ create_prepare4update_job(){
   PODNAME="$(kubectl get pod | grep -i prepare4update | awk '{print $1}')"
 }
 
-check_prepare4update_job_status(){
+check_prepare4update_pod_status(){
   while true; do
       STATUS="$(kubectl get pod "${PODNAME}" |  awk '{print $3}' | sed -n '$p')"
       case $STATUS in
@@ -48,7 +48,7 @@ check_prepare4update_job_status(){
 }
 
 delete_prepare4update_job(){
-  echo -e "\e[0;32m Status of the prepare4update POD: $JOB_STATUS. The Job will be deleted. \e[0m"
+  echo -e "\e[0;32m Status of the prepare4update POD: $POD_STATUS. The Job will be deleted \e[0m"
   kubectl delete job prepare4update
 }
 
@@ -63,7 +63,7 @@ update_images(){
 }
 
 print_error_message(){
-  echo -e "\e[0;31m Status of the prepare4update POD: $JOB_STATUS \e[0m"
+  echo -e "\e[0;31m Status of the prepare4update POD: $POD_STATUS \e[0m"
   echo -e "\e[0;31m The Job will not be deleted automatically. Further actions to manage the Job must be performed manually. \e[0m"
 }
 
@@ -71,10 +71,10 @@ init_prepare4update_job
 create_prepare4update_job
 
 echo "Getting the prepare4update POD status..."
-JOB_STATUS=$(check_prepare4update_job_status)
-if [[ "$JOB_STATUS" == "error" ]]; then
+POD_STATUS=$(check_prepare4update_pod_status)
+if [[ "$POD_STATUS" == "error" ]]; then
   print_error_message
-elif [[ "$JOB_STATUS" == "completed" ]]; then
+elif [[ "$POD_STATUS" == "completed" ]]; then
   delete_prepare4update_job
   update_images
   echo -e "\e[0;32m The Job update was completed successfully. Wait until all containers with the new version of the images have the READY status. \e[0m"
