@@ -25,8 +25,10 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
             2. [Expose DocumentServer via HTTP](#522-expose-documentserver-via-http)
             3. [Expose DocumentServer via HTTPS](#523-expose-documentserver-via-https)
     - [Update ONLYOFFICE Docs](#6-update-onlyoffice-docs)
-        + [Preparing for update](#61-preparing-for-update)
-        + [Update the DocumentServer images](#62-update-the-documentserver-images)
+        + [Manual update](#61-manual-update)
+            1. [Preparing for update](#611-preparing-for-update)
+            2. [Update the DocumentServer images](#612-update-the-documentserver-images)
+        + [Automated update](#62-automated-update)
 * [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
     - [Deploy Prometheus](#1-deploy-prometheus)
         + [Add Helm repositories](#11-add-helm-repositories)
@@ -468,7 +470,12 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 ### 6. Update ONLYOFFICE Docs
-#### 6.1 Preparing for update
+
+#### 6.1 Manual update
+
+*You should skip step [#6.1](#61-manual-update) if you want to perform the update using a script*
+
+#### 6.1.1 Preparing for update
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in the database.
 Download the ONLYOFFICE Docs database script for database cleaning:
@@ -501,7 +508,7 @@ After successful run, the job automaticly terminates its pod, but you have to cl
 $ kubectl delete job prepare4update
 ```
 
-#### 6.2 Update the DocumentServer images
+#### 6.1.2 Update the DocumentServer images
 
 Update deployment images:
 ```
@@ -514,6 +521,15 @@ $ kubectl set image deployment/converter \
 $ kubectl set image deployment/docservice \
   docservice=onlyoffice/docs-docservice-de:DOCUMENTSERVER_VERSION \
   proxy=onlyoffice/docs-proxy-de:DOCUMENTSERVER_VERSION
+```
+`DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
+
+#### 6.2 Automated update
+
+To perform the update using a script, run the following command:
+
+```bash
+$ ./scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
 
