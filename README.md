@@ -47,9 +47,18 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - You must have a Kubernetes or OpenShift cluster installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to set up Kubernetes. Please, checkout [the reference](https://docs.openshift.com/container-platform/4.7/installing/index.html) to setup OpenShift.
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
 - You should install Helm v3. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
-- If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. It is also assumed that the user from whom the installation is performed has the role of the cluster admin. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
+- If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. 
+- If in an OpenShift cluster, the installation of components external to ‘Docs’ will be performed from Helm Chart, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
 
 ## Deploy prerequisites
+
+Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 1001`.
+
+To do this, run the following commands:
+```
+$ oc apply -f ./scc/helm-components.yaml
+$ oc adm policy add-scc-to-group scc-helm-components system:authenticated
+```
 
 ### 1. Add Helm repositories
 
@@ -64,9 +73,7 @@ $ helm repo update
 
 Install NFS Server Provisioner
 
-Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html)
-
-Note: When installing to an OpenShift cluster, run the following command `oc adm policy add-scc-to-group anyuid system:authenticated` to be able to run Images with any UID.
+Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html).
 
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
@@ -196,6 +203,24 @@ Allow the StatsD metrics in ONLYOFFICE Docs:
 Set the `data.METRICS_ENABLED` field in the ./configmaps/documentserver.yaml file to the `"true"` value
 
 ## Deploy ONLYOFFICE Docs
+
+Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 101`.
+
+To do this, run the following commands:
+```
+$ oc apply -f ./scc/docs-components.yaml
+$ oc adm policy add-scc-to-group scc-docs-components system:authenticated
+```
+Also, in all `yaml` files in the `deployments` directory, you must uncomment the following fields:
+```
+spec.template.spec.securityContext.runAsUser=101
+spec.template.spec.securityContext.runAsGroup=101
+```
+In `./pods/example.yaml` needs to uncomment the following fields:
+```
+spec.securityContext.runAsUser=101
+spec.securityContext.runAsGroup=101
+```
 
 ### 1. Deploy the ONLYOFFICE Docs license
 
