@@ -5,6 +5,9 @@ metadata:
   labels:
     app: example
 spec:
+#  securityContext:
+#    runAsUser: 101
+#    runAsGroup: 101
   containers:
     - name: example
       image: onlyoffice/docs-example-de:6.2.2.17

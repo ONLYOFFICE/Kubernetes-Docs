@@ -14,6 +14,9 @@ spec:
       labels:
         app: converter
     spec:
+#      securityContext:
+#        runAsUser: 101
+#        runAsGroup: 101
       volumes:
         - name: ds-files
           persistentVolumeClaim:
