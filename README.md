@@ -73,9 +73,7 @@ $ helm repo update
 
 Install NFS Server Provisioner
 
-Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html)
-
-Note: When installing to an OpenShift cluster, run the following command `oc adm policy add-scc-to-group anyuid system:authenticated` to be able to run Images with any UID.
+Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html).
 
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
