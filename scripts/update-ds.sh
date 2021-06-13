@@ -53,8 +53,6 @@ delete_prepare4update_job(){
 }
 
 update_images(){
-  kubectl set image deployment/spellchecker \
-    spellchecker=onlyoffice/docs-spellchecker-de:${DOCUMENTSERVER_VERSION}
   kubectl set image deployment/converter \
     converter=onlyoffice/docs-converter-de:${DOCUMENTSERVER_VERSION}
   kubectl set image deployment/docservice \
