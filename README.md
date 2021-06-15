@@ -150,7 +150,7 @@ See more details about installing Redis via Helm [here](https://github.com/bitna
 Download the ONLYOFFICE Docs database scheme:
 
 ```bash
-wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
 ```
 
 Create a configmap from it:
@@ -474,16 +474,25 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 #### 6.1.1 Preparing for update
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in the database.
-Download the ONLYOFFICE Docs database script for database cleaning:
+
+If there are `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
 
 ```bash
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+$ kubectl delete cm remove-db-scripts init-db-scripts
 ```
 
-Create a configmap from it:
+Download the ONLYOFFICE Docs database scripts for database cleaning and database schema creating:
+
+```bash
+$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+```
+
+Create a configmap from them:
 
 ```bash
 $ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
+$ kubectl create configmap init-db-scripts --from-file=./createdb.sql
 ```
 
 Create a configmap containing the update script:
