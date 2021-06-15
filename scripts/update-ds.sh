@@ -14,8 +14,11 @@ init_prepare4update_job(){
     echo A Job named prepare4update exists. Exit
     exit 1
   else
-    wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+    kubectl delete cm remove-db-scripts init-db-scripts
+    wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+    wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
     kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
+    kubectl create configmap init-db-scripts --from-file=./createdb.sql
     kubectl apply -f ./configmaps/update-ds.yaml
   fi
 }
