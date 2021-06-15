@@ -10,7 +10,7 @@ spec:
 #    runAsGroup: 101
   containers:
     - name: example
-      image: onlyoffice/docs-example-de:6.2.2.17
+      image: onlyoffice/docs-example-de:6.3.1.32
       ports:
         - containerPort: 3000
       envFrom:
