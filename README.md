@@ -259,31 +259,6 @@ $ kubectl create secret generic jwt \
 
 ### 3. Deploy DocumentServer
 
-Deploy the `spellchecker` deployment:
-
-```bash
-$ kubectl apply -f ./deployments/spellchecker.yaml
-```
-
-Verify that the `spellchecker` deployment is running the desired number of pods with the following command:
-
-```bash
-$ kubectl get deployment spellchecker
-```
-
-Output:
-
-```
-NAME           READY   UP-TO-DATE   AVAILABLE   AGE
-spellchecker   2/2     2            2           1m
-```
-
-Deploy the spellchecker service:
-
-```bash
-$ kubectl apply -f ./services/spellchecker.yaml
-```
-
 Deploy the example service:
 
 ```bash
@@ -334,7 +309,7 @@ NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 converter   2/2     2            2           1m
 ```
 
-The `docservice`, `converter` and `spellchecker` deployments consist of 2 pods each other by default.
+The `docservice` and `converter` deployments consist of 2 pods each other by default.
 
 To scale the `docservice` deployment, use the following command:
 
@@ -344,14 +319,10 @@ $ kubectl scale -n default deployment docservice --replicas=POD_COUNT
 
 where `POD_COUNT` is a number of the `docservice` pods.
 
-Do the same to scale the `converter` and `spellchecker` deployment:
+Do the same to scale the `converter` deployment:
 
 ```bash
 $ kubectl scale -n default deployment converter --replicas=POD_COUNT
-```
-
-```bash
-$ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
 ```
 
 ### 4. Deploy the DocumentServer Example (optional)
@@ -537,9 +508,6 @@ $ kubectl delete job prepare4update
 
 Update deployment images:
 ```
-$ kubectl set image deployment/spellchecker \
-  spellchecker=onlyoffice/docs-spellchecker-de:DOCUMENTSERVER_VERSION
-
 $ kubectl set image deployment/converter \
   converter=onlyoffice/docs-converter-de:DOCUMENTSERVER_VERSION
 
