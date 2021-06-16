@@ -218,8 +218,8 @@ spec.template.spec.securityContext.runAsGroup=101
 ```
 In `./pods/example.yaml` needs to uncomment the following fields:
 ```
-spec.securityContext.runAsUser=101
-spec.securityContext.runAsGroup=101
+spec.securityContext.runAsUser=1001
+spec.securityContext.runAsGroup=1001
 ```
 
 ### 1. Deploy the ONLYOFFICE Docs license

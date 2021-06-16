@@ -6,11 +6,11 @@ metadata:
     app: example
 spec:
 #  securityContext:
-#    runAsUser: 101
-#    runAsGroup: 101
+#    runAsUser: 1001
+#    runAsGroup: 1001
   containers:
     - name: example
-      image: onlyoffice/docs-example-de:6.3.1.32
+      image: onlyoffice/docs-example:6.3.1.32
       ports:
         - containerPort: 3000
       envFrom:
