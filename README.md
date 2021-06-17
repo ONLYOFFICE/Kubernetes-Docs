@@ -150,7 +150,7 @@ See more details about installing Redis via Helm [here](https://github.com/bitna
 Download the ONLYOFFICE Docs database scheme:
 
 ```bash
-wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
 ```
 
 Create a configmap from it:
@@ -218,8 +218,8 @@ spec.template.spec.securityContext.runAsGroup=101
 ```
 In `./pods/example.yaml` needs to uncomment the following fields:
 ```
-spec.securityContext.runAsUser=101
-spec.securityContext.runAsGroup=101
+spec.securityContext.runAsUser=1001
+spec.securityContext.runAsGroup=1001
 ```
 
 ### 1. Deploy the ONLYOFFICE Docs license
@@ -258,31 +258,6 @@ $ kubectl create secret generic jwt \
 `MYSECRET` is the secret key to validate the JSON Web Token in the request to the ONLYOFFICE Docs.
 
 ### 3. Deploy DocumentServer
-
-Deploy the `spellchecker` deployment:
-
-```bash
-$ kubectl apply -f ./deployments/spellchecker.yaml
-```
-
-Verify that the `spellchecker` deployment is running the desired number of pods with the following command:
-
-```bash
-$ kubectl get deployment spellchecker
-```
-
-Output:
-
-```
-NAME           READY   UP-TO-DATE   AVAILABLE   AGE
-spellchecker   2/2     2            2           1m
-```
-
-Deploy the spellchecker service:
-
-```bash
-$ kubectl apply -f ./services/spellchecker.yaml
-```
 
 Deploy the example service:
 
@@ -334,7 +309,7 @@ NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 converter   2/2     2            2           1m
 ```
 
-The `docservice`, `converter` and `spellchecker` deployments consist of 2 pods each other by default.
+The `docservice` and `converter` deployments consist of 2 pods each other by default.
 
 To scale the `docservice` deployment, use the following command:
 
@@ -344,14 +319,10 @@ $ kubectl scale -n default deployment docservice --replicas=POD_COUNT
 
 where `POD_COUNT` is a number of the `docservice` pods.
 
-Do the same to scale the `converter` and `spellchecker` deployment:
+Do the same to scale the `converter` deployment:
 
 ```bash
 $ kubectl scale -n default deployment converter --replicas=POD_COUNT
-```
-
-```bash
-$ kubectl scale -n default deployment spellchecker --replicas=POD_COUNT
 ```
 
 ### 4. Deploy the DocumentServer Example (optional)
@@ -503,16 +474,25 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 #### 6.1.1 Preparing for update
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in the database.
-Download the ONLYOFFICE Docs database script for database cleaning:
+
+If there are `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
 
 ```bash
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+$ kubectl delete cm remove-db-scripts init-db-scripts
 ```
 
-Create a configmap from it:
+Download the ONLYOFFICE Docs database scripts for database cleaning and database schema creating:
+
+```bash
+$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+```
+
+Create a configmap from them:
 
 ```bash
 $ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
+$ kubectl create configmap init-db-scripts --from-file=./createdb.sql
 ```
 
 Create a configmap containing the update script:
@@ -537,9 +517,6 @@ $ kubectl delete job prepare4update
 
 Update deployment images:
 ```
-$ kubectl set image deployment/spellchecker \
-  spellchecker=onlyoffice/docs-spellchecker-de:DOCUMENTSERVER_VERSION
-
 $ kubectl set image deployment/converter \
   converter=onlyoffice/docs-converter-de:DOCUMENTSERVER_VERSION
 
