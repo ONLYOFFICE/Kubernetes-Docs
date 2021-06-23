@@ -11,6 +11,13 @@ spec:
   containers:
     - name: example
       image: onlyoffice/docs-example:6.3.1.32
+      resources:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "128Mi"
+          cpu: "250m"
       ports:
         - containerPort: 3000
       envFrom:

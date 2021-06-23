@@ -27,6 +27,13 @@ spec:
       containers:
         - name: converter
           image: onlyoffice/docs-converter-de:6.3.1.32
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "840m"
           env:
           - name: DB_PWD
             valueFrom:
