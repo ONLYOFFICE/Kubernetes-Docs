@@ -78,6 +78,10 @@ Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
   --set persistence.enabled=true \
+  --set resources.requests.memory=128Mi \
+  --set resources.requests.cpu=100m \
+  --set resources.limits.memory=256Mi \
+  --set resources.limits.cpu=200m \
   --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set persistence.size=PERSISTENT_SIZE
 ```
@@ -122,6 +126,10 @@ To install RabbitMQ to your cluster, run the following command:
 
 ```bash
 $ helm install rabbitmq bitnami/rabbitmq \
+  --set resources.requests.memory=256Mi \
+  --set resources.requests.cpu=100m \
+  --set resources.limits.memory=256Mi \
+  --set resources.limits.cpu=1000m \
   --set metrics.enabled=false
 ```
 
@@ -138,6 +146,10 @@ $ helm install redis bitnami/redis \
   --set architecture=standalone \
   --set auth.enabled=false \
   --set image.tag=5.0.7-debian-10-r51 \
+  --set master.resources.requests.memory=256Mi \
+  --set master.resources.requests.cpu=100m \
+  --set master.resources.limits.memory=256Mi \
+  --set master.resources.limits.cpu=250m \
   --set metrics.enabled=false
 ```
 
@@ -166,6 +178,10 @@ To install PostgreSQL to your cluster, run the following command:
 $ helm install postgresql bitnami/postgresql \
   --set initdbScriptsConfigMap=init-db-scripts \
   --set postgresqlDatabase=postgres \
+  --set resources.requests.memory=256Mi \
+  --set resources.requests.cpu=100m \
+  --set resources.limits.memory=1Gi \
+  --set resources.limits.cpu=1000m \
   --set persistence.size=PERSISTENT_SIZE \
   --set metrics.enabled=false
 ```
@@ -378,7 +394,13 @@ In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVIC
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
 ```bash
-$ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
+$ helm install nginx-ingress ingress-nginx/ingress-nginx \
+  --set controller.publishService.enabled=true \
+  --set controller.replicaCount=2 \
+  --set controller.resources.requests.memory=128Mi \
+  --set controller.resources.requests.cpu=100m \
+  --set controller.resources.limits.memory=128Mi \
+  --set controller.resources.limits.cpu=100m
 ```
 
 Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
