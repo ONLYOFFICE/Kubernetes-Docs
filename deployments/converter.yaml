@@ -30,10 +30,10 @@ spec:
           resources:
             requests:
               memory: "256Mi"
-              cpu: "250m"
+              cpu: "100m"
             limits:
               memory: "2Gi"
-              cpu: "840m"
+              cpu: "1000m"
           env:
           - name: DB_PWD
             valueFrom:

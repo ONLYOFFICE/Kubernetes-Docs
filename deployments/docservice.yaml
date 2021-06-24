@@ -39,8 +39,8 @@ spec:
               memory: "256Mi"
               cpu: "100m"
             limits:
-              memory: "1128Mi"
-              cpu: "400m"
+              memory: "1Gi"
+              cpu: "500m"
           ports:
             - containerPort: 8888
           livenessProbe:
@@ -71,8 +71,8 @@ spec:
               memory: "256Mi"
               cpu: "100m"
             limits:
-              memory: "1128Mi"
-              cpu: "400m"
+              memory: "2Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 8000
           readinessProbe:

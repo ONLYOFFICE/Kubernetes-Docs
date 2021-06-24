@@ -127,7 +127,7 @@ To install RabbitMQ to your cluster, run the following command:
 ```bash
 $ helm install rabbitmq bitnami/rabbitmq \
   --set resources.requests.memory=256Mi \
-  --set resources.requests.cpu=250m \
+  --set resources.requests.cpu=100m \
   --set resources.limits.memory=256Mi \
   --set resources.limits.cpu=1000m \
   --set metrics.enabled=false
@@ -179,7 +179,7 @@ $ helm install postgresql bitnami/postgresql \
   --set initdbScriptsConfigMap=init-db-scripts \
   --set postgresqlDatabase=postgres \
   --set resources.requests.memory=256Mi \
-  --set resources.requests.cpu=250m \
+  --set resources.requests.cpu=100m \
   --set resources.limits.memory=1Gi \
   --set resources.limits.cpu=1000m \
   --set persistence.size=PERSISTENT_SIZE \
