@@ -1,0 +1,22 @@
+{{ if .Values.example.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example
+  labels:
+    app: example
+spec:
+#  securityContext:
+#    runAsUser: 1001
+#    runAsGroup: 1001
+  containers:
+    - name: example
+      image: {{ .Values.example.containerImage | quote }}
+      ports:
+        - containerPort: 3000
+      envFrom:
+        - secretRef:
+            name: jwt
+        - configMapRef:
+              name: example
+{{ end }}

@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docservice
+  labels:
+    app: docservice
+spec:
+  replicas: {{ .Values.docservice.replicas }}
+  selector:
+    matchLabels:
+      app: docservice
+  template:
+    metadata:
+      labels:
+        app: docservice
+    spec:
+#      securityContext:
+#        runAsUser: 101
+#        runAsGroup: 101
+      # topologySpreadConstraints:
+      # - maxSkew: 1
+        # topologyKey: doks.digitalocean.com/node-pool
+        # whenUnsatisfiable: DoNotSchedule
+        # labelSelector:
+          # matchLabels:
+            # app: docservice
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: ds-files
+        - name: ds-license
+          secret:
+            secretName: license
+      containers:
+        - name: proxy
+          image: {{ .Values.docservice.proxyContainerImage }}
+          ports:
+            - containerPort: 8888
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /index.html
+              port: 8888
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /index.html
+              port: 8888
+            failureThreshold: 30
+            periodSeconds: 10
+          envFrom:
+          - configMapRef:
+              name: documentserver
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+
+        - name: docservice
+          image: {{ .Values.docservice.containerImage }}
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /index.html
+              port: 8000
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /index.html
+              port: 8000
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /index.html
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 10
+          resources: {{ toYaml .Values.docservice.resources | nindent 12 }}
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password
+          - name: AMQP_PWD
+            valueFrom:
+              secretKeyRef:
+                name: rabbitmq
+                key: rabbitmq-password
+          envFrom:
+          - secretRef:
+              name: jwt
+          - configMapRef:
+              name: documentserver
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          - name: ds-license
+            mountPath: /var/www/onlyoffice/Data
+            readOnly: true
