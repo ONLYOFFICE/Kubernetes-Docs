@@ -1,0 +1,67 @@
+connections:
+  dbHost: postgresql
+  dbUser: postgres
+  dbPassword: postgres
+  dbPort: "5432"
+
+  redisHost: redis-master
+
+  amqpHost: rabbitmq
+  amqpUser: user
+  amqpPassword: rabbitmq
+  amqpProto: amqp
+
+persistence:
+  storageClass: "nfs"
+  size: 8Gi
+
+metrics:
+  enabled: false
+
+example:
+  enabled: false
+  containerImage: onlyoffice/docs-example:6.3.1.32
+
+docservice:
+  replicas: 2
+  proxyContainerImage: onlyoffice/docs-proxy-de:6.3.1.32
+  containerImage: onlyoffice/docs-docservice-de:6.3.1.32
+  resources:
+    ##Example:
+    ##requests:
+    ##  memory: "256Mi"
+    ##  cpu: "100m"
+    requests: {}
+    ##limits:
+    ##  memory: "2Gi"
+    ##  cpu: "1000m"
+    limits: {}
+
+converter:
+  replicas: 2
+  containerImage: onlyoffice/docs-converter-de:6.3.1.32
+  resources:
+    ##Example:
+    ##requests:
+    ##  memory: "256Mi"
+    ##  cpu: "100m"
+    requests: {}
+    ##limits:
+    ##  memory: "2Gi"
+    ##  cpu: "1000m"
+    limits: {}
+
+jwt:
+  enabled: true
+  secret: MYSECRET
+
+service:
+  type: ClusterIP
+  port: 8888
+
+ingress:
+  enabled: false
+  ssl:
+    enabled: false
+    host: example.com
+    secret: tls

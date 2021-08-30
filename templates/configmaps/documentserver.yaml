@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: documentserver
+data:
+  DB_USER: {{ .Values.connections.dbUser }}
+  DB_HOST: {{ .Values.connections.dbHost }}
+  DB_PORT: {{ .Values.connections.dbPort | quote}}
+  REDIST_SERVER_HOST: {{ .Values.connections.redisHost }}
+  AMQP_HOST: {{ .Values.connections.amqpHost }}
+  AMQP_USER: {{ .Values.connections.amqpUser }}
+  AMQP_PROTO: {{ .Values.connections.amqpProto }}
+  METRICS_HOST: statsd-exporter-prometheus-statsd-exporter
+  METRICS_ENABLED: {{ .Values.metrics.enabled | quote}}
+  {{ if .Values.example.enabled }}
+  EXAMPLE_HOST_PORT: example:3000
+  {{ end }}
