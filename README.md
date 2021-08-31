@@ -67,12 +67,12 @@ Install NFS Server Provisioner
 
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
-  --set persistance.enabled=true \
-  --set persistance.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set persistance.size=PERSISTENT_SIZE
+  --set persistence.enabled=true \
+  --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
+  --set persistence.size=PERSISTENT_SIZE
 ```
 
-- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetes cluster
+- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetes cluster.
 
   Persistent Storage Classes for different providers:
   - Amazon EKS: `gp2`
@@ -92,15 +92,15 @@ Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `values
 
 ### 3. Deploy RabbitMQ
 
-To install the RabbitMQ to your cluster, run the following command:
+To install RabbitMQ to your cluster, run the following command:
 
 ```bash
 $ helm install rabbitmq bitnami/rabbitmq \
   --set metrics.enabled=false
 ```
-Note: Set the metrics.enabled=true to enable exposing RabbitMQ metrics to be gathered by Prometheus.
+Note: Set the `metrics.enabled=true` to enable exposing RabbitMQ metrics to be gathered by Prometheus.
 
-See more details about installing RabbitMQ via Helm here.
+See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/rabbitmq#rabbitmq).
 
 ### 4. Deploy Redis
 
@@ -114,9 +114,9 @@ $ helm install redis bitnami/redis \
   --set metrics.enabled=false
 ```
 
-Note: Set the metrics.enabled=true to enable exposing Redis metrics to be gathered by Prometheus.
+Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gathered by Prometheus.
 
-See more details about installing Redis via Helm here.
+See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/redis).
 
 ### 5. Deploy PostgreSQL
 
@@ -133,7 +133,7 @@ $ kubectl create configmap init-db-scripts \
   --from-file=./createdb.sql
 ```
 
-To install the PostgreSQL to your cluster, run the following command:
+To install PostgreSQL to your cluster, run the following command:
 
 ```
 $ helm install postgresql bitnami/postgresql \
@@ -143,14 +143,13 @@ $ helm install postgresql bitnami/postgresql \
   --set metrics.enabled=false
 ```
 
-Here PERSISTENT_SIZE is a size for the PostgreSQL persistent volume. For example: 8Gi.
+Here `PERSISTENT_SIZE` is a size for the PostgreSQL persistent volume. For example: `8Gi`.
 
 It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
 
-Note: Set the metrics.enabled=true to enable exposing PostgreSQL metrics to be gathered by Prometheus.
+Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be gathered by Prometheus.
 
-See more details about installing PostgreSQL via Helm here.
-
+See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 ### 6. Deploy StatsD exporter
 *This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) at all if you don't want to run StatsD exporter*
 
@@ -288,7 +287,7 @@ $ helm install documentserver ./ --set metrics.enabled=true
 ### 5.3 Expose DocumentServer
 
 #### 5.3.1 Expose DocumentServer via Service (HTTP Only)
-*You should skip #5.1 step if you are going expose DocumentServer via HTTPS*
+*You should skip [#5.3.1](#531-expose-documentserver-via-service--http-only-) step if you are going expose DocumentServer via HTTPS*
 
 This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
 Use this type of exposure if you use external TLS termination, and don't have another WEB application in k8s cluster.
@@ -332,7 +331,7 @@ See more detail about install Nginx Ingress via Helm [here](https://github.com/h
 
 #### 5.3.2.2 Expose DocumentServer via HTTP
 
-*You should skip #5.2.2 step if you are going expose DocumentServer via HTTPS*
+*You should skip [5.3.2.2](#5322-expose-documentserver-via-http) step if you are going expose DocumentServer via HTTPS*
 
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
@@ -350,23 +349,23 @@ Run next command to get `documentserver` ingress IP:
 $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
-After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
+After that, ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
 
-If ingress IP is empty try getting `documentserver` ingress hostname
+If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
-In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
+In this case, ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
 
 #### 5.3.2.3 Expose DocumentServer via HTTPS
 
-This type of exposure to enable internal TLS termination for DocumentServer.
+This type of exposure allows you to enable internal TLS termination for DocumentServer.
 
-Create `tls` secret with ssl certificate inside.
+Create the `tls` secret with an ssl certificate inside.
 
-Put ssl certificate and private key into `tls.crt` and `tls.key` file and than run:
+Put the ssl certificate and the private key into the `tls.crt` and `tls.key` files and then run:
 
 ```bash
 $ kubectl create secret generic tls \
@@ -379,21 +378,21 @@ $ helm install documentserver ./ --set ingress.enabled=true --set ingress.ssl.en
 
 ```
 
-Run next command to get `documentserver` ingress IP:
+Run the following command to get the `documentserver` ingress IP:
 
 ```bash
 $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
-If ingress IP is empty try getting `documentserver` ingress hostname
+If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
-Associate `documentserver` ingress IP or hostname with your domain name through your DNS provider.
+Associate the `documentserver` ingress IP or hostname with your domain name through your DNS provider.
 
-After it ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
+After that, ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
 
 ### 6. Update ONLYOFFICE Docs
 
