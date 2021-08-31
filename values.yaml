@@ -24,8 +24,20 @@ example:
 
 docservice:
   replicas: 2
-  proxyContainerImage: onlyoffice/docs-proxy-de:6.3.1.32
+  
   containerImage: onlyoffice/docs-docservice-de:6.3.1.32
+  resources:
+    ##Example:
+    ##requests:
+    ##  memory: "256Mi"
+    ##  cpu: "100m"
+    requests: {}
+    ##limits:
+    ##  memory: "2Gi"
+    ##  cpu: "1000m"
+    limits: {}
+proxy:
+  proxyContainerImage: onlyoffice/docs-proxy-de:6.3.1.32
   resources:
     ##Example:
     ##requests:

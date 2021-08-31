@@ -33,7 +33,7 @@ spec:
             secretName: license
       containers:
         - name: proxy
-          image: {{ .Values.docservice.proxyContainerImage }}
+          image: {{ .Values.proxy.proxyContainerImage }}
           ports:
             - containerPort: 8888
           livenessProbe:
@@ -50,6 +50,7 @@ spec:
               port: 8888
             failureThreshold: 30
             periodSeconds: 10
+          resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
           envFrom:
           - configMapRef:
               name: documentserver
