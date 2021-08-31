@@ -14,9 +14,9 @@ This repository contains a set of files to deploy ONLYOFFICE DocumentServer into
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
     + [6.2 Installing StatsD exporter](#62-installing-statsd-exporter)
 - [Deploy ONLYOFFICE DocumentServer](#deploy-onlyoffice-documentserver)
-  * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
-  * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
-  * [3. Uninstall ONLYOFFICE Docs](#3-uninstall-onlyoffice-docs)
+  * [1. Deploy the ONLYOFFICE DocumentServer license](#1-deploy-the-onlyoffice-documenterver-license)
+  * [2. Deploy ONLYOFFICE DocumentServer](#2-deploy-onlyoffice-documentserver)
+  * [3. Uninstall ONLYOFFICE DocumentServer](#3-uninstall-onlyoffice-documentserver)
   * [4. Parameters](#4-parameters)
   * [5. Configuration and installation details](#5-configuration-and-installation-details)
   * [5.1 Example deployment (optional)](#51-example-deployment--optional-)
@@ -27,7 +27,7 @@ This repository contains a set of files to deploy ONLYOFFICE DocumentServer into
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
     + [5.3.2.2 Expose DocumentServer via HTTP](#5322-expose-documentserver-via-http)
     + [5.3.2.3 Expose DocumentServer via HTTPS](#5323-expose-documentserver-via-https)
-  * [6. Update ONLYOFFICE Docs](#6-update-onlyoffice-docs)
+  * [6. Update ONLYOFFICE DocumentServer](#6-update-onlyoffice-documenterver)
     + [6.1 Manual update](#61-manual-update)
     + [6.1.1 Preparing for update](#611-preparing-for-update)
     + [6.1.2 Update the DocumentServer images](#612-update-the-documentserver-images)
@@ -72,7 +72,7 @@ $ helm install nfs-server stable/nfs-server-provisioner \
   --set persistence.size=PERSISTENT_SIZE
 ```
 
-- `PERSISTENT_STORAGE_CLASS` is Persistent Storage Class available in your Kubernetes cluster.
+- `PERSISTENT_STORAGE_CLASS` is a Persistent Storage Class available in your Kubernetes cluster.
 
   Persistent Storage Classes for different providers:
   - Amazon EKS: `gp2`
@@ -120,13 +120,13 @@ See more details about installing Redis via Helm [here](https://github.com/bitna
 
 ### 5. Deploy PostgreSQL
 
-Download the ONLYOFFICE Docs database scheme:
+Download the ONLYOFFICE DocumentServer database scheme:
 
 ```bash
 wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
 ```
 
-Create a config map from it:
+Create a configmap from it:
 
 ```bash
 $ kubectl create configmap init-db-scripts \
@@ -145,7 +145,7 @@ $ helm install postgresql bitnami/postgresql \
 
 Here `PERSISTENT_SIZE` is a size for the PostgreSQL persistent volume. For example: `8Gi`.
 
-It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
+It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
 
 Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be gathered by Prometheus.
 
@@ -170,15 +170,15 @@ $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
   --set statsd.eventFlushInterval=30000ms
 ```
 
-Allow the StatsD metrics in ONLYOFFICE Docs:
+Allow the StatsD metrics in ONLYOFFICE DocumentServer:
 
 Set the `data.METRICS_ENABLED` field in the ./configmaps/documentserver.yaml file to the `"true"` value
 
 ## Deploy ONLYOFFICE DocumentServer
 
-### 1. Deploy the ONLYOFFICE Docs license
+### 1. Deploy the ONLYOFFICE DocumentServer license
 
-If you have a valid ONLYOFFICE Docs license, create a secret license from the file.
+If you have a valid ONLYOFFICE DocumentServer license, create a secret license from the file.
 
 ```bash
 $ kubectl create secret generic license \
@@ -191,7 +191,7 @@ Note: The source license file name should be 'license.lic' because this name wou
 $ kubectl create secret generic license
 ```
 
-### 2. Deploy ONLYOFFICE Docs
+### 2. Deploy ONLYOFFICE DocumentServer
 
 To deploy DocumentServer with the release name `documentserver`:
 
@@ -202,7 +202,7 @@ $ helm install documentserver ./
 
 The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
 
-### 3. Uninstall ONLYOFFICE Docs
+### 3. Uninstall ONLYOFFICE DocumentServer
 
 To uninstall/delete the `documentserver` deployment:
 
@@ -394,7 +394,7 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 
 After that, ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
 
-### 6. Update ONLYOFFICE Docs
+### 6. Update ONLYOFFICE DocumentServer
 
 #### 6.1 Manual update
 
@@ -410,7 +410,7 @@ If there are `remove-db-scripts` and `init-db-scripts` configmaps, then delete t
 $ kubectl delete cm remove-db-scripts init-db-scripts
 ```
 
-Download the ONLYOFFICE Docs database scripts for database cleaning and database schema creating:
+Download the ONLYOFFICE DocumentServer database scripts for database cleaning and database schema creating:
 
 ```bash
 $ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
