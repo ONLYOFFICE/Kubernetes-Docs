@@ -81,9 +81,9 @@ $ helm install nfs-server stable/nfs-server-provisioner \
   - Yandex Cloud: `yc-network-hdd` or `yc-network-ssd`. [More details](https://cloud.yandex.ru/docs/managed-kubernetes/operations/volumes/manage-storage-class)
   - minikube: `standard`
 
-- `PERSISTENT_SIZE` is the total size of all Persistent Storages for nfs Persistent Storage Class. You can express size as a plain integer one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `8Gi`.
+- `PERSISTENT_SIZE` is the total size of all Persistent Storages for the nfs Persistent Storage Class. You can express the size as a plain integer with one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `8Gi`.
 
-See more detail about install NFS Server Provisioner via Helm [here](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner#nfs-server-provisioner).
+See more details about installing NFS Server Provisioner via Helm [here](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner#nfs-server-provisioner).
 
 Create a Persistent Volume Claim
 
@@ -290,10 +290,10 @@ $ helm install documentserver ./ --set metrics.enabled=true
 ### 5.3 Expose DocumentServer
 
 #### 5.3.1 Expose DocumentServer via Service (HTTP Only)
-*You should skip [#5.3.1](#531-expose-documentserver-via-service--http-only-) step if you are going expose DocumentServer via HTTPS*
+*You should skip step[#5.3.1](#531-expose-documentserver-via-service--http-only-) step if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
-Use this type of exposure if you use external TLS termination, and don't have another WEB application in k8s cluster.
+Use this type of exposure if you use external TLS termination, and don't have another WEB application in the k8s cluster.
 
 To expose DocumentServer via service set `service.type` parameter to LoadBalancer:
 
@@ -334,7 +334,7 @@ See more detail about install Nginx Ingress via Helm [here](https://github.com/h
 
 #### 5.3.2.2 Expose DocumentServer via HTTP
 
-*You should skip [5.3.2.2](#5322-expose-documentserver-via-http) step if you are going expose DocumentServer via HTTPS*
+*You should skip step[5.3.2.2](#5322-expose-documentserver-via-http) step if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
@@ -352,7 +352,7 @@ Run next command to get `documentserver` ingress IP:
 $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
-After that, ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
+After that, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
 
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
@@ -360,7 +360,7 @@ If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
-In this case, ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
+In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
 
 #### 5.3.2.3 Expose DocumentServer via HTTPS
 
@@ -395,9 +395,9 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 
 Associate the `documentserver` ingress IP or hostname with your domain name through your DNS provider.
 
-After that, ONLYOFFICE DocumentServer will be available at `https://your-domain-name/`.
+After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
-### 6. Update ONLYOFFICE DocumentServer
+### 6. Update ONLYOFFICE Docs
 
 #### 6.1 Manual update
 
@@ -413,7 +413,7 @@ If there are `remove-db-scripts` and `init-db-scripts` configmaps, then delete t
 $ kubectl delete cm remove-db-scripts init-db-scripts
 ```
 
-Download the ONLYOFFICE DocumentServer database scripts for database cleaning and database schema creating:
+Download the ONLYOFFICE Docs database scripts for database cleaning and database schema creating:
 
 ```bash
 $ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
@@ -568,7 +568,7 @@ Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-i
 #### 3.1 Expose Grafana via HTTP
 *You should skip step [#3.1](#31-expose-grafana-via-http) if you are going to expose Grafana via HTTPS*
 
-To expose Grafana via ingress HTTP set `ingress.enabled` parameter to `true`
+To expose Grafana via ingress HTTP set `ingress.enabled` parameter to `true`.
 
 That you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
 
