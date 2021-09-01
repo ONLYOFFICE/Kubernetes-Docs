@@ -1,6 +1,6 @@
-# ONLYOFFICE DocumentServer for Kubernetes
+# ONLYOFFICE Docs for Kubernetes
 
-This repository contains a set of files to deploy ONLYOFFICE DocumentServer into Kubernetes cluster.
+This repository contains a set of files to deploy ONLYOFFICE Docs into Kubernetes cluster.
 
 ## Contents
 - [Introduction](#introduction)
@@ -13,10 +13,10 @@ This repository contains a set of files to deploy ONLYOFFICE DocumentServer into
   * [6. Deploy StatsD exporter](#6-deploy-statsd-exporter)
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
     + [6.2 Installing StatsD exporter](#62-installing-statsd-exporter)
-- [Deploy ONLYOFFICE DocumentServer](#deploy-onlyoffice-documentserver)
-  * [1. Deploy the ONLYOFFICE DocumentServer license](#1-deploy-the-onlyoffice-documenterver-license)
-  * [2. Deploy ONLYOFFICE DocumentServer](#2-deploy-onlyoffice-documentserver)
-  * [3. Uninstall ONLYOFFICE DocumentServer](#3-uninstall-onlyoffice-documentserver)
+- [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
+  * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
+  * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
+  * [3. Uninstall ONLYOFFICE Docs](#3-uninstall-onlyoffice-docs)
   * [4. Parameters](#4-parameters)
   * [5. Configuration and installation details](#5-configuration-and-installation-details)
   * [5.1 Example deployment (optional)](#51-example-deployment--optional-)
@@ -27,7 +27,7 @@ This repository contains a set of files to deploy ONLYOFFICE DocumentServer into
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
     + [5.3.2.2 Expose DocumentServer via HTTP](#5322-expose-documentserver-via-http)
     + [5.3.2.3 Expose DocumentServer via HTTPS](#5323-expose-documentserver-via-https)
-  * [6. Update ONLYOFFICE DocumentServer](#6-update-onlyoffice-documenterver)
+  * [6. Update ONLYOFFICE Docs](#6-update-onlyoffice-docs)
     + [6.1 Manual update](#61-manual-update)
     + [6.1.1 Preparing for update](#611-preparing-for-update)
     + [6.1.2 Update the DocumentServer images](#612-update-the-documentserver-images)
@@ -85,9 +85,13 @@ $ helm install nfs-server stable/nfs-server-provisioner \
 
 See more detail about install NFS Server Provisioner via Helm [here](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner#nfs-server-provisioner).
 
-Create Persistent Volume Claim
+Create a Persistent Volume Claim
 
-Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `values.yaml` file in `persistence.storageClass` and `persistence.size` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
+```bash
+$ kubectl apply -f ./pvc/ds-files.yaml
+```
+
+Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `values.yaml` file in `persistence.storageClass` and `persistence.size` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE Docs.
 
 
 ### 3. Deploy RabbitMQ
@@ -120,7 +124,7 @@ See more details about installing Redis via Helm [here](https://github.com/bitna
 
 ### 5. Deploy PostgreSQL
 
-Download the ONLYOFFICE DocumentServer database scheme:
+Download the ONLYOFFICE Docs database scheme:
 
 ```bash
 wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
@@ -145,7 +149,7 @@ $ helm install postgresql bitnami/postgresql \
 
 Here `PERSISTENT_SIZE` is a size for the PostgreSQL persistent volume. For example: `8Gi`.
 
-It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE DocumentServer.
+It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
 
 Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be gathered by Prometheus.
 
@@ -170,15 +174,13 @@ $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
   --set statsd.eventFlushInterval=30000ms
 ```
 
-Allow the StatsD metrics in ONLYOFFICE DocumentServer:
+To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-statsd-deployment--optional-)
 
-Set the `data.METRICS_ENABLED` field in the ./configmaps/documentserver.yaml file to the `"true"` value
+## Deploy ONLYOFFICE Docs
 
-## Deploy ONLYOFFICE DocumentServer
+### 1. Deploy the ONLYOFFICE Docs license
 
-### 1. Deploy the ONLYOFFICE DocumentServer license
-
-If you have a valid ONLYOFFICE DocumentServer license, create a secret license from the file.
+If you have a valid ONLYOFFICE Docs license, create a secret license from the file.
 
 ```bash
 $ kubectl create secret generic license \
@@ -191,7 +193,7 @@ Note: The source license file name should be 'license.lic' because this name wou
 $ kubectl create secret generic license
 ```
 
-### 2. Deploy ONLYOFFICE DocumentServer
+### 2. Deploy ONLYOFFICE Docs
 
 To deploy DocumentServer with the release name `documentserver`:
 
@@ -202,7 +204,7 @@ $ helm install documentserver ./
 
 The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
 
-### 3. Uninstall ONLYOFFICE DocumentServer
+### 3. Uninstall ONLYOFFICE Docs
 
 To uninstall/delete the `documentserver` deployment:
 
@@ -279,7 +281,8 @@ $ helm install documentserver ./ --set example.enabled=true
 ```
 
 ### 5.2 StatsD deployment (optional)
-To deploy StatsD set `connections.metricsEnabled` to true:
+To deploy StatsD set `metrics.enabled` to true:
+
 ```bash
 $ helm install documentserver ./ --set metrics.enabled=true
 ```
@@ -295,7 +298,7 @@ Use this type of exposure if you use external TLS termination, and don't have an
 To expose DocumentServer via service set `service.type` parameter to LoadBalancer:
 
 ```bash
-$ helm install documentserver ./ --set service.type=LoadBalancer --set service.port=8888
+$ helm install documentserver ./ --set service.type=LoadBalancer,service.port=8888
 
 ```
 
@@ -324,7 +327,7 @@ In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERV
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
 ```bash
-$helm install nginx-ingress ingress-nginx / ingress-nginx --set controller.publishService.enabled = true, controller.replicaCount = 2
+$helm install nginx-ingress ingress-nginx / ingress-nginx --set controller.publishService.enabled = true,controller.replicaCount = 2
 ```
 
 See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
@@ -374,7 +377,7 @@ $ kubectl create secret generic tls \
 ```
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true --set ingress.ssl.enabled=true --set ingress.ssl.host=example.com
+$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
 
 ```
 
@@ -492,6 +495,13 @@ See more details about installing Prometheus via Helm [here](https://github.com/
 #### 2.1 Deploy Grafana without installing ready-made dashboards
 
 *You should skip step [#2.1](#21-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
+
+If you have completed step [6](#6-deploy-statsd-exporter), then update the prometeus installation:
+
+```bash
+helm upgrade prometheus prometheus-community/prometheus \
+--set-file extraScrapeConfigs=./template/configmaps/extraScrapeConfigs.yaml
+```
 
 To install Grafana to your cluster, run the following command:
 

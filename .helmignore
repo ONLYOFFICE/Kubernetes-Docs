@@ -23,7 +23,7 @@
 .vscode/
 templates/metrics/
 templates/scripts/
-templates/pvc/ds-files-minikube.yaml
+templates/pvc
 templates/configmaps/extraScrapeConfigs.yaml
 templates/ingresses/ingress_values.yaml
 

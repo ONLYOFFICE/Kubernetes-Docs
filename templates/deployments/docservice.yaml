@@ -62,28 +62,9 @@ spec:
           image: {{ .Values.docservice.containerImage }}
           ports:
             - containerPort: 8000
-          readinessProbe:
-            failureThreshold: 2
-            httpGet:
-              path: /index.html
-              port: 8000
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 3
-          livenessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /index.html
-              port: 8000
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 3
-          startupProbe:
-            httpGet:
-              path: /index.html
-              port: 8000
-            failureThreshold: 30
-            periodSeconds: 10
+          readinessProbe: {{ toYaml .Values.docservice.readinessProbe | nindent 12 }}
+          livenessProbe: {{ toYaml .Values.docservice.livenessProbe | nindent 12 }}
+          startupProbe: {{ toYaml .Values.docservice.startupProbe | nindent 12 }}
           resources: {{ toYaml .Values.docservice.resources | nindent 12 }}
           env:
           - name: DB_PWD
