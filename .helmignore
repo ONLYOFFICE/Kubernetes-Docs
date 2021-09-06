@@ -21,9 +21,5 @@
 .idea/
 *.tmproj
 .vscode/
-templates/metrics/
-templates/scripts/
-templates/pvc
-templates/configmaps/extraScrapeConfigs.yaml
-templates/ingresses/ingress_values.yaml
+
 

@@ -27,11 +27,13 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into Kubernete
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
     + [5.3.2.2 Expose DocumentServer via HTTP](#5322-expose-documentserver-via-http)
     + [5.3.2.3 Expose DocumentServer via HTTPS](#5323-expose-documentserver-via-https)
-  * [6. Update ONLYOFFICE Docs](#6-update-onlyoffice-docs)
-    + [6.1 Manual update](#61-manual-update)
-    + [6.1.1 Preparing for update](#611-preparing-for-update)
-    + [6.1.2 Update the DocumentServer images](#612-update-the-documentserver-images)
-    + [6.2 Automated update](#62-automated-update)
+  * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
+      + [6.1 Manual scaling](#61-manual-scaling) 
+  * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
+    + [7.1 Manual update](#71-manual-update)
+    + [7.1.1 Preparing for update](#711-preparing-for-update)
+    + [7.1.2 Update the DocumentServer images](#712-update-the-documentserver-images)
+    + [7.2 Automated update](#72-automated-update)
 - [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana--optional-)
   * [1. Deploy Prometheus](#1-deploy-prometheus)
     + [1.1 Add Helm repositories](#11-add-helm-repositories)
@@ -46,11 +48,21 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into Kubernete
 
 ## Introduction
 
-- You must have Kubernetes installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to setup a Kubernetes.
+- You must have a Kubernetes or OpenShift cluster installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to set up Kubernetes. Please, checkout [the reference](https://docs.openshift.com/container-platform/4.7/installing/index.html) to setup OpenShift.
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
-- You should install Helm v3, please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
+- You should install Helm v3. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
+- If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. 
+- If in an OpenShift cluster, the installation of components external to ‘Docs’ will be performed from Helm Chart, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
 
 ## Deploy prerequisites
+
+Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 1001`.
+
+To do this, run the following commands:
+```
+$ oc apply -f ./scc/helm-components.yaml
+$ oc adm policy add-scc-to-group scc-helm-components system:authenticated
+```
 
 ### 1. Add Helm repositories
 
@@ -64,6 +76,8 @@ $ helm repo update
 ### 2. Install Persistent Storage
 
 Install NFS Server Provisioner
+
+Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html).
 
 ```bash
 $ helm install nfs-server stable/nfs-server-provisioner \
@@ -88,7 +102,7 @@ See more details about installing NFS Server Provisioner via Helm [here](https:/
 Create a Persistent Volume Claim
 
 ```bash
-$ kubectl apply -f ./pvc/ds-files.yaml
+$ kubectl apply -f ./sources/pvc/ds-files.yaml
 ```
 
 Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `values.yaml` file in `persistence.storageClass` and `persistence.size` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE Docs.
@@ -102,6 +116,7 @@ To install RabbitMQ to your cluster, run the following command:
 $ helm install rabbitmq bitnami/rabbitmq \
   --set metrics.enabled=false
 ```
+
 Note: Set the `metrics.enabled=true` to enable exposing RabbitMQ metrics to be gathered by Prometheus.
 
 See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/rabbitmq#rabbitmq).
@@ -154,6 +169,7 @@ It's recommended to use at least 2Gi of persistent storage for every 100 active 
 Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be gathered by Prometheus.
 
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
+
 ### 6. Deploy StatsD exporter
 *This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) at all if you don't want to run StatsD exporter*
 
@@ -178,20 +194,31 @@ To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-statsd-dep
 
 ## Deploy ONLYOFFICE Docs
 
+Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 101`.
+
+To do this, run the following commands:
+```
+$ oc apply -f ./sources/scc/docs-components.yaml
+$ oc adm policy add-scc-to-group scc-docs-components system:authenticated
+```
+Also, in all `yaml` files in the `deployments` directory, you must uncomment the following fields:
+```
+spec.template.spec.securityContext.runAsUser=101
+spec.template.spec.securityContext.runAsGroup=101
+```
+In `./templates/pods/example.yaml` needs to uncomment the following fields:
+```
+spec.securityContext.runAsUser=1001
+spec.securityContext.runAsGroup=1001
+```
+
 ### 1. Deploy the ONLYOFFICE Docs license
 
-If you have a valid ONLYOFFICE Docs license, create a secret license from the file.
-
-```bash
-$ kubectl create secret generic license \
-  --from-file=./license.lic
-```
+If you have a valid ONLYOFFICE Docs license, add it to the directory `sources/license`.
 
 Note: The source license file name should be 'license.lic' because this name would be used as a field in the created secret.
 
-```bash
-$ kubectl create secret generic license
-```
+- If you have no ONLYOFFICE Docs license, leave the directory empty.
 
 ### 2. Deploy ONLYOFFICE Docs
 
@@ -209,7 +236,7 @@ The command deploys DocumentServer on the Kubernetes cluster in the default conf
 To uninstall/delete the `documentserver` deployment:
 
 ```bash
-$ helm delete my-release
+$ helm delete documentserver
 
 ```
 
@@ -265,7 +292,7 @@ This command gives expose documentServer via HTTPS.
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ helm install my-release -f values.yaml bitnami/rabbitmq
+$ helm install documentserver -f values.yaml ./
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
@@ -337,7 +364,7 @@ See more detail about install Nginx Ingress via Helm [here](https://github.com/h
 *You should skip step[5.3.2.2](#5322-expose-documentserver-via-http) step if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
-Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
+Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
 To expose DocumentServer via ingress HTTP set `ingress.enabled` parameter to true:
 
@@ -397,13 +424,34 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
-### 6. Update ONLYOFFICE Docs
+### 6. Scale DocumentServer (optional)
 
-#### 6.1 Manual update
+*This step is optional. You can skip #4 step at all if you wanna use default deployment settings.*
 
-*You should skip step [#6.1](#61-manual-update) if you want to perform the update using a script*
+#### 6.1 Manual scaling
+`docservice` and `converter` deployments consist of 2 pods each other by default.
 
-#### 6.1.1 Preparing for update
+To scale `docservice` deployment use follow command:
+
+```bash
+$ kubectl scale -n default deployment docservice --replicas=POD_COUNT
+```
+
+where `POD_COUNT` is number of `docservice` pods
+
+The same to scale `converter` deployment:
+
+```bash
+$ kubectl scale -n default deployment converter --replicas=POD_COUNT
+```
+
+### 7. Update ONLYOFFICE Docs
+
+#### 7.1 Manual update
+
+*You should skip step [#7.1](#71-manual-update) if you want to perform the update using a script*
+
+#### 7.1.1 Preparing for update
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in the database.
 
@@ -430,7 +478,7 @@ $ kubectl create configmap init-db-scripts --from-file=./createdb.sql
 Create a configmap containing the update script:
 
 ```bash
-$ kubectl apply -f ./templates/configmaps/update-ds.yaml
+$ kubectl apply -f ./sources/update-ds.yaml
 ```
 
 Run the job:
@@ -445,7 +493,7 @@ After successful run, the job automaticly terminates its pod, but you have to cl
 $ kubectl delete job prepare4update
 ```
 
-#### 6.1.2 Update the DocumentServer images
+#### 7.1.2 Update the DocumentServer images
 
 Update deployment images:
 ```
@@ -458,12 +506,12 @@ $ kubectl set image deployment/docservice \
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
 
-#### 6.2 Automated update
+#### 7.2 Automated update
 
 To perform the update using a script, run the following command:
 
 ```bash
-$ ./templates/scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
+$ ./sources/update-ds.sh [DOCUMENTSERVER_VERSION]
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
 
@@ -515,11 +563,11 @@ $ helm install grafana bitnami/grafana \
 
 #### 2.2 Deploy Grafana with the installation of ready-made dashboards
 
-Run the `./templates/metrics/get_dashboard.sh` script, which will download ready-made dashboards in `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
+Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-$ ./templates/metrics/get_dashboard.sh
+$ ./sources/metrics/get_dashboard.sh
 ```
 
 To install Grafana to your cluster, run the following command:
