@@ -1,6 +1,6 @@
 # ONLYOFFICE Docs for Kubernetes
 
-This repository contains a set of files to deploy ONLYOFFICE Docs into Kubernetes cluster.
+This repository contains a set of files to deploy ONLYOFFICE Docs into a Kubernetes cluster or OpenShift cluster.
 
 ## Contents
 - [Introduction](#introduction)
@@ -354,7 +354,7 @@ In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERV
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
 ```bash
-$helm install nginx-ingress ingress-nginx / ingress-nginx --set controller.publishService.enabled = true,controller.replicaCount = 2
+$ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
 See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
@@ -511,7 +511,7 @@ $ kubectl set image deployment/docservice \
 To perform the update using a script, run the following command:
 
 ```bash
-$ ./sources/update-ds.sh [DOCUMENTSERVER_VERSION]
+$ ./sources/scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
 
@@ -548,7 +548,7 @@ If you have completed step [6](#6-deploy-statsd-exporter), then update the prome
 
 ```bash
 helm upgrade prometheus prometheus-community/prometheus \
---set-file extraScrapeConfigs=./template/configmaps/extraScrapeConfigs.yaml
+--set-file extraScrapeConfigs=./sources/extraScrapeConfigs.yaml
 ```
 
 To install Grafana to your cluster, run the following command:
@@ -591,8 +591,8 @@ $ helm install grafana bitnami/grafana \
   --set dashboardsConfigMaps[4].fileName=dashboard-postgresql.json \
   --set dashboardsConfigMaps[5].configMapName=dashboard-nginx-ingress \
   --set dashboardsConfigMaps[5].fileName=dashboard-nginx-ingress.json \
-  --set dashboardsConfigMaps[5].configMapName=dashboard-documentserver \
-  --set dashboardsConfigMaps[5].fileName=documentserver-statsd-exporter.json
+  --set dashboardsConfigMaps[6].configMapName=dashboard-documentserver \
+  --set dashboardsConfigMaps[6].fileName=documentserver-statsd-exporter.json
 ```
 
 After executing this command, the following dashboards will be imported into Grafana:

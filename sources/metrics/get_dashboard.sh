@@ -12,6 +12,6 @@ kubectl create configmap dashboard-redis --from-file=./dashboard-redis.json
 kubectl create configmap dashboard-rabbitmq --from-file=./dashboard-rabbitmq.json
 kubectl create configmap dashboard-postgresql --from-file=./dashboard-postgresql.json
 kubectl create configmap dashboard-nginx-ingress --from-file=./dashboard-nginx-ingress.json
-kubectl create configmap dashboard-documentserver --from-file=./metrics/documentserver-statsd-exporter.json
+kubectl create configmap dashboard-documentserver --from-file=./sources/metrics/documentserver-statsd-exporter.json
 helm upgrade prometheus prometheus-community/prometheus \
---set-file extraScrapeConfigs=./templates/configmaps/extraScrapeConfigs.yaml
+--set-file extraScrapeConfigs=./sources/extraScrapeConfigs.yaml
