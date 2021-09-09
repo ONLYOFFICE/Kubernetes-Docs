@@ -332,15 +332,15 @@ Run next command to get `documentserver` service IP:
 $ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
-After it ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-SERVICE-IP/`.
+After that, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVICE-IP/`.
 
-If service IP is empty try getting `documentserver` service hostname
+If the service IP is empty, try getting the `documentserver` service hostname:
 
 ```bash
-kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
-In this case ONLYOFFICE DocumentServer will be available at `http://DOCUMENTSERVER-SERVICE-HOSTNAME/`.
+In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVICE-HOSTNAME/`.
 
 
 #### 5.3.2 Expose DocumentServer via Ingress
@@ -369,7 +369,7 @@ $ helm install documentserver ./ --set ingress.enabled=true
 
 ```
 
-Run next command to get `documentserver` ingress IP:
+Run the following command to get the `documentserver` ingress IP:
 
 ```bash
 $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
@@ -514,7 +514,6 @@ $ ./sources/scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
 ## Using Prometheus to collect metrics with visualization in Grafana (optional)
 *This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
 
-
 ### 1. Deploy Prometheus
 
 #### 1.1 Add Helm repositories
@@ -614,7 +613,7 @@ Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-i
 
 To expose Grafana via ingress HTTP set `ingress.enabled` parameter to `true`.
 
-That you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
+After that you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
 
 #### 3.2 Expose Grafana via HTTPS
 
