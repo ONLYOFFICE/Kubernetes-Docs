@@ -1,14 +1,14 @@
 connections:
   dbHost: postgresql
   dbUser: postgres
-  dbPassword: postgres
+#  dbPassword: postgres
   dbPort: "5432"
 
   redisHost: redis-master
 
   amqpHost: rabbitmq
   amqpUser: user
-  amqpPassword: rabbitmq
+#  amqpPassword: rabbitmq
   amqpProto: amqp
 
 persistence:
@@ -58,6 +58,20 @@ docservice:
     ##  cpu: "1000m"
     limits: {}
 proxy:
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /index.html
+      port: 8888
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 3
+  startupProbe:
+    httpGet:
+      path: /index.html
+      port: 8888
+    failureThreshold: 30
+    periodSeconds: 10
   proxyContainerImage: onlyoffice/docs-proxy-de:6.3.1.32
   resources:
     ##Example:
