@@ -19,10 +19,10 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [3. Uninstall ONLYOFFICE Docs](#3-uninstall-onlyoffice-docs)
   * [4. Parameters](#4-parameters)
   * [5. Configuration and installation details](#5-configuration-and-installation-details)
-  * [5.1 Example deployment (optional)](#51-example-deployment--optional-)
-  * [5.2 StatsD deployment (optional)](#52-statsd-deployment--optional-)
+  * [5.1 Example deployment (optional)](#51-example-deployment-optional)
+  * [5.2 Metrics deployment (optional)](#52-metrics-deployment-optional)
   * [5.3 Expose DocumentServer](#53-expose-documentserver)
-    + [5.3.1 Expose DocumentServer via Service (HTTP Only)](#531-expose-documentserver-via-service--http-only-)
+    + [5.3.1 Expose DocumentServer via Service (HTTP Only)](#531-expose-documentserver-via-service-http-only)
     + [5.3.2 Expose DocumentServer via Ingress](#532-expose-documentserver-via-ingress)
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
     + [5.3.2.2 Expose DocumentServer via HTTP](#5322-expose-documentserver-via-http)
@@ -34,7 +34,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [7.1.1 Preparing for update](#711-preparing-for-update)
     + [7.1.2 Update the DocumentServer images](#712-update-the-documentserver-images)
     + [7.2 Automated update](#72-automated-update)
-- [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana--optional-)
+- [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
   * [1. Deploy Prometheus](#1-deploy-prometheus)
     + [1.1 Add Helm repositories](#11-add-helm-repositories)
     + [1.2 Installing Prometheus](#12-installing-prometheus)
@@ -60,7 +60,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./scc/helm-components.yaml
+$ oc apply -f ./sources/scc/helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
 
@@ -186,7 +186,7 @@ $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
   --set statsd.eventFlushInterval=30000ms
 ```
 
-To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-statsd-deployment--optional-)
+To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
 
 ## Deploy ONLYOFFICE Docs
 
@@ -280,7 +280,7 @@ The command removes all the Kubernetes components associated with the chart and 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=your.host.com
+$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
 ```
 
 This command gives expose documentServer via HTTPS.
@@ -303,17 +303,22 @@ To deploy example set `example.install` parameter to true:
 $ helm install documentserver ./ --set example.enabled=true
 ```
 
-### 5.2 StatsD deployment (optional)
+### 5.2 Metrics deployment (optional)
 To deploy StatsD set `metrics.enabled` to true:
 
 ```bash
 $ helm install documentserver ./ --set metrics.enabled=true
 ```
+If you want to use nginx ingress set `grafana_enabled` to true:
+
+```bash
+$ helm install documentserver ./ --set grafana_ingress.enabled=true
+```
 
 ### 5.3 Expose DocumentServer
 
 #### 5.3.1 Expose DocumentServer via Service (HTTP Only)
-*You should skip step[#5.3.1](#531-expose-documentserver-via-service--http-only-) step if you are going to expose DocumentServer via HTTPS*
+*You should skip step[#5.3.1](#531-expose-documentserver-via-service-http-only) step if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
 Use this type of exposure if you use external TLS termination, and don't have another WEB application in the k8s cluster.
@@ -610,8 +615,6 @@ Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-i
 
 #### 3.1 Expose Grafana via HTTP
 *You should skip step [#3.1](#31-expose-grafana-via-http) if you are going to expose Grafana via HTTPS*
-
-To expose Grafana via ingress HTTP set `ingress.enabled` parameter to `true`.
 
 After that you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
 

@@ -1,4 +1,4 @@
-{{- if .Values.metrics.enabled -}}
+{{- if .Values.grafana_ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -10,7 +10,7 @@ spec:
   {{ if .Values.ingress.ssl.enabled }}
   tls:
   - hosts:
-    - example.com
+    - {{ .Values.ingress.ssl.host }}
     secretName: {{ .Values.ingress.ssl.secret }}
   {{ end }}
   rules:

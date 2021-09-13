@@ -1,14 +1,12 @@
 connections:
   dbHost: postgresql
   dbUser: postgres
-#  dbPassword: postgres
   dbPort: "5432"
 
   redisHost: redis-master
 
   amqpHost: rabbitmq
   amqpUser: user
-#  amqpPassword: rabbitmq
   amqpProto: amqp
 
 persistence:
@@ -112,3 +110,5 @@ ingress:
     enabled: false
     host: example.com
     secret: tls
+grafana_ingress:
+  enabled: false
