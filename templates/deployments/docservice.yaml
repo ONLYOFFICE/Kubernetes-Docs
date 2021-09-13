@@ -36,8 +36,12 @@ spec:
           image: {{ .Values.proxy.proxyContainerImage }}
           ports:
             - containerPort: 8888
-          livenessProbe: {{ toYaml .Values.proxy.livenessProbe | nindent 12 }}
-          startupProbe: {{ toYaml .Values.proxy.startupProbe | nindent 12 }}
+          {{ if .Values.proxy.livenessProbe.enabled }}
+          livenessProbe: {{ toYaml .Values.proxy.livenessProbe | nindent 14 }}
+          {{ end }}
+          {{ if .Values.proxy.startupProbe.enabled }}
+          startupProbe: {{ toYaml .Values.proxy.startupProbe | nindent 14 }}
+          {{ end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
           envFrom:
           - configMapRef:
@@ -50,9 +54,15 @@ spec:
           image: {{ .Values.docservice.containerImage }}
           ports:
             - containerPort: 8000
-          readinessProbe: {{ toYaml .Values.docservice.readinessProbe | nindent 12 }}
-          livenessProbe: {{ toYaml .Values.docservice.livenessProbe | nindent 12 }}
-          startupProbe: {{ toYaml .Values.docservice.startupProbe | nindent 12 }}
+          {{ if .Values.docservice.readinessProbe.enabled }}
+          readinessProbe: {{ toYaml .Values.docservice.readinessProbe | nindent 14 }}
+          {{ end }}
+          {{ if .Values.docservice.livenessProbe.enabled }}
+          livenessProbe: {{ toYaml .Values.docservice.livenessProbe | nindent 14 }}
+          {{ end }}
+          {{ if .Values.docservice.startupProbe.enabled }}
+          startupProbe: {{ toYaml .Values.docservice.startupProbe | nindent 14 }}
+          {{ end }}
           resources: {{ toYaml .Values.docservice.resources | nindent 12 }}
           env:
           - name: DB_PWD

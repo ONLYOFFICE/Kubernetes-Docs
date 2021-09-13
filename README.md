@@ -56,6 +56,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 
 ## Deploy prerequisites
 
+Open the repo directory
+
 Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 1001`.
 
 To do this, run the following commands:
@@ -240,42 +242,51 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ### 4. Parameters
 
-| Parameter                         | Description                                      | Default                                     |
-|-----------------------------------|--------------------------------------------------|---------------------------------------------|
-| connections.dbHost                | IP address or the name of the database           | postgresql                                  |
-| connections.dbUser                | database user                                    | postgres                                    |
-| connections.dbPassword            | database password                                | postgres                                    |
-| connections.dbPort                | database server port number                      | 5432                                        |
-| connections.redistHost            | IP address or the name of the redis host         | redis-master                                |
-| connections.amqpHost              | IP address or the name of the message-broker     | rabbit-mq                                   |
-| connections.amqpUser              | messabe-broker user                              | user                                        |
-| connections.amqpProto             | messabe-broker protocol                          | ampq                                        |
-| persistance.storageClass          | storage class name                               | nfs                                         |
-| persistance.size                  | storage volume size                              | 8Gi                                         |
-| metrics.enabled                   | Statsd installation                              | false                                       |
-| example.enabled                   | Choise of example installation                   | false                                       |
-| example.containerImage            | example container image name                     | onlyoffice/docs-example:6.3.1.32            |
-| docservice.replicas               | docservice replicas quantity                     | 2                                           |
-| docservice.proxyContainerImage    | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.3.1.32           |
-| docservice.containerImage         | docservice container image name                  | onlyoffice/docs-docservice-de:6.3.1.32      |
-| docservice.requests.memory        | memory request                                   | 256Mi                                       |
-| docservice.requests.cpu           | cpu request                                      | 100m                                        |
-| docservice.limits.memory          | memory limit                                     | 2Gi                                         |
-| docservice.limits.cpu             | cpu limit                                        | 1000m                                       |
-| converter.replicas                | converter replicas quantity                      | 2                                           |
-| converter.containerImage          | converter container image name                   | onlyoffice/docs-converter-de:6.3.1.32       |
-| converter.requests.memory         | memory request                                   | 256Mi                                       |
-| converter.requests.cpu            | cpu request                                      | 100m                                        |
-| converter.limits.memory           | memory limit                                     | 2Gi                                         |
-| converter.limits.cpu              | cpu limit                                        | 1000m                                       |
-| jwt.enabled                       | jwt enabling parameter                           | true                                        |
-| jwt.secret                        | jwt secret                                       | MYSECRET                                    |
-| service.type                      | documentserver service type                      | ClusterIP                                   |
-| service.port                      | documentserver service port                      | 8888                                        |
-| ingress.enabled                   | installation of ingress service                  | false                                       |
-| ingress.ssl.enabled               | installation ssl for ingress service             | false                                       |
-| ingress.ssl.host                  | host for ingress ssl                             | example.com                                 |
-| ingress.ssl.secret                | secret name for ssl                              | tls                                         |
+| Parameter                          | Description                                      | Default                                     |
+|------------------------------------|--------------------------------------------------|---------------------------------------------|
+| connections.dbHost                 | IP address or the name of the database           | postgresql                                  |
+| connections.dbUser                 | database user                                    | postgres                                    |
+| connections.dbPort                 | database server port number                      | 5432                                        |
+| connections.redistHost             | IP address or the name of the redis host         | redis-master                                |
+| connections.amqpHost               | IP address or the name of the message-broker     | rabbit-mq                                   |
+| connections.amqpUser               | messabe-broker user                              | user                                        |
+| connections.amqpProto              | messabe-broker protocol                          | ampq                                        |
+| persistance.storageClass           | storage class name                               | nfs                                         |
+| persistance.size                   | storage volume size                              | 8Gi                                         |
+| metrics.enabled                    | Statsd installation                              | false                                       |
+| example.enabled                    | Choise of example installation                   | false                                       |
+| example.containerImage             | example container image name                     | onlyoffice/docs-example:6.3.1.32            |
+| docservice.replicas                | docservice replicas quantity                     | 2                                           |
+| docservice.containerImage          | docservice container image name                  | onlyoffice/docs-docservice-de:6.3.1.32      |
+| docservice.resourcesrequests.memory| memory request                                   | 256Mi                                       |
+| docservice.resourcesrequests.cpu   | cpu request                                      | 100m                                        |
+| docservice.resourceslimits.memory  | memory limit                                     | 2Gi                                         |
+| docservice.resourceslimits.cpu     | cpu limit                                        | 1000m                                       |
+| docservice.readinessProbe.enabled  | Enable readinessProbe for docservice             | true                                        |
+| docservice.livenessProbe.enabled   | Enable livenessProbe for docservice              | true                                        |
+| docservice.startupProbe.enabled    | Enable startupProbe for docservice               | true                                        |
+| proxy.proxyContainerImage          | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.3.1.32           |
+| proxy.resourcesrequests.memory     | memory request                                   | 256Mi                                       |
+| proxy.resourcesrequests.cpu        | cpu request                                      | 100m                                        |
+| proxy.resourceslimits.memory       | memory limit                                     | 2Gi                                         |
+| proxy.resourceslimits.cpu          | cpu limit                                        | 1000m                                       |
+| proxy.livenessProbe.enabled        | Enable livenessProbe for proxy                   | true                                        |
+| proxy.startupProbe.enabled         | Enable startupProbe for proxy                    | true                                        |
+| converter.replicas                 | converter replicas quantity                      | 2                                           |
+| converter.containerImage           | converter container image name                   | onlyoffice/docs-converter-de:6.3.1.32       |
+| converter.requests.memory          | memory request                                   | 256Mi                                       |
+| converter.requests.cpu             | cpu request                                      | 100m                                        |
+| converter.limits.memory            | memory limit                                     | 2Gi                                         |
+| converter.limits.cpu               | cpu limit                                        | 1000m                                       |
+| jwt.enabled                        | jwt enabling parameter                           | true                                        |
+| jwt.secret                         | jwt secret                                       | MYSECRET                                    |
+| service.type                       | documentserver service type                      | ClusterIP                                   |
+| service.port                       | documentserver service port                      | 8888                                        |
+| ingress.enabled                    | installation of ingress service                  | false                                       |
+| ingress.ssl.enabled                | installation ssl for ingress service             | false                                       |
+| ingress.ssl.host                   | host for ingress ssl                             | example.com                                 |
+| ingress.ssl.secret                 | secret name for ssl                              | tls                                         |
+| grafana_ingress.enabled            | installation grafana of ingress service          | false                                       |
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
@@ -304,7 +315,7 @@ $ helm install documentserver ./ --set example.enabled=true
 ```
 
 ### 5.2 Metrics deployment (optional)
-To deploy StatsD set `metrics.enabled` to true:
+To deploy metrics set `metrics.enabled` to true:
 
 ```bash
 $ helm install documentserver ./ --set metrics.enabled=true
@@ -326,7 +337,7 @@ Use this type of exposure if you use external TLS termination, and don't have an
 To expose DocumentServer via service set `service.type` parameter to LoadBalancer:
 
 ```bash
-$ helm install documentserver ./ --set service.type=LoadBalancer,service.port=8888
+$ helm install documentserver ./ --set service.type=LoadBalancer,service.port=80
 
 ```
 
