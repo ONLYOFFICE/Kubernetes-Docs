@@ -20,8 +20,8 @@ example:
 
 docservice:
   replicas: 2
+  readinessProbeEnabled: true
   readinessProbe:
-    enabled: true
     failureThreshold: 2
     httpGet:
       path: /index.html
@@ -29,8 +29,8 @@ docservice:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 3
+  livenessProbeEnabled: true
   livenessProbe:
-    enabled: true
     failureThreshold: 5
     httpGet:
       path: /index.html
@@ -38,8 +38,8 @@ docservice:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 3
+  startupProbeEnabled: true
   startupProbe:
-    enabled: true
     httpGet:
       path: /index.html
       port: 8000
@@ -58,8 +58,8 @@ docservice:
     limits: {}
 
 proxy:
+  livenessProbeEnabled: true
   livenessProbe:
-    enabled: true
     failureThreshold: 3
     httpGet:
       path: /index.html
@@ -67,8 +67,8 @@ proxy:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 3
+  startupProbeEnabled: true
   startupProbe:
-    enabled: true
     httpGet:
       path: /index.html
       port: 8888
@@ -116,3 +116,5 @@ ingress:
     secret: tls
 grafana_ingress:
   enabled: false
+pvc:
+  enabled: true

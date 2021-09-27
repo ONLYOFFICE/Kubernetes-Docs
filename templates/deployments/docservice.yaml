@@ -36,10 +36,10 @@ spec:
           image: {{ .Values.proxy.proxyContainerImage }}
           ports:
             - containerPort: 8888
-          {{ if .Values.proxy.livenessProbe.enabled }}
+          {{ if .Values.proxy.livenessProbeEnabled }}
           livenessProbe: {{ toYaml .Values.proxy.livenessProbe | nindent 14 }}
           {{ end }}
-          {{ if .Values.proxy.startupProbe.enabled }}
+          {{ if .Values.proxy.startupProbeEnabled }}
           startupProbe: {{ toYaml .Values.proxy.startupProbe | nindent 14 }}
           {{ end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
@@ -54,13 +54,13 @@ spec:
           image: {{ .Values.docservice.containerImage }}
           ports:
             - containerPort: 8000
-          {{ if .Values.docservice.readinessProbe.enabled }}
+          {{ if .Values.docservice.readinessProbeEnabled }}
           readinessProbe: {{ toYaml .Values.docservice.readinessProbe | nindent 14 }}
           {{ end }}
-          {{ if .Values.docservice.livenessProbe.enabled }}
+          {{ if .Values.docservice.livenessProbeEnabled }}
           livenessProbe: {{ toYaml .Values.docservice.livenessProbe | nindent 14 }}
           {{ end }}
-          {{ if .Values.docservice.startupProbe.enabled }}
+          {{ if .Values.docservice.startupProbeEnabled }}
           startupProbe: {{ toYaml .Values.docservice.startupProbe | nindent 14 }}
           {{ end }}
           resources: {{ toYaml .Values.docservice.resources | nindent 12 }}
