@@ -116,5 +116,3 @@ ingress:
     secret: tls
 grafana_ingress:
   enabled: false
-pvc:
-  enabled: true

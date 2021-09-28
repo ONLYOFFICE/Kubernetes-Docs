@@ -262,16 +262,16 @@ The command removes all the Kubernetes components associated with the chart and 
 | docservice.resourcesrequests.cpu   | cpu request                                      | 100m                                        |
 | docservice.resourceslimits.memory  | memory limit                                     | 2Gi                                         |
 | docservice.resourceslimits.cpu     | cpu limit                                        | 1000m                                       |
-| docservice.readinessProbe.enabled  | Enable readinessProbe for docservice             | true                                        |
-| docservice.livenessProbe.enabled   | Enable livenessProbe for docservice              | true                                        |
-| docservice.startupProbe.enabled    | Enable startupProbe for docservice               | true                                        |
+| docservice.readinessProbeEnabled   | Enable readinessProbe for docservice             | true                                        |
+| docservice.livenessProbeEnabled    | Enable livenessProbe for docservice              | true                                        |
+| docservice.startupProbeEnabled     | Enable startupProbe for docservice               | true                                        |
 | proxy.proxyContainerImage          | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.3.1.32           |
 | proxy.resourcesrequests.memory     | memory request                                   | 256Mi                                       |
 | proxy.resourcesrequests.cpu        | cpu request                                      | 100m                                        |
 | proxy.resourceslimits.memory       | memory limit                                     | 2Gi                                         |
 | proxy.resourceslimits.cpu          | cpu limit                                        | 1000m                                       |
-| proxy.livenessProbe.enabled        | Enable livenessProbe for proxy                   | true                                        |
-| proxy.startupProbe.enabled         | Enable startupProbe for proxy                    | true                                        |
+| proxy.livenessProbeEnabled         | Enable livenessProbe for proxy                   | true                                        |
+| proxy.startupProbeEnabled          | Enable startupProbe for proxy                    | true                                        |
 | converter.replicas                 | converter replicas quantity                      | 2                                           |
 | converter.containerImage           | converter container image name                   | onlyoffice/docs-converter-de:6.3.1.32       |
 | converter.requests.memory          | memory request                                   | 256Mi                                       |
