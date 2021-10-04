@@ -52,7 +52,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
 - You should install Helm v3. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
 - If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. 
-- If in an OpenShift cluster, the installation of components external to ‘Docs’ will be performed from Helm Chart, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
+- If the installation of components external to ‘Docs’ is performed from Helm Chart in an OpenShift cluster, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
 
 ## Deploy prerequisites
 
@@ -101,9 +101,9 @@ $ helm install nfs-server stable/nfs-server-provisioner \
 
 See more details about installing NFS Server Provisioner via Helm [here](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner#nfs-server-provisioner).
 
-Configuration a Persistent Volume Claim
+Configure a Persistent Volume Claim
 
-Note: Default `nfs` Persistent Volume Claim is 8Gi. You can change it in `values.yaml` file in `persistence.storageClass` and `persistence.size` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. Recommended use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE Docs.
+Note: The default `nfs` Persistent Volume Claim is 8Gi. You can change it in the `values.yaml` file in the `persistence.storageClass` and `persistence.size` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. It's recommended to use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE Docs.
 
 
 ### 3. Deploy RabbitMQ
@@ -204,7 +204,7 @@ Also, in all `yaml` files in the `deployments` directory, you must uncomment the
 spec.template.spec.securityContext.runAsUser=101
 spec.template.spec.securityContext.runAsGroup=101
 ```
-In `./templates/pods/example.yaml` needs to uncomment the following fields:
+In the `./templates/pods/example.yaml` file, you need to uncomment the following fields:
 ```
 spec.securityContext.runAsUser=1001
 spec.securityContext.runAsGroup=1001
@@ -308,19 +308,19 @@ $ helm install documentserver -f values.yaml ./
 
 ### 5.1 Example deployment (optional)
 
-To deploy example set `example.install` parameter to true:
+To deploy the example, set the `example.install` parameter to true:
 
 ```bash
 $ helm install documentserver ./ --set example.enabled=true
 ```
 
 ### 5.2 Metrics deployment (optional)
-To deploy metrics set `metrics.enabled` to true:
+To deploy metrics, set `metrics.enabled` to true:
 
 ```bash
 $ helm install documentserver ./ --set metrics.enabled=true
 ```
-If you want to use nginx ingress set `grafana_enabled` to true:
+If you want to use nginx ingress, set `grafana_enabled` to true:
 
 ```bash
 $ helm install documentserver ./ --set grafana_ingress.enabled=true
@@ -329,12 +329,12 @@ $ helm install documentserver ./ --set grafana_ingress.enabled=true
 ### 5.3 Expose DocumentServer
 
 #### 5.3.1 Expose DocumentServer via Service (HTTP Only)
-*You should skip step[#5.3.1](#531-expose-documentserver-via-service-http-only) step if you are going to expose DocumentServer via HTTPS*
+*You should skip step[#5.3.1](#531-expose-documentserver-via-service-http-only) if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
 Use this type of exposure if you use external TLS termination, and don't have another WEB application in the k8s cluster.
 
-To expose DocumentServer via service set `service.type` parameter to LoadBalancer:
+To expose DocumentServer via service, set the `service.type` parameter to LoadBalancer:
 
 ```bash
 $ helm install documentserver ./ --set service.type=LoadBalancer,service.port=80
@@ -342,7 +342,7 @@ $ helm install documentserver ./ --set service.type=LoadBalancer,service.port=80
 ```
 
 
-Run next command to get `documentserver` service IP:
+Run the following command to get the `documentserver` service IP:
 
 ```bash
 $ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
@@ -369,16 +369,16 @@ To install the Nginx Ingress Controller to your cluster, run the following comma
 $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
-See more detail about install Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
+See more detail about installing Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
 
 #### 5.3.2.2 Expose DocumentServer via HTTP
 
-*You should skip step[5.3.2.2](#5322-expose-documentserver-via-http) step if you are going to expose DocumentServer via HTTPS*
+*You should skip step[5.3.2.2](#5322-expose-documentserver-via-http) if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
-To expose DocumentServer via ingress HTTP set `ingress.enabled` parameter to true:
+To expose DocumentServer via ingress HTTP, set the `ingress.enabled` parameter to true:
 
 ```bash
 $ helm install documentserver ./ --set ingress.enabled=true
@@ -438,20 +438,20 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 ### 6. Scale DocumentServer (optional)
 
-*This step is optional. You can skip #4 step at all if you wanna use default deployment settings.*
+*This step is optional. You can skip step [6](#6-scale-documentserver-optional) at all if you want to use default deployment settings.*
 
 #### 6.1 Manual scaling
-`docservice` and `converter` deployments consist of 2 pods each other by default.
+The `docservice` and `converter` deployments consist of 2 pods each other by default.
 
-To scale `docservice` deployment use follow command:
+To scale the `docservice` deployment, use the following command:
 
 ```bash
 $ kubectl scale -n default deployment docservice --replicas=POD_COUNT
 ```
 
-where `POD_COUNT` is number of `docservice` pods
+where `POD_COUNT` is а number of the `docservice` pods.
 
-The same to scale `converter` deployment:
+Do the same to scale the `converter` deployment:
 
 ```bash
 $ kubectl scale -n default deployment converter --replicas=POD_COUNT
@@ -467,7 +467,7 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in the database.
 
-If there are `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
+If there are the `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
 
 ```bash
 $ kubectl delete cm remove-db-scripts init-db-scripts
@@ -574,7 +574,7 @@ $ helm install grafana bitnami/grafana \
 
 #### 2.2 Deploy Grafana with the installation of ready-made dashboards
 
-Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
+Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
