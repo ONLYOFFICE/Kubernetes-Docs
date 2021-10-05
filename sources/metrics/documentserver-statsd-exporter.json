@@ -386,7 +386,7 @@
             {
               "expr": "rate(ds_coauth_openDocument_open_sum[5m])/rate(ds_coauth_openDocument_open_count[5m])",
               "interval": "",
-              "legendFormat": "мoving average time of opening documents (for 5 minutes)",
+              "legendFormat": "moving average time of opening documents (for 5 minutes)",
               "queryType": "randomWalk",
               "refId": "A"
             }

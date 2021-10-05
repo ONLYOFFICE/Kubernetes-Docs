@@ -308,7 +308,7 @@ $ helm install documentserver -f values.yaml ./
 
 ### 5.1 Example deployment (optional)
 
-To deploy the example, set the `example.install` parameter to true:
+To deploy the example, set the `example.enabled` parameter to true:
 
 ```bash
 $ helm install documentserver ./ --set example.enabled=true
@@ -320,7 +320,7 @@ To deploy metrics, set `metrics.enabled` to true:
 ```bash
 $ helm install documentserver ./ --set metrics.enabled=true
 ```
-If you want to use nginx ingress, set `grafana_enabled` to true:
+If you want to use nginx ingress, set `grafana_ingress.enabled` to true:
 
 ```bash
 $ helm install documentserver ./ --set grafana_ingress.enabled=true
