@@ -16,7 +16,7 @@ metrics:
 
 example:
   enabled: false
-  containerImage: onlyoffice/docs-example:6.3.1.32
+  containerImage: onlyoffice/docs-example:6.4.1.45
 
 docservice:
   replicas: 2
@@ -45,7 +45,7 @@ docservice:
       port: 8000
     failureThreshold: 30
     periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:6.3.1.32
+  containerImage: onlyoffice/docs-docservice-de:6.4.1.45
   resources:
     ##Example:
     ##requests:
@@ -74,7 +74,7 @@ proxy:
       port: 8888
     failureThreshold: 30
     periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:6.3.1.32
+  proxyContainerImage: onlyoffice/docs-proxy-de:6.4.1.45
   resources:
     ##Example:
     ##requests:
@@ -88,7 +88,7 @@ proxy:
 
 converter:
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:6.3.1.32
+  containerImage: onlyoffice/docs-converter-de:6.4.1.45
   resources:
     ##Example:
     ##requests:
