@@ -34,6 +34,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [7.1.1 Preparing for update](#711-preparing-for-update)
     + [7.1.2 Update the DocumentServer images](#712-update-the-documentserver-images)
     + [7.2 Automated update](#72-automated-update)
+  * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
 - [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
   * [1. Deploy Prometheus](#1-deploy-prometheus)
     + [1.1 Add Helm repositories](#11-add-helm-repositories)
@@ -529,6 +530,14 @@ $ ./sources/scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
 
 ## Using Prometheus to collect metrics with visualization in Grafana (optional)
 *This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
+
+### 8. Shutdown ONLYOFFICE Docs (optional)
+
+To perform the shutdown using a script, run the following command
+
+```bash
+$ ./sources/scripts/shutdown-ds.sh
+```
 
 ### 1. Deploy Prometheus
 
