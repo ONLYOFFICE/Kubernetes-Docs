@@ -528,9 +528,6 @@ $ ./sources/scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
 
-## Using Prometheus to collect metrics with visualization in Grafana (optional)
-*This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
-
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
 To perform the shutdown using a script, run the following command
@@ -538,6 +535,9 @@ To perform the shutdown using a script, run the following command
 ```bash
 $ ./sources/scripts/shutdown-ds.sh
 ```
+
+## Using Prometheus to collect metrics with visualization in Grafana (optional)
+*This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
 
 ### 1. Deploy Prometheus
 

@@ -41,7 +41,7 @@ spec:
           - name: init-db-scripts
             mountPath: /sql/createdb.sql
             subPath: createdb.sql
-          - name: update-scripts
+          - name: shutdown-scripts
             mountPath: /sql/update.sh
             subPath: update.sh
           command: ["/bin/sh", "-c"]
