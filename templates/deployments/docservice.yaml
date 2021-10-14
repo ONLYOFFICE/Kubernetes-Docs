@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docservice
+  labels:
+    app: docservice
+spec:
+  replicas: {{ .Values.docservice.replicas }}
+  selector:
+    matchLabels:
+      app: docservice
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: docservice
+    spec:
+#      securityContext:
+#        runAsUser: 101
+#        runAsGroup: 101
+      # topologySpreadConstraints:
+      # - maxSkew: 1
+        # topologyKey: doks.digitalocean.com/node-pool
+        # whenUnsatisfiable: DoNotSchedule
+        # labelSelector:
+          # matchLabels:
+            # app: docservice
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: ds-files
+        - name: ds-license
+          secret:
+            secretName: license
+      containers:
+        - name: proxy
+          image: {{ .Values.proxy.proxyContainerImage }}
+          ports:
+            - containerPort: 8888
+          {{ if .Values.proxy.livenessProbeEnabled }}
+          livenessProbe: {{ toYaml .Values.proxy.livenessProbe | nindent 14 }}
+          {{ end }}
+          {{ if .Values.proxy.startupProbeEnabled }}
+          startupProbe: {{ toYaml .Values.proxy.startupProbe | nindent 14 }}
+          {{ end }}
+          resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: documentserver
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+
+        - name: docservice
+          image: {{ .Values.docservice.containerImage }}
+          ports:
+            - containerPort: 8000
+          {{ if .Values.docservice.readinessProbeEnabled }}
+          readinessProbe: {{ toYaml .Values.docservice.readinessProbe | nindent 14 }}
+          {{ end }}
+          {{ if .Values.docservice.livenessProbeEnabled }}
+          livenessProbe: {{ toYaml .Values.docservice.livenessProbe | nindent 14 }}
+          {{ end }}
+          {{ if .Values.docservice.startupProbeEnabled }}
+          startupProbe: {{ toYaml .Values.docservice.startupProbe | nindent 14 }}
+          {{ end }}
+          resources: {{ toYaml .Values.docservice.resources | nindent 12 }}
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password
+          - name: AMQP_PWD
+            valueFrom:
+              secretKeyRef:
+                name: rabbitmq
+                key: rabbitmq-password
+          envFrom:
+          - secretRef:
+              name: jwt
+          - configMapRef:
+              name: documentserver
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          - name: ds-license
+            mountPath: /var/www/onlyoffice/Data
+            readOnly: true

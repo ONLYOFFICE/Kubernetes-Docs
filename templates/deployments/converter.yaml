@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: converter
+  labels:
+    app: converter
+spec:
+  replicas: {{ .Values.converter.replicas }}
+  selector:
+    matchLabels:
+      app: converter
+  template:
+    metadata:
+      labels:
+        app: converter
+    spec:
+#      securityContext:
+#        runAsUser: 101
+#        runAsGroup: 101
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: ds-files
+        - name: ds-license
+          secret:
+            secretName: license
+      containers:
+        - name: converter
+          image: {{ .Values.converter.containerImage }}
+          resources: {{- toYaml .Values.converter.resources | nindent 12 }}
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password
+          - name: AMQP_PWD
+            valueFrom:
+              secretKeyRef:
+                name: rabbitmq
+                key: rabbitmq-password
+          envFrom:
+          - secretRef:
+              name: jwt
+          - configMapRef:
+              name: documentserver
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          - name: ds-license
+            mountPath: /var/www/onlyoffice/Data
+            readOnly: true

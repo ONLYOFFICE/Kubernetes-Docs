@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prepare4shutdown
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: ds-files
+        - name: remove-db-scripts
+          configMap:
+            name: remove-db-scripts
+        - name: init-db-scripts
+          configMap:
+            name: init-db-scripts
+        - name: shutdown-scripts
+          configMap:
+            name: update-ds
+            defaultMode: 0755
+      containers:
+        - name: prepare4shutdown
+          image: postgres
+          envFrom:
+          - configMapRef:
+              name: documentserver
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-password
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+          - name: remove-db-scripts
+            mountPath: /sql/removetbl.sql
+            subPath: removetbl.sql
+          - name: init-db-scripts
+            mountPath: /sql/createdb.sql
+            subPath: createdb.sql
+          - name: shutdown-scripts
+            mountPath: /sql/update.sh
+            subPath: update.sh
+          command: ["/bin/sh", "-c"]
+          args: ["/sql/update.sh"]
+      restartPolicy: Never

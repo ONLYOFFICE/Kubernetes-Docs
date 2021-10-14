@@ -3,44 +3,49 @@
 This repository contains a set of files to deploy ONLYOFFICE Docs into a Kubernetes cluster or OpenShift cluster.
 
 ## Contents
-* [Introduction](#introduction)
-* [Deploy prerequisites](#deploy-prerequisites)
-    - [Add Helm repositories](#1-add-helm-repositories)
-    - [Install Persistent Storage](#2-install-persistent-storage)
-    - [Deploy RabbitMQ](#3-deploy-rabbitmq)
-    - [Deploy Redis](#4-deploy-redis)
-    - [Deploy PostgreSQL](#5-deploy-postgresql)
-    - [Deploy StatsD exporter](#6-deploy-statsd-exporter)
-        + [Add Helm repositories](#61-add-helm-repositories)
-        + [Installing StatsD exporter](#62-installing-statsd-exporter)
-* [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
-    - [Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
-    - [Deploy the ONLYOFFICE Docs parameters](#2-deploy-the-onlyoffice-docs-parameters)
-    - [Deploy DocumentServer](#3-deploy-documentserver)
-    - [Deploy the DocumentServer Example (optional)](#4-deploy-the-documentserver-example-optional)
-    - [Expose DocumentServer](#5-expose-documentserver)
-        + [Expose DocumentServer via Service (HTTP Only)](#51-expose-documentserver-via-service-http-only)
-        + [Expose DocumentServer via Ingress](#52-expose-documentserver-via-ingress)
-            1. [Installing the Kubernetes Nginx Ingress Controller](#521-installing-the-kubernetes-nginx-ingress-controller)
-            2. [Expose DocumentServer via HTTP](#522-expose-documentserver-via-http)
-            3. [Expose DocumentServer via HTTPS](#523-expose-documentserver-via-https)
-    - [Update ONLYOFFICE Docs](#6-update-onlyoffice-docs)
-        + [Manual update](#61-manual-update)
-            1. [Preparing for update](#611-preparing-for-update)
-            2. [Update the DocumentServer images](#612-update-the-documentserver-images)
-        + [Automated update](#62-automated-update)
-* [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
-    - [Deploy Prometheus](#1-deploy-prometheus)
-        + [Add Helm repositories](#11-add-helm-repositories)
-        + [Installing Prometheus](#12-installing-prometheus)
-    - [Deploy Grafana](#2-deploy-grafana)
-        + [Preparing for deploy](#21-preparing-for-deploy)
-        + [Deploy Grafana without installing ready-made dashboards](#22-deploy-grafana-without-installing-ready-made-dashboards)
-        + [Deploy Grafana with the installation of ready-made dashboards](#23-deploy-grafana-with-the-installation-of-ready-made-dashboards)
-    - [Expose Grafana via Ingress](#3-expose-grafana-via-ingress)
-        + [Expose Grafana via HTTP](#31-expose-grafana-via-http)
-        + [Expose Grafana via HTTPS](#32-expose-grafana-via-https)
-    - [View gathered metrics in Grafana](#4-view-gathered-metrics-in-grafana)
+- [Introduction](#introduction)
+- [Deploy prerequisites](#deploy-prerequisites)
+  * [1. Add Helm repositories](#1-add-helm-repositories)
+  * [2. Install Persistent Storage](#2-install-persistent-storage)
+  * [3. Deploy RabbitMQ](#3-deploy-rabbitmq)
+  * [4. Deploy Redis](#4-deploy-redis)
+  * [5. Deploy PostgreSQL](#5-deploy-postgresql)
+  * [6. Deploy StatsD exporter](#6-deploy-statsd-exporter)
+    + [6.1 Add Helm repositories](#61-add-helm-repositories)
+    + [6.2 Installing StatsD exporter](#62-installing-statsd-exporter)
+- [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
+  * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
+  * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
+  * [3. Uninstall ONLYOFFICE Docs](#3-uninstall-onlyoffice-docs)
+  * [4. Parameters](#4-parameters)
+  * [5. Configuration and installation details](#5-configuration-and-installation-details)
+  * [5.1 Example deployment (optional)](#51-example-deployment-optional)
+  * [5.2 Metrics deployment (optional)](#52-metrics-deployment-optional)
+  * [5.3 Expose DocumentServer](#53-expose-documentserver)
+    + [5.3.1 Expose DocumentServer via Service (HTTP Only)](#531-expose-documentserver-via-service-http-only)
+    + [5.3.2 Expose DocumentServer via Ingress](#532-expose-documentserver-via-ingress)
+    + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
+    + [5.3.2.2 Expose DocumentServer via HTTP](#5322-expose-documentserver-via-http)
+    + [5.3.2.3 Expose DocumentServer via HTTPS](#5323-expose-documentserver-via-https)
+  * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
+      + [6.1 Manual scaling](#61-manual-scaling) 
+  * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
+    + [7.1 Manual update](#71-manual-update)
+    + [7.1.1 Preparing for update](#711-preparing-for-update)
+    + [7.1.2 Update the DocumentServer images](#712-update-the-documentserver-images)
+    + [7.2 Automated update](#72-automated-update)
+  * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
+- [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
+  * [1. Deploy Prometheus](#1-deploy-prometheus)
+    + [1.1 Add Helm repositories](#11-add-helm-repositories)
+    + [1.2 Installing Prometheus](#12-installing-prometheus)
+  * [2. Deploy Grafana](#2-deploy-grafana)
+    + [2.1 Deploy Grafana without installing ready-made dashboards](#21-deploy-grafana-without-installing-ready-made-dashboards)
+    + [2.2 Deploy Grafana with the installation of ready-made dashboards](#22-deploy-grafana-with-the-installation-of-ready-made-dashboards)
+  * [3 Expose Grafana via Ingress](#3-expose-grafana-via-ingress)
+    + [3.1 Expose Grafana via HTTP](#31-expose-grafana-via-http)
+    + [3.2 Expose Grafana via HTTPS](#32-expose-grafana-via-https)
+  * [4. View gathered metrics in Grafana](#4-view-gathered-metrics-in-grafana)
 
 ## Introduction
 
@@ -48,15 +53,17 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
 - You should install Helm v3. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
 - If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. 
-- If in an OpenShift cluster, the installation of components external to ‘Docs’ will be performed from Helm Chart, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
+- If the installation of components external to ‘Docs’ is performed from Helm Chart in an OpenShift cluster, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
 
 ## Deploy prerequisites
+
+Open the repo directory
 
 Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 1001`.
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./scc/helm-components.yaml
+$ oc apply -f ./sources/scc/helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
 
@@ -91,30 +98,14 @@ $ helm install nfs-server stable/nfs-server-provisioner \
   - Yandex Cloud: `yc-network-hdd` or `yc-network-ssd`. [More details](https://cloud.yandex.ru/docs/managed-kubernetes/operations/volumes/manage-storage-class)
   - minikube: `standard`
 
-- `PERSISTENT_SIZE` is the total size of all Persistent Storages for the nfs Persistent Storage Class. You can express the size as a plain integer with one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `8Gi`.
+- `PERSISTENT_SIZE` is the total size of all Persistent Storages for the nfs Persistent Storage Class. You can express the size as a plain integer with one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `9Gi`.
 
 See more details about installing NFS Server Provisioner via Helm [here](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner#nfs-server-provisioner).
 
-Create a Persistent Volume Claim
+Configure a Persistent Volume Claim
 
-```bash
-$ kubectl apply -f ./pvc/ds-files.yaml
-```
+Note: The default `nfs` Persistent Volume Claim is 8Gi. You can change it in the `values.yaml` file in the `persistence.storageClass` and `persistence.size` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. It's recommended to use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE Docs.
 
-Note: The default `nfs` Persistent Volume Claim is 8Gi. You can change it in the `./pvc/ds-files.yaml` file in the `spec.resources.requests.storage` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. It's recommended to use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE Docs.
-
-Verify the `ds-files` status
-
-```bash
-$ kubectl get pvc ds-files
-```
-
-Output:
-
-```
-NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-ds-files   Bound    pvc-XXXXXXXX-XXXXXXXXX-XXXX-XXXXXXXXXXXX   8Gi        RWX            nfs            1m
-```
 
 ### 3. Deploy RabbitMQ
 
@@ -198,9 +189,7 @@ $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
   --set statsd.eventFlushInterval=30000ms
 ```
 
-Allow the StatsD metrics in ONLYOFFICE Docs:
-
-Set the `data.METRICS_ENABLED` field in the ./configmaps/documentserver.yaml file to the `"true"` value
+To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
 
 ## Deploy ONLYOFFICE Docs
 
@@ -208,7 +197,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./scc/docs-components.yaml
+$ oc apply -f ./sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 Also, in all `yaml` files in the `deployments` directory, you must uncomment the following fields:
@@ -216,7 +205,7 @@ Also, in all `yaml` files in the `deployments` directory, you must uncomment the
 spec.template.spec.securityContext.runAsUser=101
 spec.template.spec.securityContext.runAsGroup=101
 ```
-In `./pods/example.yaml` needs to uncomment the following fields:
+In the `./templates/pods/example.yaml` file, you need to uncomment the following fields:
 ```
 spec.securityContext.runAsUser=1001
 spec.securityContext.runAsGroup=1001
@@ -224,136 +213,135 @@ spec.securityContext.runAsGroup=1001
 
 ### 1. Deploy the ONLYOFFICE Docs license
 
-- If you have a valid ONLYOFFICE Docs license, create a secret `license` from the file.
+If you have a valid ONLYOFFICE Docs license, add it to the directory `sources/license`.
 
-    ```bash
-    $ kubectl create secret generic license \
-      --from-file=./license.lic
-    ```
+Note: The source license file name should be 'license.lic' because this name would be used as a field in the created secret.
 
-    Note: The source license file name should be 'license.lic' because this name would be used as a field in the created secret.
+- If you have no ONLYOFFICE Docs license, leave the directory empty.
 
-- If you have no ONLYOFFICE Docs license, create an empty secret `license` with the following command:
+### 2. Deploy ONLYOFFICE Docs
 
-    ```bash
-    $ kubectl create secret generic license
-    ```
-
-### 2. Deploy the ONLYOFFICE Docs parameters
-
-Deploy the DocumentServer configmap:
+To deploy DocumentServer with the release name `documentserver`:
 
 ```bash
-$ kubectl apply -f ./configmaps/documentserver.yaml
+
+$ helm install documentserver ./
 ```
 
-Create the `jwt` secret with JWT parameters
+The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
+
+### 3. Uninstall ONLYOFFICE Docs
+
+To uninstall/delete the `documentserver` deployment:
 
 ```bash
-$ kubectl create secret generic jwt \
-  --from-literal=JWT_ENABLED=true \
-  --from-literal=JWT_SECRET=MYSECRET
+$ helm delete documentserver
+
 ```
 
-`MYSECRET` is the secret key to validate the JSON Web Token in the request to the ONLYOFFICE Docs.
+The command removes all the Kubernetes components associated with the chart and deletes the release.
 
-### 3. Deploy DocumentServer
+### 4. Parameters
 
-Deploy the example service:
+| Parameter                          | Description                                      | Default                                     |
+|------------------------------------|--------------------------------------------------|---------------------------------------------|
+| connections.dbHost                 | IP address or the name of the database           | postgresql                                  |
+| connections.dbUser                 | database user                                    | postgres                                    |
+| connections.dbPort                 | database server port number                      | 5432                                        |
+| connections.redistHost             | IP address or the name of the redis host         | redis-master                                |
+| connections.amqpHost               | IP address or the name of the message-broker     | rabbit-mq                                   |
+| connections.amqpUser               | messabe-broker user                              | user                                        |
+| connections.amqpProto              | messabe-broker protocol                          | ampq                                        |
+| persistance.storageClass           | storage class name                               | nfs                                         |
+| persistance.size                   | storage volume size                              | 8Gi                                         |
+| metrics.enabled                    | Statsd installation                              | false                                       |
+| example.enabled                    | Choise of example installation                   | false                                       |
+| example.containerImage             | example container image name                     | onlyoffice/docs-example:6.3.1.32            |
+| docservice.replicas                | docservice replicas quantity                     | 2                                           |
+| docservice.containerImage          | docservice container image name                  | onlyoffice/docs-docservice-de:6.3.1.32      |
+| docservice.resourcesrequests.memory| memory request                                   | 256Mi                                       |
+| docservice.resourcesrequests.cpu   | cpu request                                      | 100m                                        |
+| docservice.resourceslimits.memory  | memory limit                                     | 2Gi                                         |
+| docservice.resourceslimits.cpu     | cpu limit                                        | 1000m                                       |
+| docservice.readinessProbeEnabled   | Enable readinessProbe for docservice             | true                                        |
+| docservice.livenessProbeEnabled    | Enable livenessProbe for docservice              | true                                        |
+| docservice.startupProbeEnabled     | Enable startupProbe for docservice               | true                                        |
+| proxy.proxyContainerImage          | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.3.1.32           |
+| proxy.resourcesrequests.memory     | memory request                                   | 256Mi                                       |
+| proxy.resourcesrequests.cpu        | cpu request                                      | 100m                                        |
+| proxy.resourceslimits.memory       | memory limit                                     | 2Gi                                         |
+| proxy.resourceslimits.cpu          | cpu limit                                        | 1000m                                       |
+| proxy.livenessProbeEnabled         | Enable livenessProbe for proxy                   | true                                        |
+| proxy.startupProbeEnabled          | Enable startupProbe for proxy                    | true                                        |
+| converter.replicas                 | converter replicas quantity                      | 2                                           |
+| converter.containerImage           | converter container image name                   | onlyoffice/docs-converter-de:6.3.1.32       |
+| converter.requests.memory          | memory request                                   | 256Mi                                       |
+| converter.requests.cpu             | cpu request                                      | 100m                                        |
+| converter.limits.memory            | memory limit                                     | 2Gi                                         |
+| converter.limits.cpu               | cpu limit                                        | 1000m                                       |
+| jwt.enabled                        | jwt enabling parameter                           | true                                        |
+| jwt.secret                         | jwt secret                                       | MYSECRET                                    |
+| service.type                       | documentserver service type                      | ClusterIP                                   |
+| service.port                       | documentserver service port                      | 8888                                        |
+| ingress.enabled                    | installation of ingress service                  | false                                       |
+| ingress.ssl.enabled                | installation ssl for ingress service             | false                                       |
+| ingress.ssl.host                   | host for ingress ssl                             | example.com                                 |
+| ingress.ssl.secret                 | secret name for ssl                              | tls                                         |
+| grafana_ingress.enabled            | installation grafana of ingress service          | false                                       |
+
+Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
 ```bash
-$ kubectl apply -f ./services/example.yaml
+$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
 ```
 
-Deploy docservice:
+This command gives expose documentServer via HTTPS.
+
+Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ kubectl apply -f ./services/docservice.yaml
+$ helm install documentserver -f values.yaml ./
 ```
 
-Deploy the `docservice` deployment:
+> **Tip**: You can use the default [values.yaml](values.yaml)
+
+### 5. Configuration and installation details
+
+### 5.1 Example deployment (optional)
+
+To deploy the example, set the `example.enabled` parameter to true:
 
 ```bash
-$ kubectl apply -f ./deployments/docservice.yaml
+$ helm install documentserver ./ --set example.enabled=true
 ```
 
-Verify that the `docservice` deployment is running the desired number of pods with the following command:
+### 5.2 Metrics deployment (optional)
+To deploy metrics, set `metrics.enabled` to true:
 
 ```bash
-$ kubectl get deployment docservice
+$ helm install documentserver ./ --set metrics.enabled=true
 ```
-
-Output:
-
-```
-NAME        READY   UP-TO-DATE   AVAILABLE   AGE
-docservice  2/2     2            2           1m
-```
-
-Deploy the `converter` deployment:
+If you want to use nginx ingress, set `grafana_ingress.enabled` to true:
 
 ```bash
-$ kubectl apply -f ./deployments/converter.yaml
+$ helm install documentserver ./ --set grafana_ingress.enabled=true
 ```
 
-Verify that the `converter` deployment is running the desired number of pods with the following command:
+### 5.3 Expose DocumentServer
 
-```bash
-$ kubectl get deployment converter
-```
-
-Output:
-
-```
-NAME        READY   UP-TO-DATE   AVAILABLE   AGE
-converter   2/2     2            2           1m
-```
-
-The `docservice` and `converter` deployments consist of 2 pods each other by default.
-
-To scale the `docservice` deployment, use the following command:
-
-```bash
-$ kubectl scale -n default deployment docservice --replicas=POD_COUNT
-```
-
-where `POD_COUNT` is a number of the `docservice` pods.
-
-Do the same to scale the `converter` deployment:
-
-```bash
-$ kubectl scale -n default deployment converter --replicas=POD_COUNT
-```
-
-### 4. Deploy the DocumentServer Example (optional)
-
-*This step is optional. You can skip step [#4](#4-deploy-the-documentserver-example-optional) at all if you don't want to run the DocumentServer Example*
-
-Deploy the example configmap:
-
-```bash
-$ kubectl apply -f ./configmaps/example.yaml
-```
-
-Deploy the example pod:
-
-```bash
-$ kubectl apply -f ./pods/example.yaml
-```
-
-### 5. Expose DocumentServer
-
-#### 5.1 Expose DocumentServer via Service (HTTP Only)
-*You should skip step [#5.1](#51-expose-documentserver-via-service-http-only) if you are going to expose DocumentServer via HTTPS*
+#### 5.3.1 Expose DocumentServer via Service (HTTP Only)
+*You should skip step[#5.3.1](#531-expose-documentserver-via-service-http-only) if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
 Use this type of exposure if you use external TLS termination, and don't have another WEB application in the k8s cluster.
 
-Deploy the `documentserver` service:
+To expose DocumentServer via service, set the `service.type` parameter to LoadBalancer:
 
 ```bash
-$ kubectl apply -f ./services/documentserver-lb.yaml
+$ helm install documentserver ./ --set service.type=LoadBalancer,service.port=80
+
 ```
+
 
 Run the following command to get the `documentserver` service IP:
 
@@ -371,9 +359,10 @@ $ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVICE-HOSTNAME/`.
 
-#### 5.2 Expose DocumentServer via Ingress
 
-#### 5.2.1 Installing the Kubernetes Nginx Ingress Controller
+#### 5.3.2 Expose DocumentServer via Ingress
+
+#### 5.3.2.1 Installing the Kubernetes Nginx Ingress Controller
 
 To install the Nginx Ingress Controller to your cluster, run the following command:
 
@@ -381,34 +370,20 @@ To install the Nginx Ingress Controller to your cluster, run the following comma
 $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
-Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
+See more detail about installing Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
 
-```bash
-$ helm install nginx-ingress -f ./ingresses/ingress_values.yaml ingress-nginx/ingress-nginx
-```
+#### 5.3.2.2 Expose DocumentServer via HTTP
 
-See more details about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
-
-Deploy the `documentserver` service:
-
-```bash
-$ kubectl apply -f ./services/documentserver.yaml
-```
-
-*Note: In all the steps below concerning Nginx Ingress for Kubernetes versions below 1.19, deploy must be performed from the `./ingresses/before-1.19` directory.
-For example: `$ kubectl apply -f ./ingresses/before-1.19/documentserver.yaml`*
-
-#### 5.2.2 Expose DocumentServer via HTTP
-
-*You should skip step [#5.2.2](#522-expose-documentserver-via-http) if you are going to expose DocumentServer via HTTPS*
+*You should skip step[5.3.2.2](#5322-expose-documentserver-via-http) if you are going to expose DocumentServer via HTTPS*
 
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
-Deploy documentserver ingress:
+To expose DocumentServer via ingress HTTP, set the `ingress.enabled` parameter to true:
 
 ```bash
-$ kubectl apply -f ./ingresses/documentserver.yaml
+$ helm install documentserver ./ --set ingress.enabled=true
+
 ```
 
 Run the following command to get the `documentserver` ingress IP:
@@ -427,7 +402,7 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
 
-#### 5.2.3 Expose DocumentServer via HTTPS
+#### 5.3.2.3 Expose DocumentServer via HTTPS
 
 This type of exposure allows you to enable internal TLS termination for DocumentServer.
 
@@ -441,12 +416,9 @@ $ kubectl create secret generic tls \
   --from-file=./tls.key
 ```
 
-Open `./ingresses/documentserver-ssl.yaml` and type your domain name instead of `example.com`
-
-Deploy documentserver ingress
-
 ```bash
-$ kubectl apply -f ./ingresses/documentserver-ssl.yaml
+$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
+
 ```
 
 Run the following command to get the `documentserver` ingress IP:
@@ -465,17 +437,38 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
-### 6. Update ONLYOFFICE Docs
+### 6. Scale DocumentServer (optional)
 
-#### 6.1 Manual update
+*This step is optional. You can skip step [6](#6-scale-documentserver-optional) at all if you want to use default deployment settings.*
 
-*You should skip step [#6.1](#61-manual-update) if you want to perform the update using a script*
+#### 6.1 Manual scaling
+The `docservice` and `converter` deployments consist of 2 pods each other by default.
 
-#### 6.1.1 Preparing for update
+To scale the `docservice` deployment, use the following command:
+
+```bash
+$ kubectl scale -n default deployment docservice --replicas=POD_COUNT
+```
+
+where `POD_COUNT` is а number of the `docservice` pods.
+
+Do the same to scale the `converter` deployment:
+
+```bash
+$ kubectl scale -n default deployment converter --replicas=POD_COUNT
+```
+
+### 7. Update ONLYOFFICE Docs
+
+#### 7.1 Manual update
+
+*You should skip step [#7.1](#71-manual-update) if you want to perform the update using a script*
+
+#### 7.1.1 Preparing for update
 
 The next script creates a job, which shuts down the service, clears the cache files and clears tables in the database.
 
-If there are `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
+If there are the `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
 
 ```bash
 $ kubectl delete cm remove-db-scripts init-db-scripts
@@ -498,7 +491,7 @@ $ kubectl create configmap init-db-scripts --from-file=./createdb.sql
 Create a configmap containing the update script:
 
 ```bash
-$ kubectl apply -f ./configmaps/update-ds.yaml
+$ kubectl apply -f ./sources/update-ds.yaml
 ```
 
 Run the job:
@@ -513,7 +506,7 @@ After successful run, the job automaticly terminates its pod, but you have to cl
 $ kubectl delete job prepare4update
 ```
 
-#### 6.1.2 Update the DocumentServer images
+#### 7.1.2 Update the DocumentServer images
 
 Update deployment images:
 ```
@@ -526,14 +519,22 @@ $ kubectl set image deployment/docservice \
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
 
-#### 6.2 Automated update
+#### 7.2 Automated update
 
 To perform the update using a script, run the following command:
 
 ```bash
-$ ./scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
+$ ./sources/scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
 ```
 `DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
+
+### 8. Shutdown ONLYOFFICE Docs (optional)
+
+To perform the shutdown using a script, run the following command
+
+```bash
+$ ./sources/scripts/shutdown-ds.sh
+```
 
 ## Using Prometheus to collect metrics with visualization in Grafana (optional)
 *This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
@@ -559,23 +560,16 @@ See more details about installing Prometheus via Helm [here](https://github.com/
 
 ### 2. Deploy Grafana
 
-#### 2.1 Preparing for deploy
+#### 2.1 Deploy Grafana without installing ready-made dashboards
 
-Create the Grafana configmap:
+*You should skip step [#2.1](#21-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
 
+If you have completed step [6](#6-deploy-statsd-exporter), then update the prometeus installation:
+
+```bash
+helm upgrade prometheus prometheus-community/prometheus \
+--set-file extraScrapeConfigs=./sources/extraScrapeConfigs.yaml
 ```
-$ kubectl apply -f ./configmaps/grafana.yaml
-```
-
-Сreate a secret that contains Prometheus as Grafana Data sources:
-
-```
-$ kubectl apply -f ./secrets/grafana-datasource.yaml
-```
-
-#### 2.2 Deploy Grafana without installing ready-made dashboards
-
-*You should skip step [#2.2](#22-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
 
 To install Grafana to your cluster, run the following command:
 
@@ -587,13 +581,13 @@ $ helm install grafana bitnami/grafana \
   --set datasources.secretName=grafana-datasource
 ```
 
-#### 2.3 Deploy Grafana with the installation of ready-made dashboards
+#### 2.2 Deploy Grafana with the installation of ready-made dashboards
 
-Run the `./metrics/get_dashboard.sh` script, which will download ready-made dashboards in `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
+Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-$ ./metrics/get_dashboard.sh
+$ ./sources/metrics/get_dashboard.sh
 ```
 
 To install Grafana to your cluster, run the following command:
@@ -617,8 +611,8 @@ $ helm install grafana bitnami/grafana \
   --set dashboardsConfigMaps[4].fileName=dashboard-postgresql.json \
   --set dashboardsConfigMaps[5].configMapName=dashboard-nginx-ingress \
   --set dashboardsConfigMaps[5].fileName=dashboard-nginx-ingress.json \
-  --set dashboardsConfigMaps[5].configMapName=dashboard-documentserver \
-  --set dashboardsConfigMaps[5].fileName=documentserver-statsd-exporter.json
+  --set dashboardsConfigMaps[6].configMapName=dashboard-documentserver \
+  --set dashboardsConfigMaps[6].fileName=documentserver-statsd-exporter.json
 ```
 
 After executing this command, the following dashboards will be imported into Grafana:
@@ -637,33 +631,16 @@ See more details about installing Grafana via Helm [here](https://github.com/bit
 
 *This step is optional. You can skip step [#3](#3-expose-grafana-via-ingress) if you don't want to use Nginx Ingress to access the Grafana web interface*
 
-Note: It is assumed that step [#5.2.1](#521-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
-
-*Note: In all the steps below concerning Nginx Ingress for kubernetes versions below 1.19, deploy must be performed from the `./ingresses/before-1.19` directory.
-For example: `$ kubectl apply -f ./ingresses/before-1.19/grafana.yaml`*
+Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
 
 #### 3.1 Expose Grafana via HTTP
 *You should skip step [#3.1](#31-expose-grafana-via-http) if you are going to expose Grafana via HTTPS*
-
-Deploy Grafana ingress:
-
-```bash
-$ kubectl apply -f ./ingresses/grafana.yaml
-```
 
 After that you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
 
 #### 3.2 Expose Grafana via HTTPS
 
-Note: It is assumed that step [#5.2.3](#523-expose-documentserver-via-https) has already been completed.
-
-Open `./ingresses/grafana-ssl.yaml` and type your domain name instead of `example.com`.
-
-Deploy Grafana ingress:
-
-```bash
-$ kubectl apply -f ./ingresses/grafana-ssl.yaml
-```
+Note: It is assumed that step [#5.3.2.3](#5323-expose-documentserver-via-https) has already been completed.
 
 After that you will have access to Grafana at `https://your-domain-name/grafana/`
 
