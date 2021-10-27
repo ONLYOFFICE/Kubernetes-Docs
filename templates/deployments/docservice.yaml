@@ -50,7 +50,7 @@ spec:
               name: documentserver
           volumeMounts:
           - name: ds-files
-            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+            mountPath: /var/lib/{{ .Values.company.name }}/documentserver/App_Data/cache/files
 
         - name: docservice
           image: {{ .Values.docservice.containerImage }}
@@ -84,7 +84,7 @@ spec:
               name: documentserver
           volumeMounts:
           - name: ds-files
-            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+            mountPath: /var/lib/{{ .Values.company.name }}/documentserver/App_Data/cache/files
           - name: ds-license
-            mountPath: /var/www/onlyoffice/Data
+            mountPath: /var/www/{{ .Values.company.name }}/Data
             readOnly: true

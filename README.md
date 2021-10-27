@@ -288,6 +288,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | ingress.ssl.host                   | host for ingress ssl                             | example.com                                 |
 | ingress.ssl.secret                 | secret name for ssl                              | tls                                         |
 | grafana_ingress.enabled            | installation grafana of ingress service          | false                                       |
+| company.name                       | Company name                                     | onlyoffice                                  |
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
@@ -370,7 +371,7 @@ To install the Nginx Ingress Controller to your cluster, run the following comma
 $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
-See more detail about installing Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
+See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
 
 #### 5.3.2.2 Expose DocumentServer via HTTP
 

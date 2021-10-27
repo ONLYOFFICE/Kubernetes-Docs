@@ -1,3 +1,6 @@
+company:
+  name: onlyoffice
+
 connections:
   dbHost: postgresql
   dbUser: postgres
