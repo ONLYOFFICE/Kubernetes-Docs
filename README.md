@@ -288,7 +288,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | ingress.ssl.host                   | host for ingress ssl                             | example.com                                 |
 | ingress.ssl.secret                 | secret name for ssl                              | tls                                         |
 | grafana_ingress.enabled            | installation grafana of ingress service          | false                                       |
-| company.name                       | Company name                                     | onlyoffice                                  |
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 

@@ -1,5 +1,5 @@
 company:
-  name: onlyoffice
+  name:
 
 connections:
   dbHost: postgresql
