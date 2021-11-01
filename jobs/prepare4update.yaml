@@ -16,9 +16,9 @@ spec:
         - name: init-db-scripts
           configMap:
             name: init-db-scripts
-        - name: update-scripts
+        - name: stop-scripts
           configMap:
-            name: update-ds
+            name: stop-ds
             defaultMode: 0755
       containers:
         - name: prepare4update
@@ -32,18 +32,20 @@ spec:
               secretKeyRef:
                 name: postgresql
                 key: postgresql-password
+          - name: PRODUCT_NAME
+            value: ${PRODUCT_NAME}
           volumeMounts:
           - name: ds-files
-            mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+            mountPath: /var/lib/${PRODUCT_NAME}/documentserver/App_Data/cache/files
           - name: remove-db-scripts
             mountPath: /sql/removetbl.sql
             subPath: removetbl.sql
           - name: init-db-scripts
             mountPath: /sql/createdb.sql
             subPath: createdb.sql
-          - name: update-scripts
-            mountPath: /sql/update.sh
-            subPath: update.sh
+          - name: stop-scripts
+            mountPath: /sql/stop.sh
+            subPath: stop.sh
           command: ["/bin/sh", "-c"]
-          args: ["/sql/update.sh"]
+          args: ["/sql/stop.sh"]
       restartPolicy: Never

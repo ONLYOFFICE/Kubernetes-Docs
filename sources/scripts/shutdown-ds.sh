@@ -1,5 +1,19 @@
 #!/bin/bash
 
+PRODUCT_NAME="onlyoffice"
+
+while [ "$1" != "" ]; do
+  case $1 in
+    -pn | --product_name )
+       if [ "$2" != "" ]; then
+         PRODUCT_NAME=$2
+         shift
+       fi
+    ;;
+  esac
+  shift
+done
+
 init_prepare4shutdown_job(){
   kubectl get job | grep -iq prepare4shutdown
   if [ $? -eq 0 ]; then
@@ -11,12 +25,13 @@ init_prepare4shutdown_job(){
     wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
     kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
     kubectl create configmap init-db-scripts --from-file=./createdb.sql
-    kubectl apply -f ./sources/update-ds.yaml
+    kubectl apply -f ./sources/stop-ds.yaml
   fi
 }
 
 create_prepare4shutdown_job(){
-  kubectl apply -f ./jobs/prepare4shutdown.yaml
+  export PRODUCT_NAME="${PRODUCT_NAME}"
+  envsubst < ./jobs/prepare4shutdown.yaml | kubectl apply -f -
   sleep 5
   PODNAME="$(kubectl get pod | grep -i prepare4shutdown | awk '{print $1}')"
 }
@@ -61,6 +76,6 @@ if [[ "$POD_STATUS" == "error" ]]; then
   print_error_message
 else
   delete_prepare4shutdown_job
-  echo -e "\e[0;32m The Job prepare4shutdown was completed successfully.\e[0m"
+  echo -e "\e[0;32m The Job shutdown was completed successfully.\e[0m"
 fi
 exit
