@@ -1,6 +1,7 @@
 #!/bin/bash
 DOCUMENTSERVER_VERSION=""
 PRODUCT_NAME="onlyoffice"
+PRODUCT_REPO=""
 PRODUCT_EDITION=""
 
 if [ "$1" == "" ]; then
@@ -13,6 +14,12 @@ while [ "$1" != "" ]; do
     -pn | --product_name )
        if [ "$2" != "" ]; then
          PRODUCT_NAME=$2
+         shift
+       fi
+    ;;
+    -pr | --product_repo )
+       if [ "$2" != "" ]; then
+         PRODUCT_REPO=$2
          shift
        fi
     ;;
@@ -35,6 +42,10 @@ done
 if [ "$DOCUMENTSERVER_VERSION" == "" ]; then
   echo -e "\e[0;31m The DOCUMENT SERVER version cannot be empty \e[0m"
   exit 1
+fi
+
+if [ "$PRODUCT_REPO" == "" ]; then
+  PRODUCT_REPO="${PRODUCT_NAME}"
 fi
 
 if [ "$PRODUCT_EDITION" != "" ]; then
@@ -90,14 +101,11 @@ delete_prepare4update_job(){
 }
 
 update_images(){
-  if [[ "$PRODUCT_NAME" == "r7-office" ]]; then
-    PRODUCT_NAME="r7office"
-  fi
   kubectl set image deployment/converter \
-    converter=${PRODUCT_NAME}/docs-converter${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION}
+    converter=${PRODUCT_REPO}/docs-converter${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION}
   kubectl set image deployment/docservice \
-    docservice=${PRODUCT_NAME}/docs-docservice${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION} \
-    proxy=${PRODUCT_NAME}/docs-proxy${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION}
+    docservice=${PRODUCT_REPO}/docs-docservice${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION} \
+    proxy=${PRODUCT_REPO}/docs-proxy${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION}
 }
 
 print_error_message(){
