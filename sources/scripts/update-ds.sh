@@ -29,7 +29,7 @@ while [ "$1" != "" ]; do
          shift
        fi
     ;;
-    -dv | --document_version )
+    -dv | --documentserver_version )
        if [ "$2" != "" ]; then
          DOCUMENTSERVER_VERSION=$2
          shift
