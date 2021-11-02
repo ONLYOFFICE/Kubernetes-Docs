@@ -459,16 +459,15 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 To perform the update, run the following script:
 
 ```bash
-$ ./sources/scripts/update-ds.sh -pe [PRODUCT_EDITION] -dv [DOCUMENTSERVER_VERSION]
+$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION]
 ```
 
 Where:
- - `pe` - product edition name
  - `dv` - new version of docker images for ONLYOFFICE Docs.
 
 For example:
 ```bash
-$ ./sources/scripts/update-ds.sh -pe de -dv 6.4.2.6
+$ ./sources/scripts/update-ds.sh -dv 6.4.2.6
 ```
 
 ### 8. Shutdown ONLYOFFICE Docs (optional)
