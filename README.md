@@ -252,9 +252,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | persistance.size                   | storage volume size                              | 8Gi                                         |
 | metrics.enabled                    | Statsd installation                              | false                                       |
 | example.enabled                    | Choise of example installation                   | false                                       |
-| example.containerImage             | example container image name                     | onlyoffice/docs-example:6.3.1.32            |
+| example.containerImage             | example container image name                     | onlyoffice/docs-example:6.4.2.6             |
 | docservice.replicas                | docservice replicas quantity                     | 2                                           |
-| docservice.containerImage          | docservice container image name                  | onlyoffice/docs-docservice-de:6.3.1.32      |
+| docservice.containerImage          | docservice container image name                  | onlyoffice/docs-docservice-de:6.4.2.6       |
 | docservice.resourcesrequests.memory| memory request                                   | 256Mi                                       |
 | docservice.resourcesrequests.cpu   | cpu request                                      | 100m                                        |
 | docservice.resourceslimits.memory  | memory limit                                     | 2Gi                                         |
@@ -262,7 +262,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | docservice.readinessProbeEnabled   | Enable readinessProbe for docservice             | true                                        |
 | docservice.livenessProbeEnabled    | Enable livenessProbe for docservice              | true                                        |
 | docservice.startupProbeEnabled     | Enable startupProbe for docservice               | true                                        |
-| proxy.proxyContainerImage          | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.3.1.32           |
+| proxy.proxyContainerImage          | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.4.2.6            |
 | proxy.resourcesrequests.memory     | memory request                                   | 256Mi                                       |
 | proxy.resourcesrequests.cpu        | cpu request                                      | 100m                                        |
 | proxy.resourceslimits.memory       | memory limit                                     | 2Gi                                         |
@@ -270,7 +270,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | proxy.livenessProbeEnabled         | Enable livenessProbe for proxy                   | true                                        |
 | proxy.startupProbeEnabled          | Enable startupProbe for proxy                    | true                                        |
 | converter.replicas                 | converter replicas quantity                      | 2                                           |
-| converter.containerImage           | converter container image name                   | onlyoffice/docs-converter-de:6.3.1.32       |
+| converter.containerImage           | converter container image name                   | onlyoffice/docs-converter-de:6.4.2.6        |
 | converter.requests.memory          | memory request                                   | 256Mi                                       |
 | converter.requests.cpu             | cpu request                                      | 100m                                        |
 | converter.limits.memory            | memory limit                                     | 2Gi                                         |
@@ -366,7 +366,7 @@ To install the Nginx Ingress Controller to your cluster, run the following comma
 $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
-See more detail about installing Nginx Ingress via Helm [here](https://github.com/helm/charts/tree/master/stable/nginx-ingress#nginx-ingress).
+See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
 
 #### 5.3.2.2 Expose DocumentServer via HTTP
 
