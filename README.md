@@ -30,10 +30,6 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
       + [6.1 Manual scaling](#61-manual-scaling) 
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
-    + [7.1 Manual update](#71-manual-update)
-    + [7.1.1 Preparing for update](#711-preparing-for-update)
-    + [7.1.2 Update the DocumentServer images](#712-update-the-documentserver-images)
-    + [7.2 Automated update](#72-automated-update)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
 - [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
   * [1. Deploy Prometheus](#1-deploy-prometheus)
@@ -460,77 +456,23 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 ### 7. Update ONLYOFFICE Docs
 
-#### 7.1 Manual update
-
-*You should skip step [#7.1](#71-manual-update) if you want to perform the update using a script*
-
-#### 7.1.1 Preparing for update
-
-The next script creates a job, which shuts down the service, clears the cache files and clears tables in the database.
-
-If there are the `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
+To perform the update, run the following script:
 
 ```bash
-$ kubectl delete cm remove-db-scripts init-db-scripts
+$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION]
 ```
 
-Download the ONLYOFFICE Docs database scripts for database cleaning and database schema creating:
+Where:
+ - `dv` - new version of docker images for ONLYOFFICE Docs.
 
+For example:
 ```bash
-$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
-$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+$ ./sources/scripts/update-ds.sh -dv 6.4.2.6
 ```
-
-Create a configmap from them:
-
-```bash
-$ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
-$ kubectl create configmap init-db-scripts --from-file=./createdb.sql
-```
-
-Create a configmap containing the update script:
-
-```bash
-$ kubectl apply -f ./sources/update-ds.yaml
-```
-
-Run the job:
-
-```bash
-$ kubectl apply -f ./jobs/prepare4update.yaml
-```
-
-After successful run, the job automaticly terminates its pod, but you have to clean the job itself manually:
-
-```bash
-$ kubectl delete job prepare4update
-```
-
-#### 7.1.2 Update the DocumentServer images
-
-Update deployment images:
-```
-$ kubectl set image deployment/converter \
-  converter=onlyoffice/docs-converter-de:DOCUMENTSERVER_VERSION
-
-$ kubectl set image deployment/docservice \
-  docservice=onlyoffice/docs-docservice-de:DOCUMENTSERVER_VERSION \
-  proxy=onlyoffice/docs-proxy-de:DOCUMENTSERVER_VERSION
-```
-`DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
-
-#### 7.2 Automated update
-
-To perform the update using a script, run the following command:
-
-```bash
-$ ./sources/scripts/update-ds.sh [DOCUMENTSERVER_VERSION]
-```
-`DOCUMENTSERVER_VERSION` is the new version of docker images for ONLYOFFICE Docs.
 
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
-To perform the shutdown using a script, run the following command
+To perform the shutdown, run the following script:
 
 ```bash
 $ ./sources/scripts/shutdown-ds.sh
