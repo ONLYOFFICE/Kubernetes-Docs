@@ -1,11 +1,40 @@
 #!/bin/bash
 DOCUMENTSERVER_VERSION=""
+PRODUCT_NAME="onlyoffice"
+PRODUCT_EDITION="de"
 
 if [ "$1" == "" ]; then
   echo "Basic parameters are missing."
   exit 1
-else
-  DOCUMENTSERVER_VERSION=$1
+fi
+
+while [ "$1" != "" ]; do
+  case $1 in
+    -pn | --product_name )
+       if [ "$2" != "" ]; then
+         PRODUCT_NAME=$2
+         shift
+       fi
+    ;;
+    -pe | --product_edition )
+       if [ "$2" != "" ]; then
+         PRODUCT_EDITION=$2
+         shift
+       fi
+    ;;
+    -dv | --documentserver_version )
+       if [ "$2" != "" ]; then
+         DOCUMENTSERVER_VERSION=$2
+         shift
+       fi
+    ;;
+  esac
+  shift
+done
+
+if [ "$DOCUMENTSERVER_VERSION" == "" ]; then
+  echo -e "\e[0;31m The DOCUMENT SERVER version cannot be empty \e[0m"
+  exit 1
 fi
 
 init_prepare4update_job(){
@@ -19,12 +48,13 @@ init_prepare4update_job(){
     wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
     kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
     kubectl create configmap init-db-scripts --from-file=./createdb.sql
-    kubectl apply -f ./sources/update-ds.yaml
+    kubectl apply -f ./sources/stop-ds.yaml
   fi
 }
 
 create_prepare4update_job(){
-  kubectl apply -f ./jobs/prepare4update.yaml
+  export PRODUCT_NAME="${PRODUCT_NAME}"
+  envsubst < ./jobs/prepare4update.yaml | kubectl apply -f -
   sleep 5
   PODNAME="$(kubectl get pod | grep -i prepare4update | awk '{print $1}')"
 }
@@ -56,11 +86,12 @@ delete_prepare4update_job(){
 }
 
 update_images(){
+  PRODUCT_NAME=$(echo "${PRODUCT_NAME}" | sed 's/-//g')
   kubectl set image deployment/converter \
-    converter=onlyoffice/docs-converter-de:${DOCUMENTSERVER_VERSION}
+    converter=${PRODUCT_NAME}/docs-converter-${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION}
   kubectl set image deployment/docservice \
-    docservice=onlyoffice/docs-docservice-de:${DOCUMENTSERVER_VERSION} \
-    proxy=onlyoffice/docs-proxy-de:${DOCUMENTSERVER_VERSION}
+    docservice=${PRODUCT_NAME}/docs-docservice-${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION} \
+    proxy=${PRODUCT_NAME}/docs-proxy-${PRODUCT_EDITION}:${DOCUMENTSERVER_VERSION}
 }
 
 print_error_message(){
