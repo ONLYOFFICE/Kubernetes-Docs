@@ -366,6 +366,12 @@ To install the Nginx Ingress Controller to your cluster, run the following comma
 $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
 ```
 
+Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
+
+```bash
+$ helm install nginx-ingress -f ./sources/ingress_values.yaml ingress-nginx/ingress-nginx
+```
+
 See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
 
 #### 5.3.2.2 Expose DocumentServer via HTTP
