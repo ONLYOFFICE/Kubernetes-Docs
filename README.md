@@ -523,7 +523,7 @@ To install Grafana to your cluster, run the following command:
 
 ```bash
 $ helm install grafana bitnami/grafana \
-  --set service.port=80 \
+  --set service.ports.grafana=80 \
   --set config.useGrafanaIniFile=true \
   --set config.grafanaIniConfigMap=grafana-ini \
   --set datasources.secretName=grafana-datasource
@@ -542,7 +542,7 @@ To install Grafana to your cluster, run the following command:
 
 ```bash
 $ helm install grafana bitnami/grafana \
-  --set service.port=80 \
+  --set service.ports.grafana=80 \
   --set config.useGrafanaIniFile=true \
   --set config.grafanaIniConfigMap=grafana-ini \
   --set datasources.secretName=grafana-datasource \
