@@ -31,6 +31,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
       + [6.1 Manual scaling](#61-manual-scaling) 
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
+  * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
 - [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
   * [1. Deploy Prometheus](#1-deploy-prometheus)
     + [1.1 Add Helm repositories](#11-add-helm-repositories)
@@ -483,6 +484,20 @@ To perform the shutdown, run the following script:
 ```bash
 $ ./sources/scripts/shutdown-ds.sh
 ```
+
+### 9. Update ONLYOFFICE Docs license (optional)
+
+In order to update the license, you need to perform the following steps:
+ - Place the license.lic file containing the new key in some directory
+ - Run the following commands:
+   ```bash
+   $ kubectl delete secret license
+   $ kubectl create secret generic license --from-file=path/to/license.lic
+   ```
+ - Restart `docservice` and `converter` pods. For example, using the following command:
+   ```bash
+   $ kubectl delete pod converter-*** docservice-***
+   ```
 
 ## Using Prometheus to collect metrics with visualization in Grafana (optional)
 *This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
