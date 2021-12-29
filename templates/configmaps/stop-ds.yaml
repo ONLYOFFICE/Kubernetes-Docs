@@ -2,6 +2,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: stop-ds
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
 data:
   stop.sh: |-
     #!/bin/bash
@@ -34,6 +37,8 @@ data:
             ;;
         esac
       done
+      wget -O /sql/removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+      wget -O /sql/createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
       PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/removetbl.sql
       PGPASSWORD=$DB_PWD psql --host=postgresql --user=postgres --file=/sql/createdb.sql
       echo work done
