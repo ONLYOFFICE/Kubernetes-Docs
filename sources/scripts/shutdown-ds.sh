@@ -21,8 +21,6 @@ init_prepare4shutdown_job(){
     exit 1
   else
     kubectl delete cm remove-db-scripts init-db-scripts
-    wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
-    wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
     kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
     kubectl create configmap init-db-scripts --from-file=./createdb.sql
     kubectl apply -f ./templates/configmaps/stop-ds.yaml

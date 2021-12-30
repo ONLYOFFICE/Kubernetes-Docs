@@ -37,12 +37,6 @@ spec:
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/${PRODUCT_NAME}/documentserver/App_Data/cache/files
-          - name: remove-db-scripts
-            mountPath: /sql/removetbl.sql
-            subPath: removetbl.sql
-          - name: init-db-scripts
-            mountPath: /sql/createdb.sql
-            subPath: createdb.sql
           - name: stop-scripts
             mountPath: /sql/stop.sh
             subPath: stop.sh

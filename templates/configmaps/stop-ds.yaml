@@ -9,7 +9,7 @@ data:
   stop.sh: |-
     #!/bin/bash
     apt update
-    apt -y install curl bash
+    apt -y install curl bash wget
     curlout="$(curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s)"
     if [[ "${curlout}" != "true" ]]; then
       echo -e "\e[0;31m The server could not be disabled \e[0m"
