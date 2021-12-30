@@ -249,8 +249,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | connections.amqpHost               | IP address or the name of the message-broker     | rabbit-mq                                   |
 | connections.amqpUser               | messabe-broker user                              | user                                        |
 | connections.amqpProto              | messabe-broker protocol                          | ampq                                        |
-| persistance.storageClass           | storage class name                               | nfs                                         |
-| persistance.size                   | storage volume size                              | 8Gi                                         |
+| persistence.storageClass           | storage class name                               | nfs                                         |
+| persistence.size                   | storage volume size                              | 8Gi                                         |
 | metrics.enabled                    | Statsd installation                              | false                                       |
 | example.enabled                    | Choise of example installation                   | false                                       |
 | example.containerImage             | example container image name                     | onlyoffice/docs-example:6.4.2.6             |
