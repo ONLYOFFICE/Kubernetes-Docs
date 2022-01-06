@@ -5,13 +5,16 @@ metadata:
 data:
   DB_USER: {{ .Values.connections.dbUser }}
   DB_HOST: {{ .Values.connections.dbHost }}
-  DB_PORT: {{ .Values.connections.dbPort | quote}}
+  DB_PORT: {{ .Values.connections.dbPort | quote }}
   REDIST_SERVER_HOST: {{ .Values.connections.redisHost }}
   AMQP_HOST: {{ .Values.connections.amqpHost }}
   AMQP_USER: {{ .Values.connections.amqpUser }}
   AMQP_PROTO: {{ .Values.connections.amqpProto }}
-  METRICS_HOST: statsd-exporter-prometheus-statsd-exporter
-  METRICS_ENABLED: {{ .Values.metrics.enabled | quote}}
+  METRICS_ENABLED: {{ .Values.metrics.enabled | quote }}
+  METRICS_HOST: {{ .Values.metrics.host }}
+  METRICS_PREFIX: {{ .Values.metrics.prefix }}
+  LOG_LEVEL: {{ .Values.log.level }}
+  NGINX_GZIP_PROXIED: {{ .Values.proxy.gzipProxied }}
   {{ if .Values.example.enabled }}
   EXAMPLE_HOST_PORT: example:3000
   {{ end }}
