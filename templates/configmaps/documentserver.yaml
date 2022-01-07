@@ -12,6 +12,7 @@ data:
   AMQP_PROTO: {{ .Values.connections.amqpProto }}
   METRICS_ENABLED: {{ .Values.metrics.enabled | quote }}
   METRICS_HOST: {{ .Values.metrics.host }}
+  METRICS_PORT: {{ .Values.metrics.port }}
   METRICS_PREFIX: {{ .Values.metrics.prefix }}
   LOG_LEVEL: {{ .Values.log.level }}
   NGINX_GZIP_PROXIED: {{ .Values.proxy.gzipProxied }}

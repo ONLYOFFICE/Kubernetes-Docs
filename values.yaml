@@ -20,6 +20,7 @@ log:
 metrics:
   enabled: false
   host: statsd-exporter-prometheus-statsd-exporter
+  port: 8125
   prefix: ds.
 
 example:
