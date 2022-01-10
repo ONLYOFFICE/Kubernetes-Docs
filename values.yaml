@@ -20,7 +20,7 @@ log:
 metrics:
   enabled: false
   host: statsd-exporter-prometheus-statsd-exporter
-  port: 8125
+  port: "8125"
   prefix: ds.
 
 example:
@@ -67,7 +67,7 @@ docservice:
     limits: {}
 
 proxy:
-  gzipProxied: off
+  gzipProxied: "off"
   livenessProbeEnabled: true
   livenessProbe:
     failureThreshold: 3
@@ -111,7 +111,7 @@ converter:
     limits: {}
 
 jwt:
-  enabled: false
+  enabled: true
   secret: MYSECRET
   header: Authorization
 

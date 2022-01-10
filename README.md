@@ -281,7 +281,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | converter.requests.cpu              | cpu request                                                                                                              | 100m                                       |
 | converter.limits.memory             | memory limit                                                                                                             | 2Gi                                        |
 | converter.limits.cpu                | cpu limit                                                                                                                | 1000m                                      |
-| jwt.enabled                         | jwt enabling parameter                                                                                                   | false                                      |
+| jwt.enabled                         | jwt enabling parameter                                                                                                   | true                                       |
 | jwt.secret                          | jwt secret                                                                                                               | MYSECRET                                   |
 | jwt.header                          | Defines the http header that will be used to send the JSON Web Token                                                     | Authorization                              |
 | service.type                        | documentserver service type                                                                                              | ClusterIP                                  |
