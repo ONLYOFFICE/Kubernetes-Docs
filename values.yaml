@@ -27,6 +27,9 @@ example:
   enabled: false
   containerImage: onlyoffice/docs-example:6.4.2.6
 
+localJson:
+  enabled: false
+
 docservice:
   replicas: 2
   readinessProbeEnabled: true

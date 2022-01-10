@@ -258,6 +258,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | metrics.prefix                      | Defines StatsD metrics prefix for backend services                                                                       | ds.                                        |
 | example.enabled                     | Choise of example installation                                                                                           | false                                      |
 | example.containerImage              | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
+| localJson.enabled                   | Determines whether the ConfigMap containing the `local.json` file with custom values will be used                        | false                                      |
 | docservice.replicas                 | docservice replicas quantity                                                                                             | 2                                          |
 | docservice.containerImage           | docservice container image name                                                                                          | onlyoffice/docs-docservice-de:6.4.2.6      |
 | docservice.resourcesrequests.memory | memory request                                                                                                           | 256Mi                                      |

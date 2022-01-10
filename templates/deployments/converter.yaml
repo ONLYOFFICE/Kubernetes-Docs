@@ -24,6 +24,11 @@ spec:
         - name: ds-license
           secret:
             secretName: license
+        {{ if .Values.localJson.enabled }}
+        - name: local-json
+          configMap:
+            name: local-config
+        {{ end }}
       containers:
         - name: converter
           image: {{ .Values.converter.containerImage }}
@@ -50,3 +55,8 @@ spec:
           - name: ds-license
             mountPath: /var/www/{{ .Values.product.name }}/Data
             readOnly: true
+          {{ if .Values.localJson.enabled }}
+          - name: local-json
+            mountPath: /etc/{{ .Values.product.name }}/documentserver/local.json
+            subPath: local.json
+          {{ end }}
