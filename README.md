@@ -240,57 +240,57 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ### 4. Parameters
 
-| Parameter                           | Description                                                                                                              | Default                                    |
-|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
-| connections.dbHost                  | IP address or the name of the database                                                                                   | postgresql                                 |
-| connections.dbUser                  | database user                                                                                                            | postgres                                   |
-| connections.dbPort                  | database server port number                                                                                              | 5432                                       |
-| connections.redistHost              | IP address or the name of the redis host                                                                                 | redis-master                               |
-| connections.amqpHost                | IP address or the name of the message-broker                                                                             | rabbit-mq                                  |
-| connections.amqpUser                | messabe-broker user                                                                                                      | user                                       |
-| connections.amqpProto               | messabe-broker protocol                                                                                                  | amqp                                       |
-| persistance.storageClass            | storage class name                                                                                                       | nfs                                        |
-| persistance.size                    | storage volume size                                                                                                      | 8Gi                                        |
-| log.level                           | Defines the type and severity of a logged event                                                                          | WARN                                       |
-| metrics.enabled                     | Statsd installation                                                                                                      | false                                      |
-| metrics.host                        | Defines StatsD listening host                                                                                            | statsd-exporter-prometheus-statsd-exporter |
-| metrics.port                        | Defines StatsD listening port                                                                                            | 8125                                       |
-| metrics.prefix                      | Defines StatsD metrics prefix for backend services                                                                       | ds.                                        |
-| example.enabled                     | Choise of example installation                                                                                           | false                                      |
-| example.containerImage              | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
-| docservice.replicas                 | docservice replicas quantity                                                                                             | 2                                          |
-| docservice.containerImage           | docservice container image name                                                                                          | onlyoffice/docs-docservice-de:6.4.2.6      |
-| docservice.resourcesrequests.memory | memory request                                                                                                           | 256Mi                                      |
-| docservice.resourcesrequests.cpu    | cpu request                                                                                                              | 100m                                       |
-| docservice.resourceslimits.memory   | memory limit                                                                                                             | 2Gi                                        |
-| docservice.resourceslimits.cpu      | cpu limit                                                                                                                | 1000m                                      |
-| docservice.readinessProbeEnabled    | Enable readinessProbe for docservice                                                                                     | true                                       |
-| docservice.livenessProbeEnabled     | Enable livenessProbe for docservice                                                                                      | true                                       |
-| docservice.startupProbeEnabled      | Enable startupProbe for docservice                                                                                       | true                                       |
-| proxy.gzipProxied                   | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive | off                                        |
-| proxy.proxyContainerImage           | docservice proxy container image name                                                                                    | onlyoffice/docs-proxy-de:6.4.2.6           |
-| proxy.resourcesrequests.memory      | memory request                                                                                                           | 256Mi                                      |
-| proxy.resourcesrequests.cpu         | cpu request                                                                                                              | 100m                                       |
-| proxy.resourceslimits.memory        | memory limit                                                                                                             | 2Gi                                        |
-| proxy.resourceslimits.cpu           | cpu limit                                                                                                                | 1000m                                      |
-| proxy.livenessProbeEnabled          | Enable livenessProbe for proxy                                                                                           | true                                       |
-| proxy.startupProbeEnabled           | Enable startupProbe for proxy                                                                                            | true                                       |
-| converter.replicas                  | converter replicas quantity                                                                                              | 2                                          |
-| converter.containerImage            | converter container image name                                                                                           | onlyoffice/docs-converter-de:6.4.2.6       |
-| converter.requests.memory           | memory request                                                                                                           | 256Mi                                      |
-| converter.requests.cpu              | cpu request                                                                                                              | 100m                                       |
-| converter.limits.memory             | memory limit                                                                                                             | 2Gi                                        |
-| converter.limits.cpu                | cpu limit                                                                                                                | 1000m                                      |
-| jwt.enabled                         | jwt enabling parameter                                                                                                   | true                                       |
-| jwt.secret                          | jwt secret                                                                                                               | MYSECRET                                   |
-| jwt.header                          | Defines the http header that will be used to send the JSON Web Token                                                     | Authorization                              |
-| service.type                        | documentserver service type                                                                                              | ClusterIP                                  |
-| service.port                        | documentserver service port                                                                                              | 8888                                       |
-| ingress.enabled                     | installation of ingress service                                                                                          | false                                      |
-| ingress.ssl.enabled                 | installation ssl for ingress service                                                                                     | false                                      |
-| ingress.ssl.host                    | host for ingress ssl                                                                                                     | example.com                                |
-| ingress.ssl.secret                  | secret name for ssl                                                                                                      | tls                                        |
-| grafana_ingress.enabled             | installation grafana of ingress service                                                                                  | false                                      |
+| Parameter                          | Description                                      | Default                                     |
+|------------------------------------|--------------------------------------------------|---------------------------------------------|
+| connections.dbHost                 | IP address or the name of the database           | postgresql                                  |
+| connections.dbUser                 | database user                                    | postgres                                    |
+| connections.dbPort                 | database server port number                      | 5432                                        |
+| connections.redistHost             | IP address or the name of the redis host         | redis-master                                |
+| connections.amqpHost               | IP address or the name of the message-broker     | rabbit-mq                                   |
+| connections.amqpUser               | messabe-broker user                              | user                                        |
+| connections.amqpProto              | messabe-broker protocol                          | ampq                                        |
+| persistance.storageClass           | storage class name                               | nfs                                         |
+| persistance.size                   | storage volume size                              | 8Gi                                         |
+| log.level                          | Defines the type and severity of a logged event  | WARN                                        |
+| metrics.enabled                    | Statsd installation                              | false                                       |
+| metrics.host                       | Defines StatsD listening host                    | statsd-exporter-prometheus-statsd-exporter  |
+| metrics.port                       | Defines StatsD listening port                    | 8125                                        |
+| metrics.prefix                     | Defines StatsD metrics prefix for backend services | ds.                                       |
+| example.enabled                    | Choise of example installation                   | false                                       |
+| example.containerImage             | example container image name                     | onlyoffice/docs-example:6.4.2.6             |
+| docservice.replicas                | docservice replicas quantity                     | 2                                           |
+| docservice.containerImage          | docservice container image name                  | onlyoffice/docs-docservice-de:6.4.2.6       |
+| docservice.resourcesrequests.memory| memory request                                   | 256Mi                                       |
+| docservice.resourcesrequests.cpu   | cpu request                                      | 100m                                        |
+| docservice.resourceslimits.memory  | memory limit                                     | 2Gi                                         |
+| docservice.resourceslimits.cpu     | cpu limit                                        | 1000m                                       |
+| docservice.readinessProbeEnabled   | Enable readinessProbe for docservice             | true                                        |
+| docservice.livenessProbeEnabled    | Enable livenessProbe for docservice              | true                                        |
+| docservice.startupProbeEnabled     | Enable startupProbe for docservice               | true                                        |
+| proxy.gzipProxied                  | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive | off |
+| proxy.proxyContainerImage          | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.4.2.6            |
+| proxy.resourcesrequests.memory     | memory request                                   | 256Mi                                       |
+| proxy.resourcesrequests.cpu        | cpu request                                      | 100m                                        |
+| proxy.resourceslimits.memory       | memory limit                                     | 2Gi                                         |
+| proxy.resourceslimits.cpu          | cpu limit                                        | 1000m                                       |
+| proxy.livenessProbeEnabled         | Enable livenessProbe for proxy                   | true                                        |
+| proxy.startupProbeEnabled          | Enable startupProbe for proxy                    | true                                        |
+| converter.replicas                 | converter replicas quantity                      | 2                                           |
+| converter.containerImage           | converter container image name                   | onlyoffice/docs-converter-de:6.4.2.6        |
+| converter.requests.memory          | memory request                                   | 256Mi                                       |
+| converter.requests.cpu             | cpu request                                      | 100m                                        |
+| converter.limits.memory            | memory limit                                     | 2Gi                                         |
+| converter.limits.cpu               | cpu limit                                        | 1000m                                       |
+| jwt.enabled                        | jwt enabling parameter                           | true                                        |
+| jwt.secret                         | jwt secret                                       | MYSECRET                                    |
+| jwt.header                         | Defines the http header that will be used to send the JSON Web Token | Authorization           |
+| service.type                       | documentserver service type                      | ClusterIP                                   |
+| service.port                       | documentserver service port                      | 8888                                        |
+| ingress.enabled                    | installation of ingress service                  | false                                       |
+| ingress.ssl.enabled                | installation ssl for ingress service             | false                                       |
+| ingress.ssl.host                   | host for ingress ssl                             | example.com                                 |
+| ingress.ssl.secret                 | secret name for ssl                              | tls                                         |
+| grafana_ingress.enabled            | installation grafana of ingress service          | false                                       |
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
