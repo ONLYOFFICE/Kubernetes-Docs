@@ -251,7 +251,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | connections.amqpProto              | messabe-broker protocol                          | ampq                                        |
 | persistance.storageClass           | storage class name                               | nfs                                         |
 | persistance.size                   | storage volume size                              | 8Gi                                         |
+| log.level                          | Defines the type and severity of a logged event  | WARN                                        |
 | metrics.enabled                    | Statsd installation                              | false                                       |
+| metrics.host                       | Defines StatsD listening host                    | statsd-exporter-prometheus-statsd-exporter  |
+| metrics.port                       | Defines StatsD listening port                    | 8125                                        |
+| metrics.prefix                     | Defines StatsD metrics prefix for backend services | ds.                                       |
 | example.enabled                    | Choise of example installation                   | false                                       |
 | example.containerImage             | example container image name                     | onlyoffice/docs-example:6.4.2.6             |
 | docservice.replicas                | docservice replicas quantity                     | 2                                           |
@@ -263,6 +267,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | docservice.readinessProbeEnabled   | Enable readinessProbe for docservice             | true                                        |
 | docservice.livenessProbeEnabled    | Enable livenessProbe for docservice              | true                                        |
 | docservice.startupProbeEnabled     | Enable startupProbe for docservice               | true                                        |
+| proxy.gzipProxied                  | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive | off |
 | proxy.proxyContainerImage          | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.4.2.6            |
 | proxy.resourcesrequests.memory     | memory request                                   | 256Mi                                       |
 | proxy.resourcesrequests.cpu        | cpu request                                      | 100m                                        |
@@ -278,6 +283,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | converter.limits.cpu               | cpu limit                                        | 1000m                                       |
 | jwt.enabled                        | jwt enabling parameter                           | true                                        |
 | jwt.secret                         | jwt secret                                       | MYSECRET                                    |
+| jwt.header                         | Defines the http header that will be used to send the JSON Web Token | Authorization           |
 | service.type                       | documentserver service type                      | ClusterIP                                   |
 | service.port                       | documentserver service port                      | 8888                                        |
 | ingress.enabled                    | installation of ingress service                  | false                                       |

@@ -14,8 +14,14 @@ persistence:
   storageClass: "nfs"
   size: 8Gi
 
+log:
+  level: WARN
+
 metrics:
   enabled: false
+  host: statsd-exporter-prometheus-statsd-exporter
+  port: "8125"
+  prefix: ds.
 
 example:
   enabled: false
@@ -61,6 +67,7 @@ docservice:
     limits: {}
 
 proxy:
+  gzipProxied: "off"
   livenessProbeEnabled: true
   livenessProbe:
     failureThreshold: 3
@@ -106,6 +113,7 @@ converter:
 jwt:
   enabled: true
   secret: MYSECRET
+  header: Authorization
 
 service:
   type: ClusterIP
