@@ -27,6 +27,10 @@ example:
   enabled: false
   containerImage: onlyoffice/docs-example:6.4.2.6
 
+extraConf:
+  configMap: ""
+  filename: local.json
+
 docservice:
   replicas: 2
   readinessProbeEnabled: true
