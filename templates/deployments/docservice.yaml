@@ -26,6 +26,18 @@ spec:
         # labelSelector:
           # matchLabels:
             # app: docservice
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - docservice
+              topologyKey: kubernetes.io/hostname
+            weight: 100
       volumes:
         - name: ds-files
           persistentVolumeClaim:

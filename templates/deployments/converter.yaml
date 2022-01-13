@@ -17,6 +17,18 @@ spec:
 #      securityContext:
 #        runAsUser: 101
 #        runAsGroup: 101
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - converter
+              topologyKey: kubernetes.io/hostname
+            weight: 100
       volumes:
         - name: ds-files
           persistentVolumeClaim:
