@@ -24,10 +24,10 @@ spec:
         - name: ds-license
           secret:
             secretName: license
-        {{ if .Values.nodeConfig.configMap }}
+        {{ if .Values.extraConf.configMap }}
         - name: custom-file
           configMap:
-            name: {{ .Values.nodeConfig.configMap }}
+            name: {{ .Values.extraConf.configMap }}
         {{ end }}
       containers:
         - name: converter
@@ -55,8 +55,8 @@ spec:
           - name: ds-license
             mountPath: /var/www/{{ .Values.product.name }}/Data
             readOnly: true
-          {{ if .Values.nodeConfig.configMap }}
+          {{ if .Values.extraConf.configMap }}
           - name: custom-file
-            mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.nodeConfig.filename }}
-            subPath: {{ .Values.nodeConfig.filename }}
+            mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.extraConf.filename }}
+            subPath: {{ .Values.extraConf.filename }}
           {{ end }}

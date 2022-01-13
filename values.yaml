@@ -27,7 +27,7 @@ example:
   enabled: false
   containerImage: onlyoffice/docs-example:6.4.2.6
 
-nodeConfig:
+extraConf:
   configMap: ""
   filename: local.json
 

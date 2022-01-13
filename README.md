@@ -258,8 +258,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | metrics.prefix                      | Defines StatsD metrics prefix for backend services                                                                       | ds.                                        |
 | example.enabled                     | Choise of example installation                                                                                           | false                                      |
 | example.containerImage              | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
-| nodeConfig.configMap                | The name of the ConfigMap containing the json file that override the default values                                      | ""                                         |
-| nodeConfig.filename                 | The name of the json file that contains custom values. Must be the same as the `key` name in `nodeConfig.ConfigMap`      | local.json                                 |
+| extraConf.configMap                 | The name of the ConfigMap containing the json file that override the default values                                      | ""                                         |
+| extraConf.filename                  | The name of the json file that contains custom values. Must be the same as the `key` name in `extraConf.ConfigMap`       | local.json                                 |
 | docservice.replicas                 | docservice replicas quantity                                                                                             | 2                                          |
 | docservice.containerImage           | docservice container image name                                                                                          | onlyoffice/docs-docservice-de:6.4.2.6      |
 | docservice.resourcesrequests.memory | memory request                                                                                                           | 256Mi                                      |
