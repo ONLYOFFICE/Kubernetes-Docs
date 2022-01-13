@@ -37,7 +37,7 @@ antiAffinity:
   weight: "100"
 
 docservice:
-  replicas: 3
+  replicas: 2
   readinessProbeEnabled: true
   readinessProbe:
     failureThreshold: 2
@@ -106,7 +106,7 @@ proxy:
     limits: {}
 
 converter:
-  replicas: 3
+  replicas: 2
   containerImage: onlyoffice/docs-converter-de:6.4.2.6
   resources:
     ##Example:
