@@ -260,6 +260,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | example.containerImage              | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
 | extraConf.configMap                 | The name of the ConfigMap containing the json file that override the default values                                      | ""                                         |
 | extraConf.filename                  | The name of the json file that contains custom values. Must be the same as the `key` name in `extraConf.ConfigMap`       | local.json                                 |
+| antiAffinity.type                   | Types of Pod antiaffinity. Allowed values: `soft` or `hard`                                                              | soft                                       |
+| antiAffinity.topologyKey            | Node label key to match                                                                                                  | kubernetes.io/hostname                     |
+| antiAffinity.weight                 | Priority when selecting node. It is in the range from 1 to 100                                                           | 100                                        |
 | docservice.replicas                 | docservice replicas quantity                                                                                             | 2                                          |
 | docservice.containerImage           | docservice container image name                                                                                          | onlyoffice/docs-docservice-de:6.4.2.6      |
 | docservice.resourcesrequests.memory | memory request                                                                                                           | 256Mi                                      |

@@ -31,8 +31,13 @@ extraConf:
   configMap: ""
   filename: local.json
 
+antiAffinity:
+  type: "soft"
+  topologyKey: kubernetes.io/hostname
+  weight: "100"
+
 docservice:
-  replicas: 2
+  replicas: 3
   readinessProbeEnabled: true
   readinessProbe:
     failureThreshold: 2
@@ -101,7 +106,7 @@ proxy:
     limits: {}
 
 converter:
-  replicas: 2
+  replicas: 3
   containerImage: onlyoffice/docs-converter-de:6.4.2.6
   resources:
     ##Example:
