@@ -31,6 +31,11 @@ extraConf:
   configMap: ""
   filename: local.json
 
+antiAffinity:
+  type: "soft"
+  topologyKey: kubernetes.io/hostname
+  weight: "100"
+
 docservice:
   replicas: 2
   readinessProbeEnabled: true

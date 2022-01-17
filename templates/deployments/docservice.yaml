@@ -26,6 +26,29 @@ spec:
         # labelSelector:
           # matchLabels:
             # app: docservice
+      affinity:
+        podAntiAffinity:
+        {{- if eq .Values.antiAffinity.type "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - docservice
+              topologyKey: {{ .Values.antiAffinity.topologyKey }}
+            weight: {{ .Values.antiAffinity.weight }}
+        {{- else if eq .Values.antiAffinity.type "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - docservice
+            topologyKey: {{ .Values.antiAffinity.topologyKey }}
+        {{- end }}
       volumes:
         - name: ds-files
           persistentVolumeClaim:

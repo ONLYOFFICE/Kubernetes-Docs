@@ -17,6 +17,29 @@ spec:
 #      securityContext:
 #        runAsUser: 101
 #        runAsGroup: 101
+      affinity:
+        podAntiAffinity:
+        {{- if eq .Values.antiAffinity.type "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - converter
+              topologyKey: {{ .Values.antiAffinity.topologyKey }}
+            weight: {{ .Values.antiAffinity.weight }}
+        {{- else if eq .Values.antiAffinity.type "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - converter
+            topologyKey: {{ .Values.antiAffinity.topologyKey }}
+        {{- end }}
       volumes:
         - name: ds-files
           persistentVolumeClaim:
