@@ -60,12 +60,12 @@ spec:
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
-                name: postgresql
+                name: {{ template "ds.postgresql.secretName" . }}
                 key: postgresql-password
           - name: AMQP_PWD
             valueFrom:
               secretKeyRef:
-                name: rabbitmq
+                name: {{ template "ds.rabbitmq.secretName" . }}
                 key: rabbitmq-password
           envFrom:
           - secretRef:

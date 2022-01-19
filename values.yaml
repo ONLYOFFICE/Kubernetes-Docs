@@ -5,10 +5,14 @@ connections:
   dbHost: postgresql
   dbUser: postgres
   dbPort: "5432"
+  dbExistingSecret: postgresql
+  dbPassword: ""
   redisHost: redis-master
   amqpHost: rabbitmq
   amqpUser: user
   amqpProto: amqp
+  amqpExistingSecret: rabbitmq
+  amqpPassword: ""
 
 persistence:
   storageClass: "nfs"
