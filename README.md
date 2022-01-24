@@ -247,6 +247,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | connections.dbHost                  | IP address or the name of the database                                                                                   | postgresql                                 |
 | connections.dbUser                  | database user                                                                                                            | postgres                                   |
 | connections.dbPort                  | database server port number                                                                                              | 5432                                       |
+| connections.dbName                  | Name of the PostgreSQL database to which the application will connect                                                    | postgres                                   |
 | connections.dbPassword              | PostgreSQL user password. If set to, it takes priority over the `connections.dbExistingSecret`                           | ""                                         |
 | connections.dbExistingSecret        | Name of existing secret to use for PostgreSQL passwords. Must contain the `postgresql-password` key                      | postgresql                                 |
 | connections.redistHost              | IP address or the name of the redis host                                                                                 | redis-master                               |

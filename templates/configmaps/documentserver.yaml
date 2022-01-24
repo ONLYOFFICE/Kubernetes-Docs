@@ -6,6 +6,7 @@ data:
   DB_USER: {{ .Values.connections.dbUser }}
   DB_HOST: {{ .Values.connections.dbHost }}
   DB_PORT: {{ .Values.connections.dbPort | quote }}
+  DB_NAME: {{ .Values.connections.dbName }}
   REDIST_SERVER_HOST: {{ .Values.connections.redisHost }}
   AMQP_HOST: {{ .Values.connections.amqpHost }}
   AMQP_USER: {{ .Values.connections.amqpUser }}

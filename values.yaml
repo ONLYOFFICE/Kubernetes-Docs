@@ -5,6 +5,7 @@ connections:
   dbHost: postgresql
   dbUser: postgres
   dbPort: "5432"
+  dbName: postgres
   dbExistingSecret: postgresql
   dbPassword: ""
   redisHost: redis-master
