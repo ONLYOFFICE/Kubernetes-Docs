@@ -30,6 +30,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
       + [6.1 Manual scaling](#61-manual-scaling) 
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
+      + [7.1 Updating using a script](#71-updating-using-a-script)
+      + [7.2 Updating using helm upgrade](#72-updating-using-helm-upgrade)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
 - [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
@@ -478,7 +480,7 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 ### 7. Update ONLYOFFICE Docs
 
-####7.1 Updating using a script
+#### 7.1 Updating using a script
 
 To perform the update, run the following script:
 
@@ -494,7 +496,7 @@ For example:
 $ ./sources/scripts/update-ds.sh -dv 6.4.2.6
 ```
 
-####7.2 Updating using helm upgrade
+#### 7.2 Updating using helm upgrade
 
 It's necessary to set the parameters for updating. For example,
 
