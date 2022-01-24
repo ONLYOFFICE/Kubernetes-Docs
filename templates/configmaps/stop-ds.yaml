@@ -15,7 +15,7 @@ data:
       echo -e "\e[0;31m The server could not be disabled \e[0m"
       exit 1
     else
-      PGPASSWORD=$DB_PWD psql --host=$DBHOST --user=$DBUSER --dbname=$DBNAME -c "\dt" > /dev/null
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME -c "\dt" > /dev/null
       if [ $? -ne 0 ]; then
         echo -e "\e[0;31m DB is not available \e[0m"
         exit 1
@@ -39,7 +39,7 @@ data:
       done
       wget -O /sql/removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
       wget -O /sql/createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
-      PGPASSWORD=$DB_PWD psql --host=$DBHOST --user=$DBUSER --dbname=$DBNAME --file=/sql/removetbl.sql
-      PGPASSWORD=$DB_PWD psql --host=$DBHOST --user=$DBUSER --dbname=$DBNAME --file=/sql/createdb.sql
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/removetbl.sql
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/createdb.sql
       echo work done
     fi

@@ -32,12 +32,6 @@ spec:
                 key: postgresql-password
           - name: PRODUCT_NAME
             value: {{ .Values.product.name }}
-          - name: DBHOST
-            value: {{ .Values.connections.dbHost }}
-          - name: DBUSER
-            value: {{ .Values.connections.dbUser }}
-          - name: DBNAME
-            value: {{ .Values.connections.dbName }}
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
