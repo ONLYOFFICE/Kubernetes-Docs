@@ -478,6 +478,8 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 ### 7. Update ONLYOFFICE Docs
 
+####7.1 Updating using a script
+
 To perform the update, run the following script:
 
 ```bash
@@ -492,6 +494,23 @@ For example:
 $ ./sources/scripts/update-ds.sh -dv 6.4.2.6
 ```
 
+####7.2 Updating using helm upgrade
+
+It's necessary to set the parameters for updating. For example,
+
+```bash
+$ helm upgrade documentserver ./ \
+  --set docservice.containerImage=[image]:[version]
+  ```
+  
+  > **Note**: also need to specify the parameters that were specified during installation
+  
+  Or modify the values.yaml file and run the command:
+  
+  ```bash
+  $ helm upgrade documentserver ./
+  ```
+  
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
 To perform the shutdown, run the following script:
