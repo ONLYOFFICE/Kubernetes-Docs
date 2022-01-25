@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: prepare4update
+  name: prepare-ds
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "3"
@@ -19,7 +19,7 @@ spec:
             name: stop-ds
             defaultMode: 0755
       containers:
-        - name: prepare4update
+        - name: prepare-ds
           image: postgres
           envFrom:
           - configMapRef:

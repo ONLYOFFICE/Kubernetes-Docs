@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: prepare4shutdown
+  name: prepare-ds
 spec:
   backoffLimit: 2
   template:
@@ -10,28 +10,19 @@ spec:
         - name: ds-files
           persistentVolumeClaim:
             claimName: ds-files
-        - name: remove-db-scripts
-          configMap:
-            name: remove-db-scripts
-        - name: init-db-scripts
-          configMap:
-            name: init-db-scripts
         - name: stop-scripts
           configMap:
             name: stop-ds
             defaultMode: 0755
       containers:
-        - name: prepare4shutdown
+        - name: prepare-ds
           image: postgres
           envFrom:
           - configMapRef:
               name: documentserver
           env:
           - name: DB_PWD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql
-                key: postgresql-password
+            value: ${DB_PASSWORD}
           - name: PRODUCT_NAME
             value: ${PRODUCT_NAME}
           volumeMounts:
