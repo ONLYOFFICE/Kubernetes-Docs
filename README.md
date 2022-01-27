@@ -514,6 +514,19 @@ $ helm upgrade documentserver ./ \
   $ helm upgrade documentserver ./
   ```
   
+Running the helm upgrade command runs a hook that shuts down the documentserver and cleans up the database. This is needed when updating the version of documentserver. The default hook execution time is 300s.
+The execution time can be changed using --timeout [time], for example
+
+```bash
+helm upgrade documentserver ./ --timeout 15m
+```
+
+If you are not upgrading documentserver, upgrade without hooks, for example:
+
+```bash
+helm upgrade documenterver ./ --no-hooks
+```
+  
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
 To perform the shutdown, run the following script:
