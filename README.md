@@ -60,7 +60,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./sources/scc/helm-components.yaml
+$ oc apply -f ./charts/documentserver/sources/scc/helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
 
@@ -194,7 +194,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./sources/scc/docs-components.yaml
+$ oc apply -f ./charts/documentserver/sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 Also, in all `yaml` files in the `deployments` directory, you must uncomment the following fields:
@@ -202,7 +202,7 @@ Also, in all `yaml` files in the `deployments` directory, you must uncomment the
 spec.template.spec.securityContext.runAsUser=101
 spec.template.spec.securityContext.runAsGroup=101
 ```
-In the `./templates/pods/example.yaml` file, you need to uncomment the following fields:
+In the `./charts/documentserver/templates/pods/example.yaml` file, you need to uncomment the following fields:
 ```
 spec.securityContext.runAsUser=1001
 spec.securityContext.runAsGroup=1001
@@ -222,7 +222,7 @@ To deploy DocumentServer with the release name `documentserver`:
 
 ```bash
 
-$ helm install documentserver ./
+$ helm install documentserver ./charts/documentserver/
 ```
 
 The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
@@ -289,7 +289,7 @@ The command removes all the Kubernetes components associated with the chart and 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
+$ helm install documentserver ./charts/documentserver/ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
 ```
 
 This command gives expose documentServer via HTTPS.
@@ -297,10 +297,10 @@ This command gives expose documentServer via HTTPS.
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ helm install documentserver -f values.yaml ./
+$ helm install documentserver -f values.yaml ./charts/documentserver/
 ```
 
-> **Tip**: You can use the default [values.yaml](values.yaml)
+> **Tip**: You can use the default [values.yaml](/charts/documentserver/values.yaml)
 
 ### 5. Configuration and installation details
 
@@ -309,19 +309,19 @@ $ helm install documentserver -f values.yaml ./
 To deploy the example, set the `example.enabled` parameter to true:
 
 ```bash
-$ helm install documentserver ./ --set example.enabled=true
+$ helm install documentserver ./charts/documentserver/ --set example.enabled=true
 ```
 
 ### 5.2 Metrics deployment (optional)
 To deploy metrics, set `metrics.enabled` to true:
 
 ```bash
-$ helm install documentserver ./ --set metrics.enabled=true
+$ helm install documentserver ./charts/documentserver/ --set metrics.enabled=true
 ```
 If you want to use nginx ingress, set `grafana_ingress.enabled` to true:
 
 ```bash
-$ helm install documentserver ./ --set grafana_ingress.enabled=true
+$ helm install documentserver ./charts/documentserver/ --set grafana_ingress.enabled=true
 ```
 
 ### 5.3 Expose DocumentServer
@@ -335,7 +335,7 @@ Use this type of exposure if you use external TLS termination, and don't have an
 To expose DocumentServer via service, set the `service.type` parameter to LoadBalancer:
 
 ```bash
-$ helm install documentserver ./ --set service.type=LoadBalancer,service.port=80
+$ helm install documentserver ./charts/documentserver/ --set service.type=LoadBalancer,service.port=80
 
 ```
 
@@ -370,7 +370,7 @@ $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publis
 Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
 
 ```bash
-$ helm install nginx-ingress -f ./sources/ingress_values.yaml ingress-nginx/ingress-nginx
+$ helm install nginx-ingress -f ./charts/documentserver/sources/ingress_values.yaml ingress-nginx/ingress-nginx
 ```
 
 See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
@@ -385,7 +385,7 @@ Use this type if you use external TLS termination and when you have several WEB 
 To expose DocumentServer via ingress HTTP, set the `ingress.enabled` parameter to true:
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true
+$ helm install documentserver ./charts/documentserver/ --set ingress.enabled=true
 
 ```
 
@@ -420,7 +420,7 @@ $ kubectl create secret generic tls \
 ```
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
+$ helm install documentserver ./charts/documentserver/ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
 
 ```
 
@@ -466,7 +466,7 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 To perform the update, run the following script:
 
 ```bash
-$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION]
+$ ./charts/documentserver/sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION]
 ```
 
 Where:
@@ -474,7 +474,7 @@ Where:
 
 For example:
 ```bash
-$ ./sources/scripts/update-ds.sh -dv 6.4.2.6
+$ ./charts/documentserver/sources/scripts/update-ds.sh -dv 6.4.2.6
 ```
 
 ### 8. Shutdown ONLYOFFICE Docs (optional)
@@ -482,7 +482,7 @@ $ ./sources/scripts/update-ds.sh -dv 6.4.2.6
 To perform the shutdown, run the following script:
 
 ```bash
-$ ./sources/scripts/shutdown-ds.sh
+$ ./charts/documentserver/sources/scripts/shutdown-ds.sh
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
@@ -531,7 +531,7 @@ If you have completed step [6](#6-deploy-statsd-exporter), then update the prome
 
 ```bash
 helm upgrade prometheus prometheus-community/prometheus \
---set-file extraScrapeConfigs=./sources/extraScrapeConfigs.yaml
+--set-file extraScrapeConfigs=./charts/documentserver/sources/extraScrapeConfigs.yaml
 ```
 
 To install Grafana to your cluster, run the following command:
@@ -550,7 +550,7 @@ Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-m
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-$ ./sources/metrics/get_dashboard.sh
+$ ./charts/documentserver/sources/metrics/get_dashboard.sh
 ```
 
 To install Grafana to your cluster, run the following command:
