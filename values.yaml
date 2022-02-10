@@ -128,7 +128,7 @@ jwt:
   enabled: true
   secret: MYSECRET
   header: Authorization
-  inbody: false
+  inBody: false
 
 service:
   type: ClusterIP
