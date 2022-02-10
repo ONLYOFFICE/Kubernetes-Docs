@@ -294,6 +294,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | jwt.enabled                         | jwt enabling parameter                                                                                                   | true                                       |
 | jwt.secret                          | jwt secret                                                                                                               | MYSECRET                                   |
 | jwt.header                          | Defines the http header that will be used to send the JSON Web Token                                                     | Authorization                              |
+| jwt.inbody                          | Specifies the enabling the token validation in the request body to the ONLYOFFICE Docs                                   | false                                      |
 | service.type                        | documentserver service type                                                                                              | ClusterIP                                  |
 | service.port                        | documentserver service port                                                                                              | 8888                                       |
 | ingress.enabled                     | installation of ingress service                                                                                          | false                                      |
