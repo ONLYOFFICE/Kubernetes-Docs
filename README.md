@@ -481,20 +481,23 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 ### 7. Update ONLYOFFICE Docs
 
+There are two possible options for updating ONLYOFFICE Docs, which are presented below.
+
 #### 7.1 Updating using a script
 
 To perform the update, run the following script:
 
 ```bash
-$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION]
+$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
 Where:
  - `dv` - new version of docker images for ONLYOFFICE Docs.
+ - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
 
 For example:
 ```bash
-$ ./sources/scripts/update-ds.sh -dv 6.4.2.6
+$ ./sources/scripts/update-ds.sh -dv 7.0.0.132 -ns onlyoffice
 ```
 
 #### 7.2 Updating using helm upgrade
@@ -521,10 +524,10 @@ The execution time can be changed using --timeout [time], for example
 helm upgrade documentserver ./ --timeout 15m
 ```
 
-If you are not upgrading documentserver, upgrade without hooks, for example:
+If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without hooks, for example:
 
 ```bash
-helm upgrade documenterver ./ --no-hooks
+helm upgrade documenterver ./ --set jwt.enabled=false --no-hooks
 ```
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
