@@ -16,9 +16,11 @@ spec:
       labels:
         app: docservice
     spec:
-#      securityContext:
-#        runAsUser: 101
-#        runAsGroup: 101
+      {{ if .Values.securityContext.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.securityContext.user }}
+        runAsGroup: {{ .Values.securityContext.group }}
+      {{ end }}
       # topologySpreadConstraints:
       # - maxSkew: 1
         # topologyKey: doks.digitalocean.com/node-pool

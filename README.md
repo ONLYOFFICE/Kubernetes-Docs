@@ -197,17 +197,10 @@ To do this, run the following commands:
 $ oc apply -f ./sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
-Also, in all `yaml` files in the `deployments` directory, you must uncomment the following fields:
+Also, you must set the `securityContext.enabled` parameter to `true`:
 ```
-spec.template.spec.securityContext.runAsUser=101
-spec.template.spec.securityContext.runAsGroup=101
+$ helm install documentserver ./ --set securityContext.enabled=true
 ```
-In the `./templates/pods/example.yaml` file, you need to uncomment the following fields:
-```
-spec.securityContext.runAsUser=1001
-spec.securityContext.runAsGroup=1001
-```
-
 ### 1. Deploy the ONLYOFFICE Docs license
 
 If you have a valid ONLYOFFICE Docs license, add it to the directory `sources/license`.

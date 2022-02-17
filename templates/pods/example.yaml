@@ -6,9 +6,11 @@ metadata:
   labels:
     app: example
 spec:
-#  securityContext:
-#    runAsUser: 1001
-#    runAsGroup: 1001
+  {{ if .Values.securityContext.enabled }}
+  securityContext:
+    runAsUser: {{ .Values.securityContext.exampleUser }}
+    runAsGroup: {{ .Values.securityContext.exampleGroup }}
+  {{ end }}
   containers:
     - name: example
       image: {{ .Values.example.containerImage | quote }}

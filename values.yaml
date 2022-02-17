@@ -142,3 +142,11 @@ ingress:
     secret: tls
 grafana_ingress:
   enabled: false
+
+securityContext:
+  enabled: false
+  user: 101
+  group: 101
+  exampleUser: 1001
+  exampleGroup: 1001
+

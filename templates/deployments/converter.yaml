@@ -14,9 +14,11 @@ spec:
       labels:
         app: converter
     spec:
-#      securityContext:
-#        runAsUser: 101
-#        runAsGroup: 101
+      {{ if .Values.securityContext.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.securityContext.user }}
+        runAsGroup: {{ .Values.securityContext.group }}
+      {{ end }}
       affinity:
         podAntiAffinity:
         {{- if eq .Values.antiAffinity.type "soft" }}
