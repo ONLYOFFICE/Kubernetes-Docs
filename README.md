@@ -254,6 +254,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | connections.amqpProto               | messabe-broker protocol                                                                                                  | amqp                                       |
 | connections.amqpPassword            | RabbitMQ user password. If set to, it takes priority over the `connections.amqpExistingSecret`                           | ""                                         |
 | connections.amqpExistingSecret      | Name of existing secret to use for RabbitMQ passwords. Must contain the `rabbitmq-password` key                          | rabbitmq                                   |
+| persistance.existingClaim           | Name of an existing PVC to use. If not specified, a PVC named "ds-files" will be created                                 | ""                                         |
 | persistance.storageClass            | storage class name                                                                                                       | nfs                                        |
 | persistance.size                    | storage volume size                                                                                                      | 8Gi                                        |
 | log.level                           | Defines the type and severity of a logged event                                                                          | WARN                                       |
