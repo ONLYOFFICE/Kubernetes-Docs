@@ -52,7 +52,7 @@ spec:
       volumes:
         - name: ds-files
           persistentVolumeClaim:
-            claimName: ds-files
+            claimName: {{ template "ds.pvc.name" . }}
         - name: ds-license
           secret:
             secretName: license
