@@ -1,4 +1,5 @@
 {{- if .Values.grafana_ingress.enabled -}}
+{{ if not .Values.ingress.oldVersion }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -10,12 +11,12 @@ spec:
   {{ if .Values.ingress.ssl.enabled }}
   tls:
   - hosts:
-    - {{ .Values.ingress.ssl.host }}
+    - {{ .Values.ingress.host }}
     secretName: {{ .Values.ingress.ssl.secret }}
   {{ end }}
   rules:
-  {{ if .Values.ingress.ssl.enabled }}
-  - host: {{ .Values.ingress.ssl.host }}
+  {{ if .Values.ingress.host }}
+  - host: {{ .Values.ingress.host }}
   {{ else }}
   - host:
   {{ end }}
@@ -29,3 +30,4 @@ spec:
             port:
               number: 80
 {{- end }}
+{{ end }}
