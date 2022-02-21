@@ -527,7 +527,7 @@ helm upgrade documentserver ./ --timeout 15m
 If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without hooks, for example:
 
 ```bash
-helm upgrade documenterver ./ --set jwt.enabled=false --no-hooks
+helm upgrade documentserver ./ --set jwt.enabled=false --no-hooks
 ```
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)

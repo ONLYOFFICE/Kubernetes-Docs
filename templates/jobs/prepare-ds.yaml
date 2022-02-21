@@ -13,7 +13,7 @@ spec:
       volumes:
         - name: ds-files
           persistentVolumeClaim:
-            claimName: ds-files
+            claimName: {{ template "ds.pvc.name" . }}
         - name: stop-scripts
           configMap:
             name: stop-ds

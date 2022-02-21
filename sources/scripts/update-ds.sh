@@ -47,6 +47,7 @@ fi
 POD_ALL_DS_NAME="$(kubectl get pod -n "${NAMESPACE}" | grep -i docservice | awk '{print $1}')"
 declare -a POD_DS_NAME=($POD_ALL_DS_NAME)
 DB_PASSWORD="$(kubectl exec ${POD_DS_NAME[0]} -c docservice -n "${NAMESPACE}" -- sh -c 'echo $DB_PWD')"
+PVC_NAME="$(kubectl get pod ${POD_DS_NAME[0]} -n "${NAMESPACE}" -o jsonpath='{.spec.volumes[?(@.name=="ds-files")].persistentVolumeClaim.claimName}')"
 
 init_prepare_ds_job(){
   kubectl get job -n "${NAMESPACE}" | grep -iq prepare-ds
@@ -61,6 +62,7 @@ init_prepare_ds_job(){
 create_prepare_ds_job(){
   export PRODUCT_NAME="${PRODUCT_NAME}"
   export DB_PASSWORD="${DB_PASSWORD}"
+  export PVC_NAME="${PVC_NAME}"
   envsubst < ./jobs/prepare-ds.yaml | kubectl apply -f - -n "${NAMESPACE}"
   sleep 5
   PODNAME="$(kubectl get pod -n "${NAMESPACE}" | grep -i prepare-ds | awk '{print $1}')"

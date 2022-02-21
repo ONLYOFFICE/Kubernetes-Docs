@@ -9,7 +9,7 @@ spec:
       volumes:
         - name: ds-files
           persistentVolumeClaim:
-            claimName: ds-files
+            claimName: ${PVC_NAME}
         - name: stop-scripts
           configMap:
             name: stop-ds
