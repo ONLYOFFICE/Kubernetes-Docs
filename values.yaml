@@ -16,6 +16,7 @@ connections:
   amqpPassword: ""
 
 persistence:
+  existingClaim: ""
   storageClass: "nfs"
   size: 8Gi
 

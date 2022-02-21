@@ -59,3 +59,23 @@ Return RabbitMQ password
     {{- required "A RabbitMQ Password is required!" .Values.connections.amqpPassword }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Get the PVC name
+*/}}
+{{- define "ds.pvc.name" -}}
+{{- if .Values.persistence.existingClaim -}}
+    {{- printf "%s" (tpl .Values.persistence.existingClaim $) -}}
+{{- else }}
+    {{- printf "ds-files" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a pvc object should be created
+*/}}
+{{- define "ds.pvc.create" -}}
+{{- if empty .Values.persistence.existingClaim }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
