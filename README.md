@@ -30,6 +30,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
       + [6.1 Manual scaling](#61-manual-scaling) 
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
+      + [7.1 Updating using a script](#71-updating-using-a-script)
+      + [7.2 Updating using helm upgrade](#72-updating-using-helm-upgrade)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
 - [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
@@ -481,20 +483,55 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 ### 7. Update ONLYOFFICE Docs
 
+There are two possible options for updating ONLYOFFICE Docs, which are presented below.
+
+#### 7.1 Updating using a script
+
 To perform the update, run the following script:
 
 ```bash
-$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION]
+$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
 Where:
  - `dv` - new version of docker images for ONLYOFFICE Docs.
+ - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
 
 For example:
 ```bash
-$ ./sources/scripts/update-ds.sh -dv 6.4.2.6
+$ ./sources/scripts/update-ds.sh -dv 7.0.0.132 -ns onlyoffice
 ```
 
+#### 7.2 Updating using helm upgrade
+
+It's necessary to set the parameters for updating. For example,
+
+```bash
+$ helm upgrade documentserver ./ \
+  --set docservice.containerImage=[image]:[version]
+  ```
+  
+  > **Note**: also need to specify the parameters that were specified during installation
+  
+  Or modify the values.yaml file and run the command:
+  
+  ```bash
+  $ helm upgrade documentserver ./
+  ```
+  
+Running the helm upgrade command runs a hook that shuts down the documentserver and cleans up the database. This is needed when updating the version of documentserver. The default hook execution time is 300s.
+The execution time can be changed using --timeout [time], for example
+
+```bash
+helm upgrade documentserver ./ --timeout 15m
+```
+
+If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without hooks, for example:
+
+```bash
+helm upgrade documentserver ./ --set jwt.enabled=false --no-hooks
+```
+  
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
 To perform the shutdown, run the following script:
