@@ -300,7 +300,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | service.port                        | documentserver service port                                                                                              | 8888                                       |
 | ingress.enabled                     | installation of ingress service                                                                                          | false                                      |
 | ingress.ssl.enabled                 | installation ssl for ingress service                                                                                     | false                                      |
-| ingress.host                        | host for ingress ssl                                                                                                     | example.com                                |
+| ingress.host                        | Ingress hostname for the documentserver ingress                                                                          | ""                                         |
 | ingress.ssl.secret                  | secret name for ssl                                                                                                      | tls                                        |
 | grafana_ingress.enabled             | installation grafana of ingress service                                                                                  | false                                      |
 
