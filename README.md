@@ -199,17 +199,10 @@ To do this, run the following commands:
 $ oc apply -f ./sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
-Also, in all `yaml` files in the `deployments` directory, you must uncomment the following fields:
+Also, you must set the `securityContext.enabled` parameter to `true`:
 ```
-spec.template.spec.securityContext.runAsUser=101
-spec.template.spec.securityContext.runAsGroup=101
+$ helm install documentserver ./ --set securityContext.enabled=true
 ```
-In the `./templates/pods/example.yaml` file, you need to uncomment the following fields:
-```
-spec.securityContext.runAsUser=1001
-spec.securityContext.runAsGroup=1001
-```
-
 ### 1. Deploy the ONLYOFFICE Docs license
 
 If you have a valid ONLYOFFICE Docs license, add it to the directory `sources/license`.
@@ -309,6 +302,14 @@ The command removes all the Kubernetes components associated with the chart and 
 | ingress.ssl.host                    | host for ingress ssl                                                                                                     | example.com                                |
 | ingress.ssl.secret                  | secret name for ssl                                                                                                      | tls                                        |
 | grafana_ingress.enabled             | installation grafana of ingress service                                                                                  | false                                      |
+| securityContext.enabled             | Enable security context for the pods                                                                                     | false                                      |
+| securityContext.converter.runAsUser | Set converter containers' Security Context runAsUser                                                                     | 101                                        |
+| securityContext.converter.runAsGroup| Set converter containers' Security Context runAsGroup                                                                    | 101                                        |
+| securityContext.docservice.runAsUser| Set docservice containers' Security Context runAsUser                                                                    | 101                                        |
+| securityContext.docservice.runAsGroup| Set docservice containers' Security Context runAsGroup                                                                  | 101                                        |
+| securityContext.example.runAsUser   | Set example containers' Security Context runAsUser                                                                       | 1001                                       |
+| securityContext.example.runAsGroup  | Set example containers' Security Context runAsGroup                                                                      | 1001                                       |
+
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
