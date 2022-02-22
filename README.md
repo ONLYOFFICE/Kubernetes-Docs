@@ -30,6 +30,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
       + [6.1 Manual scaling](#61-manual-scaling) 
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
+      + [7.1 Updating using a script](#71-updating-using-a-script)
+      + [7.2 Updating using helm upgrade](#72-updating-using-helm-upgrade)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
 - [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
@@ -197,17 +199,10 @@ To do this, run the following commands:
 $ oc apply -f ./sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
-Also, in all `yaml` files in the `deployments` directory, you must uncomment the following fields:
+Also, you must set the `securityContext.enabled` parameter to `true`:
 ```
-spec.template.spec.securityContext.runAsUser=101
-spec.template.spec.securityContext.runAsGroup=101
+$ helm install documentserver ./ --set securityContext.enabled=true
 ```
-In the `./templates/pods/example.yaml` file, you need to uncomment the following fields:
-```
-spec.securityContext.runAsUser=1001
-spec.securityContext.runAsGroup=1001
-```
-
 ### 1. Deploy the ONLYOFFICE Docs license
 
 If you have a valid ONLYOFFICE Docs license, add it to the directory `sources/license`.
@@ -264,6 +259,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | metrics.prefix                      | Defines StatsD metrics prefix for backend services                                                                       | ds.                                        |
 | example.enabled                     | Choise of example installation                                                                                           | false                                      |
 | example.containerImage              | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
+| example.resources.requests.memory   | memory request                                                                                                           | 128Mi                                      |
+| example.resources.requests.cpu      | cpu request                                                                                                              | 100m                                       |
+| example.resources.limits.memory     | memory limit                                                                                                             | 128Mi                                      |
+| example.resources.limits.cpu        | cpu limit                                                                                                                | 250m                                       |
 | extraConf.configMap                 | The name of the ConfigMap containing the json file that override the default values                                      | ""                                         |
 | extraConf.filename                  | The name of the json file that contains custom values. Must be the same as the `key` name in `extraConf.ConfigMap`       | local.json                                 |
 | antiAffinity.type                   | Types of Pod antiaffinity. Allowed values: `soft` or `hard`                                                              | soft                                       |
@@ -303,6 +302,14 @@ The command removes all the Kubernetes components associated with the chart and 
 | ingress.host                        | Ingress hostname for the documentserver ingress                                                                          | ""                                         |
 | ingress.ssl.secret                  | secret name for ssl                                                                                                      | tls                                        |
 | grafana_ingress.enabled             | installation grafana of ingress service                                                                                  | false                                      |
+| securityContext.enabled             | Enable security context for the pods                                                                                     | false                                      |
+| securityContext.converter.runAsUser | Set converter containers' Security Context runAsUser                                                                     | 101                                        |
+| securityContext.converter.runAsGroup| Set converter containers' Security Context runAsGroup                                                                    | 101                                        |
+| securityContext.docservice.runAsUser| Set docservice containers' Security Context runAsUser                                                                    | 101                                        |
+| securityContext.docservice.runAsGroup| Set docservice containers' Security Context runAsGroup                                                                  | 101                                        |
+| securityContext.example.runAsUser   | Set example containers' Security Context runAsUser                                                                       | 1001                                       |
+| securityContext.example.runAsGroup  | Set example containers' Security Context runAsGroup                                                                      | 1001                                       |
+
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
@@ -481,20 +488,55 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 ### 7. Update ONLYOFFICE Docs
 
+There are two possible options for updating ONLYOFFICE Docs, which are presented below.
+
+#### 7.1 Updating using a script
+
 To perform the update, run the following script:
 
 ```bash
-$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION]
+$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
 Where:
  - `dv` - new version of docker images for ONLYOFFICE Docs.
+ - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
 
 For example:
 ```bash
-$ ./sources/scripts/update-ds.sh -dv 6.4.2.6
+$ ./sources/scripts/update-ds.sh -dv 7.0.0.132 -ns onlyoffice
 ```
 
+#### 7.2 Updating using helm upgrade
+
+It's necessary to set the parameters for updating. For example,
+
+```bash
+$ helm upgrade documentserver ./ \
+  --set docservice.containerImage=[image]:[version]
+  ```
+  
+  > **Note**: also need to specify the parameters that were specified during installation
+  
+  Or modify the values.yaml file and run the command:
+  
+  ```bash
+  $ helm upgrade documentserver ./
+  ```
+  
+Running the helm upgrade command runs a hook that shuts down the documentserver and cleans up the database. This is needed when updating the version of documentserver. The default hook execution time is 300s.
+The execution time can be changed using --timeout [time], for example
+
+```bash
+helm upgrade documentserver ./ --timeout 15m
+```
+
+If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without hooks, for example:
+
+```bash
+helm upgrade documentserver ./ --set jwt.enabled=false --no-hooks
+```
+  
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
 To perform the shutdown, run the following script:

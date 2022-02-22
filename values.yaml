@@ -32,6 +32,16 @@ metrics:
 example:
   enabled: false
   containerImage: onlyoffice/docs-example:6.4.2.6
+  resources:
+    ##Example:
+    ##requests:
+    ##  memory: "128Mi"
+    ##  cpu: "100m"
+    requests: {}
+    ##limits:
+    ##  memory: "128Mi"
+    ##  cpu: "250m"
+    limits: {}
 
 extraConf:
   configMap: ""
@@ -145,3 +155,14 @@ ingress:
 grafana_ingress:
   enabled: false
 
+securityContext:
+  enabled: false
+  converter:
+    runAsUser: 101
+    runAsGroup: 101
+  docservice:
+    runAsUser: 101
+    runAsGroup: 101
+  example:
+    runAsUser: 1001
+    runAsGroup: 1001
