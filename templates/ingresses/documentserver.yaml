@@ -1,5 +1,4 @@
 {{ if .Values.ingress.enabled }}
-{{ if not .Values.ingress.oldVersion }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -29,5 +28,4 @@ spec:
             name: documentserver
             port:
               number: 8888
-{{ end }}
 {{ end }}
