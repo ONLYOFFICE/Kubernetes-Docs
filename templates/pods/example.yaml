@@ -8,8 +8,8 @@ metadata:
 spec:
   {{ if .Values.securityContext.enabled }}
   securityContext:
-    runAsUser: {{ .Values.securityContext.exampleUser }}
-    runAsGroup: {{ .Values.securityContext.exampleGroup }}
+    runAsUser: {{ .Values.securityContext.example.runAsUser }}
+    runAsGroup: {{ .Values.securityContext.example.runAsGroup }}
   {{ end }}
   containers:
     - name: example

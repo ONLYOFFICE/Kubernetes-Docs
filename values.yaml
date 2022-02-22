@@ -140,13 +140,18 @@ ingress:
     enabled: false
     host: example.com
     secret: tls
+    
 grafana_ingress:
   enabled: false
 
 securityContext:
   enabled: false
-  user: 101
-  group: 101
-  exampleUser: 1001
-  exampleGroup: 1001
-
+  converter:
+    runAsUser: 101
+    runAsGroup: 101
+  docservice:
+    runAsUser: 101
+    runAsGroup: 101
+  example:
+    runAsUser: 1001
+    runAsGroup: 1001

@@ -16,8 +16,8 @@ spec:
     spec:
       {{ if .Values.securityContext.enabled }}
       securityContext:
-        runAsUser: {{ .Values.securityContext.user }}
-        runAsGroup: {{ .Values.securityContext.group }}
+        runAsUser: {{ .Values.securityContext.converter.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.converter.runAsGroup }}
       {{ end }}
       affinity:
         podAntiAffinity:

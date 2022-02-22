@@ -18,8 +18,8 @@ spec:
     spec:
       {{ if .Values.securityContext.enabled }}
       securityContext:
-        runAsUser: {{ .Values.securityContext.user }}
-        runAsGroup: {{ .Values.securityContext.group }}
+        runAsUser: {{ .Values.securityContext.docservice.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.docservice.runAsGroup }}
       {{ end }}
       # topologySpreadConstraints:
       # - maxSkew: 1
