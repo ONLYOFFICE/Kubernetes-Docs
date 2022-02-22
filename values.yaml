@@ -137,7 +137,7 @@ service:
 
 ingress:
   enabled: false
-  host: example.com
+  host: ""
   ssl:
     enabled: false
     secret: tls

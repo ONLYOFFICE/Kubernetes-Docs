@@ -300,14 +300,14 @@ The command removes all the Kubernetes components associated with the chart and 
 | service.port                        | documentserver service port                                                                                              | 8888                                       |
 | ingress.enabled                     | installation of ingress service                                                                                          | false                                      |
 | ingress.ssl.enabled                 | installation ssl for ingress service                                                                                     | false                                      |
-| ingress.ssl.host                    | host for ingress ssl                                                                                                     | example.com                                |
+| ingress.host                        | host for ingress ssl                                                                                                     | example.com                                |
 | ingress.ssl.secret                  | secret name for ssl                                                                                                      | tls                                        |
 | grafana_ingress.enabled             | installation grafana of ingress service                                                                                  | false                                      |
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
+$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 ```
 
 This command gives expose documentServer via HTTPS.
@@ -438,7 +438,7 @@ $ kubectl create secret generic tls \
 ```
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
+$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 
 ```
 
