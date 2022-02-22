@@ -266,6 +266,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | metrics.prefix                      | Defines StatsD metrics prefix for backend services                                                                       | ds.                                        |
 | example.enabled                     | Choise of example installation                                                                                           | false                                      |
 | example.containerImage              | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
+| example.resources.requests.memory   | memory request                                                                                                           | 128Mi                                      |
+| example.resources.requests.cpu      | cpu request                                                                                                              | 100m                                       |
+| example.resources.limits.memory     | memory limit                                                                                                             | 128Mi                                      |
+| example.resources.limits.cpu        | cpu limit                                                                                                                | 250m                                       |
 | extraConf.configMap                 | The name of the ConfigMap containing the json file that override the default values                                      | ""                                         |
 | extraConf.filename                  | The name of the json file that contains custom values. Must be the same as the `key` name in `extraConf.ConfigMap`       | local.json                                 |
 | antiAffinity.type                   | Types of Pod antiaffinity. Allowed values: `soft` or `hard`                                                              | soft                                       |
