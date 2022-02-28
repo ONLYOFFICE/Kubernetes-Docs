@@ -182,8 +182,7 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ helm install prometheus prometheus-community/prometheus \
---set-file extraScrapeConfigs=./sources/extraScrapeConfigs.yaml
+$ helm install prometheus -f ./sources/extraScrapeConfigs.yaml prometheus-community/prometheus
 ```
 
 See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
