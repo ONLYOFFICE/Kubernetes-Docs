@@ -13,5 +13,3 @@ kubectl create configmap dashboard-rabbitmq --from-file=./dashboard-rabbitmq.jso
 kubectl create configmap dashboard-postgresql --from-file=./dashboard-postgresql.json
 kubectl create configmap dashboard-nginx-ingress --from-file=./dashboard-nginx-ingress.json
 kubectl create configmap dashboard-documentserver --from-file=./sources/metrics/documentserver-statsd-exporter.json
-helm upgrade prometheus prometheus-community/prometheus \
---set-file extraScrapeConfigs=./sources/extraScrapeConfigs.yaml
