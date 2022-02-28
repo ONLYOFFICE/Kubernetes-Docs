@@ -12,7 +12,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [5. Deploy PostgreSQL](#5-deploy-postgresql)
   * [6. Deploy StatsD exporter](#6-deploy-statsd-exporter)
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
-    + [6.2 Installing StatsD exporter](#62-installing-statsd-exporter)
+    + [6.2 Installing Prometheus](#62-installing-prometheus)
+    + [6.3 Installing StatsD exporter](#63-installing-statsd-exporter)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
@@ -35,16 +36,13 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
 - [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
-  * [1. Deploy Prometheus](#1-deploy-prometheus)
-    + [1.1 Add Helm repositories](#11-add-helm-repositories)
-    + [1.2 Installing Prometheus](#12-installing-prometheus)
-  * [2. Deploy Grafana](#2-deploy-grafana)
-    + [2.1 Deploy Grafana without installing ready-made dashboards](#21-deploy-grafana-without-installing-ready-made-dashboards)
-    + [2.2 Deploy Grafana with the installation of ready-made dashboards](#22-deploy-grafana-with-the-installation-of-ready-made-dashboards)
-  * [3 Expose Grafana via Ingress](#3-expose-grafana-via-ingress)
-    + [3.1 Expose Grafana via HTTP](#31-expose-grafana-via-http)
-    + [3.2 Expose Grafana via HTTPS](#32-expose-grafana-via-https)
-  * [4. View gathered metrics in Grafana](#4-view-gathered-metrics-in-grafana)
+  * [1. Deploy Grafana](#1-deploy-grafana)
+    + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
+    + [1.2 Deploy Grafana with the installation of ready-made dashboards](#12-deploy-grafana-with-the-installation-of-ready-made-dashboards)
+  * [2 Expose Grafana via Ingress](#2-expose-grafana-via-ingress)
+    + [2.1 Expose Grafana via HTTP](#21-expose-grafana-via-http)
+    + [2.2 Expose Grafana via HTTPS](#22-expose-grafana-via-https)
+  * [3. View gathered metrics in Grafana](#3-view-gathered-metrics-in-grafana)
 
 ## Introduction
 
@@ -175,10 +173,21 @@ See more details about installing PostgreSQL via Helm [here](https://github.com/
 
 ```bash
 $ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+$ helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
 $ helm repo update
 ```
 
-#### 6.2 Installing StatsD exporter
+#### 6.2 Installing Prometheus
+
+To install Prometheus to your cluster, run the following command:
+
+```bash
+$ helm install prometheus -f ./sources/extraScrapeConfigs.yaml prometheus-community/prometheus
+```
+
+See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
+
+#### 6.3 Installing StatsD exporter
 
 To install StatsD exporter to your cluster, run the following command:
 ```
@@ -187,6 +196,8 @@ $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
   --set statsd.tcpPort=8126 \
   --set statsd.eventFlushInterval=30000ms
 ```
+
+See more details about installing Prometheus StatsD exporter via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-statsd-exporter).
 
 To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
 
@@ -566,37 +577,11 @@ In order to update the license, you need to perform the following steps:
 ## Using Prometheus to collect metrics with visualization in Grafana (optional)
 *This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
 
-### 1. Deploy Prometheus
+### 1. Deploy Grafana
 
-#### 1.1 Add Helm repositories
-
-```bash
-$ helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
-$ helm repo update
-```
-
-#### 1.2 Installing Prometheus
-
-To install Prometheus to your cluster, run the following command:
-
-```bash
-$ helm install prometheus prometheus-community/prometheus
-```
-
-See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
-
-### 2. Deploy Grafana
-
-#### 2.1 Deploy Grafana without installing ready-made dashboards
+#### 1.1 Deploy Grafana without installing ready-made dashboards
 
 *You should skip step [#2.1](#21-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
-
-If you have completed step [6](#6-deploy-statsd-exporter), then update the prometeus installation:
-
-```bash
-helm upgrade prometheus prometheus-community/prometheus \
---set-file extraScrapeConfigs=./sources/extraScrapeConfigs.yaml
-```
 
 To install Grafana to your cluster, run the following command:
 
@@ -608,7 +593,7 @@ $ helm install grafana bitnami/grafana \
   --set datasources.secretName=grafana-datasource
 ```
 
-#### 2.2 Deploy Grafana with the installation of ready-made dashboards
+#### 1.2 Deploy Grafana with the installation of ready-made dashboards
 
 Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
@@ -654,24 +639,24 @@ After executing this command, the following dashboards will be imported into Gra
 
 See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
 
-### 3 Expose Grafana via Ingress
+### 2 Expose Grafana via Ingress
 
-*This step is optional. You can skip step [#3](#3-expose-grafana-via-ingress) if you don't want to use Nginx Ingress to access the Grafana web interface*
+*This step is optional. You can skip step [#2](#2-expose-grafana-via-ingress) if you don't want to use Nginx Ingress to access the Grafana web interface*
 
 Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
 
-#### 3.1 Expose Grafana via HTTP
-*You should skip step [#3.1](#31-expose-grafana-via-http) if you are going to expose Grafana via HTTPS*
+#### 2.1 Expose Grafana via HTTP
+*You should skip step [#2.1](#21-expose-grafana-via-http) if you are going to expose Grafana via HTTPS*
 
 After that you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
 
-#### 3.2 Expose Grafana via HTTPS
+#### 2.2 Expose Grafana via HTTPS
 
 Note: It is assumed that step [#5.3.2.3](#5323-expose-documentserver-via-https) has already been completed.
 
 After that you will have access to Grafana at `https://your-domain-name/grafana/`
 
-### 4. View gathered metrics in Grafana
+### 3. View gathered metrics in Grafana
 
 Go to the address `http(s)://your-domain-name/grafana/`
 
