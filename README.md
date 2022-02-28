@@ -259,6 +259,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | metrics.prefix                        | Defines StatsD metrics prefix for backend services                                                                       | ds.                                        |
 | example.enabled                       | Choise of example installation                                                                                           | false                                      |
 | example.containerImage                | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
+| example.imagePullPolicy               | Example container image pull policy                                                                                      | IfNotPresent                               |
 | example.resources.requests.memory     | memory request                                                                                                           | 128Mi                                      |
 | example.resources.requests.cpu        | cpu request                                                                                                              | 100m                                       |
 | example.resources.limits.memory       | memory limit                                                                                                             | 128Mi                                      |
@@ -270,6 +271,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | antiAffinity.weight                   | Priority when selecting node. It is in the range from 1 to 100                                                           | 100                                        |
 | docservice.replicas                   | docservice replicas quantity                                                                                             | 2                                          |
 | docservice.containerImage             | docservice container image name                                                                                          | onlyoffice/docs-docservice-de:6.4.2.6      |
+| docservice.imagePullPolicy            | Docservice container image pull policy                                                                                   | IfNotPresent                               |
 | docservice.resources.requests.memory  | memory request                                                                                                           | 256Mi                                      |
 | docservice.resources.requests.cpu     | cpu request                                                                                                              | 100m                                       |
 | docservice.resources.limits.memory    | memory limit                                                                                                             | 2Gi                                        |
@@ -279,6 +281,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | docservice.startupProbeEnabled        | Enable startupProbe for docservice                                                                                       | true                                       |
 | proxy.gzipProxied                     | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive | off                                        |
 | proxy.proxyContainerImage             | docservice proxy container image name                                                                                    | onlyoffice/docs-proxy-de:6.4.2.6           |
+| proxy.imagePullPolicy                 | Docservice proxy container image pull policy                                                                             | IfNotPresent                               |
 | proxy.resources.requests.memory       | memory request                                                                                                           | 256Mi                                      |
 | proxy.resources.requests.cpu          | cpu request                                                                                                              | 100m                                       |
 | proxy.resources.limits.memory         | memory limit                                                                                                             | 2Gi                                        |
@@ -287,6 +290,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | proxy.startupProbeEnabled             | Enable startupProbe for proxy                                                                                            | true                                       |
 | converter.replicas                    | converter replicas quantity                                                                                              | 2                                          |
 | converter.containerImage              | converter container image name                                                                                           | onlyoffice/docs-converter-de:6.4.2.6       |
+| converter.imagePullPolicy             | Converter container image pull policy                                                                                    | IfNotPresent                               |
 | converter.requests.memory             | memory request                                                                                                           | 256Mi                                      |
 | converter.requests.cpu                | cpu request                                                                                                              | 100m                                       |
 | converter.limits.memory               | memory limit                                                                                                             | 2Gi                                        |

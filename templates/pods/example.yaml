@@ -14,6 +14,7 @@ spec:
   containers:
     - name: example
       image: {{ .Values.example.containerImage | quote }}
+      imagePullPolicy: {{ .Values.example.imagePullPolicy }}
       ports:
         - containerPort: 3000
       resources: {{ toYaml .Values.example.resources | nindent 8 }}
