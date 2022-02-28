@@ -103,7 +103,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "ds.postgresql.secretName" . }}
-                key: postgresql-password
+                key: postgres-password
           - name: AMQP_PWD
             valueFrom:
               secretKeyRef:

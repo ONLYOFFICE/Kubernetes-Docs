@@ -152,9 +152,9 @@ To install PostgreSQL to your cluster, run the following command:
 
 ```
 $ helm install postgresql bitnami/postgresql \
-  --set initdbScriptsConfigMap=init-db-scripts \
-  --set postgresqlDatabase=postgres \
-  --set persistence.size=PERSISTENT_SIZE \
+  --set primary.initdb.scriptsConfigMap=init-db-scripts \
+  --set auth.database=postgres \
+  --set primary.persistence.size=PERSISTENT_SIZE \
   --set metrics.enabled=false
 ```
 
@@ -253,7 +253,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | connections.dbPort                    | database server port number                                                                                              | 5432                                       |
 | connections.dbName                    | Name of the PostgreSQL database to which the application will connect                                                    | postgres                                   |
 | connections.dbPassword                | PostgreSQL user password. If set to, it takes priority over the `connections.dbExistingSecret`                           | ""                                         |
-| connections.dbExistingSecret          | Name of existing secret to use for PostgreSQL passwords. Must contain the `postgresql-password` key                      | postgresql                                 |
+| connections.dbExistingSecret          | Name of existing secret to use for PostgreSQL passwords. Must contain the `postgres-password` key                        | postgresql                                 |
 | connections.redistHost                | IP address or the name of the redis host                                                                                 | redis-master                               |
 | connections.amqpHost                  | IP address or the name of the message-broker                                                                             | rabbit-mq                                  |
 | connections.amqpUser                  | messabe-broker user                                                                                                      | user                                       |
