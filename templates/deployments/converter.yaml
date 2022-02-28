@@ -57,6 +57,7 @@ spec:
       containers:
         - name: converter
           image: {{ .Values.converter.containerImage }}
+          imagePullPolicy: {{ .Values.converter.imagePullPolicy }}
           resources: {{- toYaml .Values.converter.resources | nindent 12 }}
           env:
           - name: DB_PWD
