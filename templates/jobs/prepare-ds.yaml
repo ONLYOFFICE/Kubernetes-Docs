@@ -29,7 +29,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "ds.postgresql.secretName" . }}
-                key: postgresql-password
+                key: postgres-password
           - name: PRODUCT_NAME
             value: {{ .Values.product.name }}
           volumeMounts:
