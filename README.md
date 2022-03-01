@@ -256,7 +256,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | connections.dbSecretKeyName           | The name of the key that contains the PostgreSQL user password                                                           | postgres-password                          |
 | connections.dbExistingSecret          | Name of existing secret to use for PostgreSQL passwords. Must contain the key specified in `connections.dbSecretKeyName` | postgresql                                 |
 | connections.redistHost                | IP address or the name of the redis host                                                                                 | redis-master                               |
-| connections.amqpHost                  | IP address or the name of the message-broker                                                                             | rabbit-mq                                  |
+| connections.amqpHost                  | IP address or the name of the message-broker                                                                             | rabbitmq                                   |
 | connections.amqpUser                  | messabe-broker user                                                                                                      | user                                       |
 | connections.amqpProto                 | messabe-broker protocol                                                                                                  | amqp                                       |
 | connections.amqpPassword              | RabbitMQ user password. If set to, it takes priority over the `connections.amqpExistingSecret`                           | ""                                         |
