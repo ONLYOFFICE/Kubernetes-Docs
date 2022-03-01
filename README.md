@@ -559,7 +559,15 @@ helm upgrade documentserver ./ --set jwt.enabled=false --no-hooks
 To perform the shutdown, run the following script:
 
 ```bash
-$ ./sources/scripts/shutdown-ds.sh
+$ ./sources/scripts/shutdown-ds.sh -ns <NAMESPACE>
+```
+
+Where:
+ - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
+
+For example:
+```bash
+$ ./sources/scripts/shutdown-ds.sh -ns onlyoffice
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
