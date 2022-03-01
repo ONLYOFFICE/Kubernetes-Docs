@@ -64,12 +64,12 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "ds.postgresql.secretName" . }}
-                key: postgres-password
+                key: {{ .Values.connections.dbSecretKeyName }}
           - name: AMQP_PWD
             valueFrom:
               secretKeyRef:
                 name: {{ template "ds.rabbitmq.secretName" . }}
-                key: rabbitmq-password
+                key: {{ .Values.connections.amqpSecretKeyName }}
           envFrom:
           - secretRef:
               name: jwt
