@@ -35,7 +35,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
       + [7.2 Updating using helm upgrade](#72-updating-using-helm-upgrade)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
-- [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
+- [Using Grafana to visualize metrics (optional)](#using-grafana-to-visualize-metrics-optional)
   * [1. Deploy Grafana](#1-deploy-grafana)
     + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
     + [1.2 Deploy Grafana with the installation of ready-made dashboards](#12-deploy-grafana-with-the-installation-of-ready-made-dashboards)
@@ -582,10 +582,13 @@ In order to update the license, you need to perform the following steps:
    $ kubectl delete pod converter-*** docservice-***
    ```
 
-## Using Prometheus to collect metrics with visualization in Grafana (optional)
-*This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
+## Using Grafana to visualize metrics (optional)
+
+*This step is optional. You can skip this section if you don't want to install Grafana*
 
 ### 1. Deploy Grafana
+
+Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been completed.
 
 #### 1.1 Deploy Grafana without installing ready-made dashboards
 
