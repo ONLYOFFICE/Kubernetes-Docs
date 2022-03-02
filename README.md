@@ -39,9 +39,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [1. Deploy Grafana](#1-deploy-grafana)
     + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
     + [1.2 Deploy Grafana with the installation of ready-made dashboards](#12-deploy-grafana-with-the-installation-of-ready-made-dashboards)
-  * [2 Expose Grafana via Ingress](#2-expose-grafana-via-ingress)
-    + [2.1 Expose Grafana via HTTP](#21-expose-grafana-via-http)
-    + [2.2 Expose Grafana via HTTPS](#22-expose-grafana-via-https)
+  * [2 Access to Grafana via Ingress](#2-access-to-grafana-via-ingress)
   * [3. View gathered metrics in Grafana](#3-view-gathered-metrics-in-grafana)
 
 ## Introduction
@@ -649,22 +647,13 @@ After executing this command, the following dashboards will be imported into Gra
 
 See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
 
-### 2 Expose Grafana via Ingress
-
-*This step is optional. You can skip step [#2](#2-expose-grafana-via-ingress) if you don't want to use Nginx Ingress to access the Grafana web interface*
+### 2 Access to Grafana via Ingress
 
 Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
 
-#### 2.1 Expose Grafana via HTTP
-*You should skip step [#2.1](#21-expose-grafana-via-http) if you are going to expose Grafana via HTTPS*
+If DocumentServer was installed with the parameter `grafana_ingress.enabled=true` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://INGRESS-ADDRESS/grafana/`
 
-After that you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
-
-#### 2.2 Expose Grafana via HTTPS
-
-Note: It is assumed that step [#5.3.2.3](#5323-expose-documentserver-via-https) has already been completed.
-
-After that you will have access to Grafana at `https://your-domain-name/grafana/`
+If Ingres was installed using a secure connection (step [#5.3.2.3](#5323-expose-documentserver-via-https)), then access to Grafana will be at: `https://your-domain-name/grafana/`
 
 ### 3. View gathered metrics in Grafana
 
