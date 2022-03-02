@@ -261,8 +261,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | connections.amqpSecretKeyName         | The name of the key that contains the RabbitMQ user password                                                             | rabbitmq-password                          |
 | connections.amqpExistingSecret        | Name of existing secret to use for RabbitMQ passwords. Must contain the key specified in `connections.amqpSecretKeyName` | rabbitmq                                   |
 | persistence.existingClaim             | Name of an existing PVC to use. If not specified, a PVC named "ds-files" will be created                                 | ""                                         |
-| persistance.storageClass              | storage class name                                                                                                       | nfs                                        |
-| persistance.size                      | storage volume size                                                                                                      | 8Gi                                        |
+| persistence.storageClass              | storage class name                                                                                                       | nfs                                        |
+| persistence.size                      | storage volume size                                                                                                      | 8Gi                                        |
 | log.level                             | Defines the type and severity of a logged event                                                                          | WARN                                       |
 | metrics.enabled                       | Statsd installation                                                                                                      | false                                      |
 | metrics.host                          | Defines StatsD listening host                                                                                            | statsd-exporter-prometheus-statsd-exporter |
@@ -324,7 +324,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | securityContext.docservice.runAsGroup | Set docservice containers' Security Context runAsGroup                                                                   | 101                                        |
 | securityContext.example.runAsUser     | Set example containers' Security Context runAsUser                                                                       | 1001                                       |
 | securityContext.example.runAsGroup    | Set example containers' Security Context runAsGroup                                                                      | 1001                                       |
-
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
