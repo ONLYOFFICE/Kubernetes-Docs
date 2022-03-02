@@ -582,10 +582,13 @@ In order to update the license, you need to perform the following steps:
    $ kubectl delete pod converter-*** docservice-***
    ```
 
-## Using Prometheus to collect metrics with visualization in Grafana (optional)
-*This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
+## Using Grafana to visualize metrics (optional)
+
+*This step is optional. You can skip this section if you don't want to install Grafana*
 
 ### 1. Deploy Grafana
+
+Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been completed.
 
 #### 1.1 Deploy Grafana without installing ready-made dashboards
 
