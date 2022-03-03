@@ -6,14 +6,18 @@ metadata:
   labels:
     app: example
 spec:
-#  securityContext:
-#    runAsUser: 1001
-#    runAsGroup: 1001
+  {{ if .Values.securityContext.enabled }}
+  securityContext:
+    runAsUser: {{ .Values.securityContext.example.runAsUser }}
+    runAsGroup: {{ .Values.securityContext.example.runAsGroup }}
+  {{ end }}
   containers:
     - name: example
       image: {{ .Values.example.containerImage | quote }}
+      imagePullPolicy: {{ .Values.example.imagePullPolicy }}
       ports:
         - containerPort: 3000
+      resources: {{ toYaml .Values.example.resources | nindent 8 }}
       envFrom:
         - secretRef:
             name: jwt

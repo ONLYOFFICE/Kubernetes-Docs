@@ -12,7 +12,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [5. Deploy PostgreSQL](#5-deploy-postgresql)
   * [6. Deploy StatsD exporter](#6-deploy-statsd-exporter)
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
-    + [6.2 Installing StatsD exporter](#62-installing-statsd-exporter)
+    + [6.2 Installing Prometheus](#62-installing-prometheus)
+    + [6.3 Installing StatsD exporter](#63-installing-statsd-exporter)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
@@ -30,19 +31,16 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
       + [6.1 Manual scaling](#61-manual-scaling) 
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
+      + [7.1 Updating using a script](#71-updating-using-a-script)
+      + [7.2 Updating using helm upgrade](#72-updating-using-helm-upgrade)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
-- [Using Prometheus to collect metrics with visualization in Grafana (optional)](#using-prometheus-to-collect-metrics-with-visualization-in-grafana-optional)
-  * [1. Deploy Prometheus](#1-deploy-prometheus)
-    + [1.1 Add Helm repositories](#11-add-helm-repositories)
-    + [1.2 Installing Prometheus](#12-installing-prometheus)
-  * [2. Deploy Grafana](#2-deploy-grafana)
-    + [2.1 Deploy Grafana without installing ready-made dashboards](#21-deploy-grafana-without-installing-ready-made-dashboards)
-    + [2.2 Deploy Grafana with the installation of ready-made dashboards](#22-deploy-grafana-with-the-installation-of-ready-made-dashboards)
-  * [3 Expose Grafana via Ingress](#3-expose-grafana-via-ingress)
-    + [3.1 Expose Grafana via HTTP](#31-expose-grafana-via-http)
-    + [3.2 Expose Grafana via HTTPS](#32-expose-grafana-via-https)
-  * [4. View gathered metrics in Grafana](#4-view-gathered-metrics-in-grafana)
+- [Using Grafana to visualize metrics (optional)](#using-grafana-to-visualize-metrics-optional)
+  * [1. Deploy Grafana](#1-deploy-grafana)
+    + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
+    + [1.2 Deploy Grafana with the installation of ready-made dashboards](#12-deploy-grafana-with-the-installation-of-ready-made-dashboards)
+  * [2 Access to Grafana via Ingress](#2-access-to-grafana-via-ingress)
+  * [3. View gathered metrics in Grafana](#3-view-gathered-metrics-in-grafana)
 
 ## Introduction
 
@@ -152,9 +150,9 @@ To install PostgreSQL to your cluster, run the following command:
 
 ```
 $ helm install postgresql bitnami/postgresql \
-  --set initdbScriptsConfigMap=init-db-scripts \
-  --set postgresqlDatabase=postgres \
-  --set persistence.size=PERSISTENT_SIZE \
+  --set primary.initdb.scriptsConfigMap=init-db-scripts \
+  --set auth.database=postgres \
+  --set primary.persistence.size=PERSISTENT_SIZE \
   --set metrics.enabled=false
 ```
 
@@ -173,10 +171,21 @@ See more details about installing PostgreSQL via Helm [here](https://github.com/
 
 ```bash
 $ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+$ helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
 $ helm repo update
 ```
 
-#### 6.2 Installing StatsD exporter
+#### 6.2 Installing Prometheus
+
+To install Prometheus to your cluster, run the following command:
+
+```bash
+$ helm install prometheus -f ./sources/extraScrapeConfigs.yaml prometheus-community/prometheus
+```
+
+See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
+
+#### 6.3 Installing StatsD exporter
 
 To install StatsD exporter to your cluster, run the following command:
 ```
@@ -185,6 +194,8 @@ $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
   --set statsd.tcpPort=8126 \
   --set statsd.eventFlushInterval=30000ms
 ```
+
+See more details about installing Prometheus StatsD exporter via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-statsd-exporter).
 
 To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
 
@@ -197,17 +208,10 @@ To do this, run the following commands:
 $ oc apply -f ./sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
-Also, in all `yaml` files in the `deployments` directory, you must uncomment the following fields:
+Also, you must set the `securityContext.enabled` parameter to `true`:
 ```
-spec.template.spec.securityContext.runAsUser=101
-spec.template.spec.securityContext.runAsGroup=101
+$ helm install documentserver ./ --set securityContext.enabled=true
 ```
-In the `./templates/pods/example.yaml` file, you need to uncomment the following fields:
-```
-spec.securityContext.runAsUser=1001
-spec.securityContext.runAsGroup=1001
-```
-
 ### 1. Deploy the ONLYOFFICE Docs license
 
 If you have a valid ONLYOFFICE Docs license, add it to the directory `sources/license`.
@@ -240,56 +244,91 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ### 4. Parameters
 
-| Parameter                          | Description                                      | Default                                     |
-|------------------------------------|--------------------------------------------------|---------------------------------------------|
-| connections.dbHost                 | IP address or the name of the database           | postgresql                                  |
-| connections.dbUser                 | database user                                    | postgres                                    |
-| connections.dbPort                 | database server port number                      | 5432                                        |
-| connections.redistHost             | IP address or the name of the redis host         | redis-master                                |
-| connections.amqpHost               | IP address or the name of the message-broker     | rabbit-mq                                   |
-| connections.amqpUser               | messabe-broker user                              | user                                        |
-| connections.amqpProto              | messabe-broker protocol                          | ampq                                        |
-| persistence.storageClass           | storage class name                               | nfs                                         |
-| persistence.size                   | storage volume size                              | 8Gi                                         |
-| metrics.enabled                    | Statsd installation                              | false                                       |
-| example.enabled                    | Choise of example installation                   | false                                       |
-| example.containerImage             | example container image name                     | onlyoffice/docs-example:6.4.2.6             |
-| docservice.replicas                | docservice replicas quantity                     | 2                                           |
-| docservice.containerImage          | docservice container image name                  | onlyoffice/docs-docservice-de:6.4.2.6       |
-| docservice.resourcesrequests.memory| memory request                                   | 256Mi                                       |
-| docservice.resourcesrequests.cpu   | cpu request                                      | 100m                                        |
-| docservice.resourceslimits.memory  | memory limit                                     | 2Gi                                         |
-| docservice.resourceslimits.cpu     | cpu limit                                        | 1000m                                       |
-| docservice.readinessProbeEnabled   | Enable readinessProbe for docservice             | true                                        |
-| docservice.livenessProbeEnabled    | Enable livenessProbe for docservice              | true                                        |
-| docservice.startupProbeEnabled     | Enable startupProbe for docservice               | true                                        |
-| proxy.proxyContainerImage          | docservice proxy container image name            | onlyoffice/docs-proxy-de:6.4.2.6            |
-| proxy.resourcesrequests.memory     | memory request                                   | 256Mi                                       |
-| proxy.resourcesrequests.cpu        | cpu request                                      | 100m                                        |
-| proxy.resourceslimits.memory       | memory limit                                     | 2Gi                                         |
-| proxy.resourceslimits.cpu          | cpu limit                                        | 1000m                                       |
-| proxy.livenessProbeEnabled         | Enable livenessProbe for proxy                   | true                                        |
-| proxy.startupProbeEnabled          | Enable startupProbe for proxy                    | true                                        |
-| converter.replicas                 | converter replicas quantity                      | 2                                           |
-| converter.containerImage           | converter container image name                   | onlyoffice/docs-converter-de:6.4.2.6        |
-| converter.requests.memory          | memory request                                   | 256Mi                                       |
-| converter.requests.cpu             | cpu request                                      | 100m                                        |
-| converter.limits.memory            | memory limit                                     | 2Gi                                         |
-| converter.limits.cpu               | cpu limit                                        | 1000m                                       |
-| jwt.enabled                        | jwt enabling parameter                           | true                                        |
-| jwt.secret                         | jwt secret                                       | MYSECRET                                    |
-| service.type                       | documentserver service type                      | ClusterIP                                   |
-| service.port                       | documentserver service port                      | 8888                                        |
-| ingress.enabled                    | installation of ingress service                  | false                                       |
-| ingress.ssl.enabled                | installation ssl for ingress service             | false                                       |
-| ingress.ssl.host                   | host for ingress ssl                             | example.com                                 |
-| ingress.ssl.secret                 | secret name for ssl                              | tls                                         |
-| grafana_ingress.enabled            | installation grafana of ingress service          | false                                       |
+| Parameter                             | Description                                                                                                              | Default                                    |
+|---------------------------------------|--------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| connections.dbHost                    | IP address or the name of the database                                                                                   | postgresql                                 |
+| connections.dbUser                    | database user                                                                                                            | postgres                                   |
+| connections.dbPort                    | database server port number                                                                                              | 5432                                       |
+| connections.dbName                    | Name of the PostgreSQL database to which the application will connect                                                    | postgres                                   |
+| connections.dbPassword                | PostgreSQL user password. If set to, it takes priority over the `connections.dbExistingSecret`                           | ""                                         |
+| connections.dbSecretKeyName           | The name of the key that contains the PostgreSQL user password                                                           | postgres-password                          |
+| connections.dbExistingSecret          | Name of existing secret to use for PostgreSQL passwords. Must contain the key specified in `connections.dbSecretKeyName` | postgresql                                 |
+| connections.redistHost                | IP address or the name of the redis host                                                                                 | redis-master                               |
+| connections.amqpHost                  | IP address or the name of the message-broker                                                                             | rabbitmq                                   |
+| connections.amqpUser                  | messabe-broker user                                                                                                      | user                                       |
+| connections.amqpProto                 | messabe-broker protocol                                                                                                  | amqp                                       |
+| connections.amqpPassword              | RabbitMQ user password. If set to, it takes priority over the `connections.amqpExistingSecret`                           | ""                                         |
+| connections.amqpSecretKeyName         | The name of the key that contains the RabbitMQ user password                                                             | rabbitmq-password                          |
+| connections.amqpExistingSecret        | Name of existing secret to use for RabbitMQ passwords. Must contain the key specified in `connections.amqpSecretKeyName` | rabbitmq                                   |
+| persistence.existingClaim             | Name of an existing PVC to use. If not specified, a PVC named "ds-files" will be created                                 | ""                                         |
+| persistence.storageClass              | storage class name                                                                                                       | nfs                                        |
+| persistence.size                      | storage volume size                                                                                                      | 8Gi                                        |
+| log.level                             | Defines the type and severity of a logged event                                                                          | WARN                                       |
+| metrics.enabled                       | Statsd installation                                                                                                      | false                                      |
+| metrics.host                          | Defines StatsD listening host                                                                                            | statsd-exporter-prometheus-statsd-exporter |
+| metrics.port                          | Defines StatsD listening port                                                                                            | 8125                                       |
+| metrics.prefix                        | Defines StatsD metrics prefix for backend services                                                                       | ds.                                        |
+| example.enabled                       | Choise of example installation                                                                                           | false                                      |
+| example.containerImage                | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
+| example.imagePullPolicy               | Example container image pull policy                                                                                      | IfNotPresent                               |
+| example.resources.requests.memory     | memory request                                                                                                           | 128Mi                                      |
+| example.resources.requests.cpu        | cpu request                                                                                                              | 100m                                       |
+| example.resources.limits.memory       | memory limit                                                                                                             | 128Mi                                      |
+| example.resources.limits.cpu          | cpu limit                                                                                                                | 250m                                       |
+| extraConf.configMap                   | The name of the ConfigMap containing the json file that override the default values                                      | ""                                         |
+| extraConf.filename                    | The name of the json file that contains custom values. Must be the same as the `key` name in `extraConf.ConfigMap`       | local.json                                 |
+| antiAffinity.type                     | Types of Pod antiaffinity. Allowed values: `soft` or `hard`                                                              | soft                                       |
+| antiAffinity.topologyKey              | Node label key to match                                                                                                  | kubernetes.io/hostname                     |
+| antiAffinity.weight                   | Priority when selecting node. It is in the range from 1 to 100                                                           | 100                                        |
+| docservice.replicas                   | docservice replicas quantity                                                                                             | 2                                          |
+| docservice.containerImage             | docservice container image name                                                                                          | onlyoffice/docs-docservice-de:6.4.2.6      |
+| docservice.imagePullPolicy            | Docservice container image pull policy                                                                                   | IfNotPresent                               |
+| docservice.resources.requests.memory  | memory request                                                                                                           | 256Mi                                      |
+| docservice.resources.requests.cpu     | cpu request                                                                                                              | 100m                                       |
+| docservice.resources.limits.memory    | memory limit                                                                                                             | 2Gi                                        |
+| docservice.resources.limits.cpu       | cpu limit                                                                                                                | 1000m                                      |
+| docservice.readinessProbeEnabled      | Enable readinessProbe for docservice                                                                                     | true                                       |
+| docservice.livenessProbeEnabled       | Enable livenessProbe for docservice                                                                                      | true                                       |
+| docservice.startupProbeEnabled        | Enable startupProbe for docservice                                                                                       | true                                       |
+| proxy.gzipProxied                     | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive | off                                        |
+| proxy.proxyContainerImage             | docservice proxy container image name                                                                                    | onlyoffice/docs-proxy-de:6.4.2.6           |
+| proxy.imagePullPolicy                 | Docservice proxy container image pull policy                                                                             | IfNotPresent                               |
+| proxy.resources.requests.memory       | memory request                                                                                                           | 256Mi                                      |
+| proxy.resources.requests.cpu          | cpu request                                                                                                              | 100m                                       |
+| proxy.resources.limits.memory         | memory limit                                                                                                             | 2Gi                                        |
+| proxy.resources.limits.cpu            | cpu limit                                                                                                                | 1000m                                      |
+| proxy.livenessProbeEnabled            | Enable livenessProbe for proxy                                                                                           | true                                       |
+| proxy.startupProbeEnabled             | Enable startupProbe for proxy                                                                                            | true                                       |
+| converter.replicas                    | converter replicas quantity                                                                                              | 2                                          |
+| converter.containerImage              | converter container image name                                                                                           | onlyoffice/docs-converter-de:6.4.2.6       |
+| converter.imagePullPolicy             | Converter container image pull policy                                                                                    | IfNotPresent                               |
+| converter.requests.memory             | memory request                                                                                                           | 256Mi                                      |
+| converter.requests.cpu                | cpu request                                                                                                              | 100m                                       |
+| converter.limits.memory               | memory limit                                                                                                             | 2Gi                                        |
+| converter.limits.cpu                  | cpu limit                                                                                                                | 1000m                                      |
+| jwt.enabled                           | jwt enabling parameter                                                                                                   | true                                       |
+| jwt.secret                            | jwt secret                                                                                                               | MYSECRET                                   |
+| jwt.header                            | Defines the http header that will be used to send the JSON Web Token                                                     | Authorization                              |
+| jwt.inBody                            | Specifies the enabling the token validation in the request body to the ONLYOFFICE Docs                                   | false                                      |
+| service.type                          | documentserver service type                                                                                              | ClusterIP                                  |
+| service.port                          | documentserver service port                                                                                              | 8888                                       |
+| ingress.enabled                       | installation of ingress service                                                                                          | false                                      |
+| ingress.host                          | Ingress hostname for the documentserver ingress                                                                          | ""                                         |
+| ingress.ssl.enabled                   | installation ssl for ingress service                                                                                     | false                                      |
+| ingress.ssl.secret                    | secret name for ssl                                                                                                      | tls                                        |
+| grafana_ingress.enabled               | installation grafana of ingress service                                                                                  | false                                      |
+| securityContext.enabled               | Enable security context for the pods                                                                                     | false                                      |
+| securityContext.converter.runAsUser   | Set converter containers' Security Context runAsUser                                                                     | 101                                        |
+| securityContext.converter.runAsGroup  | Set converter containers' Security Context runAsGroup                                                                    | 101                                        |
+| securityContext.docservice.runAsUser  | Set docservice containers' Security Context runAsUser                                                                    | 101                                        |
+| securityContext.docservice.runAsGroup | Set docservice containers' Security Context runAsGroup                                                                   | 101                                        |
+| securityContext.example.runAsUser     | Set example containers' Security Context runAsUser                                                                       | 1001                                       |
+| securityContext.example.runAsGroup    | Set example containers' Security Context runAsGroup                                                                      | 1001                                       |
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
+$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 ```
 
 This command gives expose documentServer via HTTPS.
@@ -420,7 +459,7 @@ $ kubectl create secret generic tls \
 ```
 
 ```bash
-$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.ssl.host=example.com
+$ helm install documentserver ./ --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 
 ```
 
@@ -463,26 +502,69 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 ### 7. Update ONLYOFFICE Docs
 
+There are two possible options for updating ONLYOFFICE Docs, which are presented below.
+
+#### 7.1 Updating using a script
+
 To perform the update, run the following script:
 
 ```bash
-$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION]
+$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
 Where:
  - `dv` - new version of docker images for ONLYOFFICE Docs.
+ - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
 
 For example:
 ```bash
-$ ./sources/scripts/update-ds.sh -dv 6.4.2.6
+$ ./sources/scripts/update-ds.sh -dv 7.0.0.132 -ns onlyoffice
 ```
 
+#### 7.2 Updating using helm upgrade
+
+It's necessary to set the parameters for updating. For example,
+
+```bash
+$ helm upgrade documentserver ./ \
+  --set docservice.containerImage=[image]:[version]
+  ```
+  
+  > **Note**: also need to specify the parameters that were specified during installation
+  
+  Or modify the values.yaml file and run the command:
+  
+  ```bash
+  $ helm upgrade documentserver ./
+  ```
+  
+Running the helm upgrade command runs a hook that shuts down the documentserver and cleans up the database. This is needed when updating the version of documentserver. The default hook execution time is 300s.
+The execution time can be changed using --timeout [time], for example
+
+```bash
+helm upgrade documentserver ./ --timeout 15m
+```
+
+If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without hooks, for example:
+
+```bash
+helm upgrade documentserver ./ --set jwt.enabled=false --no-hooks
+```
+  
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
 To perform the shutdown, run the following script:
 
 ```bash
-$ ./sources/scripts/shutdown-ds.sh
+$ ./sources/scripts/shutdown-ds.sh -ns <NAMESPACE>
+```
+
+Where:
+ - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
+
+For example:
+```bash
+$ ./sources/scripts/shutdown-ds.sh -ns onlyoffice
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
@@ -499,40 +581,17 @@ In order to update the license, you need to perform the following steps:
    $ kubectl delete pod converter-*** docservice-***
    ```
 
-## Using Prometheus to collect metrics with visualization in Grafana (optional)
-*This step is optional. You can skip this section if you don't want to install Prometheus and Grafana*
+## Using Grafana to visualize metrics (optional)
 
-### 1. Deploy Prometheus
+*This step is optional. You can skip this section if you don't want to install Grafana*
 
-#### 1.1 Add Helm repositories
+### 1. Deploy Grafana
 
-```bash
-$ helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
-$ helm repo update
-```
+Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been completed.
 
-#### 1.2 Installing Prometheus
-
-To install Prometheus to your cluster, run the following command:
-
-```bash
-$ helm install prometheus prometheus-community/prometheus
-```
-
-See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
-
-### 2. Deploy Grafana
-
-#### 2.1 Deploy Grafana without installing ready-made dashboards
+#### 1.1 Deploy Grafana without installing ready-made dashboards
 
 *You should skip step [#2.1](#21-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
-
-If you have completed step [6](#6-deploy-statsd-exporter), then update the prometeus installation:
-
-```bash
-helm upgrade prometheus prometheus-community/prometheus \
---set-file extraScrapeConfigs=./sources/extraScrapeConfigs.yaml
-```
 
 To install Grafana to your cluster, run the following command:
 
@@ -544,7 +603,7 @@ $ helm install grafana bitnami/grafana \
   --set datasources.secretName=grafana-datasource
 ```
 
-#### 2.2 Deploy Grafana with the installation of ready-made dashboards
+#### 1.2 Deploy Grafana with the installation of ready-made dashboards
 
 Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
@@ -590,24 +649,15 @@ After executing this command, the following dashboards will be imported into Gra
 
 See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
 
-### 3 Expose Grafana via Ingress
-
-*This step is optional. You can skip step [#3](#3-expose-grafana-via-ingress) if you don't want to use Nginx Ingress to access the Grafana web interface*
+### 2 Access to Grafana via Ingress
 
 Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
 
-#### 3.1 Expose Grafana via HTTP
-*You should skip step [#3.1](#31-expose-grafana-via-http) if you are going to expose Grafana via HTTPS*
+If DocumentServer was installed with the parameter `grafana_ingress.enabled=true` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://INGRESS-ADDRESS/grafana/`
 
-After that you will have access to Grafana at `http://INGRESS-ADDRESS/grafana/`
+If Ingres was installed using a secure connection (step [#5.3.2.3](#5323-expose-documentserver-via-https)), then access to Grafana will be at: `https://your-domain-name/grafana/`
 
-#### 3.2 Expose Grafana via HTTPS
-
-Note: It is assumed that step [#5.3.2.3](#5323-expose-documentserver-via-https) has already been completed.
-
-After that you will have access to Grafana at `https://your-domain-name/grafana/`
-
-### 4. View gathered metrics in Grafana
+### 3. View gathered metrics in Grafana
 
 Go to the address `http(s)://your-domain-name/grafana/`
 

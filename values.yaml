@@ -5,21 +5,55 @@ connections:
   dbHost: postgresql
   dbUser: postgres
   dbPort: "5432"
+  dbName: postgres
+  dbExistingSecret: postgresql
+  dbSecretKeyName: postgres-password
+  dbPassword: ""
   redisHost: redis-master
   amqpHost: rabbitmq
   amqpUser: user
   amqpProto: amqp
+  amqpExistingSecret: rabbitmq
+  amqpSecretKeyName: rabbitmq-password
+  amqpPassword: ""
 
 persistence:
+  existingClaim: ""
   storageClass: "nfs"
   size: 8Gi
 
+log:
+  level: WARN
+
 metrics:
   enabled: false
+  host: statsd-exporter-prometheus-statsd-exporter
+  port: "8125"
+  prefix: ds.
 
 example:
   enabled: false
-  containerImage: onlyoffice/docs-example:7.0.0.132
+  containerImage: onlyoffice/docs-example:7.0.1.37
+  imagePullPolicy: IfNotPresent
+  resources:
+    ##Example:
+    ##requests:
+    ##  memory: "128Mi"
+    ##  cpu: "100m"
+    requests: {}
+    ##limits:
+    ##  memory: "128Mi"
+    ##  cpu: "250m"
+    limits: {}
+
+extraConf:
+  configMap: ""
+  filename: local.json
+
+antiAffinity:
+  type: "soft"
+  topologyKey: kubernetes.io/hostname
+  weight: "100"
 
 docservice:
   replicas: 2
@@ -48,7 +82,8 @@ docservice:
       port: 8000
     failureThreshold: 30
     periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:7.0.0.132
+  containerImage: onlyoffice/docs-docservice-de:7.0.1.37
+  imagePullPolicy: IfNotPresent
   resources:
     ##Example:
     ##requests:
@@ -61,6 +96,7 @@ docservice:
     limits: {}
 
 proxy:
+  gzipProxied: "off"
   livenessProbeEnabled: true
   livenessProbe:
     failureThreshold: 3
@@ -77,7 +113,8 @@ proxy:
       port: 8888
     failureThreshold: 30
     periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:7.0.0.132
+  proxyContainerImage: onlyoffice/docs-proxy-de:7.0.1.37
+  imagePullPolicy: IfNotPresent
   resources:
     ##Example:
     ##requests:
@@ -91,7 +128,8 @@ proxy:
 
 converter:
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:7.0.0.132
+  containerImage: onlyoffice/docs-converter-de:7.0.1.37
+  imagePullPolicy: IfNotPresent
   resources:
     ##Example:
     ##requests:
@@ -106,6 +144,8 @@ converter:
 jwt:
   enabled: true
   secret: MYSECRET
+  header: Authorization
+  inBody: false
 
 service:
   type: ClusterIP
@@ -113,9 +153,22 @@ service:
 
 ingress:
   enabled: false
+  host: ""
   ssl:
     enabled: false
-    host: example.com
     secret: tls
+
 grafana_ingress:
   enabled: false
+
+securityContext:
+  enabled: false
+  converter:
+    runAsUser: 101
+    runAsGroup: 101
+  docservice:
+    runAsUser: 101
+    runAsGroup: 101
+  example:
+    runAsUser: 1001
+    runAsGroup: 1001

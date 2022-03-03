@@ -16,9 +16,11 @@ spec:
       labels:
         app: docservice
     spec:
-#      securityContext:
-#        runAsUser: 101
-#        runAsGroup: 101
+      {{ if .Values.securityContext.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.securityContext.docservice.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.docservice.runAsGroup }}
+      {{ end }}
       # topologySpreadConstraints:
       # - maxSkew: 1
         # topologyKey: doks.digitalocean.com/node-pool
@@ -26,16 +28,45 @@ spec:
         # labelSelector:
           # matchLabels:
             # app: docservice
+      affinity:
+        podAntiAffinity:
+        {{- if eq .Values.antiAffinity.type "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - docservice
+              topologyKey: {{ .Values.antiAffinity.topologyKey }}
+            weight: {{ .Values.antiAffinity.weight }}
+        {{- else if eq .Values.antiAffinity.type "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - docservice
+            topologyKey: {{ .Values.antiAffinity.topologyKey }}
+        {{- end }}
       volumes:
         - name: ds-files
           persistentVolumeClaim:
-            claimName: ds-files
+            claimName: {{ template "ds.pvc.name" . }}
         - name: ds-license
           secret:
             secretName: license
+        {{ if .Values.extraConf.configMap }}
+        - name: custom-file
+          configMap:
+            name: {{ .Values.extraConf.configMap }}
+        {{ end }}
       containers:
         - name: proxy
           image: {{ .Values.proxy.proxyContainerImage }}
+          imagePullPolicy: {{ .Values.proxy.imagePullPolicy }}
           ports:
             - containerPort: 8888
           {{ if .Values.proxy.livenessProbeEnabled }}
@@ -54,6 +85,7 @@ spec:
 
         - name: docservice
           image: {{ .Values.docservice.containerImage }}
+          imagePullPolicy: {{ .Values.docservice.imagePullPolicy }}
           ports:
             - containerPort: 8000
           {{ if .Values.docservice.readinessProbeEnabled }}
@@ -70,13 +102,13 @@ spec:
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
-                name: postgresql
-                key: postgresql-password
+                name: {{ template "ds.postgresql.secretName" . }}
+                key: {{ .Values.connections.dbSecretKeyName }}
           - name: AMQP_PWD
             valueFrom:
               secretKeyRef:
-                name: rabbitmq
-                key: rabbitmq-password
+                name: {{ template "ds.rabbitmq.secretName" . }}
+                key: {{ .Values.connections.amqpSecretKeyName }}
           envFrom:
           - secretRef:
               name: jwt
@@ -88,3 +120,8 @@ spec:
           - name: ds-license
             mountPath: /var/www/{{ .Values.product.name }}/Data
             readOnly: true
+          {{ if .Values.extraConf.configMap }}
+          - name: custom-file
+            mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.extraConf.filename }}
+            subPath: {{ .Values.extraConf.filename }}
+          {{ end }}
