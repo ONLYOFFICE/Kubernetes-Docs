@@ -1,4 +1,4 @@
-extraScrapeConfigs:
+extraScrapeConfigs: |
   - job_name: 'statsd'
     scrape_interval: 30s
     static_configs:
