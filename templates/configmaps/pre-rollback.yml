@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: pre-rollback
   annotations:
-    "helm.sh/hook": pre-delete, pre-rollback
+    "helm.sh/hook": pre-rollback
     "helm.sh/hook-weight": "1"
 data:
   stop.sh: |-
@@ -11,31 +11,31 @@ data:
     apt update
     apt -y install curl bash wget
     curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s
-      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME -c "\dt" > /dev/null
-      if [ $? -ne 0 ]; then	
-        echo -e "\e[0;31m DB is not available \e[0m"
-        exit 1
-      fi
-      FILES_DIR=/var/lib/$PRODUCT_NAME/documentserver/App_Data/cache/files/
-      ls $FILES_DIR > /dev/null
-      if [ $? -ne 0 ]; then
-        echo -e "\e[0;31m Error accessing the $FILES_DIR directory \e[0m"
-        exit 1
-      fi
-      for ENTRY in `ls $FILES_DIR`; do
-        case $ENTRY in
-          errors)
-            ;;
-          forgotten)
-            ;;
-          *)
-            rm -rfv $FILES_DIR$ENTRY
-            ;;
-        esac
-      done
-      wget -O /sql/removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
-      wget -O /sql/createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
-      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/removetbl.sql
-      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/createdb.sql
-      echo work done
+    PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME -c "\dt" > /dev/null
+    if [ $? -ne 0 ]; then	
+      echo -e "\e[0;31m DB is not available \e[0m"
+      exit 1
     fi
+    FILES_DIR=/var/lib/$PRODUCT_NAME/documentserver/App_Data/cache/files/
+    ls $FILES_DIR > /dev/null
+    if [ $? -ne 0 ]; then
+      echo -e "\e[0;31m Error accessing the $FILES_DIR directory \e[0m"
+      exit 1
+    fi
+    for ENTRY in `ls $FILES_DIR`; do
+      case $ENTRY in
+        errors)
+          ;;
+        forgotten)
+          ;;
+          *)
+          rm -rfv $FILES_DIR$ENTRY
+          ;;
+      esac
+    done
+    wget -O /sql/removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+    wget -O /sql/createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+    PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/removetbl.sql
+    PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/createdb.sql
+    echo work done
+    
