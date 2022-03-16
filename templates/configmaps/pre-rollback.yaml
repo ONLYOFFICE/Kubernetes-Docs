@@ -28,7 +28,7 @@ data:
           ;;
         forgotten)
           ;;
-          *)
+        *)
           rm -rfv $FILES_DIR$ENTRY
           ;;
       esac
