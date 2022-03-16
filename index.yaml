@@ -1,1 +1,14 @@
-initial
+apiVersion: v1
+entries:
+  documentserver:
+  - apiVersion: v2
+    appVersion: 7.0.1
+    created: "2022-03-16T08:26:30.388983553Z"
+    description: Helm chart for installing ONLYOFFICE Docs in Kubernetes
+    digest: 8f1ff9e18479ba2435cdd1cbba850c1ba77573c7b07ecb939ead9f06cc6812dd
+    name: documentserver
+    type: application
+    urls:
+    - https://github.com/ONLYOFFICE/Kubernetes-Docs/releases/download/documentserver-7.0.1/documentserver-7.0.1.tgz
+    version: 7.0.1
+generated: "2022-03-16T08:26:30.388999253Z"
