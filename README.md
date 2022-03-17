@@ -550,6 +550,13 @@ If you want to update any parameter other than the version of the DocumentServer
 ```bash
 helm upgrade documentserver ./ --set jwt.enabled=false --no-hooks
 ```
+
+To rollback updates, run the following command:
+
+```bash
+helm rollback documentserver
+```
+
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
