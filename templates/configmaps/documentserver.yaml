@@ -16,6 +16,8 @@ data:
   METRICS_PORT: {{ .Values.metrics.port | quote }}
   METRICS_PREFIX: {{ .Values.metrics.prefix }}
   LOG_LEVEL: {{ .Values.log.level }}
+  LOG_TYPE: {{ .Values.log.type }}
+  LOG_PATTERN: {{ .Values.log.pattern | quote }}
   NGINX_GZIP_PROXIED: {{ .Values.proxy.gzipProxied | quote }}
   {{ if .Values.example.enabled }}
   EXAMPLE_HOST_PORT: example:3000

@@ -264,6 +264,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | persistence.storageClass              | storage class name                                                                                                       | nfs                                        |
 | persistence.size                      | storage volume size                                                                                                      | 8Gi                                        |
 | log.level                             | Defines the type and severity of a logged event                                                                          | WARN                                       |
+| log.type                              | Defines the format of a logged event                                                                                     | pattern                                    |
+| log.pattern                           | Defines the log [pattern](https://github.com/log4js-node/log4js-node/blob/master/docs/layouts.md#pattern-format) if `LOG_TYPE=pattern` | [%d] [%p] %c - %.10000m      |
 | metrics.enabled                       | Statsd installation                                                                                                      | false                                      |
 | metrics.host                          | Defines StatsD listening host                                                                                            | statsd-exporter-prometheus-statsd-exporter |
 | metrics.port                          | Defines StatsD listening port                                                                                            | 8125                                       |

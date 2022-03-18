@@ -24,6 +24,8 @@ persistence:
 
 log:
   level: WARN
+  type: pattern
+  pattern: "[%d] [%p] %c - %.10000m"
 
 metrics:
   enabled: false
