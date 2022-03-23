@@ -68,6 +68,7 @@ $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 $ helm repo add bitnami https://charts.bitnami.com/bitnami
 $ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 $ helm repo add stable https://charts.helm.sh/stable
+$ helm repo add documentserver https://onlyoffice.github.io/Kubernetes-Docs/
 $ helm repo update
 ```
 
@@ -180,7 +181,8 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ helm install prometheus -f ./charts/documentserver/sources/extraScrapeConfigs.yaml prometheus-community/prometheus
+$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/extraScrapeConfigs.yaml
+$ helm install prometheus -f ./extraScrapeConfigs.yaml prometheus-community/prometheus
 ```
 
 See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
@@ -210,7 +212,7 @@ $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 Also, you must set the `securityContext.enabled` parameter to `true`:
 ```
-$ helm install documentserver ./ --set securityContext.enabled=true
+$ helm install documentserver ./charts/documentserver --set securityContext.enabled=true
 ```
 ### 1. Deploy the ONLYOFFICE Docs license
 
@@ -222,21 +224,20 @@ Note: The source license file name should be 'license.lic' because this name wou
 
 ### 2. Deploy ONLYOFFICE Docs
 
-To deploy DocumentServer with the release name `documentserver`:
+To deploy DocumentServer with the release name `docs`:
 
 ```bash
-
-$ helm install documentserver ./charts/documentserver
+$ helm install docs documentserver/documentserver
 ```
 
 The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
 
 ### 3. Uninstall ONLYOFFICE Docs
 
-To uninstall/delete the `documentserver` deployment:
+To uninstall/delete the `docs` deployment:
 
 ```bash
-$ helm delete documentserver
+$ helm delete docs
 
 ```
 
@@ -328,7 +329,7 @@ The command removes all the Kubernetes components associated with the chart and 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
 ```bash
-$ helm install documentserver ./charts/documentserver --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
+$ helm install docs documentserver/documentserver --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 ```
 
 This command gives expose documentServer via HTTPS.
@@ -336,7 +337,7 @@ This command gives expose documentServer via HTTPS.
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ helm install documentserver -f values.yaml ./charts/documentserver
+$ helm install docs -f values.yaml documentserver/documentserver
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
@@ -348,19 +349,19 @@ $ helm install documentserver -f values.yaml ./charts/documentserver
 To deploy the example, set the `example.enabled` parameter to true:
 
 ```bash
-$ helm install documentserver ./charts/documentserver --set example.enabled=true
+$ helm install docs documentserver/documentserver --set example.enabled=true
 ```
 
 ### 5.2 Metrics deployment (optional)
 To deploy metrics, set `metrics.enabled` to true:
 
 ```bash
-$ helm install documentserver ./charts/documentserver --set metrics.enabled=true
+$ helm install docs documentserver/documentserver --set metrics.enabled=true
 ```
 If you want to use nginx ingress, set `grafana_ingress.enabled` to true:
 
 ```bash
-$ helm install documentserver ./charts/documentserver --set grafana_ingress.enabled=true
+$ helm install docs documentserver/documentserver --set grafana_ingress.enabled=true
 ```
 
 ### 5.3 Expose DocumentServer
@@ -374,7 +375,7 @@ Use this type of exposure if you use external TLS termination, and don't have an
 To expose DocumentServer via service, set the `service.type` parameter to LoadBalancer:
 
 ```bash
-$ helm install documentserver ./charts/documentserver --set service.type=LoadBalancer,service.port=80
+$ helm install docs documentserver/documentserver --set service.type=LoadBalancer,service.port=80
 
 ```
 
@@ -409,7 +410,8 @@ $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publis
 Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
 
 ```bash
-$ helm install nginx-ingress -f ./charts/documentserver/sources/ingress_values.yaml ingress-nginx/ingress-nginx
+wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/ingress_values.yaml
+$ helm install nginx-ingress -f ./ingress_values.yaml ingress-nginx/ingress-nginx
 ```
 
 See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
@@ -424,7 +426,7 @@ Use this type if you use external TLS termination and when you have several WEB 
 To expose DocumentServer via ingress HTTP, set the `ingress.enabled` parameter to true:
 
 ```bash
-$ helm install documentserver ./charts/documentserver --set ingress.enabled=true
+$ helm install docs documentserver/documentserver --set ingress.enabled=true
 
 ```
 
@@ -459,7 +461,7 @@ $ kubectl create secret generic tls \
 ```
 
 ```bash
-$ helm install documentserver ./charts/documentserver --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
+$ helm install docs documentserver/documentserver --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 
 ```
 
@@ -506,10 +508,11 @@ There are two possible options for updating ONLYOFFICE Docs, which are presented
 
 #### 7.1 Updating using a script
 
-To perform the update, run the following script:
+To perform the update, download and run the following script:
 
 ```bash
-$ ./charts/documentserver/sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
+$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/scripts/update-ds.sh
+$ ./update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
 Where:
@@ -518,7 +521,7 @@ Where:
 
 For example:
 ```bash
-$ ./charts/documentserver/sources/scripts/update-ds.sh -dv 7.0.0.132 -ns onlyoffice
+$ ./update-ds.sh -dv 7.0.0.132 -ns onlyoffice
 ```
 
 #### 7.2 Updating using helm upgrade
@@ -526,7 +529,7 @@ $ ./charts/documentserver/sources/scripts/update-ds.sh -dv 7.0.0.132 -ns onlyoff
 It's necessary to set the parameters for updating. For example,
 
 ```bash
-$ helm upgrade documentserver ./charts/documentserver \
+$ helm upgrade docs documentserver/documentserver \
   --set docservice.containerImage=[image]:[version]
   ```
   
@@ -535,28 +538,29 @@ $ helm upgrade documentserver ./charts/documentserver \
   Or modify the values.yaml file and run the command:
   
   ```bash
-  $ helm upgrade documentserver ./charts/documentserver
+  $ helm upgrade docs -f values.yaml documentserver/documentserver
   ```
   
 Running the helm upgrade command runs a hook that shuts down the documentserver and cleans up the database. This is needed when updating the version of documentserver. The default hook execution time is 300s.
 The execution time can be changed using --timeout [time], for example
 
 ```bash
-helm upgrade documentserver ./charts/documentserver --timeout 15m
+helm upgrade docs documentserver/documentserver --timeout 15m
 ```
 
 If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without hooks, for example:
 
 ```bash
-helm upgrade documentserver ./charts/documentserver --set jwt.enabled=false --no-hooks
+helm upgrade docs documentserver/documentserver --set jwt.enabled=false --no-hooks
 ```
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
-To perform the shutdown, run the following script:
+To perform the shutdown, download and run the following script:
 
 ```bash
-$ ./charts/documentserver/sources/scripts/shutdown-ds.sh -ns <NAMESPACE>
+$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/scripts/shutdown-ds.sh
+$ ./shutdown-ds.sh -ns <NAMESPACE>
 ```
 
 Where:
@@ -564,7 +568,7 @@ Where:
 
 For example:
 ```bash
-$ ./charts/documentserver/sources/scripts/shutdown-ds.sh -ns onlyoffice
+$ ./shutdown-ds.sh -ns onlyoffice
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
@@ -605,11 +609,12 @@ $ helm install grafana bitnami/grafana \
 
 #### 1.2 Deploy Grafana with the installation of ready-made dashboards
 
-Run the `./charts/documentserver/sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
+Download and run the `get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-$ ./charts/documentserver/sources/metrics/get_dashboard.sh
+wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/metrics/get_dashboard.sh
+$ ./get_dashboard.sh
 ```
 
 To install Grafana to your cluster, run the following command:
