@@ -1,0 +1,14 @@
+{{- if .Values.persistence.license }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ds-license
+spec:
+  storageClassName: {{ .Values.persistence.storageClass }}
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 100Mi
+{{- end }}
