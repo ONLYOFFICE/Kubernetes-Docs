@@ -58,7 +58,8 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./charts/documentserver/sources/scc/helm-components.yaml
+wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/scc/helm-components.yaml
+$ oc apply -f ./helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
 
@@ -181,7 +182,7 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/extraScrapeConfigs.yaml
+$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/extraScrapeConfigs.yaml
 $ helm install prometheus -f ./extraScrapeConfigs.yaml prometheus-community/prometheus
 ```
 
@@ -207,12 +208,13 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./charts/documentserver/sources/scc/docs-components.yaml
+wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/scc/docs-components.yaml
+$ oc apply -f ./docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 Also, you must set the `securityContext.enabled` parameter to `true`:
 ```
-$ helm install documentserver ./charts/documentserver --set securityContext.enabled=true
+$ helm install docs documentserver/documentserver --set securityContext.enabled=true
 ```
 ### 1. Deploy the ONLYOFFICE Docs license
 
@@ -410,7 +412,7 @@ $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publis
 Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
 
 ```bash
-wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/ingress_values.yaml
+wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/ingress_values.yaml
 $ helm install nginx-ingress -f ./ingress_values.yaml ingress-nginx/ingress-nginx
 ```
 
@@ -511,7 +513,7 @@ There are two possible options for updating ONLYOFFICE Docs, which are presented
 To perform the update, download and run the following script:
 
 ```bash
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/scripts/update-ds.sh
+$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/scripts/update-ds.sh
 $ ./update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
@@ -559,7 +561,7 @@ helm upgrade docs documentserver/documentserver --set jwt.enabled=false --no-hoo
 To perform the shutdown, download and run the following script:
 
 ```bash
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/scripts/shutdown-ds.sh
+$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/scripts/shutdown-ds.sh
 $ ./shutdown-ds.sh -ns <NAMESPACE>
 ```
 
@@ -613,7 +615,7 @@ Download and run the `get_dashboard.sh` script, which will download ready-made d
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/metrics/get_dashboard.sh
+wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/metrics/get_dashboard.sh
 $ ./get_dashboard.sh
 ```
 
