@@ -601,7 +601,7 @@ Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been
 
 #### 1.1 Deploy Grafana without installing ready-made dashboards
 
-*You should skip step [#2.1](#21-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
+*You should skip step [#1.1](#11-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
 
 To install Grafana to your cluster, run the following command:
 

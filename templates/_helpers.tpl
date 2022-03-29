@@ -80,7 +80,6 @@ Return true if a pvc object should be created
 {{- end -}}
 {{- end -}}
 
-
 {{/*
 Get the license name
 */}}
