@@ -79,3 +79,24 @@ Return true if a pvc object should be created
     {{- true -}}
 {{- end -}}
 {{- end -}}
+
+
+{{/*
+Get the license name
+*/}}
+{{- define "ds.license.secretName" -}}
+{{- if .Values.license.existingSecret -}}
+    {{- printf "%s" (tpl .Values.license.existingSecret $) -}}
+{{- else }}
+    {{- printf "license" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for license
+*/}}
+{{- define "ds.license.createSecret" -}}
+{{- if and (empty .Values.license.existingSecret) (empty .Values.license.existingClaim) }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}

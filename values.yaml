@@ -21,7 +21,10 @@ persistence:
   existingClaim: ""
   storageClass: "nfs"
   size: 8Gi
-  license: false
+
+license:
+  existingSecret: ""
+  existingClaim: ""
 
 log:
   level: WARN

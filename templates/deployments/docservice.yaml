@@ -56,12 +56,12 @@ spec:
           persistentVolumeClaim:
             claimName: {{ template "ds.pvc.name" . }}
         - name: ds-license
-          {{- if .Values.persistence.license }}
+          {{- if .Values.license.existingClaim }}
           persistentVolumeClaim:
-            claimName: ds-license
+            claimName: {{ .Values.license.existingClaim }}
           {{- else }}
           secret:
-            secretName: license
+            secretName: {{ template "ds.license.secretName" . }}
           {{- end }}
         {{ if .Values.extraConf.configMap }}
         - name: custom-file
@@ -124,7 +124,7 @@ spec:
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
           - name: ds-license
             mountPath: /var/www/{{ .Values.product.name }}/Data
-            {{- if not .Values.persistence.license }}
+            {{- if not .Values.license.existingClaim }}
             readOnly: true
             {{- end }}
           {{ if .Values.extraConf.configMap }}
