@@ -22,6 +22,10 @@ persistence:
   storageClass: "nfs"
   size: 8Gi
 
+license:
+  existingSecret: ""
+  existingClaim: ""
+
 log:
   level: WARN
   type: pattern
