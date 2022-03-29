@@ -202,12 +202,12 @@ See more details about installing Prometheus StatsD exporter via Helm [here](htt
 
 To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
 
-### 7 Make changes to Node-config configuration files
+### 7. Make changes to Node-config configuration files
 *This step is optional. You can skip step [#7](#7-make-changes-to-node-config-configuration-files) at all if you don't need to make changes to the configuration files*
 
-#### 7.1 Create a ConfigMap containing json file
+#### 7.1 Create a ConfigMap containing a json file
 
-In order to create a ConfigMap from a file that contains the structure `local.json` you need to run the following command:
+In order to create a ConfigMap from a file that contains the `local.json` structure, you need to run the following command:
 
 ```bash
 $ kubectl create configmap local-config \
@@ -217,10 +217,10 @@ Note: Any name can be used instead of `local-config`.
 
 #### 7.2 Specify parameters when installing DocumentServer
 
-When installing DocumentServer, specify the parameters `extraConf.configMap=local-config` and `extraConf.filename=local.json`
+When installing DocumentServer, specify the `extraConf.configMap=local-config` and `extraConf.filename=local.json` parameters
 
 Note: If you need to add a configuration file after the DocumentServer is already installed, you need to execute step [7.1](#71-create-a-configmap-containing-json-file) 
-and then run the command `helm upgrade documentserver ./ --set extraConf.configMap=local-config --set extraConf.filename=local.json --no-hooks` or 
+and then run the `helm upgrade documentserver ./ --set extraConf.configMap=local-config --set extraConf.filename=local.json --no-hooks` command or 
 `helm upgrade documentserver -f ./values.yaml ./ --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ## Deploy ONLYOFFICE Docs
