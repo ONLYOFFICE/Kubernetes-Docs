@@ -14,6 +14,9 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
     + [6.2 Installing Prometheus](#62-installing-prometheus)
     + [6.3 Installing StatsD exporter](#63-installing-statsd-exporter)
+  * [7. Make changes to Node-config configuration files](#7-make-changes-to-Node-config-configuration-files)
+    + [7.1 Create a ConfigMap containing a json file](#71-create-a-configmap-containing-a-json-file)
+    + [7.2 Specify parameters when installing DocumentServer](#72-specify-parameters-when-installing-documentserver)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
@@ -198,6 +201,27 @@ $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
 See more details about installing Prometheus StatsD exporter via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-statsd-exporter).
 
 To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
+
+### 7. Make changes to Node-config configuration files
+*This step is optional. You can skip step [#7](#7-make-changes-to-node-config-configuration-files) at all if you don't need to make changes to the configuration files*
+
+#### 7.1 Create a ConfigMap containing a json file
+
+In order to create a ConfigMap from a file that contains the `local.json` structure, you need to run the following command:
+
+```bash
+$ kubectl create configmap local-config \
+  --from-file=./local.json
+```
+Note: Any name can be used instead of `local-config`.
+
+#### 7.2 Specify parameters when installing DocumentServer
+
+When installing DocumentServer, specify the `extraConf.configMap=local-config` and `extraConf.filename=local.json` parameters
+
+Note: If you need to add a configuration file after the DocumentServer is already installed, you need to execute step [7.1](#71-create-a-configmap-containing-a-json-file) 
+and then run the `helm upgrade documentserver ./ --set extraConf.configMap=local-config --set extraConf.filename=local.json --no-hooks` command or 
+`helm upgrade documentserver -f ./values.yaml ./ --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ## Deploy ONLYOFFICE Docs
 
