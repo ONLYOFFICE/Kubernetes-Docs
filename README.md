@@ -228,16 +228,14 @@ and then run the `helm upgrade documentserver ./ --set extraConf.configMap=local
 ### 8. Add custom Fonts
 *This step is optional. You can skip step [#8](#8-add-custom-fonts) at all if you don't need to add your fonts*
 
-Follow the [next](https://github.com/ONLYOFFICE/Docker-Docs/tree/feature/custom-build#adding-custom-fonts-optional) step of the instructions.
-
-Next, you will need to build your own images according to [this](https://github.com/ONLYOFFICE/Docker-Docs/tree/feature/custom-build#building-images-optional) point in the instructions and specify them when installing DocumentServer.
+In order to add fonts to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
+Then specify your images when installing the DocumentServer.
 
 ### 9. Add Plugins
 *This step is optional. You can skip step [#9](#9-add-plugins) at all if you don't need to add plugins*
 
-Follow the [next](https://github.com/ONLYOFFICE/Docker-Docs/tree/feature/custom-build#adding-plugins-optional) step of the instructions.
-
-Next, you will need to build your own images according to [this](https://github.com/ONLYOFFICE/Docker-Docs/tree/feature/custom-build#building-images-optional) point in the instructions and specify them when installing DocumentServer.
+In order to add plugins to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
+Then specify your images when installing the DocumentServer.
 
 ## Deploy ONLYOFFICE Docs
 
