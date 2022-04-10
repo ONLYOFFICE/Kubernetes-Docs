@@ -226,13 +226,13 @@ and then run the `helm upgrade documentserver ./ --set extraConf.configMap=local
 `helm upgrade documentserver -f ./values.yaml ./ --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ### 8. Add custom Fonts
-*This step is optional. You can skip step [#8](#8-add-custom-fonts) at all if you don't need to add your fonts*
+*This step is optional. You can skip step [#8](#8-add-custom-fonts) entirely if you don't need to add your fonts*
 
 In order to add fonts to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
 Then specify your images when installing the DocumentServer.
 
 ### 9. Add Plugins
-*This step is optional. You can skip step [#9](#9-add-plugins) at all if you don't need to add plugins*
+*This step is optional. You can skip step [#9](#9-add-plugins) entirely if you don't need to add plugins*
 
 In order to add plugins to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
 Then specify your images when installing the DocumentServer.
