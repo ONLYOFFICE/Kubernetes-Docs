@@ -116,7 +116,7 @@ spec:
                 key: {{ .Values.connections.amqpSecretKeyName }}
           envFrom:
           - secretRef:
-              name: jwt
+              name: {{ template "ds.jwt.secretName" . }}
           - configMapRef:
               name: documentserver
           volumeMounts:
