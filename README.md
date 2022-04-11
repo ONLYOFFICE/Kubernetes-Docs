@@ -17,6 +17,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [7. Make changes to Node-config configuration files](#7-make-changes-to-Node-config-configuration-files)
     + [7.1 Create a ConfigMap containing a json file](#71-create-a-configmap-containing-a-json-file)
     + [7.2 Specify parameters when installing DocumentServer](#72-specify-parameters-when-installing-documentserver)
+  * [8. Add custom Fonts](#8-add-custom-fonts)
+  * [9. Add Plugins](#9-add-plugins)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
@@ -222,6 +224,18 @@ When installing DocumentServer, specify the `extraConf.configMap=local-config` a
 Note: If you need to add a configuration file after the DocumentServer is already installed, you need to execute step [7.1](#71-create-a-configmap-containing-a-json-file) 
 and then run the `helm upgrade documentserver ./ --set extraConf.configMap=local-config --set extraConf.filename=local.json --no-hooks` command or 
 `helm upgrade documentserver -f ./values.yaml ./ --no-hooks` if the parameters are specified in the `values.yaml` file.
+
+### 8. Add custom Fonts
+*This step is optional. You can skip step [#8](#8-add-custom-fonts) entirely if you don't need to add your fonts*
+
+In order to add fonts to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
+Then specify your images when installing the DocumentServer.
+
+### 9. Add Plugins
+*This step is optional. You can skip step [#9](#9-add-plugins) entirely if you don't need to add plugins*
+
+In order to add plugins to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
+Then specify your images when installing the DocumentServer.
 
 ## Deploy ONLYOFFICE Docs
 
