@@ -152,6 +152,7 @@ jwt:
   secret: MYSECRET
   header: Authorization
   inBody: false
+  existingSecret: ""
 
 service:
   type: ClusterIP

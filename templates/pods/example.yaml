@@ -20,7 +20,7 @@ spec:
       resources: {{ toYaml .Values.example.resources | nindent 8 }}
       envFrom:
         - secretRef:
-            name: jwt
+            name: {{ template "ds.jwt.secretName" . }}
         - configMapRef:
               name: example
 {{ end }}
