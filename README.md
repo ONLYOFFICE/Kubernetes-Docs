@@ -170,7 +170,7 @@ Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
 ### 6. Deploy StatsD exporter
-*This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) at all if you don't want to run StatsD exporter*
+*This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) entirely if you don't want to run StatsD exporter*
 
 #### 6.1 Add Helm repositories
 
@@ -205,7 +205,7 @@ See more details about installing Prometheus StatsD exporter via Helm [here](htt
 To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
 
 ### 7. Make changes to Node-config configuration files
-*This step is optional. You can skip step [#7](#7-make-changes-to-node-config-configuration-files) at all if you don't need to make changes to the configuration files*
+*This step is optional. You can skip step [#7](#7-make-changes-to-node-config-configuration-files) entirely if you don't need to make changes to the configuration files*
 
 #### 7.1 Create a ConfigMap containing a json file
 
@@ -524,7 +524,7 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 ### 6. Scale DocumentServer (optional)
 
-*This step is optional. You can skip step [6](#6-scale-documentserver-optional) at all if you want to use default deployment settings.*
+*This step is optional. You can skip step [6](#6-scale-documentserver-optional) entirely if you want to use default deployment settings.*
 
 #### 6.1 Manual scaling
 The `docservice` and `converter` deployments consist of 2 pods each other by default.
