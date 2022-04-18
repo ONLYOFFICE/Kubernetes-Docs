@@ -47,8 +47,13 @@ spec:
           persistentVolumeClaim:
             claimName: {{ template "ds.pvc.name" . }}
         - name: ds-license
+          {{- if .Values.license.existingClaim }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.license.existingClaim }}
+          {{- else }}
           secret:
-            secretName: license
+            secretName: {{ template "ds.license.secretName" . }}
+          {{- end }}
         {{ if .Values.extraConf.configMap }}
         - name: custom-file
           configMap:
@@ -72,7 +77,7 @@ spec:
                 key: {{ .Values.connections.amqpSecretKeyName }}
           envFrom:
           - secretRef:
-              name: jwt
+              name: {{ template "ds.jwt.secretName" . }}
           - configMapRef:
               name: documentserver
           volumeMounts:
@@ -80,7 +85,9 @@ spec:
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
           - name: ds-license
             mountPath: /var/www/{{ .Values.product.name }}/Data
+            {{- if not .Values.license.existingClaim }}
             readOnly: true
+            {{- end }}
           {{ if .Values.extraConf.configMap }}
           - name: custom-file
             mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.extraConf.filename }}

@@ -1,1 +1,1 @@
-Сopy the license file here
+Copy the license file here

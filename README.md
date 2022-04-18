@@ -14,6 +14,11 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
     + [6.2 Installing Prometheus](#62-installing-prometheus)
     + [6.3 Installing StatsD exporter](#63-installing-statsd-exporter)
+  * [7. Make changes to Node-config configuration files](#7-make-changes-to-Node-config-configuration-files)
+    + [7.1 Create a ConfigMap containing a json file](#71-create-a-configmap-containing-a-json-file)
+    + [7.2 Specify parameters when installing DocumentServer](#72-specify-parameters-when-installing-documentserver)
+  * [8. Add custom Fonts](#8-add-custom-fonts)
+  * [9. Add Plugins](#9-add-plugins)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
@@ -165,7 +170,7 @@ Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
 ### 6. Deploy StatsD exporter
-*This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) at all if you don't want to run StatsD exporter*
+*This step is optional. You can skip step [#6](#6-deploy-statsd-exporter) entirely if you don't want to run StatsD exporter*
 
 #### 6.1 Add Helm repositories
 
@@ -198,6 +203,39 @@ $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
 See more details about installing Prometheus StatsD exporter via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-statsd-exporter).
 
 To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
+
+### 7. Make changes to Node-config configuration files
+*This step is optional. You can skip step [#7](#7-make-changes-to-node-config-configuration-files) entirely if you don't need to make changes to the configuration files*
+
+#### 7.1 Create a ConfigMap containing a json file
+
+In order to create a ConfigMap from a file that contains the `local.json` structure, you need to run the following command:
+
+```bash
+$ kubectl create configmap local-config \
+  --from-file=./local.json
+```
+Note: Any name can be used instead of `local-config`.
+
+#### 7.2 Specify parameters when installing DocumentServer
+
+When installing DocumentServer, specify the `extraConf.configMap=local-config` and `extraConf.filename=local.json` parameters
+
+Note: If you need to add a configuration file after the DocumentServer is already installed, you need to execute step [7.1](#71-create-a-configmap-containing-a-json-file) 
+and then run the `helm upgrade documentserver ./ --set extraConf.configMap=local-config --set extraConf.filename=local.json --no-hooks` command or 
+`helm upgrade documentserver -f ./values.yaml ./ --no-hooks` if the parameters are specified in the `values.yaml` file.
+
+### 8. Add custom Fonts
+*This step is optional. You can skip step [#8](#8-add-custom-fonts) entirely if you don't need to add your fonts*
+
+In order to add fonts to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
+Then specify your images when installing the DocumentServer.
+
+### 9. Add Plugins
+*This step is optional. You can skip step [#9](#9-add-plugins) entirely if you don't need to add plugins*
+
+In order to add plugins to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
+Then specify your images when installing the DocumentServer.
 
 ## Deploy ONLYOFFICE Docs
 
@@ -237,93 +275,110 @@ To uninstall/delete the `documentserver` deployment:
 
 ```bash
 $ helm delete documentserver
-
 ```
 
-The command removes all the Kubernetes components associated with the chart and deletes the release.
+Executing the `helm delete` command launches hooks, which perform some preparatory actions before completely deleting the documentserver, which include stopping the server, cleaning up the used PVC and database tables.
+The default hook execution time is 300s. The execution time can be changed using `--timeout [time]`, for example:
+
+```bash
+$ helm delete documentserver --timeout 25m
+```
+
+If you want to delete the documentserver without any preparatory actions, run the following command:
+
+```bash
+$ helm delete documentserver --no-hooks
+```
+
+The `helm delete` command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ### 4. Parameters
 
-| Parameter                             | Description                                                                                                              | Default                                    |
-|---------------------------------------|--------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
-| connections.dbHost                    | IP address or the name of the database                                                                                   | postgresql                                 |
-| connections.dbUser                    | database user                                                                                                            | postgres                                   |
-| connections.dbPort                    | database server port number                                                                                              | 5432                                       |
-| connections.dbName                    | Name of the PostgreSQL database to which the application will connect                                                    | postgres                                   |
-| connections.dbPassword                | PostgreSQL user password. If set to, it takes priority over the `connections.dbExistingSecret`                           | ""                                         |
-| connections.dbSecretKeyName           | The name of the key that contains the PostgreSQL user password                                                           | postgres-password                          |
-| connections.dbExistingSecret          | Name of existing secret to use for PostgreSQL passwords. Must contain the key specified in `connections.dbSecretKeyName` | postgresql                                 |
-| connections.redistHost                | IP address or the name of the redis host                                                                                 | redis-master                               |
-| connections.amqpHost                  | IP address or the name of the message-broker                                                                             | rabbitmq                                   |
-| connections.amqpUser                  | messabe-broker user                                                                                                      | user                                       |
-| connections.amqpProto                 | messabe-broker protocol                                                                                                  | amqp                                       |
-| connections.amqpPassword              | RabbitMQ user password. If set to, it takes priority over the `connections.amqpExistingSecret`                           | ""                                         |
-| connections.amqpSecretKeyName         | The name of the key that contains the RabbitMQ user password                                                             | rabbitmq-password                          |
-| connections.amqpExistingSecret        | Name of existing secret to use for RabbitMQ passwords. Must contain the key specified in `connections.amqpSecretKeyName` | rabbitmq                                   |
-| persistence.existingClaim             | Name of an existing PVC to use. If not specified, a PVC named "ds-files" will be created                                 | ""                                         |
-| persistence.storageClass              | storage class name                                                                                                       | nfs                                        |
-| persistence.size                      | storage volume size                                                                                                      | 8Gi                                        |
-| log.level                             | Defines the type and severity of a logged event                                                                          | WARN                                       |
-| metrics.enabled                       | Statsd installation                                                                                                      | false                                      |
-| metrics.host                          | Defines StatsD listening host                                                                                            | statsd-exporter-prometheus-statsd-exporter |
-| metrics.port                          | Defines StatsD listening port                                                                                            | 8125                                       |
-| metrics.prefix                        | Defines StatsD metrics prefix for backend services                                                                       | ds.                                        |
-| example.enabled                       | Choise of example installation                                                                                           | false                                      |
-| example.containerImage                | example container image name                                                                                             | onlyoffice/docs-example:6.4.2.6            |
-| example.imagePullPolicy               | Example container image pull policy                                                                                      | IfNotPresent                               |
-| example.resources.requests.memory     | memory request                                                                                                           | 128Mi                                      |
-| example.resources.requests.cpu        | cpu request                                                                                                              | 100m                                       |
-| example.resources.limits.memory       | memory limit                                                                                                             | 128Mi                                      |
-| example.resources.limits.cpu          | cpu limit                                                                                                                | 250m                                       |
-| extraConf.configMap                   | The name of the ConfigMap containing the json file that override the default values                                      | ""                                         |
-| extraConf.filename                    | The name of the json file that contains custom values. Must be the same as the `key` name in `extraConf.ConfigMap`       | local.json                                 |
-| antiAffinity.type                     | Types of Pod antiaffinity. Allowed values: `soft` or `hard`                                                              | soft                                       |
-| antiAffinity.topologyKey              | Node label key to match                                                                                                  | kubernetes.io/hostname                     |
-| antiAffinity.weight                   | Priority when selecting node. It is in the range from 1 to 100                                                           | 100                                        |
-| docservice.replicas                   | docservice replicas quantity                                                                                             | 2                                          |
-| docservice.containerImage             | docservice container image name                                                                                          | onlyoffice/docs-docservice-de:6.4.2.6      |
-| docservice.imagePullPolicy            | Docservice container image pull policy                                                                                   | IfNotPresent                               |
-| docservice.resources.requests.memory  | memory request                                                                                                           | 256Mi                                      |
-| docservice.resources.requests.cpu     | cpu request                                                                                                              | 100m                                       |
-| docservice.resources.limits.memory    | memory limit                                                                                                             | 2Gi                                        |
-| docservice.resources.limits.cpu       | cpu limit                                                                                                                | 1000m                                      |
-| docservice.readinessProbeEnabled      | Enable readinessProbe for docservice                                                                                     | true                                       |
-| docservice.livenessProbeEnabled       | Enable livenessProbe for docservice                                                                                      | true                                       |
-| docservice.startupProbeEnabled        | Enable startupProbe for docservice                                                                                       | true                                       |
-| proxy.gzipProxied                     | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive | off                                        |
-| proxy.proxyContainerImage             | docservice proxy container image name                                                                                    | onlyoffice/docs-proxy-de:6.4.2.6           |
-| proxy.imagePullPolicy                 | Docservice proxy container image pull policy                                                                             | IfNotPresent                               |
-| proxy.resources.requests.memory       | memory request                                                                                                           | 256Mi                                      |
-| proxy.resources.requests.cpu          | cpu request                                                                                                              | 100m                                       |
-| proxy.resources.limits.memory         | memory limit                                                                                                             | 2Gi                                        |
-| proxy.resources.limits.cpu            | cpu limit                                                                                                                | 1000m                                      |
-| proxy.livenessProbeEnabled            | Enable livenessProbe for proxy                                                                                           | true                                       |
-| proxy.startupProbeEnabled             | Enable startupProbe for proxy                                                                                            | true                                       |
-| converter.replicas                    | converter replicas quantity                                                                                              | 2                                          |
-| converter.containerImage              | converter container image name                                                                                           | onlyoffice/docs-converter-de:6.4.2.6       |
-| converter.imagePullPolicy             | Converter container image pull policy                                                                                    | IfNotPresent                               |
-| converter.requests.memory             | memory request                                                                                                           | 256Mi                                      |
-| converter.requests.cpu                | cpu request                                                                                                              | 100m                                       |
-| converter.limits.memory               | memory limit                                                                                                             | 2Gi                                        |
-| converter.limits.cpu                  | cpu limit                                                                                                                | 1000m                                      |
-| jwt.enabled                           | jwt enabling parameter                                                                                                   | true                                       |
-| jwt.secret                            | jwt secret                                                                                                               | MYSECRET                                   |
-| jwt.header                            | Defines the http header that will be used to send the JSON Web Token                                                     | Authorization                              |
-| jwt.inBody                            | Specifies the enabling the token validation in the request body to the ONLYOFFICE Docs                                   | false                                      |
-| service.type                          | documentserver service type                                                                                              | ClusterIP                                  |
-| service.port                          | documentserver service port                                                                                              | 8888                                       |
-| ingress.enabled                       | installation of ingress service                                                                                          | false                                      |
-| ingress.host                          | Ingress hostname for the documentserver ingress                                                                          | ""                                         |
-| ingress.ssl.enabled                   | installation ssl for ingress service                                                                                     | false                                      |
-| ingress.ssl.secret                    | secret name for ssl                                                                                                      | tls                                        |
-| grafana_ingress.enabled               | installation grafana of ingress service                                                                                  | false                                      |
-| securityContext.enabled               | Enable security context for the pods                                                                                     | false                                      |
-| securityContext.converter.runAsUser   | Set converter containers' Security Context runAsUser                                                                     | 101                                        |
-| securityContext.converter.runAsGroup  | Set converter containers' Security Context runAsGroup                                                                    | 101                                        |
-| securityContext.docservice.runAsUser  | Set docservice containers' Security Context runAsUser                                                                    | 101                                        |
-| securityContext.docservice.runAsGroup | Set docservice containers' Security Context runAsGroup                                                                   | 101                                        |
-| securityContext.example.runAsUser     | Set example containers' Security Context runAsUser                                                                       | 1001                                       |
-| securityContext.example.runAsGroup    | Set example containers' Security Context runAsGroup                                                                      | 1001                                       |
+| Parameter                             | Description                                                                                                                            | Default                                    |
+|---------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| connections.dbHost                    | IP address or the name of the database                                                                                                 | postgresql                                 |
+| connections.dbUser                    | database user                                                                                                                          | postgres                                   |
+| connections.dbPort                    | database server port number                                                                                                            | 5432                                       |
+| connections.dbName                    | Name of the PostgreSQL database to which the application will connect                                                                  | postgres                                   |
+| connections.dbPassword                | PostgreSQL user password. If set to, it takes priority over the `connections.dbExistingSecret`                                         | ""                                         |
+| connections.dbSecretKeyName           | The name of the key that contains the PostgreSQL user password                                                                         | postgres-password                          |
+| connections.dbExistingSecret          | Name of existing secret to use for PostgreSQL passwords. Must contain the key specified in `connections.dbSecretKeyName`               | postgresql                                 |
+| connections.redistHost                | IP address or the name of the redis host                                                                                               | redis-master                               |
+| connections.amqpHost                  | IP address or the name of the message-broker                                                                                           | rabbitmq                                   |
+| connections.amqpUser                  | messabe-broker user                                                                                                                    | user                                       |
+| connections.amqpProto                 | messabe-broker protocol                                                                                                                | amqp                                       |
+| connections.amqpPassword              | RabbitMQ user password. If set to, it takes priority over the `connections.amqpExistingSecret`                                         | ""                                         |
+| connections.amqpSecretKeyName         | The name of the key that contains the RabbitMQ user password                                                                           | rabbitmq-password                          |
+| connections.amqpExistingSecret        | Name of existing secret to use for RabbitMQ passwords. Must contain the key specified in `connections.amqpSecretKeyName`               | rabbitmq                                   |
+| persistence.existingClaim             | Name of an existing PVC to use. If not specified, a PVC named "ds-files" will be created                                               | ""                                         |
+| persistence.storageClass              | storage class name                                                                                                                     | nfs                                        |
+| persistence.size                      | storage volume size                                                                                                                    | 8Gi                                        |
+| license.existingSecret                | Name of the existing secret that contains the license. Must contain the key `license.lic`                                              | ""                                         |
+| license.existingClaim                 | Name of the existing PVC in which the license is stored. Must contain the file `license.lic`                                           | ""                                         |
+| log.level                             | Defines the type and severity of a logged event                                                                                        | WARN                                       |
+| log.type                              | Defines the format of a logged event                                                                                                   | pattern                                    |
+| log.pattern                           | Defines the log [pattern](https://github.com/log4js-node/log4js-node/blob/master/docs/layouts.md#pattern-format) if `log.type=pattern` | [%d] [%p] %c - %.10000m                    |
+| metrics.enabled                       | Statsd installation                                                                                                                    | false                                      |
+| metrics.host                          | Defines StatsD listening host                                                                                                          | statsd-exporter-prometheus-statsd-exporter |
+| metrics.port                          | Defines StatsD listening port                                                                                                          | 8125                                       |
+| metrics.prefix                        | Defines StatsD metrics prefix for backend services                                                                                     | ds.                                        |
+| example.enabled                       | Choise of example installation                                                                                                         | false                                      |
+| example.containerImage                | example container image name                                                                                                           | onlyoffice/docs-example:6.4.2.6            |
+| example.imagePullPolicy               | Example container image pull policy                                                                                                    | IfNotPresent                               |
+| example.resources.requests.memory     | memory request                                                                                                                         | 128Mi                                      |
+| example.resources.requests.cpu        | cpu request                                                                                                                            | 100m                                       |
+| example.resources.limits.memory       | memory limit                                                                                                                           | 128Mi                                      |
+| example.resources.limits.cpu          | cpu limit                                                                                                                              | 250m                                       |
+| extraConf.configMap                   | The name of the ConfigMap containing the json file that override the default values                                                    | ""                                         |
+| extraConf.filename                    | The name of the json file that contains custom values. Must be the same as the `key` name in `extraConf.ConfigMap`                     | local.json                                 |
+| antiAffinity.type                     | Types of Pod antiaffinity. Allowed values: `soft` or `hard`                                                                            | soft                                       |
+| antiAffinity.topologyKey              | Node label key to match                                                                                                                | kubernetes.io/hostname                     |
+| antiAffinity.weight                   | Priority when selecting node. It is in the range from 1 to 100                                                                         | 100                                        |
+| docservice.replicas                   | docservice replicas quantity                                                                                                           | 2                                          |
+| docservice.containerImage             | docservice container image name                                                                                                        | onlyoffice/docs-docservice-de:6.4.2.6      |
+| docservice.imagePullPolicy            | Docservice container image pull policy                                                                                                 | IfNotPresent                               |
+| docservice.resources.requests.memory  | memory request                                                                                                                         | 256Mi                                      |
+| docservice.resources.requests.cpu     | cpu request                                                                                                                            | 100m                                       |
+| docservice.resources.limits.memory    | memory limit                                                                                                                           | 2Gi                                        |
+| docservice.resources.limits.cpu       | cpu limit                                                                                                                              | 1000m                                      |
+| docservice.readinessProbeEnabled      | Enable readinessProbe for docservice                                                                                                   | true                                       |
+| docservice.livenessProbeEnabled       | Enable livenessProbe for docservice                                                                                                    | true                                       |
+| docservice.startupProbeEnabled        | Enable startupProbe for docservice                                                                                                     | true                                       |
+| proxy.gzipProxied                     | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive               | off                                        |
+| proxy.proxyContainerImage             | docservice proxy container image name                                                                                                  | onlyoffice/docs-proxy-de:6.4.2.6           |
+| proxy.imagePullPolicy                 | Docservice proxy container image pull policy                                                                                           | IfNotPresent                               |
+| proxy.resources.requests.memory       | memory request                                                                                                                         | 256Mi                                      |
+| proxy.resources.requests.cpu          | cpu request                                                                                                                            | 100m                                       |
+| proxy.resources.limits.memory         | memory limit                                                                                                                           | 2Gi                                        |
+| proxy.resources.limits.cpu            | cpu limit                                                                                                                              | 1000m                                      |
+| proxy.livenessProbeEnabled            | Enable livenessProbe for proxy                                                                                                         | true                                       |
+| proxy.startupProbeEnabled             | Enable startupProbe for proxy                                                                                                          | true                                       |
+| converter.replicas                    | converter replicas quantity                                                                                                            | 2                                          |
+| converter.containerImage              | converter container image name                                                                                                         | onlyoffice/docs-converter-de:6.4.2.6       |
+| converter.imagePullPolicy             | Converter container image pull policy                                                                                                  | IfNotPresent                               |
+| converter.requests.memory             | memory request                                                                                                                         | 256Mi                                      |
+| converter.requests.cpu                | cpu request                                                                                                                            | 100m                                       |
+| converter.limits.memory               | memory limit                                                                                                                           | 2Gi                                        |
+| converter.limits.cpu                  | cpu limit                                                                                                                              | 1000m                                      |
+| jwt.enabled                           | jwt enabling parameter                                                                                                                 | true                                       |
+| jwt.secret                            | jwt secret                                                                                                                             | MYSECRET                                   |
+| jwt.header                            | Defines the http header that will be used to send the JSON Web Token                                                                   | Authorization                              |
+| jwt.inBody                            | Specifies the enabling the token validation in the request body to the ONLYOFFICE Docs                                                 | false                                      |
+| jwt.existingSecret                    | The name of an existing secret containing variables for jwt. If not specified, a secret named `jwt` will be created                    | ""                                         |
+| service.type                          | documentserver service type                                                                                                            | ClusterIP                                  |
+| service.port                          | documentserver service port                                                                                                            | 8888                                       |
+| ingress.enabled                       | installation of ingress service                                                                                                        | false                                      |
+| ingress.host                          | Ingress hostname for the documentserver ingress                                                                                        | ""                                         |
+| ingress.ssl.enabled                   | installation ssl for ingress service                                                                                                   | false                                      |
+| ingress.ssl.secret                    | secret name for ssl                                                                                                                    | tls                                        |
+| grafana_ingress.enabled               | installation grafana of ingress service                                                                                                | false                                      |
+| securityContext.enabled               | Enable security context for the pods                                                                                                   | false                                      |
+| securityContext.converter.runAsUser   | Set converter containers' Security Context runAsUser                                                                                   | 101                                        |
+| securityContext.converter.runAsGroup  | Set converter containers' Security Context runAsGroup                                                                                  | 101                                        |
+| securityContext.docservice.runAsUser  | Set docservice containers' Security Context runAsUser                                                                                  | 101                                        |
+| securityContext.docservice.runAsGroup | Set docservice containers' Security Context runAsGroup                                                                                 | 101                                        |
+| securityContext.example.runAsUser     | Set example containers' Security Context runAsUser                                                                                     | 1001                                       |
+| securityContext.example.runAsGroup    | Set example containers' Security Context runAsGroup                                                                                    | 1001                                       |
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
@@ -481,7 +536,7 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 ### 6. Scale DocumentServer (optional)
 
-*This step is optional. You can skip step [6](#6-scale-documentserver-optional) at all if you want to use default deployment settings.*
+*This step is optional. You can skip step [6](#6-scale-documentserver-optional) entirely if you want to use default deployment settings.*
 
 #### 6.1 Manual scaling
 The `docservice` and `converter` deployments consist of 2 pods each other by default.
@@ -550,6 +605,12 @@ If you want to update any parameter other than the version of the DocumentServer
 ```bash
 helm upgrade documentserver ./ --set jwt.enabled=false --no-hooks
 ```
+
+To rollback updates, run the following command:
+
+```bash
+helm rollback documentserver
+```
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
@@ -591,7 +652,7 @@ Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been
 
 #### 1.1 Deploy Grafana without installing ready-made dashboards
 
-*You should skip step [#2.1](#21-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
+*You should skip step [#1.1](#11-deploy-grafana-without-installing-ready-made-dashboards) if you want to Deploy Grafana with the installation of ready-made dashboards*
 
 To install Grafana to your cluster, run the following command:
 

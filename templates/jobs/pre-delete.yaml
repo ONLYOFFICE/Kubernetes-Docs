@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pre-delete
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: {{ template "ds.pvc.name" . }}
+        - name: stop-scripts
+          configMap:
+            name: stop-ds
+            defaultMode: 0755
+      containers:
+        - name: pre-delete
+          image: postgres
+          envFrom:
+          - configMapRef:
+              name: documentserver
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.postgresql.secretName" . }}
+                key: {{ .Values.connections.dbSecretKeyName }}
+          - name: PRODUCT_NAME
+            value: {{ .Values.product.name }}
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
+          - name: stop-scripts
+            mountPath: /sql/stop.sh
+            subPath: stop.sh
+          command: ["/bin/sh", "-c"]
+          args: ["/sql/stop.sh"]
+      restartPolicy: Never

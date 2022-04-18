@@ -79,3 +79,43 @@ Return true if a pvc object should be created
     {{- true -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the license name
+*/}}
+{{- define "ds.license.secretName" -}}
+{{- if .Values.license.existingSecret -}}
+    {{- printf "%s" (tpl .Values.license.existingSecret $) -}}
+{{- else }}
+    {{- printf "license" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for license
+*/}}
+{{- define "ds.license.createSecret" -}}
+{{- if and (empty .Values.license.existingSecret) (empty .Values.license.existingClaim) }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the jwt name
+*/}}
+{{- define "ds.jwt.secretName" -}}
+{{- if .Values.jwt.existingSecret -}}
+    {{- printf "%s" (tpl .Values.jwt.existingSecret $) -}}
+{{- else }}
+    {{- printf "jwt" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for jwt
+*/}}
+{{- define "ds.jwt.createSecret" -}}
+{{- if empty .Values.jwt.existingSecret }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
