@@ -275,10 +275,22 @@ To uninstall/delete the `documentserver` deployment:
 
 ```bash
 $ helm delete documentserver
-
 ```
 
-The command removes all the Kubernetes components associated with the chart and deletes the release.
+Executing the `helm delete` command launches hooks, which perform some preparatory actions before completely deleting the documentserver, which include stopping the server, cleaning up the used PVC and database tables.
+The default hook execution time is 300s. The execution time can be changed using `--timeout [time]`, for example:
+
+```bash
+helm delete documentserver --timeout 25m
+```
+
+If you want to delete the documentserver without any preparatory actions, run the following command:
+
+```bash
+helm delete documentserver --no-hooks
+```
+
+The `helm delete` command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ### 4. Parameters
 
