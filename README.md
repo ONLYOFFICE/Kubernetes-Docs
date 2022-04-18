@@ -281,13 +281,13 @@ Executing the `helm delete` command launches hooks, which perform some preparato
 The default hook execution time is 300s. The execution time can be changed using `--timeout [time]`, for example:
 
 ```bash
-helm delete documentserver --timeout 25m
+$ helm delete documentserver --timeout 25m
 ```
 
 If you want to delete the documentserver without any preparatory actions, run the following command:
 
 ```bash
-helm delete documentserver --no-hooks
+$ helm delete documentserver --no-hooks
 ```
 
 The `helm delete` command removes all the Kubernetes components associated with the chart and deletes the release.
