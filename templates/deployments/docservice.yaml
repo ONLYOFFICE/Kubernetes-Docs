@@ -15,6 +15,12 @@ spec:
     metadata:
       labels:
         app: docservice
+    {{- if .Values.docservice.podAnnotations }}
+      annotations:
+        {{- range $key, $value := .Values.docservice.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ }}
+        {{- end }}
+    {{- end }}
     spec:
       {{ if .Values.securityContext.enabled }}
       securityContext:

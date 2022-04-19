@@ -13,6 +13,12 @@ spec:
     metadata:
       labels:
         app: converter
+    {{- if .Values.converter.podAnnotations }}
+      annotations:
+        {{- range $key, $value := .Values.converter.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ }}
+        {{- end }}
+    {{- end }}
     spec:
       {{ if .Values.securityContext.enabled }}
       securityContext:

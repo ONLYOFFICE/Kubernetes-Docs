@@ -62,6 +62,8 @@ antiAffinity:
   weight: "100"
 
 docservice:
+  podAnnotations:
+    rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
   readinessProbeEnabled: true
   readinessProbe:
@@ -133,6 +135,8 @@ proxy:
     limits: {}
 
 converter:
+  podAnnotations:
+    rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
   containerImage: onlyoffice/docs-converter-de:7.0.1-1
   imagePullPolicy: IfNotPresent
