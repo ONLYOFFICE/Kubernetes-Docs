@@ -156,12 +156,14 @@ jwt:
   secret: MYSECRET
   header: Authorization
   inBody: false
-  enabledInbox: ""
-  secretInbox: ""
-  headerInbox: ""
-  enabledOutbox: ""
-  secretOutbox: ""
-  headerOutbox: ""
+  inbox:
+    enabled:
+    secret: ""
+    header: ""
+  outbox:
+    enabled:
+    secret: ""
+    header: ""
   existingSecret: ""
 
 service:
