@@ -153,17 +153,20 @@ converter:
 
 jwt:
   enabled: true
-  secret: MYSECRET
-  header: Authorization
+  secret: "MYSECRET"
+  header: "Authorization"
   inBody: false
-#  inbox:
-#    enabled:
-#    secret: ""
-#    header: ""
-#  outbox:
-#    enabled:
-#    secret: ""
-#    header: ""
+  ##Example:
+  ##inbox:
+  ##  enabled: true
+  ##  secret: "MYSECRET"
+  ##  header: "Authorization"
+  inbox: {}
+  ##outbox:
+  ##  enabled: true
+  ##  secret: "MYSECRET"
+  ##  header: "Authorization"
+  outbox: {}
   existingSecret: ""
 
 service:
