@@ -19,6 +19,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [7.2 Specify parameters when installing DocumentServer](#72-specify-parameters-when-installing-documentserver)
   * [8. Add custom Fonts](#8-add-custom-fonts)
   * [9. Add Plugins](#9-add-plugins)
+  * [10. Change interface themes](#10-change-interface-themes)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
@@ -237,6 +238,28 @@ Then specify your images when installing the DocumentServer.
 In order to add plugins to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
 Then specify your images when installing the DocumentServer.
 
+### 10. Change interface themes
+*This step is optional. You can skip step [#10](#10-change-interface-themes) entirely if you don't need to change the interface themes*
+
+#### 10.1 Create a ConfigMap containing a json file
+
+To create a ConfigMap with a json file that contains the interface themes, you need to run the following command:
+
+```bash
+$ kubectl create configmap custom-themes \
+  --from-file=./custom-themes.json
+```
+
+Note: Instead of `custom-themes` and `custom-themes.json` you can use any other names.
+
+#### 10.2 Specify parameters when installing DocumentServer
+
+When installing DocumentServer, specify the `extraThemes.configMap=custom-themes` and `extraThemes.filename=custom-themes.json` parameters.
+
+Note: If you need to add interface themes after the DocumentServer is already installed, you need to execute step [10.1](#101-create-a-configmap-containing-a-json-file)
+and then run the `helm upgrade documentserver ./ --set extraThemes.configMap=custom-themes --set extraThemes.filename=custom-themes.json --no-hooks` command or
+`helm upgrade documentserver -f ./values.yaml ./ --no-hooks` if the parameters are specified in the `values.yaml` file.
+
 ## Deploy ONLYOFFICE Docs
 
 Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 101`.
@@ -331,6 +354,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | example.resources.limits.cpu          | cpu limit                                                                                                                              | 250m                                       |
 | extraConf.configMap                   | The name of the ConfigMap containing the json file that override the default values                                                    | ""                                         |
 | extraConf.filename                    | The name of the json file that contains custom values. Must be the same as the `key` name in `extraConf.ConfigMap`                     | local.json                                 |
+| extraThemes.configMap                 | The name of the ConfigMap containing the json file that contains the interface themes                                                  | ""                                         |
+| extraThemes.filename                  | The name of the json file that contains custom interface themes. Must be the same as the `key` name in `extraThemes.configMap`         | custom-themes.json                         |
 | antiAffinity.type                     | Types of Pod antiaffinity. Allowed values: `soft` or `hard`                                                                            | soft                                       |
 | antiAffinity.topologyKey              | Node label key to match                                                                                                                | kubernetes.io/hostname                     |
 | antiAffinity.weight                   | Priority when selecting node. It is in the range from 1 to 100                                                                         | 100                                        |
