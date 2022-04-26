@@ -56,6 +56,10 @@ extraConf:
   configMap: ""
   filename: local.json
 
+extraThemes:
+  configMap: ""
+  filename: custom-themes.json
+
 antiAffinity:
   type: "soft"
   topologyKey: kubernetes.io/hostname
