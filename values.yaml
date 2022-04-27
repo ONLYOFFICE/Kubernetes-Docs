@@ -13,6 +13,7 @@ connections:
   amqpType: rabbitmq
   amqpHost: rabbitmq
   amqpPort: "5672"
+  amqpVhost: "/"
   amqpUser: user
   amqpProto: amqp
   amqpExistingSecret: rabbitmq
