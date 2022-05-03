@@ -177,6 +177,7 @@ jwt:
   existingSecret: ""
 
 service:
+  annotations: {}
   type: ClusterIP
   port: 8888
 
