@@ -8,6 +8,9 @@ data:
   DB_PORT: {{ .Values.connections.dbPort | quote }}
   DB_NAME: {{ .Values.connections.dbName }}
   REDIST_SERVER_HOST: {{ .Values.connections.redisHost }}
+  AMQP_TYPE: {{ .Values.connections.amqpType }}
+  AMQP_PORT: {{ .Values.connections.amqpPort | quote }}
+  AMQP_VHOST: {{ .Values.connections.amqpVhost | quote }}
   AMQP_HOST: {{ .Values.connections.amqpHost }}
   AMQP_USER: {{ .Values.connections.amqpUser }}
   AMQP_PROTO: {{ .Values.connections.amqpProto }}

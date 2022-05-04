@@ -15,6 +15,12 @@ spec:
     metadata:
       labels:
         app: docservice
+    {{- if .Values.docservice.podAnnotations }}
+      annotations:
+        {{- range $key, $value := .Values.docservice.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ }}
+        {{- end }}
+    {{- end }}
     spec:
       {{ if .Values.securityContext.enabled }}
       securityContext:
@@ -68,6 +74,11 @@ spec:
           configMap:
             name: {{ .Values.extraConf.configMap }}
         {{ end }}
+        {{ if .Values.extraThemes.configMap }}
+        - name: custom-themes
+          configMap:
+            name: {{ .Values.extraThemes.configMap }}
+        {{ end }}
       containers:
         - name: proxy
           image: {{ .Values.proxy.proxyContainerImage }}
@@ -87,6 +98,11 @@ spec:
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
+          {{ if .Values.extraThemes.configMap }}
+          - name: custom-themes
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
+            subPath: {{ .Values.extraThemes.filename }}
+          {{ end }}
 
         - name: docservice
           image: {{ .Values.docservice.containerImage }}
@@ -131,4 +147,9 @@ spec:
           - name: custom-file
             mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.extraConf.filename }}
             subPath: {{ .Values.extraConf.filename }}
+          {{ end }}
+          {{ if .Values.extraThemes.configMap }}
+          - name: custom-themes
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
+            subPath: {{ .Values.extraThemes.filename }}
           {{ end }}

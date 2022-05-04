@@ -2,6 +2,12 @@ kind: Service
 apiVersion: v1
 metadata:
   name: documentserver
+{{- if .Values.service.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.service.annotations }}
+    {{ $key }}: {{ tpl $value $ }}
+    {{- end }}
+{{- end }}
 spec:
   selector:
     app: docservice
