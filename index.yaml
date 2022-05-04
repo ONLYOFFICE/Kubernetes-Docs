@@ -3,6 +3,16 @@ entries:
   documentserver:
   - apiVersion: v2
     appVersion: 7.0.1
+    created: "2022-05-04T05:07:48.794656404-04:00"
+    description: Helm chart for installing ONLYOFFICE Docs in Kubernetes
+    digest: 60da691862b3696d1c91f41f1fdc90812e368b67aecd122c4adc4ba7d4453723
+    name: documentserver
+    type: application
+    urls:
+    - https://github.com/ONLYOFFICE/Kubernetes-Docs/releases/download/documentserver-22.5.4/documentserver-22.5.4.tgz
+    version: 22.5.4
+  - apiVersion: v2
+    appVersion: 7.0.1
     created: "2022-04-28T04:09:09.693543096-04:00"
     description: Helm chart for installing ONLYOFFICE Docs in Kubernetes
     digest: 6569efb6466975a53cdb3dd8c81887698ce8cb931fc5a05352f01df43005c6b1
@@ -51,5 +61,5 @@ entries:
     urls:
     - https://github.com/ONLYOFFICE/Kubernetes-Docs/releases/download/documentserver-7.0.1/documentserver-7.0.1.tgz
     version: 7.0.1
-generated: "2022-04-28T04:09:09.687457412-04:00"
+generated: "2022-05-04T05:07:48.788452143-04:00"
 
