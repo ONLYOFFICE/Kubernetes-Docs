@@ -4,7 +4,7 @@ name: Release Chart on S3 repo
 on:    
   push:
     branches:
-      - feature/helm_repo
+      - master
       
 jobs:
   build:
