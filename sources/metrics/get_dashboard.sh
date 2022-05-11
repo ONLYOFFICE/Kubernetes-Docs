@@ -5,7 +5,7 @@ wget https://grafana.com/api/dashboards/11835/revisions/1/download -O dashboard-
 wget https://grafana.com/api/dashboards/10991/revisions/8/download -O dashboard-rabbitmq.json
 wget https://grafana.com/api/dashboards/9628/revisions/6/download -O dashboard-postgresql.json
 wget https://grafana.com/api/dashboards/9614/revisions/1/download -O dashboard-nginx-ingress.json
-wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/metrics/documentserver-statsd-exporter.json
+wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/metrics/documentserver-statsd-exporter.json -O documentserver-statsd-exporter.json
 sed -i 's/${DS_PROMETHEUS}/Prometheus/' *.json
 kubectl create configmap dashboard-node-exporter --from-file=./dashboard-node-exporter.json
 kubectl create configmap dashboard-deployment --from-file=./dashboard-deployment.json
