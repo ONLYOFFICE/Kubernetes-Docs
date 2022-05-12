@@ -64,7 +64,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/scc/helm-components.yaml
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/feature/helm_repo/sources/scc/helm-components.yaml
 $ oc apply -f ./helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
@@ -270,7 +270,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/scc/docs-components.yaml
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/feature/helm_repo/sources/scc/docs-components.yaml
 $ oc apply -f ./docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
@@ -286,11 +286,23 @@ If you have a valid ONLYOFFICE Docs license, Run the following commands:
 $ kubectl create secret generic license --from-file=path/to/license.lic
 ```
 
-Also, you must set the license.existingSecret parameter to `secret_name`:
+Also, you must set the parameter: `license.existingSecret=secret_name`:
 ```
 $ helm install documentserver onlyoffice/documentserver --set license.existingSecret=license
 ```
 Note: The source license file name should be 'license.lic' because this name would be used as a field in the created secret.
+
+If DocumentServer is already installed, create a secret
+
+```
+$ kubectl create secret generic license --from-file=path/to/license.lic
+```
+
+and restart `docservice` and `converter` pods. For example, using the following command:
+
+```
+$ kubectl delete pod converter-*** docservice-***
+```
 
 ### 2. Deploy ONLYOFFICE Docs
 
@@ -599,8 +611,8 @@ There are two possible options for updating ONLYOFFICE Docs, which are presented
 To perform the update, run the following script:
 
 ```bash
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/scripts/update-ds.sh
-$ ./update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/feature/helm_repo/sources/scripts/update-ds.sh
+$ bash update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
 Where:
@@ -609,7 +621,7 @@ Where:
 
 For example:
 ```bash
-$ ./update-ds.sh -dv 7.0.0.132 -ns onlyoffice
+$ bash update-ds.sh -dv 7.0.0.132 -ns onlyoffice
 ```
 
 #### 7.2 Updating using helm upgrade
@@ -653,8 +665,8 @@ $ helm rollback documentserver
 To perform the shutdown, run the following script:
 
 ```bash
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/scripts/shutdown-ds.sh
-./shutdown-ds.sh -ns <NAMESPACE>
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scripts/shutdown-ds.sh
+$ bash shutdown-ds.sh -ns <NAMESPACE>
 ```
 
 Where:
@@ -662,7 +674,7 @@ Where:
 
 For example:
 ```bash
-$ ./shutdown-ds.sh -ns onlyoffice
+$ bash shutdown-ds.sh -ns onlyoffice
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
@@ -707,8 +719,8 @@ Dowload and run the `get_dashboard.sh` script, which will download ready-made da
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/charts/documentserver/sources/metrics/get_dashboard.sh
-$ ./get_dashboard.sh
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/get_dashboard.sh
+$ bash get_dashboard.sh
 ```
 
 To install Grafana to your cluster, run the following command:
