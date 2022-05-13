@@ -22,6 +22,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [10. Change interface themes](#10-change-interface-themes)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
+    + [1.1 Kreate secret](#11-kreate-secret)
+    + [1.2 Specify parameters when installing DocumentServer](specify-parameters-when-installing-documentserver)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
   * [3. Uninstall ONLYOFFICE Docs](#3-uninstall-onlyoffice-docs)
   * [4. Parameters](#4-parameters)
@@ -280,29 +282,24 @@ $ helm install documentserver onlyoffice/documentserver --set securityContext.en
 ```
 ### 1. Deploy the ONLYOFFICE Docs license
 
+#### 1.1. Kreate secret
+
 If you have a valid ONLYOFFICE Docs license, Run the following commands:
 
 ```
 $ kubectl create secret generic license --from-file=path/to/license.lic
 ```
 
-Also, you must set the parameter: `license.existingSecret=secret_name`:
+#### 1.2. Specify parameters when installing DocumentServer
+
+When installing DocumentServer, specify the `license.existingSecret=secret_name` parameter.
+
 ```
 $ helm install documentserver onlyoffice/documentserver --set license.existingSecret=license
 ```
 Note: The source license file name should be 'license.lic' because this name would be used as a field in the created secret.
 
-If DocumentServer is already installed, create a secret
-
-```
-$ kubectl create secret generic license --from-file=path/to/license.lic
-```
-
-and restart `docservice` and `converter` pods. For example, using the following command:
-
-```
-$ kubectl delete pod converter-*** docservice-***
-```
+Note: If you need to add license after the DocumentServer is already installed, you need to execute step [1.1](#11-kreate-secret) and then run the helm upgrade documentserver onlyoffice/documentserver --set license.existingSecret=license --no-hooks command or helm upgrade documentserver -f ./values.yaml onlyoffice/documentserver --no-hooks if the parameters are specified in the values.yaml file.
 
 ### 2. Deploy ONLYOFFICE Docs
 
