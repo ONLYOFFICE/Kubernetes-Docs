@@ -42,7 +42,7 @@ metrics:
 
 example:
   enabled: false
-  containerImage: onlyoffice/docs-example:7.0.1.37
+  containerImage: onlyoffice/docs-example:7.1.0-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
