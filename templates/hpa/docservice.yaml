@@ -1,0 +1,37 @@
+{{- if .Values.docservice.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: docservice-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: docservice
+  minReplicas: {{ .Values.docservice.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.docservice.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.docservice.autoscaling.targetCPU.enabled }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.docservice.autoscaling.targetCPU.utilizationPercentage }}
+  {{- end }}
+  {{- if .Values.docservice.autoscaling.targetMemory.enabled }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.docservice.autoscaling.targetMemory.utilizationPercentage }}
+  {{- end }}
+  {{- with .Values.docservice.autoscaling.customMetricsType }}
+  {{- toYaml . | nindent 2 }}
+  {{ end }}
+  {{- with .Values.docservice.autoscaling.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

@@ -109,6 +109,46 @@ docservice:
     ##  memory: "2Gi"
     ##  cpu: "1000m"
     limits: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 9
+    targetCPU:
+      enabled: true
+      utilizationPercentage: 70
+    targetMemory:
+      enabled: false
+      utilizationPercentage: 70
+    ##Example:
+    ##customMetricsType:
+    ##  - type: Object
+    ##    object:
+    ##      metric:
+    ##        name: requests-per-second
+    ##      describedObject:
+    ##        apiVersion: networking.k8s.io/v1
+    ##        kind: Ingress
+    ##        name: main-route
+    ##      target:
+    ##        type: Value
+    ##        value: 2k
+    customMetricsType: []
+    ##Example:
+    ##behavior:
+    ##  scaleDown:
+    ##    stabilizationWindowSeconds: 300
+    ##    policies:
+    ##    - type: Pods
+    ##      value: 4
+    ##      periodSeconds: 60
+    ##  scaleUp:
+    ##    stabilizationWindowSeconds: 0
+    ##    policies:
+    ##    - type: Percent
+    ##      value: 70
+    ##      periodSeconds: 15
+    ##    selectPolicy: Max
+    behavior: {}
 
 proxy:
   gzipProxied: "off"
@@ -151,12 +191,51 @@ converter:
     ##Example:
     ##requests:
     ##  memory: "256Mi"
-    ##  cpu: "100m"
+    ##  cpu: "200m"
     requests: {}
     ##limits:
     ##  memory: "2Gi"
     ##  cpu: "1000m"
     limits: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 9
+    targetCPU:
+      enabled: true
+      utilizationPercentage: 70
+    targetMemory:
+      enabled: false
+      utilizationPercentage: 70
+    ##Example:
+    ##customMetricsType:
+    ##  - type: Pods
+    ##    pods:
+    ##      metric:
+    ##        name: packets-per-second
+    ##      target:
+    ##        type: AverageValue
+    ##        averageValue: 1k
+    customMetricsType: []
+    ##Example:
+    ##behavior:
+    ##  scaleDown:
+    ##    stabilizationWindowSeconds: 300
+    ##    policies:
+    ##    - type: Percent
+    ##      value: 10
+    ##      periodSeconds: 60
+    ##  scaleUp:
+    ##    stabilizationWindowSeconds: 0
+    ##    policies:
+    ##    - type: Percent
+    ##      value: 10
+    ##      periodSeconds: 15
+    ##    - type: Pods
+    ##      value: 2
+    ##      periodSeconds: 15
+    ##    selectPolicy: Max
+    behavior: {}
 
 jwt:
   enabled: true
