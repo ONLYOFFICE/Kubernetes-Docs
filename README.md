@@ -22,7 +22,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [10. Change interface themes](#10-change-interface-themes)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
-    + [1.1 Kreate secret](#11-kreate-secret)
+    + [1.1 Create secret](#11-create-secret)
     + [1.2 Specify parameters when installing DocumentServer](specify-parameters-when-installing-documentserver)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
   * [3. Uninstall ONLYOFFICE Docs](#3-uninstall-onlyoffice-docs)
@@ -282,24 +282,25 @@ $ helm install documentserver onlyoffice/documentserver --set securityContext.en
 ```
 ### 1. Deploy the ONLYOFFICE Docs license
 
-#### 1.1. Kreate secret
+#### 1.1. Create secret
 
-If you have a valid ONLYOFFICE Docs license, Run the following commands:
+If you have a valid ONLYOFFICE Docs license, create a secret `license` from the file:
 
 ```
 $ kubectl create secret generic license --from-file=path/to/license.lic
 ```
 
+Note: The source license file name should be 'license.lic' because this name would be used as a field in the created secret.
+
 #### 1.2. Specify parameters when installing DocumentServer
 
-When installing DocumentServer, specify the `license.existingSecret=secret_name` parameter.
+When installing DocumentServer, specify the `license.existingSecret=license` parameter.
 
 ```
 $ helm install documentserver onlyoffice/documentserver --set license.existingSecret=license
 ```
-Note: The source license file name should be 'license.lic' because this name would be used as a field in the created secret.
 
-Note: If you need to add license after the DocumentServer is already installed, you need to execute step [1.1](#11-kreate-secret) and then run the helm upgrade documentserver onlyoffice/documentserver --set license.existingSecret=license --no-hooks command or helm upgrade documentserver -f ./values.yaml onlyoffice/documentserver --no-hooks if the parameters are specified in the values.yaml file.
+Note: If you need to add license after the DocumentServer is already installed, you need to execute step [1.1](#11-create-secret) and then run the `helm upgrade documentserver onlyoffice/documentserver --set license.existingSecret=license --no-hooks` command or `helm upgrade documentserver -f ./values.yaml onlyoffice/documentserver --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ### 2. Deploy ONLYOFFICE Docs
 

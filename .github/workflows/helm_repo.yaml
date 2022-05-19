@@ -22,19 +22,19 @@ jobs:
       - name: Helm release
         uses: shellbear/helm-release-action@v0.1
         with:
-          repo: ${{ secrets.AWS_BUCKET_URL }}/charts/
+          repo: ${{ secrets.AWS_BUCKET_URL }}/charts/stable
           chart: ./
 
       - name: Reindex index.yaml
         run: |
-          aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/index.yaml . 
+          aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/stable/index.yaml . 
           ls | grep index.yaml
           sed -i "s|${{ secrets.AWS_BUCKET_URL }}|${{ secrets.AWS_CLOUDFRONT_URL }}|g" index.yaml
-          aws s3 cp index.yaml ${{ secrets.AWS_BUCKET_URL }}/charts/ --acl public-read
+          aws s3 cp index.yaml ${{ secrets.AWS_BUCKET_URL }}/charts/stable/ --acl public-read
       - name: Make public access to chart repo
         run: |
           mkdir s3dir
-          aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/ ./s3dir  --recursive
-          aws s3 cp ./s3dir ${{ secrets.AWS_BUCKET_URL }}/charts --acl public-read --recursive
+          aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/stable/ ./s3dir  --recursive
+          aws s3 cp ./s3dir ${{ secrets.AWS_BUCKET_URL }}/charts/stable --acl public-read --recursive
       - name: Invalidate CLOUDFRONT cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths "/charts/*"
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths "/charts/stable/*"
