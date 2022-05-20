@@ -23,7 +23,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
     + [1.1 Create secret](#11-create-secret)
-    + [1.2 Specify parameters when installing DocumentServer](specify-parameters-when-installing-documentserver)
+    + [1.2 Specify parameters when installing DocumentServer](#12-specify-parameters-when-installing-documentserver)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
   * [3. Uninstall ONLYOFFICE Docs](#3-uninstall-onlyoffice-docs)
   * [4. Parameters](#4-parameters)
@@ -77,7 +77,7 @@ $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 $ helm repo add bitnami https://charts.bitnami.com/bitnami
 $ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 $ helm repo add stable https://charts.helm.sh/stable
-$ helm repo add onlyoffice https://download.onlyoffice.com/charts
+$ helm repo add onlyoffice https://download.onlyoffice.com/charts/stable
 $ helm repo update
 ```
 
