@@ -362,7 +362,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `antiAffinity.topologyKey`              | Node label key to match                                                                                                                       | `kubernetes.io/hostname`                     |
 | `antiAffinity.weight`                   | Priority when selecting node. It is in the range from 1 to 100                                                                                | `100`                                        |
 | `docservice.podAnnotations`             | Map of annotations to add to the docservice deployment pods                                                                                   | `rollme: "{{ randAlphaNum 5 \| quote }}"`    |
-| `docservice.replicas`                   | Docservice replicas quantity                                                                                                                  | `2`                                          |
+| `docservice.replicas`                   | Docservice replicas quantity. If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored                                     | `2`                                          |
 | `docservice.containerImage`             | Docservice container image name                                                                                                               | `onlyoffice/docs-docservice-de:7.0.1-2`      |
 | `docservice.imagePullPolicy`            | Docservice container image pull policy                                                                                                        | `IfNotPresent`                               |
 | `docservice.resources.requests`         | The requested resources for the Docservice container                                                                                          | `{}`                                         |
@@ -387,7 +387,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `proxy.livenessProbeEnabled`            | Enable livenessProbe for Proxy container                                                                                                      | `true`                                       |
 | `proxy.startupProbeEnabled`             | Enable startupProbe for Proxy container                                                                                                       | `true`                                       |
 | `converter.podAnnotations`              | Map of annotations to add to the converter deployment pods                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`    |
-| `converter.replicas`                    | converter replicas quantity                                                                                                                   | `2`                                          |
+| `converter.replicas`                    | Converter replicas quantity. If the `converter.autoscaling.enabled` parameter is enabled, it is ignored                                       | `2`                                          |
 | `converter.containerImage`              | converter container image name                                                                                                                | `onlyoffice/docs-converter-de:7.0.1-2`       |
 | `converter.imagePullPolicy`             | Converter container image pull policy                                                                                                         | `IfNotPresent`                               |
 | `converter.resources.requests`          | The requested resources for the Converter container                                                                                           | `{}`                                         |
@@ -582,7 +582,25 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 *This step is optional. You can skip step [6](#6-scale-documentserver-optional) entirely if you want to use default deployment settings.*
 
-#### 6.1 Manual scaling
+#### 6.1 Horizontal Pod Autoscaling
+You can enable Autoscaling so that the number of replicas of `docservice` and `converter` deployments is calculated automatically based on the values and type of metrics.
+
+For resource metrics must be registered API metrics.k8s.io, generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server). It can be launched as a cluster add-on.
+
+To use the target utilization value (`target.type==Utilization`), it is necessary that the values for `resources.requests` are specified in the deployment.
+
+For more information about Horizontal Pod Autoscaling, see [here](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
+
+To enable HPA for the `docservice` deployment, specify the `docservice.autoscaling.enabled=true` parameter. 
+In this case, the `docservice.replicas` parameter is ignored and the number of replicas is controlled by HPA.
+
+Similarly, to enable HPA for the `converter` deployment, specify the `converter.autoscaling.enabled=true` parameter. 
+In this case, the `converter.replicas` parameter is ignored and the number of replicas is controlled by HPA.
+
+With the `autoscaling.enabled` parameter enabled, by default Autoscaling will adjust the number of replicas based on the average percentage of CPU Utilization.
+For other configurable Autoscaling parameters, see the [Parameters](#4-parameters) table.
+
+#### 6.2 Manual scaling
 The `docservice` and `converter` deployments consist of 2 pods each other by default.
 
 To scale the `docservice` deployment, use the following command:
