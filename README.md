@@ -66,7 +66,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/feature/helm_repo/sources/scc/helm-components.yaml
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/helm-components.yaml
 $ oc apply -f ./helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
@@ -229,8 +229,8 @@ Note: Any name can be used instead of `local-config`.
 When installing DocumentServer, specify the `extraConf.configMap=local-config` and `extraConf.filename=local.json` parameters
 
 Note: If you need to add a configuration file after the DocumentServer is already installed, you need to execute step [7.1](#71-create-a-configmap-containing-a-json-file) 
-and then run the `helm upgrade documentserver onlyoffice/documentserver --set extraConf.configMap=local-config --set extraConf.filename=local.json --no-hooks` command or 
-`helm upgrade documentserver -f ./values.yaml onlyoffice/documentserver --no-hooks` if the parameters are specified in the `values.yaml` file.
+and then run the `helm upgrade documentserver onlyoffice/docs --set extraConf.configMap=local-config --set extraConf.filename=local.json --no-hooks` command or 
+`helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ### 8. Add custom Fonts
 *This step is optional. You can skip step [#8](#8-add-custom-fonts) entirely if you don't need to add your fonts*
@@ -263,8 +263,8 @@ Note: Instead of `custom-themes` and `custom-themes.json` you can use any other 
 When installing DocumentServer, specify the `extraThemes.configMap=custom-themes` and `extraThemes.filename=custom-themes.json` parameters.
 
 Note: If you need to add interface themes after the DocumentServer is already installed, you need to execute step [10.1](#101-create-a-configmap-containing-a-json-file)
-and then run the `helm upgrade documentserver onlyoffice/documentserver --set extraThemes.configMap=custom-themes --set extraThemes.filename=custom-themes.json --no-hooks` command or
-`helm upgrade documentserver -f ./values.yaml onlyoffice/documentserver --no-hooks` if the parameters are specified in the `values.yaml` file.
+and then run the `helm upgrade documentserver onlyoffice/docs --set extraThemes.configMap=custom-themes --set extraThemes.filename=custom-themes.json --no-hooks` command or
+`helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ## Deploy ONLYOFFICE Docs
 
@@ -272,7 +272,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/feature/helm_repo/sources/scc/docs-components.yaml
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/docs-components.yaml
 $ oc apply -f ./docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
@@ -297,17 +297,17 @@ Note: The source license file name should be 'license.lic' because this name wou
 When installing DocumentServer, specify the `license.existingSecret=license` parameter.
 
 ```
-$ helm install documentserver onlyoffice/documentserver --set license.existingSecret=license
+$ helm install documentserver onlyoffice/docs --set license.existingSecret=license
 ```
 
-Note: If you need to add license after the DocumentServer is already installed, you need to execute step [1.1](#11-create-secret) and then run the `helm upgrade documentserver onlyoffice/documentserver --set license.existingSecret=license --no-hooks` command or `helm upgrade documentserver -f ./values.yaml onlyoffice/documentserver --no-hooks` if the parameters are specified in the `values.yaml` file.
+Note: If you need to add license after the DocumentServer is already installed, you need to execute step [1.1](#11-create-secret) and then run the `helm upgrade documentserver onlyoffice/docs --set license.existingSecret=license --no-hooks` command or `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ### 2. Deploy ONLYOFFICE Docs
 
 To deploy DocumentServer with the release name `documentserver`:
 
 ```bash
-$ helm install documentserver onlyoffice/documentserver
+$ helm install documentserver onlyoffice/docs
 ```
 
 The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
@@ -428,7 +428,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
 ```bash
-$ helm install documentserver onlyoffice/documentserver --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
+$ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 ```
 
 This command gives expose documentServer via HTTPS.
@@ -436,7 +436,7 @@ This command gives expose documentServer via HTTPS.
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ helm install documentserver -f values.yaml onlyoffice/documentserver
+$ helm install documentserver -f values.yaml onlyoffice/docs
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
@@ -448,19 +448,19 @@ $ helm install documentserver -f values.yaml onlyoffice/documentserver
 To deploy the example, set the `example.enabled` parameter to true:
 
 ```bash
-$ helm install documentserver onlyoffice/documentserver --set example.enabled=true
+$ helm install documentserver onlyoffice/docs --set example.enabled=true
 ```
 
 ### 5.2 Metrics deployment (optional)
 To deploy metrics, set `metrics.enabled` to true:
 
 ```bash
-$ helm install documentserver onlyoffice/documentserver --set metrics.enabled=true
+$ helm install documentserver onlyoffice/docs --set metrics.enabled=true
 ```
 If you want to use nginx ingress, set `grafana_ingress.enabled` to true:
 
 ```bash
-$ helm install documentserver onlyoffice/documentserver --set grafana_ingress.enabled=true
+$ helm install documentserver onlyoffice/docs --set grafana_ingress.enabled=true
 ```
 
 ### 5.3 Expose DocumentServer
@@ -474,10 +474,9 @@ Use this type of exposure if you use external TLS termination, and don't have an
 To expose DocumentServer via service, set the `service.type` parameter to LoadBalancer:
 
 ```bash
-$ helm install documentserver onlyoffice/documentserver --set service.type=LoadBalancer,service.port=80
+$ helm install documentserver onlyoffice/docs --set service.type=LoadBalancer,service.port=80
 
 ```
-
 
 Run the following command to get the `documentserver` service IP:
 
@@ -524,7 +523,7 @@ Use this type if you use external TLS termination and when you have several WEB 
 To expose DocumentServer via ingress HTTP, set the `ingress.enabled` parameter to true:
 
 ```bash
-$ helm install documentserver onlyoffice/documentserver --set ingress.enabled=true
+$ helm install documentserver onlyoffice/docs --set ingress.enabled=true
 
 ```
 
@@ -559,7 +558,7 @@ $ kubectl create secret generic tls \
 ```
 
 ```bash
-$ helm install documentserver onlyoffice/documentserver --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
+$ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 
 ```
 
@@ -609,7 +608,7 @@ There are two possible options for updating ONLYOFFICE Docs, which are presented
 To perform the update, run the following script:
 
 ```bash
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/feature/helm_repo/sources/scripts/update-ds.sh
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scripts/update-ds.sh
 $ bash update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
@@ -627,7 +626,7 @@ $ bash update-ds.sh -dv 7.0.0.132 -ns onlyoffice
 It's necessary to set the parameters for updating. For example,
 
 ```bash
-$ helm upgrade documentserver onlyoffice/documentserver \
+$ helm upgrade documentserver onlyoffice/docs \
   --set docservice.containerImage=[image]:[version]
   ```
   
@@ -636,20 +635,20 @@ $ helm upgrade documentserver onlyoffice/documentserver \
   Or modify the values.yaml file and run the command:
   
   ```bash
-  $ helm upgrade documentserver -f values.yaml onlyoffice/documentserver
+  $ helm upgrade documentserver -f values.yaml onlyoffice/docs
   ```
   
 Running the helm upgrade command runs a hook that shuts down the documentserver and cleans up the database. This is needed when updating the version of documentserver. The default hook execution time is 300s.
 The execution time can be changed using --timeout [time], for example
 
 ```bash
-$ helm upgrade documentserver -f values.yaml onlyoffice/documentserver --timeout 15m
+$ helm upgrade documentserver -f values.yaml onlyoffice/docs --timeout 15m
 ```
 
 If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without hooks, for example:
 
 ```bash
-$ helm upgrade documentserver onlyoffice/documentserver --set jwt.enabled=false --no-hooks
+$ helm upgrade documentserver onlyoffice/docs --set jwt.enabled=false --no-hooks
 ```
 
 To rollback updates, run the following command:
