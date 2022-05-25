@@ -278,7 +278,7 @@ $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 Also, you must set the `securityContext.enabled` parameter to `true`:
 ```
-$ helm install documentserver onlyoffice/documentserver --set securityContext.enabled=true
+$ helm install documentserver onlyoffice/docs --set securityContext.enabled=true
 ```
 ### 1. Deploy the ONLYOFFICE Docs license
 
@@ -508,7 +508,8 @@ $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publis
 Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
 
 ```bash
-$ helm install nginx-ingress -f ./sources/ingress_values.yaml ingress-nginx/ingress-nginx
+$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/ingress_values.yaml
+$ helm install nginx-ingress -f ./ingress_values.yaml ingress-nginx/ingress-nginx
 ```
 
 See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
