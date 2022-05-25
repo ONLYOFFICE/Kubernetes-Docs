@@ -190,7 +190,7 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ wget https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/extraScrapeConfigs.yaml
+$ wget -O extraScrapeConfigs.yaml https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/extraScrapeConfigs.yaml
 $ helm install prometheus -f ./extraScrapeConfigs.yaml prometheus-community/prometheus
 ```
 
