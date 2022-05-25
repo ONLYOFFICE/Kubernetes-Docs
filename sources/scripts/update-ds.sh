@@ -55,8 +55,8 @@ init_prepare_ds_job(){
     echo A Job named prepare-ds exists. Exit
     exit 1
   else
-    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/jobs/prepare-ds.yaml
-    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/templates/configmaps/stop-ds.yaml
+    wget -O prepare-ds.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/jobs/prepare-ds.yaml
+    wget -O stop-ds.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/templates/configmaps/stop-ds.yaml
     kubectl apply -f stop-ds.yaml -n "${NAMESPACE}"
   fi
 }

@@ -66,7 +66,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/helm-components.yaml
+$ wget -O helm-components.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/helm-components.yaml
 $ oc apply -f ./helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
@@ -272,7 +272,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/docs-components.yaml
+$ wget docs-components.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/docs-components.yaml
 $ oc apply -f ./docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
@@ -508,7 +508,7 @@ $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publis
 Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
 
 ```bash
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/ingress_values.yaml
+$ wget -O ingress_values.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/ingress_values.yaml
 $ helm install nginx-ingress -f ./ingress_values.yaml ingress-nginx/ingress-nginx
 ```
 
@@ -609,7 +609,7 @@ There are two possible options for updating ONLYOFFICE Docs, which are presented
 To perform the update, run the following script:
 
 ```bash
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scripts/update-ds.sh
+$ wget -O update-ds.sh https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scripts/update-ds.sh
 $ bash update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
@@ -663,7 +663,7 @@ $ helm rollback documentserver
 To perform the shutdown, run the following script:
 
 ```bash
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scripts/shutdown-ds.sh
+$ wget -O shutdown-ds.sh https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scripts/shutdown-ds.sh
 $ bash shutdown-ds.sh -ns <NAMESPACE>
 ```
 
@@ -717,7 +717,7 @@ Dowload and run the `get_dashboard.sh` script, which will download ready-made da
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-$ wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/get_dashboard.sh
+$ wget -O get_dashboard.sh https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/get_dashboard.sh
 $ bash get_dashboard.sh
 ```
 
