@@ -11,6 +11,12 @@ spec:
     runAsUser: {{ .Values.securityContext.example.runAsUser }}
     runAsGroup: {{ .Values.securityContext.example.runAsGroup }}
   {{ end }}
+  {{- if .Values.nodeSelector }}
+  nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.tolerations }}
+  tolerations: {{ toYaml .Values.tolerations | nindent 4 }}
+  {{- end }}
   containers:
     - name: example
       image: {{ .Values.example.containerImage | quote }}

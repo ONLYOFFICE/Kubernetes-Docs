@@ -68,6 +68,10 @@ antiAffinity:
   topologyKey: kubernetes.io/hostname
   weight: "100"
 
+nodeSelector: {}
+
+tolerations: []
+
 docservice:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
