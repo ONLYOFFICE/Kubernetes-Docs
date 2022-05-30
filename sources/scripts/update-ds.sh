@@ -55,9 +55,7 @@ init_prepare_ds_job(){
     echo A Job named prepare-ds exists. Exit
     exit 1
   else
-    wget -O prepare-ds.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/jobs/prepare-ds.yaml
-    wget -O stop-ds.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/templates/configmaps/stop-ds.yaml
-    kubectl apply -f stop-ds.yaml -n "${NAMESPACE}"
+    kubectl apply -f ./templates/configmaps/stop-ds.yaml -n "${NAMESPACE}"
   fi
 }
 
@@ -65,7 +63,7 @@ create_prepare_ds_job(){
   export PRODUCT_NAME="${PRODUCT_NAME}"
   export DB_PASSWORD="${DB_PASSWORD}"
   export PVC_NAME="${PVC_NAME}"
-  envsubst < prepare-ds.yaml | kubectl apply -f - -n "${NAMESPACE}"
+  envsubst < ./jobs/prepare-ds.yaml | kubectl apply -f - -n "${NAMESPACE}"
   sleep 5
   PODNAME="$(kubectl get pod -n "${NAMESPACE}" | grep -i prepare-ds | awk '{print $1}')"
 }

@@ -66,8 +66,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ wget -O helm-components.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/helm-components.yaml
-$ oc apply -f ./helm-components.yaml
+$ oc apply -f ./sources/scc/helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
 
@@ -190,8 +189,7 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ wget -O extraScrapeConfigs.yaml https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/sources/extraScrapeConfigs.yaml
-$ helm install prometheus -f ./extraScrapeConfigs.yaml prometheus-community/prometheus
+$ helm install prometheus -f ./sources/extraScrapeConfigs.yaml prometheus-community/prometheus
 ```
 
 See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
@@ -272,8 +270,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ wget -O docs-components.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/docs-components.yaml
-$ oc apply -f ./docs-components.yaml
+$ oc apply -f ./sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 Also, you must set the `securityContext.enabled` parameter to `true`:
@@ -508,8 +505,7 @@ $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publis
 Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
 
 ```bash
-$ wget -O ingress_values.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/ingress_values.yaml
-$ helm install nginx-ingress -f ./ingress_values.yaml ingress-nginx/ingress-nginx
+$ helm install nginx-ingress -f ./sources/ingress_values.yaml ingress-nginx/ingress-nginx
 ```
 
 See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
@@ -609,8 +605,7 @@ There are two possible options for updating ONLYOFFICE Docs, which are presented
 To perform the update, run the following script:
 
 ```bash
-$ wget -O update-ds.sh https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scripts/update-ds.sh
-$ bash update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
+$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
 ```
 
 Where:
@@ -619,7 +614,7 @@ Where:
 
 For example:
 ```bash
-$ bash update-ds.sh -dv 7.0.0.132 -ns onlyoffice
+$ ./sources/scripts/update-ds.sh -dv 7.0.0.132 -ns onlyoffice
 ```
 
 #### 7.2 Updating using helm upgrade
@@ -663,8 +658,7 @@ $ helm rollback documentserver
 To perform the shutdown, run the following script:
 
 ```bash
-$ wget -O shutdown-ds.sh https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scripts/shutdown-ds.sh
-$ bash shutdown-ds.sh -ns <NAMESPACE>
+$ ./sources/scripts/shutdown-ds.sh -ns <NAMESPACE>
 ```
 
 Where:
@@ -672,7 +666,7 @@ Where:
 
 For example:
 ```bash
-$ bash shutdown-ds.sh -ns onlyoffice
+$ ./sources/scripts/shutdown-ds.sh -ns onlyoffice
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
@@ -713,12 +707,11 @@ $ helm install grafana bitnami/grafana \
 
 #### 1.2 Deploy Grafana with the installation of ready-made dashboards
 
-Dowload and run the `get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
+Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
-$ wget -O get_dashboard.sh https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/get_dashboard.sh
-$ bash get_dashboard.sh
+$ ./sources/metrics/get_dashboard.sh
 ```
 
 To install Grafana to your cluster, run the following command:
