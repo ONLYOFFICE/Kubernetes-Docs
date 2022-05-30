@@ -36,11 +36,9 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
     + [5.3.2.2 Expose DocumentServer via HTTP](#5322-expose-documentserver-via-http)
     + [5.3.2.3 Expose DocumentServer via HTTPS](#5323-expose-documentserver-via-https)
-  * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
-      + [6.1 Manual scaling](#61-manual-scaling) 
+  * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional)
+      + [6.1 Manual scaling](#61-manual-scaling)
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
-      + [7.1 Updating using a script](#71-updating-using-a-script)
-      + [7.2 Updating using helm upgrade](#72-updating-using-helm-upgrade)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
 - [Using Grafana to visualize metrics (optional)](#using-grafana-to-visualize-metrics-optional)
@@ -60,13 +58,11 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 
 ## Deploy prerequisites
 
-Open the repo directory
-
 Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 1001`.
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./sources/scc/helm-components.yaml
+$ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/helm-components.yaml
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
 
@@ -270,7 +266,7 @@ Note: When installing to an OpenShift cluster, you must apply the `SecurityConte
 
 To do this, run the following commands:
 ```
-$ oc apply -f ./sources/scc/docs-components.yaml
+$ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 Also, you must set the `securityContext.enabled` parameter to `true`:
@@ -505,7 +501,7 @@ $ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publis
 Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
 
 ```bash
-$ helm install nginx-ingress -f ./sources/ingress_values.yaml ingress-nginx/ingress-nginx
+helm install nginx-ingress -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/ingress_values.yaml ingress-nginx/ingress-nginx
 ```
 
 See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
@@ -598,27 +594,6 @@ $ kubectl scale -n default deployment converter --replicas=POD_COUNT
 
 ### 7. Update ONLYOFFICE Docs
 
-There are two possible options for updating ONLYOFFICE Docs, which are presented below.
-
-#### 7.1 Updating using a script
-
-To perform the update, run the following script:
-
-```bash
-$ ./sources/scripts/update-ds.sh -dv [DOCUMENTSERVER_VERSION] -ns <NAMESPACE>
-```
-
-Where:
- - `dv` - new version of docker images for ONLYOFFICE Docs.
- - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
-
-For example:
-```bash
-$ ./sources/scripts/update-ds.sh -dv 7.0.0.132 -ns onlyoffice
-```
-
-#### 7.2 Updating using helm upgrade
-
 It's necessary to set the parameters for updating. For example,
 
 ```bash
@@ -655,7 +630,8 @@ $ helm rollback documentserver
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
-To perform the shutdown, run the following script:
+To perform the shutdown, clone this repository and open the repo directory.
+Next, run the following script:
 
 ```bash
 $ ./sources/scripts/shutdown-ds.sh -ns <NAMESPACE>
@@ -707,7 +683,8 @@ $ helm install grafana bitnami/grafana \
 
 #### 1.2 Deploy Grafana with the installation of ready-made dashboards
 
-Run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
+Сlone this repository and open the repo directory.
+Next, run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
 make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 ```
