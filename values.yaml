@@ -116,7 +116,7 @@ docservice:
   autoscaling:
     enabled: false
     minReplicas: 2
-    maxReplicas: 9
+    maxReplicas: 4
     targetCPU:
       enabled: true
       utilizationPercentage: 70
@@ -204,7 +204,7 @@ converter:
   autoscaling:
     enabled: false
     minReplicas: 2
-    maxReplicas: 9
+    maxReplicas: 16
     targetCPU:
       enabled: true
       utilizationPercentage: 70
