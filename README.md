@@ -600,7 +600,7 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 #### 6.1 Horizontal Pod Autoscaling
 You can enable Autoscaling so that the number of replicas of `docservice` and `converter` deployments is calculated automatically based on the values and type of metrics.
 
-For resource metrics must be registered API metrics.k8s.io, generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server). It can be launched as a cluster add-on.
+For resource metrics, API metrics.k8s.io must be registered, which is generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server). It can be launched as a cluster add-on.
 
 To use the target utilization value (`target.type==Utilization`), it is necessary that the values for `resources.requests` are specified in the deployment.
 
