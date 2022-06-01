@@ -776,6 +776,8 @@ After executing this command, the following dashboards will be imported into Gra
   - NGINX Ingress controller
   - DocumentServer
 
+Note: You can see the description of the DocumentServer metrics that are visualized in Grafana [here](https://github.com/ONLYOFFICE/Kubernetes-Docs/wiki/Document-Server-Metrics).
+
 See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
 
 ### 2 Access to Grafana via Ingress
