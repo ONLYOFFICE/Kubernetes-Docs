@@ -1,5 +1,22 @@
 # Change log
 
+## 1.0.0
+
+### New Features
+
+* Added the ability set up Horizontal Pod Autoscaling
+* Added the ability set up `nodeSelector` and `tolerations`
+* Added the ability set up annotations for ingress
+* Added build of Helm Chart releases with their publication in the repository
+* Added a description of the DocumentServer metrics that are visualized in Grafana
+
+### Changes
+
+* Release v7.1.0 of ONLYOFFICE Docs
+* Changed the Helm Chart name from `documentserver` to `docs`
+* Changed the Helm Chart versioning to the `SemVer` format
+* Removed the instruction for updating the "DocumentServer" using a script
+
 ## 22.5.4
 
 ### New Features
@@ -22,7 +39,7 @@
 ### Changes
 
 * Edits to the Helm Chart release deletion procedure
-* Changed the Helm Chart versioning to a different format, e.g 7.0.1 (old version format) -> 22.4.15 (new version format)
+* Changed the Helm Chart versioning to the `CalVer` format
 
 ## 7.0.1
 
