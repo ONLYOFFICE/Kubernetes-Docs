@@ -5,7 +5,9 @@ metadata:
   labels:
     app: docservice
 spec:
+  {{ if not .Values.docservice.autoscaling.enabled }}
   replicas: {{ .Values.docservice.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       app: docservice

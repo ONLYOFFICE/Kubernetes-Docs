@@ -36,8 +36,9 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
     + [5.3.2.2 Expose DocumentServer via HTTP](#5322-expose-documentserver-via-http)
     + [5.3.2.3 Expose DocumentServer via HTTPS](#5323-expose-documentserver-via-https)
-  * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional)
-      + [6.1 Manual scaling](#61-manual-scaling)
+  * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
+      + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
+      + [6.2 Manual scaling](#62-manual-scaling) 
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
@@ -376,7 +377,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `nodeSelector`                          | Node labels for pods assignment                                                                                                               | `{}`                                         |
 | `tolerations`                           | Tolerations for pods assignment                                                                                                               | `[]`                                         |
 | `docservice.podAnnotations`             | Map of annotations to add to the docservice deployment pods                                                                                   | `rollme: "{{ randAlphaNum 5 \| quote }}"`    |
-| `docservice.replicas`                   | Docservice replicas quantity                                                                                                                  | `2`                                          |
+| `docservice.replicas`                   | Docservice replicas quantity. If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored                                     | `2`                                          |
 | `docservice.containerImage`             | Docservice container image name                                                                                                               | `onlyoffice/docs-docservice-de:7.0.1-2`      |
 | `docservice.imagePullPolicy`            | Docservice container image pull policy                                                                                                        | `IfNotPresent`                               |
 | `docservice.resources.requests`         | The requested resources for the Docservice container                                                                                          | `{}`                                         |
@@ -384,6 +385,15 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `docservice.readinessProbeEnabled`      | Enable readinessProbe for Docservice container                                                                                                | `true`                                       |
 | `docservice.livenessProbeEnabled`       | Enable livenessProbe for Docservice container                                                                                                 | `true`                                       |
 | `docservice.startupProbeEnabled`        | Enable startupProbe for Docservice container                                                                                                  | `true`                                       |
+| `docservice.autoscaling.enabled`        | Enable docservice deployment autoscaling                                                                                                      | `false`                                      |
+| `docservice.autoscaling.minReplicas`    | Docservice deployment autoscaling minimum number of replicas                                                                                  | `2`                                          |
+| `docservice.autoscaling.maxReplicas`    | Docservice deployment autoscaling maximum number of replicas                                                                                  | `4`                                          |
+| `docservice.autoscaling.targetCPU.enabled` | Enable autoscaling of docservice deployment by CPU usage percentage                                                                        | `true`                                       |
+| `docservice.autoscaling.targetCPU.utilizationPercentage` | Docservice deployment autoscaling target CPU percentage                                                                      | `70`                                         | 
+| `docservice.autoscaling.targetMemory.enabled` | Enable autoscaling of docservice deployment by memory usage percentage                                                                  | `false`                                      |
+| `docservice.autoscaling.targetMemory.utilizationPercentage` | Docservice deployment autoscaling target memory percentage                                                                | `70`                                         |
+| `docservice.autoscaling.customMetricsType` | Custom, additional or external autoscaling metrics for the docservice deployment                                                           | `[]`                                         |
+| `docservice.autoscaling.behavior`       | Configuring docservice deployment scaling behavior policies for the `scaleDown` and `scaleUp` fields                                          | `{}`                                         |
 | `proxy.gzipProxied`                     | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive                      | `off`                                        |
 | `proxy.proxyContainerImage`             | Docservice Proxy container image name                                                                                                         | `onlyoffice/docs-proxy-de:7.0.1-2`           |
 | `proxy.imagePullPolicy`                 | Docservice Proxy container image pull policy                                                                                                  | `IfNotPresent`                               |
@@ -392,11 +402,20 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `proxy.livenessProbeEnabled`            | Enable livenessProbe for Proxy container                                                                                                      | `true`                                       |
 | `proxy.startupProbeEnabled`             | Enable startupProbe for Proxy container                                                                                                       | `true`                                       |
 | `converter.podAnnotations`              | Map of annotations to add to the converter deployment pods                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`    |
-| `converter.replicas`                    | converter replicas quantity                                                                                                                   | `2`                                          |
+| `converter.replicas`                    | Converter replicas quantity. If the `converter.autoscaling.enabled` parameter is enabled, it is ignored                                       | `2`                                          |
 | `converter.containerImage`              | converter container image name                                                                                                                | `onlyoffice/docs-converter-de:7.0.1-2`       |
 | `converter.imagePullPolicy`             | Converter container image pull policy                                                                                                         | `IfNotPresent`                               |
 | `converter.resources.requests`          | The requested resources for the Converter container                                                                                           | `{}`                                         |
 | `converter.resources.limits`            | The resources limits for the Converter container                                                                                              | `{}`                                         |
+| `converter.autoscaling.enabled`         | Enable converter deployment autoscaling                                                                                                       | `false`                                      |
+| `converter.autoscaling.minReplicas`     | Converter deployment autoscaling minimum number of replicas                                                                                   | `2`                                          |
+| `converter.autoscaling.maxReplicas`     | Converter deployment autoscaling maximum number of replicas                                                                                   | `16`                                          |
+| `converter.autoscaling.targetCPU.enabled` | Enable autoscaling of converter deployment by CPU usage percentage                                                                          | `true`                                       |
+| `converter.autoscaling.targetCPU.utilizationPercentage` | Docservice converter autoscaling target CPU percentage                                                                        | `70`                                         |
+| `converter.autoscaling.targetMemory.enabled` |  Enable autoscaling of converter deployment by memory usage percentage                                                                   | `false`                                      |
+| `converter.autoscaling.targetMemory.utilizationPercentage` | Docservice deployment autoscaling target memory percentage                                                                 | `70`                                         |
+| `converter.autoscaling.customMetricsType` | Custom, additional or external autoscaling metrics for the converter deployment                                                             | `[]`                                         |
+| `converter.autoscaling.behavior`        | Configuring converter deployment scaling behavior policies for the `scaleDown` and `scaleUp` fields                                           | `{}`                                         |
 | `jwt.enabled`                           | Specifies the enabling the JSON Web Token validation by the ONLYOFFICE Docs. Common for inbox and outbox requests                             | `true`                                       |
 | `jwt.secret`                            | Defines the secret key to validate the JSON Web Token in the request to the ONLYOFFICE Docs. Common for inbox and outbox requests             | `MYSECRET`                                   |
 | `jwt.header`                            | Defines the http header that will be used to send the JSON Web Token. Common for inbox and outbox requests                                    | `Authorization`                              |
@@ -578,7 +597,25 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 *This step is optional. You can skip step [6](#6-scale-documentserver-optional) entirely if you want to use default deployment settings.*
 
-#### 6.1 Manual scaling
+#### 6.1 Horizontal Pod Autoscaling
+You can enable Autoscaling so that the number of replicas of `docservice` and `converter` deployments is calculated automatically based on the values and type of metrics.
+
+For resource metrics, API metrics.k8s.io must be registered, which is generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server). It can be launched as a cluster add-on.
+
+To use the target utilization value (`target.type==Utilization`), it is necessary that the values for `resources.requests` are specified in the deployment.
+
+For more information about Horizontal Pod Autoscaling, see [here](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
+
+To enable HPA for the `docservice` deployment, specify the `docservice.autoscaling.enabled=true` parameter. 
+In this case, the `docservice.replicas` parameter is ignored and the number of replicas is controlled by HPA.
+
+Similarly, to enable HPA for the `converter` deployment, specify the `converter.autoscaling.enabled=true` parameter. 
+In this case, the `converter.replicas` parameter is ignored and the number of replicas is controlled by HPA.
+
+With the `autoscaling.enabled` parameter enabled, by default Autoscaling will adjust the number of replicas based on the average percentage of CPU Utilization.
+For other configurable Autoscaling parameters, see the [Parameters](#4-parameters) table.
+
+#### 6.2 Manual scaling
 The `docservice` and `converter` deployments consist of 2 pods each other by default.
 
 To scale the `docservice` deployment, use the following command:
