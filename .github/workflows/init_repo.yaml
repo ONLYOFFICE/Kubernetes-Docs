@@ -2,7 +2,9 @@
 name: Release Chart on S3 4testing repo
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - feature/4testing_helm_repo
 
 jobs:
   build:
