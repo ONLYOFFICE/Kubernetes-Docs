@@ -5,7 +5,9 @@ metadata:
   labels:
     app: converter
 spec:
+  {{ if not .Values.converter.autoscaling.enabled }}
   replicas: {{ .Values.converter.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       app: converter
@@ -48,6 +50,12 @@ spec:
                 - converter
             topologyKey: {{ .Values.antiAffinity.topologyKey }}
         {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
       volumes:
         - name: ds-files
           persistentVolumeClaim:

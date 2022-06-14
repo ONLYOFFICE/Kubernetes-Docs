@@ -1,0 +1,51 @@
+---
+name: Build 4testing repo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Chart release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set chart version
+        run: |
+          wget https://download.onlyoffice.com/charts/4testing/index.yaml -P /tmp
+          LATEST_VERSION=$(awk '/docs:/{f=1};f{print}' /tmp/index.yaml | awk '/version:/ {print $2;}' | head -1)
+          NEW_VERSION=$(awk '/version:/ {print $2;}' Chart.yaml)
+          if [[ "$LATEST_VERSION" == *"$NEW_VERSION"* ]]; then
+            RC=${LATEST_VERSION: -1}
+            let "RC+=1"
+          else
+            RC='1'
+          fi
+          NEW_VERSION=$(echo $NEW_VERSION)-rc$RC
+          sed 's/\(version:\).*/\1 '$NEW_VERSION'/' -i Chart.yaml
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: us-east-1
+      - name: Helm release
+        uses: shellbear/helm-release-action@v0.1
+        with:
+          repo: ${{ secrets.AWS_BUCKET_URL }}/charts/4testing
+          chart: ./
+
+      - name: Reindex index.yaml
+        run: |
+          aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/4testing/index.yaml ..
+          ls | grep index.yaml
+          sed -i "s|${{ secrets.AWS_BUCKET_URL }}|${{ secrets.AWS_CLOUDFRONT_URL }}|g" index.yaml
+          aws s3 cp index.yaml ${{ secrets.AWS_BUCKET_URL }}/charts/4testing/ --acl public-read
+      - name: Make public access to chart repo
+        run: |
+          mkdir s3dir
+          aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/4testing/ ./s3dir  --recursive
+          aws s3 cp ./s3dir ${{ secrets.AWS_BUCKET_URL }}/charts/4testing --acl public-read --recursive
+      - name: Invalidate CLOUDFRONT cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths "/charts/4testing/*"

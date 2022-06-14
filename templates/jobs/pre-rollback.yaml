@@ -10,6 +10,12 @@ spec:
   backoffLimit: 2
   template:
     spec:
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
       volumes:
         - name: ds-files
           persistentVolumeClaim:

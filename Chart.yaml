@@ -1,9 +1,9 @@
 apiVersion: v2
-name: documentserver
+name: docs
 description: Helm chart for installing ONLYOFFICE Docs in Kubernetes
 
 type: application
 
-version: 22.5.17
+version: 1.0.0
 
 appVersion: 7.1.0

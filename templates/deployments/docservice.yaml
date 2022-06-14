@@ -5,7 +5,9 @@ metadata:
   labels:
     app: docservice
 spec:
+  {{ if not .Values.docservice.autoscaling.enabled }}
   replicas: {{ .Values.docservice.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       app: docservice
@@ -57,6 +59,12 @@ spec:
                 - docservice
             topologyKey: {{ .Values.antiAffinity.topologyKey }}
         {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
       volumes:
         - name: ds-files
           persistentVolumeClaim:
