@@ -1,5 +1,20 @@
 # Change log
 
+## 1.0.1
+
+### New Features
+
+* Added the ability to specify an existing `Service` for "DocumentServer"
+
+### Changes
+
+* Release v7.1.1 of ONLYOFFICE Docs
+* Added a variable to specify the port number of the `Redis` server in `ConfigMap` `documentserver`
+
+### Fixes
+
+* Fixed the name of the variable for specifying the host of the Redis server
+
 ## 1.0.0
 
 ### New Features
