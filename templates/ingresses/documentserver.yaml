@@ -28,7 +28,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: documentserver
+            name: {{ template "ds.svc.name" . }}
             port:
               number: 8888
 {{ end }}
