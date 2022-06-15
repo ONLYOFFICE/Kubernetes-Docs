@@ -10,6 +10,7 @@ connections:
   dbSecretKeyName: postgres-password
   dbPassword: ""
   redisHost: redis-master
+  redisPort: "6379"
   amqpType: rabbitmq
   amqpHost: rabbitmq
   amqpPort: "5672"
