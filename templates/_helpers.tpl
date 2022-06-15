@@ -119,3 +119,12 @@ Return true if a secret object should be created for jwt
     {{- true -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Return true if a service object should be created for ds
+*/}}
+{{- define "ds.svc.create" -}}
+{{- if empty .Values.service.existing }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
