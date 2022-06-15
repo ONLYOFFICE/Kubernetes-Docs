@@ -1,3 +1,4 @@
+{{- if eq (include "ds.svc.create" .) "true" }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -17,3 +18,4 @@ spec:
       port: {{ .Values.service.port }}
       targetPort: 8888
   type: {{ .Values.service.type }}
+{{- end }}
