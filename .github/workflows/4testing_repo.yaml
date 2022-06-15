@@ -38,7 +38,7 @@ jobs:
 
       - name: Reindex index.yaml
         run: |
-          aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/4testing/index.yaml ..
+          aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/4testing/index.yaml .
           ls | grep index.yaml
           sed -i "s|${{ secrets.AWS_BUCKET_URL }}|${{ secrets.AWS_CLOUDFRONT_URL }}|g" index.yaml
           aws s3 cp index.yaml ${{ secrets.AWS_BUCKET_URL }}/charts/4testing/ --acl public-read
