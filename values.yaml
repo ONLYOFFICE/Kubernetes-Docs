@@ -10,6 +10,7 @@ connections:
   dbSecretKeyName: postgres-password
   dbPassword: ""
   redisHost: redis-master
+  redisPort: "6379"
   amqpType: rabbitmq
   amqpHost: rabbitmq
   amqpPort: "5672"
@@ -42,7 +43,7 @@ metrics:
 
 example:
   enabled: false
-  containerImage: onlyoffice/docs-example:7.1.0-2
+  containerImage: onlyoffice/docs-example:7.1.1-1
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -101,7 +102,7 @@ docservice:
       port: 8000
     failureThreshold: 30
     periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:7.1.0-1
+  containerImage: onlyoffice/docs-docservice-de:7.1.1-1
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -172,7 +173,7 @@ proxy:
       port: 8888
     failureThreshold: 30
     periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.0-1
+  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-1
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -189,7 +190,7 @@ converter:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:7.1.0-1
+  containerImage: onlyoffice/docs-converter-de:7.1.1-1
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -260,6 +261,7 @@ jwt:
   existingSecret: ""
 
 service:
+  existing: ""
   annotations: {}
   type: ClusterIP
   port: 8888

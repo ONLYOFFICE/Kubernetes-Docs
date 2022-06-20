@@ -119,3 +119,23 @@ Return true if a secret object should be created for jwt
     {{- true -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the service name for ds
+*/}}
+{{- define "ds.svc.name" -}}
+{{- if .Values.service.existing -}}
+    {{- printf "%s" (tpl .Values.service.existing $) -}}
+{{- else }}
+    {{- printf "documentserver" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a service object should be created for ds
+*/}}
+{{- define "ds.svc.create" -}}
+{{- if empty .Values.service.existing }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
