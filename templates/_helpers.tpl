@@ -139,3 +139,45 @@ Return true if a service object should be created for ds
     {{- true -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the configmap name containing the ds upgrade script
+*/}}
+{{- define "ds.upgrade.configMapName" -}}
+{{- if .Values.upgrade.existingConfigmap.dsStop -}}
+    {{- printf "%s" (tpl .Values.upgrade.existingConfigmap.dsStop $) -}}
+{{- else }}
+    {{- printf "stop-ds" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a configmap object should be created for ds for upgrade
+*/}}
+{{- define "ds.upgrade.createConfigMap" -}}
+{{- if empty .Values.upgrade.existingConfigmap.dsStop }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the configmap name of removing tables
+*/}}
+{{- define "ds.upgrade.configmap.tblRemove.name" -}}
+{{- if not (empty .Values.upgrade.existingConfigmap.tblRemove.name) }}
+    {{- .Values.upgrade.existingConfigmap.tblRemove.name }}
+{{- else if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) (not .Values.upgrade.existingConfigmap.tblRemove.name) }}
+    {{- required "You set privateCluster=true and did not specify an existing secret containing the ds update script. In this case, you must set upgrade.existingConfigmap.tblRemove.name!" .Values.upgrade.existingConfigmap.tblRemove.name }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Return the configmap name of creating tables
+*/}}
+{{- define "ds.upgrade.configmap.tblCreate.name" -}}
+{{- if not (empty .Values.upgrade.existingConfigmap.tblCreate.name) }}
+    {{- .Values.upgrade.existingConfigmap.tblCreate.name }}
+{{- else if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) (not .Values.upgrade.existingConfigmap.tblCreate.name) }}
+    {{- required "You set privateCluster=true and did not specify an existing secret containing the ds update script. In this case, you must set upgrade.existingConfigmap.tblCreate.name!" .Values.upgrade.existingConfigmap.tblCreate.name }}
+{{- end }}
+{{- end -}}

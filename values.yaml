@@ -290,3 +290,20 @@ securityContext:
   example:
     runAsUser: 1001
     runAsGroup: 1001
+
+privateCluster: false
+
+upgrade:
+  job:
+    image:
+      repository: postgres
+      tag: latest
+      pullPolicy: IfNotPresent
+  existingConfigmap:
+    tblRemove:
+      name: ""
+      keyName: removetbl.sql
+    tblCreate:
+      name: ""
+      keyName: createdb.sql
+    dsStop: ""
