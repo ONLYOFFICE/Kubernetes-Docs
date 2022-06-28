@@ -5,7 +5,7 @@ metadata:
   annotations:
     "helm.sh/hook": pre-rollback
     "helm.sh/hook-weight": "3"
-    "helm.sh/hook-delete-policy": before-hook-creation, hook-succeeded, hook-failed
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded,hook-failed
 spec:
   backoffLimit: 2
   template:
@@ -22,11 +22,20 @@ spec:
             claimName: {{ template "ds.pvc.name" . }}
         - name: stop-scripts
           configMap:
-            name: pre-rollback
+            name: {{ template "ds.rollback.configMapName" . }}
             defaultMode: 0755
+        {{- if and .Values.privateCluster (not .Values.rollback.existingConfigmap.dsStop) }}
+        - name: remove-dt-scripts
+          configMap:
+            name: {{ template "ds.rollback.configmap.tblRemove.name" . }}
+        - name: create-dt-scripts
+          configMap:
+            name: {{ template "ds.rollback.configmap.tblCreate.name" . }}
+        {{- end }}
       containers:
-        - name: prepare-ds
-          image: postgres
+        - name: pre-rollback
+          image: {{ .Values.rollback.job.image.repository }}:{{ .Values.rollback.job.image.tag }}
+          imagePullPolicy: {{ .Values.rollback.job.image.pullPolicy }}
           envFrom:
           - configMapRef:
               name: documentserver
@@ -38,12 +47,28 @@ spec:
                 key: {{ .Values.connections.dbSecretKeyName }}
           - name: PRODUCT_NAME
             value: {{ .Values.product.name }}
+          - name: PRIVATE_CLUSTER
+            value: {{ .Values.privateCluster | quote }}
+          {{- if and .Values.privateCluster (not .Values.rollback.existingConfigmap.dsStop) }}
+          - name: REMOVE_SCRIPT
+            value: {{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
+          - name: CREATE_SCRIPT
+            value: {{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
+          {{- end }}
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
           - name: stop-scripts
             mountPath: /sql/stop.sh
             subPath: stop.sh
+          {{- if and .Values.privateCluster (not .Values.rollback.existingConfigmap.dsStop) }}
+          - name: remove-dt-scripts
+            mountPath: /sql/{{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
+            subPath: {{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
+          - name: create-dt-scripts
+            mountPath: /sql/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
+            subPath: {{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
+          {{- end }}
           command: ["/bin/sh", "-c"]
           args: ["/sql/stop.sh"]
       restartPolicy: Never
