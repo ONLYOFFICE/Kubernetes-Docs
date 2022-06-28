@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pre-upgrade
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: {{ template "ds.pvc.name" . }}
+        - name: stop-scripts
+          configMap:
+            name: {{ template "ds.upgrade.configMapName" . }}
+            defaultMode: 0755
+        {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
+        - name: remove-dt-scripts
+          configMap:
+            name: {{ template "ds.upgrade.configmap.tblRemove.name" . }}
+        - name: create-dt-scripts
+          configMap:
+            name: {{ template "ds.upgrade.configmap.tblCreate.name" . }}
+        {{- end }}
+      containers:
+        - name: pre-upgrade
+          image: {{ .Values.upgrade.job.image.repository }}:{{ .Values.upgrade.job.image.tag }}
+          imagePullPolicy: {{ .Values.upgrade.job.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: documentserver
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.postgresql.secretName" . }}
+                key: {{ .Values.connections.dbSecretKeyName }}
+          - name: PRODUCT_NAME
+            value: {{ .Values.product.name }}
+          - name:  PRIVATE_CLUSTER
+            value: {{ .Values.privateCluster | quote }}
+          {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
+          - name: REMOVE_SCRIPT
+            value: {{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+          - name: CREATE_SCRIPT
+            value: {{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+          {{- end }}
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
+          - name: stop-scripts
+            mountPath: /sql/stop.sh
+            subPath: stop.sh
+          {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
+          - name: remove-dt-scripts
+            mountPath: /sql/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+            subPath: {{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+          - name: create-dt-scripts
+            mountPath: /sql/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+            subPath: {{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+          {{- end }}
+          command: ["/bin/sh", "-c"]
+          args: ["/sql/stop.sh"]
+      restartPolicy: Never
