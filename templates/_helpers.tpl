@@ -223,3 +223,34 @@ Return the configmap name of creating tables for rollback
     {{- required "You set privateCluster=true and did not specify an existing secret containing the ds rollback script. In this case, you must set rollback.existingConfigmap.tblCreate.name!" .Values.rollback.existingConfigmap.tblCreate.name }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Get the configmap name containing the ds delete script
+*/}}
+{{- define "ds.delete.configMapName" -}}
+{{- if .Values.delete.existingConfigmap.dsStop -}}
+    {{- printf "%s" (tpl .Values.delete.existingConfigmap.dsStop $) -}}
+{{- else }}
+    {{- printf "pre-delete" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a configmap object containing the ds delete script should be created
+*/}}
+{{- define "ds.delete.createConfigMap" -}}
+{{- if empty .Values.delete.existingConfigmap.dsStop }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the configmap name of deleting tables for rollback
+*/}}
+{{- define "ds.delete.configmap.tblRemove.name" -}}
+{{- if not (empty .Values.delete.existingConfigmap.tblRemove.name) }}
+    {{- .Values.delete.existingConfigmap.tblRemove.name }}
+{{- else if and .Values.privateCluster (not .Values.delete.existingConfigmap.dsStop) (not .Values.delete.existingConfigmap.tblRemove.name) }}
+    {{- required "You set privateCluster=true and did not specify an existing secret containing the ds delete script. In this case, you must set delete.existingConfigmap.tblRemove.name!" .Values.delete.existingConfigmap.tblRemove.name }}
+{{- end }}
+{{- end -}}
