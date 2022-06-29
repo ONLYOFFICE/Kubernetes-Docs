@@ -22,11 +22,17 @@ spec:
             claimName: {{ template "ds.pvc.name" . }}
         - name: stop-scripts
           configMap:
-            name: stop-ds
+            name: {{ template "ds.delete.configMapName" . }}
             defaultMode: 0755
+        {{- if and .Values.privateCluster (not .Values.delete.existingConfigmap.dsStop) }}
+        - name: remove-dt-scripts
+          configMap:
+            name: {{ template "ds.delete.configmap.tblRemove.name" . }}
+        {{- end }}
       containers:
         - name: pre-delete
-          image: postgres
+          image: {{ .Values.delete.job.image.repository }}:{{ .Values.delete.job.image.tag }}
+          imagePullPolicy: {{ .Values.delete.job.image.pullPolicy }}
           envFrom:
           - configMapRef:
               name: documentserver
@@ -38,12 +44,23 @@ spec:
                 key: {{ .Values.connections.dbSecretKeyName }}
           - name: PRODUCT_NAME
             value: {{ .Values.product.name }}
+          - name: PRIVATE_CLUSTER
+            value: {{ .Values.privateCluster | quote }}
+          {{- if and .Values.privateCluster (not .Values.delete.existingConfigmap.dsStop) }}
+          - name: REMOVE_SCRIPT
+            value: {{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+          {{- end }}
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
           - name: stop-scripts
             mountPath: /sql/stop.sh
             subPath: stop.sh
+          {{- if and .Values.privateCluster (not .Values.delete.existingConfigmap.dsStop) }}
+          - name: remove-dt-scripts
+            mountPath: /sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+            subPath: {{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+          {{- end }}
           command: ["/bin/sh", "-c"]
           args: ["/sql/stop.sh"]
       restartPolicy: Never

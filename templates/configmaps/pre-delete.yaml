@@ -1,0 +1,47 @@
+{{- if eq (include "ds.delete.createConfigMap" .) "true" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pre-delete
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+data:
+  stop.sh: |-
+    #!/bin/bash
+    if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
+      apt update
+      apt -y install curl bash wget
+    fi
+    curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s
+    PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME -c "\dt" > /dev/null
+    if [ $? -ne 0 ]; then	
+      echo -e "\e[0;31m DB is not available \e[0m"
+      exit 1
+    fi
+    FILES_DIR=/var/lib/$PRODUCT_NAME/documentserver/App_Data/cache/files/
+    ls $FILES_DIR > /dev/null
+    if [ $? -ne 0 ]; then
+      echo -e "\e[0;31m Error accessing the $FILES_DIR directory \e[0m"
+      exit 1
+    fi
+    for ENTRY in `ls $FILES_DIR`; do
+      case $ENTRY in
+        errors)
+          ;;
+        forgotten)
+          ;;
+        *)
+          rm -rfv $FILES_DIR$ENTRY
+          ;;
+      esac
+    done
+    if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
+      wget -O /sql/removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/removetbl.sql
+    else
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/$REMOVE_SCRIPT
+    fi
+    echo work done
+{{- end }}
