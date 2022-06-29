@@ -47,7 +47,7 @@ spec:
                 key: {{ .Values.connections.dbSecretKeyName }}
           - name: PRODUCT_NAME
             value: {{ .Values.product.name }}
-          - name:  PRIVATE_CLUSTER
+          - name: PRIVATE_CLUSTER
             value: {{ .Values.privateCluster | quote }}
           {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
           - name: REMOVE_SCRIPT

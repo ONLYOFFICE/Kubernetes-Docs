@@ -1,3 +1,4 @@
+{{- if eq (include "ds.rollback.createConfigMap" .) "true" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,8 +9,10 @@ metadata:
 data:
   stop.sh: |-
     #!/bin/bash
-    apt update
-    apt -y install curl bash wget
+    if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
+      apt update
+      apt -y install curl bash wget
+    fi
     curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s
     PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME -c "\dt" > /dev/null
     if [ $? -ne 0 ]; then	
@@ -33,9 +36,14 @@ data:
           ;;
       esac
     done
-    wget -O /sql/removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
-    wget -O /sql/createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
-    PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/removetbl.sql
-    PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/createdb.sql
+    if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
+      wget -O /sql/removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+      wget -O /sql/createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/removetbl.sql
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/createdb.sql
+    else
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/$REMOVE_SCRIPT
+      PGPASSWORD=$DB_PWD psql --host=$DB_HOST --user=$DB_USER --dbname=$DB_NAME --file=/sql/$CREATE_SCRIPT
+    fi
     echo work done
-    
+{{- end }}

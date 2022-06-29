@@ -307,3 +307,18 @@ upgrade:
       name: ""
       keyName: createdb.sql
     dsStop: ""
+
+rollback:
+  job:
+    image:
+      repository: postgres
+      tag: latest
+      pullPolicy: IfNotPresent
+  existingConfigmap:
+    tblRemove:
+      name: remove-db-scripts
+      keyName: removetbl.sql
+    tblCreate:
+      name: init-db-scripts
+      keyName: createdb.sql
+    dsStop: ""
