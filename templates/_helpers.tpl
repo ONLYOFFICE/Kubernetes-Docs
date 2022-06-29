@@ -220,6 +220,6 @@ Return the configmap name of creating tables for rollback
 {{- if not (empty .Values.rollback.existingConfigmap.tblCreate.name) }}
     {{- .Values.rollback.existingConfigmap.tblCreate.name }}
 {{- else if and .Values.privateCluster (not .Values.rollback.existingConfigmap.dsStop) (not .Values.rollback.existingConfigmap.tblCreate.name) }}
-    {{- required "You set privateCluster=true and did not specify an existing secret containing the ds rollback script. In this case, you must set upgrade.existingConfigmap.tblCreate.name!" .Values.rollback.existingConfigmap.tblCreate.name }}
+    {{- required "You set privateCluster=true and did not specify an existing secret containing the ds rollback script. In this case, you must set rollback.existingConfigmap.tblCreate.name!" .Values.rollback.existingConfigmap.tblCreate.name }}
 {{- end }}
 {{- end -}}
