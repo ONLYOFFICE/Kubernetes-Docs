@@ -147,12 +147,12 @@ Get the configmap name containing the ds upgrade script
 {{- if .Values.upgrade.existingConfigmap.dsStop -}}
     {{- printf "%s" (tpl .Values.upgrade.existingConfigmap.dsStop $) -}}
 {{- else }}
-    {{- printf "stop-ds" -}}
+    {{- printf "pre-upgrade" -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Return true if a configmap object should be created for ds for upgrade
+Return true if a configmap object containing the ds upgrade script should be created
 */}}
 {{- define "ds.upgrade.createConfigMap" -}}
 {{- if empty .Values.upgrade.existingConfigmap.dsStop }}
@@ -194,7 +194,7 @@ Get the configmap name containing the ds rollback script
 {{- end -}}
 
 {{/*
-Return true if a configmap object should be created for ds for rollback
+Return true if a configmap object containing the ds rollback script should be created
 */}}
 {{- define "ds.rollback.createConfigMap" -}}
 {{- if empty .Values.rollback.existingConfigmap.dsStop }}
