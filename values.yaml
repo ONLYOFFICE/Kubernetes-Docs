@@ -316,9 +316,9 @@ rollback:
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
-      name: ""
+      name: remove-db-scripts
       keyName: removetbl.sql
     tblCreate:
-      name: ""
+      name: init-db-scripts
       keyName: createdb.sql
     dsStop: ""
