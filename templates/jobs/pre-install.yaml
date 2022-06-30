@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pre-install
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: initdb-scripts
+          configMap:
+            name: {{ template "ds.install.configMapName" . }}
+            defaultMode: 0755
+        {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
+        - name: create-dt-scripts
+          configMap:
+            name: {{ template "ds.install.configmap.tblCreate.name" . }}
+        {{- end }}
+      containers:
+        - name: pre-install
+          image: {{ .Values.install.job.image.repository }}:{{ .Values.install.job.image.tag }}
+          imagePullPolicy: {{ .Values.install.job.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: documentserver
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.postgresql.secretName" . }}
+                key: {{ .Values.connections.dbSecretKeyName }}
+          - name: PRIVATE_CLUSTER
+            value: {{ .Values.privateCluster | quote }}
+          {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
+          - name: CREATE_SCRIPT
+            value: {{ .Values.install.existingConfigmap.tblCreate.keyName }}
+          {{- end }}
+          volumeMounts:
+          - name: initdb-scripts
+            mountPath: /sql/initdb.sh
+            subPath: initdb.sh
+          {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
+          - name: create-dt-scripts
+            mountPath: /sql/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
+            subPath: {{ .Values.install.existingConfigmap.tblCreate.keyName }}
+          {{- end }}
+          command: ["/bin/sh", "-c"]
+          args: ["/sql/initdb.sh"]
+      restartPolicy: Never
