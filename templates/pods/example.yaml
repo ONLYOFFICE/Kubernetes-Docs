@@ -6,6 +6,12 @@ metadata:
   labels:
     app: example
 spec:
+  {{- if .Values.example.podAnnotations }}
+  annotations:
+    {{- range $key, $value := .Values.example.podAnnotations }}
+    {{ $key }}: {{ tpl $value $ }}
+    {{- end }}
+  {{- end }}
   {{ if .Values.securityContext.enabled }}
   securityContext:
     runAsUser: {{ .Values.securityContext.example.runAsUser }}
