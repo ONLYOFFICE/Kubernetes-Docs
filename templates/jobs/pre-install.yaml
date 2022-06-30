@@ -30,9 +30,6 @@ spec:
         - name: pre-install
           image: {{ .Values.install.job.image.repository }}:{{ .Values.install.job.image.tag }}
           imagePullPolicy: {{ .Values.install.job.image.pullPolicy }}
-          envFrom:
-          - configMapRef:
-              name: documentserver
           env:
           - name: DB_PWD
             valueFrom:

@@ -157,7 +157,6 @@ To install PostgreSQL to your cluster, run the following command:
 
 ```
 $ helm install postgresql bitnami/postgresql \
-  --set primary.initdb.scriptsConfigMap=init-db-scripts \
   --set auth.database=postgres \
   --set primary.persistence.size=PERSISTENT_SIZE \
   --set metrics.enabled=false
