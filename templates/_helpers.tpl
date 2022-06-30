@@ -254,3 +254,34 @@ Return the configmap name of deleting tables for rollback
     {{- required "You set privateCluster=true and did not specify an existing secret containing the ds delete script. In this case, you must set delete.existingConfigmap.tblRemove.name!" .Values.delete.existingConfigmap.tblRemove.name }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Get the configmap name containing the initdb script
+*/}}
+{{- define "ds.install.configMapName" -}}
+{{- if .Values.install.existingConfigmap.initdb -}}
+    {{- printf "%s" (tpl .Values.install.existingConfigmap.initdb $) -}}
+{{- else }}
+    {{- printf "pre-install" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a configmap object containing the initdb script should be created
+*/}}
+{{- define "ds.install.createConfigMap" -}}
+{{- if empty .Values.install.existingConfigmap.initdb }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the configmap name of creating tables for install ds
+*/}}
+{{- define "ds.install.configmap.tblCreate.name" -}}
+{{- if not (empty .Values.install.existingConfigmap.tblCreate.name) }}
+    {{- .Values.install.existingConfigmap.tblCreate.name }}
+{{- else if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) (not .Values.install.existingConfigmap.tblCreate.name) }}
+    {{- required "You set privateCluster=true and did not specify an existing secret containing the initdb script. In this case, you must set install.existingConfigmap.tblCreate.name!" .Values.install.existingConfigmap.tblCreate.name }}
+{{- end }}
+{{- end -}}

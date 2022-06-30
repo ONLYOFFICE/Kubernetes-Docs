@@ -1,0 +1,29 @@
+{{- if eq (include "ds.install.createConfigMap" .) "true" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pre-install
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+data:
+  initdb.sh: |-
+    #!/bin/bash
+    if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
+      apt update
+      apt -y install bash wget
+    fi
+    PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} --user={{ .Values.connections.dbUser }} --dbname={{ .Values.connections.dbName }} -c "\l" > /dev/null
+    if [ $? -ne 0 ]; then	
+      echo -e "\e[0;31m DB is not available \e[0m"
+      exit 1
+    fi
+    if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
+      wget -O /sql/createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+      PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} --user={{ .Values.connections.dbUser }} --dbname={{ .Values.connections.dbName }} --file=/sql/createdb.sql
+    else
+      PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} --user={{ .Values.connections.dbUser }} --dbname={{ .Values.connections.dbName }} --file=/sql/$CREATE_SCRIPT
+    fi
+    echo work done
+{{- end }}

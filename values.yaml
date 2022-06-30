@@ -293,6 +293,18 @@ securityContext:
 
 privateCluster: false
 
+install:
+  job:
+    image:
+      repository: postgres
+      tag: latest
+      pullPolicy: IfNotPresent
+  existingConfigmap:
+    tblCreate:
+      name: init-db-scripts
+      keyName: createdb.sql
+    initdb: ""
+
 upgrade:
   job:
     image:
