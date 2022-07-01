@@ -781,7 +781,7 @@ Note: If you specified a different name for `ConfigMap` and for the file from wh
 
 Next, when executing the commands `helm install|upgrade|rollback|delete`, set the parameter `privateCluster=true`
 
-Note: With the set parameter `privateCluster=true`, you need to use the image set in the `job.image.repository` parameter, in which `curl` and `psql` will be installed, The image  must also be run either from `root` or from `UID=101`.
+Note: With the set parameter `privateCluster=true`, you need to use the image set in the `job.image.repository` parameter, in which `curl` and `psql` will be installed. The image  must also be run either from `root` or from `UID=101`.
 
 ## Using Grafana to visualize metrics (optional)
 
