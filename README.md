@@ -715,7 +715,7 @@ To rollback updates, run the following command:
 $ helm rollback documentserver
 ```
 
-Note: When rollback ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When rolling back ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
@@ -751,7 +751,7 @@ $ kubectl delete pod converter-*** docservice-***
 ### 10. Run Jobs in a private k8s cluster (optional)
 
 When running `Job` for installation, update, rollback and deletion, the container being launched needs Internet access to download the latest sql scripts.
-If the access of containers to the external network is prohibited in your k8s cluster, then you can perform these `Job` by setting the `privateCluster=true` parameter and manually create a `ConfigMap` with the necessary sql scripts.
+If the access of containers to the external network is prohibited in your k8s cluster, then you can perform these Jobs by setting the `privateCluster=true` parameter and manually create a `ConfigMap` with the necessary sql scripts.
 
 To do this, run the following commands:
 
