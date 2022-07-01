@@ -338,7 +338,7 @@ $ helm delete documentserver --no-hooks
 
 The `helm delete` command removes all the Kubernetes components associated with the chart and deletes the release.
 
-Note: When deleting `ONLYOFFICE Docs` in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When deleting ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 ### 4. Parameters
 
@@ -701,7 +701,7 @@ The execution time can be changed using --timeout [time], for example
 $ helm upgrade documentserver -f values.yaml onlyoffice/docs --timeout 15m
 ```
 
-Note: When upgrading `ONLYOFFICE Docs` in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When upgrading ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without `hooks`, for example:
 
@@ -715,7 +715,7 @@ To rollback updates, run the following command:
 $ helm rollback documentserver
 ```
 
-Note: When rollback `ONLYOFFICE Docs` in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When rollback ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
@@ -752,6 +752,7 @@ $ kubectl delete pod converter-*** docservice-***
 
 When running `Job` for installation, update, rollback and deletion, the container being launched needs Internet access to download the latest sql scripts.
 If the access of containers to the external network is prohibited in your k8s cluster, then you can perform these `Job` by setting the `privateCluster=true` parameter and manually create a `ConfigMap` with the necessary sql scripts.
+
 To do this, run the following commands:
 
 If your cluster already has `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
