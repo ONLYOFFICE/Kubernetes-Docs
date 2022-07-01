@@ -44,6 +44,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
+  * [10. Run Jobs in a private k8s cluster (optional)](#10-run-jobs-in-a-private-k8s-cluster-optional)
 - [Using Grafana to visualize metrics (optional)](#using-grafana-to-visualize-metrics-optional)
   * [1. Deploy Grafana](#1-deploy-grafana)
     + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
@@ -310,7 +311,9 @@ To deploy DocumentServer with the release name `documentserver`:
 $ helm install documentserver onlyoffice/docs
 ```
 
-The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
+The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The [Parameters](#4-parameters) section lists the parameters that can be configured during installation.
+
+Note: When installing ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 ### 3. Uninstall ONLYOFFICE Docs
 
@@ -334,6 +337,8 @@ $ helm delete documentserver --no-hooks
 ```
 
 The `helm delete` command removes all the Kubernetes components associated with the chart and deletes the release.
+
+Note: When deleting ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 ### 4. Parameters
 
@@ -696,7 +701,9 @@ The execution time can be changed using --timeout [time], for example
 $ helm upgrade documentserver -f values.yaml onlyoffice/docs --timeout 15m
 ```
 
-If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without hooks, for example:
+Note: When upgrading ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+
+If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without `hooks`, for example:
 
 ```bash
 $ helm upgrade documentserver onlyoffice/docs --set jwt.enabled=false --no-hooks
@@ -707,6 +714,8 @@ To rollback updates, run the following command:
 ```bash
 $ helm rollback documentserver
 ```
+
+Note: When rolling back ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
@@ -738,6 +747,41 @@ $ kubectl create secret generic license --from-file=path/to/license.lic
 ```bash
 $ kubectl delete pod converter-*** docservice-***
 ```
+
+### 10. Run Jobs in a private k8s cluster (optional)
+
+When running `Job` for installation, update, rollback and deletion, the container being launched needs Internet access to download the latest sql scripts.
+If the access of containers to the external network is prohibited in your k8s cluster, then you can perform these Jobs by setting the `privateCluster=true` parameter and manually create a `ConfigMap` with the necessary sql scripts.
+
+To do this, run the following commands:
+
+If your cluster already has `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
+
+```bash
+$ kubectl delete cm remove-db-scripts init-db-scripts
+```
+
+Download the ONLYOFFICE Docs database scripts for database cleaning and database tables creating:
+
+```bash
+$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
+$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+```
+
+Create a configmap from them:
+
+```bash
+$ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
+$ kubectl create configmap init-db-scripts --from-file=./createdb.sql
+```
+
+Note: If you specified a different name for `ConfigMap` and for the file from which it is created, set the appropriate parameters for the corresponding Jobs:
+ - `existingConfigmap.tblRemove.name` and `existingConfigmap.tblRemove.keyName` for scripts for database cleaning
+ - `existingConfigmap.tblCreate.name` and `existingConfigmap.tblCreate.keyName` for scripts for database tables creating
+
+Next, when executing the commands `helm install|upgrade|rollback|delete`, set the parameter `privateCluster=true`
+
+Note: With the set parameter `privateCluster=true`, you need to use the image set in the `job.image.repository` parameter, in which `curl` and `psql` will be installed. The image  must also be run either from `root` or from `UID=101`.
 
 ## Using Grafana to visualize metrics (optional)
 
