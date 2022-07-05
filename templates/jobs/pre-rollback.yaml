@@ -36,25 +36,14 @@ spec:
         - name: pre-rollback
           image: {{ .Values.rollback.job.image.repository }}:{{ .Values.rollback.job.image.tag }}
           imagePullPolicy: {{ .Values.rollback.job.image.pullPolicy }}
-          envFrom:
-          - configMapRef:
-              name: documentserver
           env:
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
                 name: {{ template "ds.postgresql.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
-          - name: PRODUCT_NAME
-            value: {{ .Values.product.name }}
           - name: PRIVATE_CLUSTER
             value: {{ .Values.privateCluster | quote }}
-          {{- if and .Values.privateCluster (not .Values.rollback.existingConfigmap.dsStop) }}
-          - name: REMOVE_SCRIPT
-            value: {{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
-          - name: CREATE_SCRIPT
-            value: {{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
-          {{- end }}
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files

@@ -38,10 +38,6 @@ spec:
                 key: {{ .Values.connections.dbSecretKeyName }}
           - name: PRIVATE_CLUSTER
             value: {{ .Values.privateCluster | quote }}
-          {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
-          - name: CREATE_SCRIPT
-            value: {{ .Values.install.existingConfigmap.tblCreate.keyName }}
-          {{- end }}
           volumeMounts:
           - name: initdb-scripts
             mountPath: /sql/initdb.sh

@@ -43,7 +43,7 @@ metrics:
 
 example:
   enabled: false
-  containerImage: onlyoffice/docs-example:7.1.1-1
+  containerImage: onlyoffice/docs-example:7.1.1-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -102,7 +102,7 @@ docservice:
       port: 8000
     failureThreshold: 30
     periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:7.1.1-1
+  containerImage: onlyoffice/docs-docservice-de:7.1.1-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -173,7 +173,7 @@ proxy:
       port: 8888
     failureThreshold: 30
     periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-1
+  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -190,7 +190,7 @@ converter:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:7.1.1-1
+  containerImage: onlyoffice/docs-converter-de:7.1.1-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -291,13 +291,16 @@ securityContext:
     runAsUser: 1001
     runAsGroup: 1001
 
+sqlScripts:
+  branchName: master
+
 privateCluster: false
 
 install:
   job:
     image:
-      repository: postgres
-      tag: latest
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-2
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblCreate:
@@ -308,8 +311,8 @@ install:
 upgrade:
   job:
     image:
-      repository: postgres
-      tag: latest
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-2
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
@@ -323,8 +326,8 @@ upgrade:
 rollback:
   job:
     image:
-      repository: postgres
-      tag: latest
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-2
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
@@ -338,8 +341,8 @@ rollback:
 delete:
   job:
     image:
-      repository: postgres
-      tag: latest
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-2
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
