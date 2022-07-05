@@ -10,6 +10,8 @@
 ### Changes
 
 * Changed the algorithm in the deletion script, which is executed in `Job` `pre-delete`
+* Changed the image for the Jobs, which includes the utilities necessary for execution
+* Changed the scripts executed by Jobs, taking into account the image change
 
 ## 1.0.1
 
