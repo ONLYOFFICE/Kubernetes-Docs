@@ -59,5 +59,9 @@ spec:
             subPath: {{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
           {{- end }}
           command: ["/bin/sh", "-c"]
+          {{- if .Values.webProxy.enabled }}
+          args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy=localhost,127.0.0.1,docservice /sql/stop.sh"]
+          {{ else }}
           args: ["/sql/stop.sh"]
+          {{- end }}
       restartPolicy: Never

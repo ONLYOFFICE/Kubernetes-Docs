@@ -1,6 +1,11 @@
 product:
   name: onlyoffice
 
+webProxy:
+  enabled: false
+  http: "http://proxy.example.com"
+  https: "https://proxy.example.com"  
+
 connections:
   dbHost: postgresql
   dbUser: postgres
