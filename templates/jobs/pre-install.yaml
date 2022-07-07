@@ -48,5 +48,9 @@ spec:
             subPath: {{ .Values.install.existingConfigmap.tblCreate.keyName }}
           {{- end }}
           command: ["/bin/sh", "-c"]
+          {{- if .Values.webProxy.enabled }}
+          args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /sql/initdb.sh"]
+          {{ else }}
           args: ["/sql/initdb.sh"]
+          {{- end }}
       restartPolicy: Never
