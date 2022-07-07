@@ -313,7 +313,7 @@ $ helm install documentserver onlyoffice/docs
 
 The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The [Parameters](#4-parameters) section lists the parameters that can be configured during installation.
 
-Note: When installing ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When installing ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 ### 3. Uninstall ONLYOFFICE Docs
 
@@ -330,6 +330,8 @@ The default hook execution time is 300s. The execution time can be changed using
 $ helm delete documentserver --timeout 25m
 ```
 
+Note: When deleting ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+
 If you want to delete the documentserver without any preparatory actions, run the following command:
 
 ```bash
@@ -337,8 +339,6 @@ $ helm delete documentserver --no-hooks
 ```
 
 The `helm delete` command removes all the Kubernetes components associated with the chart and deletes the release.
-
-Note: When deleting ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 ### 4. Parameters
 
@@ -452,7 +452,11 @@ Note: When deleting ONLYOFFICE Docs in a private k8s cluster, see the [notes](#1
 | `securityContext.docservice.runAsGroup`                     | Group ID for the Docservice pods                                                                                                                                               | `101`                                                                                     |
 | `securityContext.example.runAsUser`                         | User ID for the Example pod                                                                                                                                                    | `1001`                                                                                    |
 | `securityContext.example.runAsGroup`                        | Group ID for the Example pod                                                                                                                                                   | `1001`                                                                                    |
-| `privateCluster`                                            | Specify whether the k8s cluster is used in a closed network without internet access                                                                                            | `false`                                                                                   |
+| `webProxy.enabled`                                          | Specify whether a Web proxy is used in your network to access the Pods of k8s cluster to the Internet                                                                          | `false`                                                                                   |
+| `webProxy.http`                                             | Web Proxy address for `HTTP` traffic                                                                                                                                           | `http://proxy.example.com`                                                                |
+| `webProxy.https`                                            | Web Proxy address for `HTTPS` traffic                                                                                                                                          | `https://proxy.example.com`                                                               |
+| `webProxy.noProxy`                                          | Patterns for IP addresses or k8s services name or domain names that shouldn’t use the Web Proxy                                                                                | `localhost,127.0.0.1,docservice`                                                          |
+| `privateCluster`                                            | Specify whether the k8s cluster is used in a private network without internet access                                                                                           | `false`                                                                                   |
 | `upgrade.job.image.repository`                              | Job by upgrade image repository                                                                                                                                                | `onlyoffice/docs-utils`                                                                   |
 | `upgrade.job.image.tag`                                     | Job by upgrade image tag                                                                                                                                                       | `7.1.1-2`                                                                                 |
 | `upgrade.job.image.pullPolicy`                              | Job by upgrade image pull policy                                                                                                                                               | `IfNotPresent`                                                                            |
@@ -701,7 +705,7 @@ The execution time can be changed using --timeout [time], for example
 $ helm upgrade documentserver -f values.yaml onlyoffice/docs --timeout 15m
 ```
 
-Note: When upgrading ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When upgrading ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without `hooks`, for example:
 
@@ -715,7 +719,7 @@ To rollback updates, run the following command:
 $ helm rollback documentserver
 ```
 
-Note: When rolling back ONLYOFFICE Docs in a private k8s cluster, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When rolling back ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
@@ -780,6 +784,8 @@ Note: If you specified a different name for `ConfigMap` and for the file from wh
  - `existingConfigmap.tblCreate.name` and `existingConfigmap.tblCreate.keyName` for scripts for database tables creating
 
 Next, when executing the commands `helm install|upgrade|rollback|delete`, set the parameter `privateCluster=true`
+
+  > **Note**: If it is possible to use a Web Proxy in your network to ensure the Pods containers have access to the Internet, then you can leave the parameter `privateCluster=false` and set the parameter `webProxy.enabled=true`, also setting the appropriate parameters for the Web Proxy.
 
 ## Using Grafana to visualize metrics (optional)
 

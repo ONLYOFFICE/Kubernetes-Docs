@@ -294,6 +294,12 @@ securityContext:
 sqlScripts:
   branchName: master
 
+webProxy:
+  enabled: false
+  http: "http://proxy.example.com"
+  https: "https://proxy.example.com"
+  noProxy: "localhost,127.0.0.1,docservice"
+
 privateCluster: false
 
 install:
