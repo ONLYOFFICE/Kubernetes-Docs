@@ -785,7 +785,7 @@ Note: If you specified a different name for `ConfigMap` and for the file from wh
 
 Next, when executing the commands `helm install|upgrade|rollback|delete`, set the parameter `privateCluster=true`
 
-  > **Note**: If it is possible to use a Web Proxy in your network to ensure the Pods containers have access to the Internet, then you can leave the parameter `privateCluster=false` and set the parameter `webProxy.enabled=true`, also setting the appropriate parameters for the Web Proxy.
+  > **Note**: If it is possible to use a Web Proxy in your network to ensure the Pods containers have access to the Internet, then you can leave the parameter `privateCluster=false`, not manually create a configmaps with sql scripts and set the parameter `webProxy.enabled=true`, also setting the appropriate parameters for the Web Proxy.
 
 ## Using Grafana to visualize metrics (optional)
 

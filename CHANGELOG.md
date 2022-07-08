@@ -6,6 +6,7 @@
 
 * Added the ability to perform Jobs: `pre-upgrade`, `pre-rollback` and `pre-delete` in private k8s cluster
 * Added `Job` `pre-install` (with support for execution in private cluster) to initialize the database before starting ONLYOFFICE Docs
+* Added the ability to run ONLYOFFICE Docs in a private k8s cluster behind a Web Proxy
 
 ### Changes
 
