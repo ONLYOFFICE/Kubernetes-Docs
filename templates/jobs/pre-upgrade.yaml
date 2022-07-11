@@ -1,11 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pre-rollback
+  name: pre-upgrade
   annotations:
-    "helm.sh/hook": pre-rollback
+    "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "3"
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded,hook-failed
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 2
   template:
@@ -22,20 +22,20 @@ spec:
             claimName: {{ template "ds.pvc.name" . }}
         - name: stop-scripts
           configMap:
-            name: {{ template "ds.rollback.configMapName" . }}
+            name: {{ template "ds.upgrade.configMapName" . }}
             defaultMode: 0755
-        {{- if and .Values.privateCluster (not .Values.rollback.existingConfigmap.dsStop) }}
+        {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
         - name: remove-dt-scripts
           configMap:
-            name: {{ template "ds.rollback.configmap.tblRemove.name" . }}
+            name: {{ template "ds.upgrade.configmap.tblRemove.name" . }}
         - name: create-dt-scripts
           configMap:
-            name: {{ template "ds.rollback.configmap.tblCreate.name" . }}
+            name: {{ template "ds.upgrade.configmap.tblCreate.name" . }}
         {{- end }}
       containers:
-        - name: pre-rollback
-          image: {{ .Values.rollback.job.image.repository }}:{{ .Values.rollback.job.image.tag }}
-          imagePullPolicy: {{ .Values.rollback.job.image.pullPolicy }}
+        - name: pre-upgrade
+          image: {{ .Values.upgrade.job.image.repository }}:{{ .Values.upgrade.job.image.tag }}
+          imagePullPolicy: {{ .Values.upgrade.job.image.pullPolicy }}
           env:
           - name: DB_PWD
             valueFrom:
@@ -50,18 +50,18 @@ spec:
           - name: stop-scripts
             mountPath: /sql/stop.sh
             subPath: stop.sh
-          {{- if and .Values.privateCluster (not .Values.rollback.existingConfigmap.dsStop) }}
+          {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
           - name: remove-dt-scripts
-            mountPath: /sql/{{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
-            subPath: {{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
+            mountPath: /sql/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+            subPath: {{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
           - name: create-dt-scripts
-            mountPath: /sql/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
-            subPath: {{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
+            mountPath: /sql/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+            subPath: {{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
           {{- end }}
           command: ["/bin/sh", "-c"]
           {{- if .Values.webProxy.enabled }}
           args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /sql/stop.sh"]
           {{ else }}
           args: ["/sql/stop.sh"]
-          {{- end }}
+          {{- end }}          
       restartPolicy: Never

@@ -1,11 +1,12 @@
-{{- if eq (include "ds.rollback.createConfigMap" .) "true" }}
+{{- if eq (include "ds.delete.createConfigMap" .) "true" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: pre-rollback
+  name: pre-delete
   annotations:
-    "helm.sh/hook": pre-rollback
+    "helm.sh/hook": pre-delete
     "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 data:
   stop.sh: |-
     #!/bin/bash
@@ -35,18 +36,12 @@ data:
       esac
     done
     if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
-      wget -O /sql/{{ .Values.rollback.existingConfigmap.tblRemove.keyName }} \
+      wget -O /sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }} \
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ .Values.sqlScripts.branchName }}/schema/postgresql/removetbl.sql
-      wget -O /sql/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }} \
-        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ .Values.sqlScripts.branchName }}/schema/postgresql/createdb.sql
     fi
     PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} \
-      --file=/sql/{{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
-    PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
-      --user={{ .Values.connections.dbUser }} \
-      --dbname={{ .Values.connections.dbName }} \
-      --file=/sql/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
+      --file=/sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
     echo work done
 {{- end }}

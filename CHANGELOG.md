@@ -1,5 +1,19 @@
 # Change log
 
+## 1.1.0
+
+### New Features
+
+* Added the ability to perform Jobs: `pre-upgrade`, `pre-rollback` and `pre-delete` in private k8s cluster
+* Added `Job` `pre-install` (with support for execution in private cluster) to initialize the database before starting ONLYOFFICE Docs
+* Added the ability to run ONLYOFFICE Docs in a private k8s cluster behind a Web Proxy
+
+### Changes
+
+* Changed the algorithm in the deletion script, which is executed in `Job` `pre-delete`
+* Changed the image for the Jobs, which includes the utilities necessary for execution
+* Changed the scripts executed by Jobs, taking into account the image change
+
 ## 1.0.1
 
 ### New Features

@@ -43,7 +43,7 @@ metrics:
 
 example:
   enabled: false
-  containerImage: onlyoffice/docs-example:7.1.1-1
+  containerImage: onlyoffice/docs-example:7.1.1-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -102,7 +102,7 @@ docservice:
       port: 8000
     failureThreshold: 30
     periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:7.1.1-1
+  containerImage: onlyoffice/docs-docservice-de:7.1.1-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -173,7 +173,7 @@ proxy:
       port: 8888
     failureThreshold: 30
     periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-1
+  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -190,7 +190,7 @@ converter:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:7.1.1-1
+  containerImage: onlyoffice/docs-converter-de:7.1.1-2
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -290,3 +290,68 @@ securityContext:
   example:
     runAsUser: 1001
     runAsGroup: 1001
+
+sqlScripts:
+  branchName: master
+
+webProxy:
+  enabled: false
+  http: "http://proxy.example.com"
+  https: "https://proxy.example.com"
+  noProxy: "localhost,127.0.0.1,docservice"
+
+privateCluster: false
+
+install:
+  job:
+    image:
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-2
+      pullPolicy: IfNotPresent
+  existingConfigmap:
+    tblCreate:
+      name: init-db-scripts
+      keyName: createdb.sql
+    initdb: ""
+
+upgrade:
+  job:
+    image:
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-2
+      pullPolicy: IfNotPresent
+  existingConfigmap:
+    tblRemove:
+      name: remove-db-scripts
+      keyName: removetbl.sql
+    tblCreate:
+      name: init-db-scripts
+      keyName: createdb.sql
+    dsStop: ""
+
+rollback:
+  job:
+    image:
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-2
+      pullPolicy: IfNotPresent
+  existingConfigmap:
+    tblRemove:
+      name: remove-db-scripts
+      keyName: removetbl.sql
+    tblCreate:
+      name: init-db-scripts
+      keyName: createdb.sql
+    dsStop: ""
+
+delete:
+  job:
+    image:
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-2
+      pullPolicy: IfNotPresent
+  existingConfigmap:
+    tblRemove:
+      name: remove-db-scripts
+      keyName: removetbl.sql
+    dsStop: ""

@@ -1,0 +1,58 @@
+{{- if eq (include "ds.upgrade.createConfigMap" .) "true" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pre-upgrade
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+data:
+  stop.sh: |-
+    #!/bin/bash
+    curlout="$(curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s)"
+    if [[ "${curlout}" != "true" ]]; then
+      echo -e "\e[0;31m The server could not be disabled \e[0m"
+      exit 1
+    else
+      PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+        --user={{ .Values.connections.dbUser }} \
+        --dbname={{ .Values.connections.dbName }} -c "\dt" > /dev/null
+      if [ $? -ne 0 ]; then
+        echo -e "\e[0;31m DB is not available \e[0m"
+        exit 1
+      fi
+      FILES_DIR=/var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files/
+      ls $FILES_DIR > /dev/null
+      if [ $? -ne 0 ]; then
+        echo -e "\e[0;31m Error accessing the $FILES_DIR directory \e[0m"
+        exit 1
+      fi
+      for ENTRY in `ls $FILES_DIR`; do
+        case $ENTRY in
+          errors)
+            ;;
+          forgotten)
+            ;;
+          *)
+            rm -rfv $FILES_DIR$ENTRY
+            ;;
+        esac
+      done
+      if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
+        wget -O /sql/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }} \
+          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ .Values.sqlScripts.branchName }}/schema/postgresql/removetbl.sql
+        wget -O /sql/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }} \
+          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ .Values.sqlScripts.branchName }}/schema/postgresql/createdb.sql
+      fi
+      PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+        --user={{ .Values.connections.dbUser }} \
+        --dbname={{ .Values.connections.dbName }} \
+        --file=/sql/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+      PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+        --user={{ .Values.connections.dbUser }} \
+        --dbname={{ .Values.connections.dbName }} \
+        --file=/sql/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+      echo work done
+    fi
+{{- end }}
