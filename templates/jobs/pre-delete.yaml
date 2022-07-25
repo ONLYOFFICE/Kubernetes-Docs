@@ -1,3 +1,4 @@
+{{- if .Values.delete.job.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -59,3 +60,4 @@ spec:
           args: ["/sql/stop.sh"]
           {{- end }}          
       restartPolicy: Never
+{{- end }}

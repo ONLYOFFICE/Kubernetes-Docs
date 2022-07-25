@@ -333,6 +333,7 @@ upgrade:
 
 rollback:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-2
@@ -348,6 +349,7 @@ rollback:
 
 delete:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-2
