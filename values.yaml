@@ -304,6 +304,7 @@ privateCluster: false
 
 install:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-2
@@ -316,6 +317,7 @@ install:
 
 upgrade:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-2
@@ -331,6 +333,7 @@ upgrade:
 
 rollback:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-2
@@ -346,6 +349,7 @@ rollback:
 
 delete:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-2

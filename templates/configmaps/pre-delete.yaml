@@ -1,4 +1,4 @@
-{{- if eq (include "ds.delete.createConfigMap" .) "true" }}
+{{- if and (eq (include "ds.delete.createConfigMap" .) "true") .Values.delete.job.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
