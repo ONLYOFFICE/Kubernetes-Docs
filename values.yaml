@@ -43,8 +43,11 @@ metrics:
 
 example:
   enabled: false
+  podAnnotations:
+    rollme: "{{ randAlphaNum 5 | quote }}"
   containerImage: onlyoffice/docs-example:7.1.1-2
   imagePullPolicy: IfNotPresent
+  dsUrl: "/"
   resources:
     ##Example:
     ##requests:

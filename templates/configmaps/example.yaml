@@ -4,5 +4,5 @@ kind: ConfigMap
 metadata:
   name: example
 data:
-  DS_URL: /
+  DS_URL: {{ .Values.example.dsUrl }}
 {{ end }}
