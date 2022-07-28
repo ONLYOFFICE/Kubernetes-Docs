@@ -35,6 +35,9 @@ log:
   type: pattern
   pattern: "[%d] [%p] %c - %.10000m"
 
+wopi:
+  enabled: false
+
 metrics:
   enabled: false
   host: statsd-exporter-prometheus-statsd-exporter
@@ -43,7 +46,7 @@ metrics:
 
 example:
   enabled: false
-  containerImage: onlyoffice/docs-example:7.1.1-2
+  containerImage: onlyoffice/docs-example:7.1.1-4
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -102,7 +105,7 @@ docservice:
       port: 8000
     failureThreshold: 30
     periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:7.1.1-2
+  containerImage: onlyoffice/docs-docservice-de:7.1.1-4
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -173,7 +176,7 @@ proxy:
       port: 8888
     failureThreshold: 30
     periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-2
+  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-4
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -190,7 +193,7 @@ converter:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:7.1.1-2
+  containerImage: onlyoffice/docs-converter-de:7.1.1-4
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -307,7 +310,7 @@ install:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-2
+      tag: 7.1.1-4
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblCreate:
@@ -320,7 +323,7 @@ upgrade:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-2
+      tag: 7.1.1-4
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
@@ -336,7 +339,7 @@ rollback:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-2
+      tag: 7.1.1-4
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
@@ -352,7 +355,7 @@ delete:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-2
+      tag: 7.1.1-4
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
