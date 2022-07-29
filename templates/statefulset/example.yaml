@@ -1,4 +1,4 @@
-{{ if .Values.example.enabled }}
+{{- if .Values.example.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -25,11 +25,11 @@ spec:
         {{- end }}
       {{- end }}
     spec:
-      {{ if .Values.securityContext.enabled }}
+      {{- if .Values.securityContext.enabled }}
       securityContext:
         runAsUser: {{ .Values.securityContext.example.runAsUser }}
         runAsGroup: {{ .Values.securityContext.example.runAsGroup }}
-      {{ end }}
+      {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
       {{- end }}
@@ -41,11 +41,12 @@ spec:
         image: {{ .Values.example.containerImage | quote }}
         imagePullPolicy: {{ .Values.example.imagePullPolicy }}
         ports:
-          - containerPort: 3000
+        - containerPort: 3000
+          name: http
         resources: {{ toYaml .Values.example.resources | nindent 10 }}
         envFrom:
-          - secretRef:
-              name: {{ template "ds.jwt.secretName" . }}
-          - configMapRef:
-              name: example
-{{ end }}
+        - secretRef:
+            name: {{ template "ds.jwt.secretName" . }}
+        - configMapRef:
+            name: example
+{{- end }}
