@@ -35,6 +35,9 @@ log:
   type: pattern
   pattern: "[%d] [%p] %c - %.10000m"
 
+wopi:
+  enabled: false
+
 metrics:
   enabled: false
   host: statsd-exporter-prometheus-statsd-exporter

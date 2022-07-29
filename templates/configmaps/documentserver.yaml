@@ -26,6 +26,7 @@ data:
   {{ if .Values.example.enabled }}
   EXAMPLE_HOST_PORT: example:3000
   {{ end }}
+  WOPI_ENABLED: {{ .Values.wopi.enabled | quote }}
   {{- if .Values.webProxy.enabled }}
   http_proxy: {{ .Values.webProxy.http | quote }}
   https_proxy: {{ .Values.webProxy.https | quote }}
