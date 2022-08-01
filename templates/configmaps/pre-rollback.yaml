@@ -1,4 +1,4 @@
-{{- if eq (include "ds.rollback.createConfigMap" .) "true" }}
+{{- if and (eq (include "ds.rollback.createConfigMap" .) "true") .Values.rollback.job.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

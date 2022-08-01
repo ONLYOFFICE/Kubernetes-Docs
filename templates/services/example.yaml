@@ -1,15 +1,17 @@
-{{ if .Values.example.enabled }}
+{{- if .Values.example.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
   name: example
-spec:
-  selector:
+  labels:
     app: example
+spec:
   ports:
-    - name: http
-      protocol: TCP
-      port: 3000
-      targetPort: 3000
+  - name: http
+    protocol: TCP
+    port: 3000
+    targetPort: 3000
+  selector:
+    statefulset.kubernetes.io/pod-name: example-0
   type: ClusterIP
-{{ end }}
+{{- end }}

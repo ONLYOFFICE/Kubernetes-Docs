@@ -35,6 +35,9 @@ log:
   type: pattern
   pattern: "[%d] [%p] %c - %.10000m"
 
+wopi:
+  enabled: false
+
 metrics:
   enabled: false
   host: statsd-exporter-prometheus-statsd-exporter
@@ -43,8 +46,11 @@ metrics:
 
 example:
   enabled: false
-  containerImage: onlyoffice/docs-example:7.1.1-2
+  podAnnotations:
+    rollme: "{{ randAlphaNum 5 | quote }}"
+  containerImage: onlyoffice/docs-example:7.1.1-4
   imagePullPolicy: IfNotPresent
+  dsUrl: "/"
   resources:
     ##Example:
     ##requests:
@@ -102,7 +108,7 @@ docservice:
       port: 8000
     failureThreshold: 30
     periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:7.1.1-2
+  containerImage: onlyoffice/docs-docservice-de:7.1.1-4
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -173,7 +179,7 @@ proxy:
       port: 8888
     failureThreshold: 30
     periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-2
+  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-4
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -190,7 +196,7 @@ converter:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:7.1.1-2
+  containerImage: onlyoffice/docs-converter-de:7.1.1-4
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -304,9 +310,10 @@ privateCluster: false
 
 install:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-2
+      tag: 7.1.1-4
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblCreate:
@@ -316,9 +323,10 @@ install:
 
 upgrade:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-2
+      tag: 7.1.1-4
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
@@ -331,9 +339,10 @@ upgrade:
 
 rollback:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-2
+      tag: 7.1.1-4
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
@@ -346,9 +355,10 @@ rollback:
 
 delete:
   job:
+    enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-2
+      tag: 7.1.1-4
       pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:

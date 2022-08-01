@@ -1,5 +1,16 @@
 # Change log
 
+## 1.1.1
+
+### New Features
+
+* Added the ability to disable the run of Jobs
+
+### Fixes
+
+* Fixed errors when connecting via the WOPI protocol
+* Fixed the conversion error in Example
+
 ## 1.1.0
 
 ### New Features
