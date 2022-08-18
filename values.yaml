@@ -310,6 +310,7 @@ privateCluster: false
 
 install:
   job:
+    resources: {}
     enabled: true
     image:
       repository: onlyoffice/docs-utils
@@ -323,6 +324,7 @@ install:
 
 upgrade:
   job:
+    resources: {}
     enabled: true
     image:
       repository: onlyoffice/docs-utils
@@ -339,6 +341,7 @@ upgrade:
 
 rollback:
   job:
+    resources: {}
     enabled: true
     image:
       repository: onlyoffice/docs-utils
@@ -355,6 +358,7 @@ rollback:
 
 delete:
   job:
+    resources: {}
     enabled: true
     image:
       repository: onlyoffice/docs-utils
