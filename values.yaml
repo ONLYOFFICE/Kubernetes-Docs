@@ -293,6 +293,9 @@ securityContext:
   docservice:
     runAsUser: 101
     runAsGroup: 101
+  jobs:
+    runAsUser: 101
+    runAsGroup: 101
   example:
     runAsUser: 1001
     runAsGroup: 1001
