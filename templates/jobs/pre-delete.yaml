@@ -39,6 +39,7 @@ spec:
         - name: pre-delete
           image: {{ .Values.delete.job.image.repository }}:{{ .Values.delete.job.image.tag }}
           imagePullPolicy: {{ .Values.delete.job.image.pullPolicy }}
+          resources: {{- toYaml .Values.delete.job.resources | nindent 12 }}
           env:
           - name: DB_PWD
             valueFrom:
