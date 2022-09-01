@@ -310,7 +310,16 @@ privateCluster: false
 
 install:
   job:
-    resources: {}
+    resources:
+      ##Example:
+      ##requests:
+      ##  memory: "256Mi"
+      ##  cpu: "200m"
+      requests: {}
+      ##limits:
+      ##  memory: "2Gi"
+      ##  cpu: "1000m"
+      limits: {}
     enabled: true
     image:
       repository: onlyoffice/docs-utils
@@ -324,7 +333,16 @@ install:
 
 upgrade:
   job:
-    resources: {}
+    resources:
+      ##Example:
+      ##requests:
+      ##  memory: "256Mi"
+      ##  cpu: "200m"
+      requests: {}
+      ##limits:
+      ##  memory: "2Gi"
+      ##  cpu: "1000m"
+      limits: {}
     enabled: true
     image:
       repository: onlyoffice/docs-utils
@@ -341,7 +359,16 @@ upgrade:
 
 rollback:
   job:
-    resources: {}
+    resources:
+      ##Example:
+      ##requests:
+      ##  memory: "256Mi"
+      ##  cpu: "200m"
+      requests: {}
+      ##limits:
+      ##  memory: "2Gi"
+      ##  cpu: "1000m"
+      limits: {}
     enabled: true
     image:
       repository: onlyoffice/docs-utils
@@ -358,7 +385,16 @@ rollback:
 
 delete:
   job:
-    resources: {}
+    resources:
+      ##Example:
+      ##requests:
+      ##  memory: "256Mi"
+      ##  cpu: "200m"
+      requests: {}
+      ##limits:
+      ##  memory: "2Gi"
+      ##  cpu: "1000m"
+      limits: {}
     enabled: true
     image:
       repository: onlyoffice/docs-utils
