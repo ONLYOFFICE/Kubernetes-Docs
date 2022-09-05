@@ -293,6 +293,9 @@ securityContext:
   docservice:
     runAsUser: 101
     runAsGroup: 101
+  jobs:
+    runAsUser: 101
+    runAsGroup: 101
   example:
     runAsUser: 1001
     runAsGroup: 1001
@@ -315,6 +318,16 @@ install:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-4
       pullPolicy: IfNotPresent
+    resources:
+      ##Example:
+      ##requests:
+      ##  memory: "256Mi"
+      ##  cpu: "200m"
+      requests: {}
+      ##limits:
+      ##  memory: "2Gi"
+      ##  cpu: "1000m"
+      limits: {}
   existingConfigmap:
     tblCreate:
       name: init-db-scripts
@@ -328,6 +341,16 @@ upgrade:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-4
       pullPolicy: IfNotPresent
+    resources:
+      ##Example:
+      ##requests:
+      ##  memory: "256Mi"
+      ##  cpu: "200m"
+      requests: {}
+      ##limits:
+      ##  memory: "2Gi"
+      ##  cpu: "1000m"
+      limits: {}
   existingConfigmap:
     tblRemove:
       name: remove-db-scripts
@@ -344,6 +367,16 @@ rollback:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-4
       pullPolicy: IfNotPresent
+    resources:
+      ##Example:
+      ##requests:
+      ##  memory: "256Mi"
+      ##  cpu: "200m"
+      requests: {}
+      ##limits:
+      ##  memory: "2Gi"
+      ##  cpu: "1000m"
+      limits: {}
   existingConfigmap:
     tblRemove:
       name: remove-db-scripts
@@ -360,6 +393,16 @@ delete:
       repository: onlyoffice/docs-utils
       tag: 7.1.1-4
       pullPolicy: IfNotPresent
+    resources:
+      ##Example:
+      ##requests:
+      ##  memory: "256Mi"
+      ##  cpu: "200m"
+      requests: {}
+      ##limits:
+      ##  memory: "2Gi"
+      ##  cpu: "1000m"
+      limits: {}
   existingConfigmap:
     tblRemove:
       name: remove-db-scripts

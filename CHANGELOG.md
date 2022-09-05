@@ -1,5 +1,11 @@
 # Change log
 
+## 1.1.2
+
+### Fixes
+
+* Fixed running Jobs in an OpenShift cluster
+
 ## 1.1.1
 
 ### New Features
