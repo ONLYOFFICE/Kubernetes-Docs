@@ -313,6 +313,11 @@ privateCluster: false
 
 install:
   job:
+    enabled: true
+    image:
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-4
+      pullPolicy: IfNotPresent
     resources:
       ##Example:
       ##requests:
@@ -323,11 +328,6 @@ install:
       ##  memory: "2Gi"
       ##  cpu: "1000m"
       limits: {}
-    enabled: true
-    image:
-      repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
-      pullPolicy: IfNotPresent
   existingConfigmap:
     tblCreate:
       name: init-db-scripts
@@ -336,6 +336,11 @@ install:
 
 upgrade:
   job:
+    enabled: true
+    image:
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-4
+      pullPolicy: IfNotPresent
     resources:
       ##Example:
       ##requests:
@@ -346,11 +351,6 @@ upgrade:
       ##  memory: "2Gi"
       ##  cpu: "1000m"
       limits: {}
-    enabled: true
-    image:
-      repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
-      pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
       name: remove-db-scripts
@@ -362,6 +362,11 @@ upgrade:
 
 rollback:
   job:
+    enabled: true
+    image:
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-4
+      pullPolicy: IfNotPresent
     resources:
       ##Example:
       ##requests:
@@ -372,11 +377,6 @@ rollback:
       ##  memory: "2Gi"
       ##  cpu: "1000m"
       limits: {}
-    enabled: true
-    image:
-      repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
-      pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
       name: remove-db-scripts
@@ -388,6 +388,11 @@ rollback:
 
 delete:
   job:
+    enabled: true
+    image:
+      repository: onlyoffice/docs-utils
+      tag: 7.1.1-4
+      pullPolicy: IfNotPresent
     resources:
       ##Example:
       ##requests:
@@ -398,11 +403,6 @@ delete:
       ##  memory: "2Gi"
       ##  cpu: "1000m"
       limits: {}
-    enabled: true
-    image:
-      repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
-      pullPolicy: IfNotPresent
   existingConfigmap:
     tblRemove:
       name: remove-db-scripts
