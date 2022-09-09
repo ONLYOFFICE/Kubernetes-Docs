@@ -2,6 +2,7 @@ product:
   name: onlyoffice
 
 connections:
+  dbType: postgres
   dbHost: postgresql
   dbUser: postgres
   dbPort: "5432"

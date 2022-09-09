@@ -3,6 +3,7 @@ kind: ConfigMap
 metadata:
   name: documentserver
 data:
+  DB_TYPE: {{ .Values.connections.dbType }}
   DB_USER: {{ .Values.connections.dbUser }}
   DB_HOST: {{ .Values.connections.dbHost }}
   DB_PORT: {{ .Values.connections.dbPort | quote }}
