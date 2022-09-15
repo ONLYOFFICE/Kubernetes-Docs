@@ -132,7 +132,6 @@ To install Redis to your cluster, run the following command:
 $ helm install redis bitnami/redis \
   --set architecture=standalone \
   --set auth.enabled=false \
-  --set image.tag=5.0.7-debian-10-r51 \
   --set metrics.enabled=false
 ```
 
