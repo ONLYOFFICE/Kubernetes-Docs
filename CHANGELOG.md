@@ -1,5 +1,15 @@
 # Change log
 
+## 1.2.0
+
+### New Features
+
+* Added the ability to use MySQL or MariaDB as a database server
+
+### Changes
+
+* Changed the Redis version
+
 ## 1.1.2
 
 ### Fixes
