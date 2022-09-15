@@ -49,7 +49,7 @@ example:
   enabled: false
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
-  containerImage: onlyoffice/docs-example:7.1.1-4
+  containerImage: onlyoffice/docs-example:7.1.1-5
   imagePullPolicy: IfNotPresent
   dsUrl: "/"
   resources:
@@ -109,7 +109,7 @@ docservice:
       port: 8000
     failureThreshold: 30
     periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:7.1.1-4
+  containerImage: onlyoffice/docs-docservice-de:7.1.1-5
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -180,7 +180,7 @@ proxy:
       port: 8888
     failureThreshold: 30
     periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-4
+  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-5
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -197,7 +197,7 @@ converter:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:7.1.1-4
+  containerImage: onlyoffice/docs-converter-de:7.1.1-5
   imagePullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -317,7 +317,7 @@ install:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
+      tag: 7.1.1-5
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -340,7 +340,7 @@ upgrade:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
+      tag: 7.1.1-5
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -366,7 +366,7 @@ rollback:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
+      tag: 7.1.1-5
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -392,7 +392,7 @@ delete:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
+      tag: 7.1.1-5
       pullPolicy: IfNotPresent
     resources:
       ##Example:
