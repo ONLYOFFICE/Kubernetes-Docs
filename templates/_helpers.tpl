@@ -1,31 +1,44 @@
 {{/*
-Get the PostgreSQL password secret
+Check the DB type
 */}}
-{{- define "ds.postgresql.secretName" -}}
+{{- define "ds.db.type" -}}
+{{- $dbType := .Values.connections.dbType -}}
+{{- $possibleTypes := list "postgres" "mysql" "mariadb" -}}
+{{- if has $dbType $possibleTypes }}
+    {{- $dbType -}}
+{{- else -}}
+    {{- fail "You have specified an unsupported DB type!" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the DB password secret
+*/}}
+{{- define "ds.db.secretName" -}}
 {{- if .Values.connections.dbPassword -}}
-    {{- printf "%s-postgresql" .Release.Name -}}
+    {{- printf "%s-db" .Release.Name -}}
 {{- else if .Values.connections.dbExistingSecret -}}
     {{- printf "%s" (tpl .Values.connections.dbExistingSecret $) -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Return true if a secret object should be created for PostgreSQL
+Return true if a secret object should be created for DB
 */}}
-{{- define "ds.postgresql.createSecret" -}}
+{{- define "ds.db.createSecret" -}}
 {{- if or .Values.connections.dbPassword (not .Values.connections.dbExistingSecret) -}}
     {{- true -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Return PostgreSQL password
+Return DB password
 */}}
-{{- define "ds.postgresql.password" -}}
+{{- define "ds.db.password" -}}
 {{- if not (empty .Values.connections.dbPassword) }}
     {{- .Values.connections.dbPassword }}
 {{- else }}
-    {{- required "A PostgreSQL Password is required!" .Values.connections.dbPassword }}
+    {{- required "A DB Password is required!" .Values.connections.dbPassword }}
 {{- end }}
 {{- end -}}
 

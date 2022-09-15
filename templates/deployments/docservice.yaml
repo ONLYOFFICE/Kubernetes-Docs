@@ -131,7 +131,7 @@ spec:
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
-                name: {{ template "ds.postgresql.secretName" . }}
+                name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
           - name: AMQP_PWD
             valueFrom:

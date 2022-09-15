@@ -9,7 +9,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [2. Install Persistent Storage](#2-install-persistent-storage)
   * [3. Deploy RabbitMQ](#3-deploy-rabbitmq)
   * [4. Deploy Redis](#4-deploy-redis)
-  * [5. Deploy PostgreSQL](#5-deploy-postgresql)
+  * [5. Deploy Database](#5-deploy-database)
   * [6. Deploy StatsD exporter](#6-deploy-statsd-exporter)
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
     + [6.2 Installing Prometheus](#62-installing-prometheus)
@@ -140,7 +140,11 @@ Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gath
 
 See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/redis).
 
-### 5. Deploy PostgreSQL
+### 5. Deploy Database
+
+As a database server, you can use PostgreSQL, MySQL or MariaDB
+
+**If PostgreSQL is selected as the database server, then follow these steps**
 
 Download the ONLYOFFICE Docs database scheme:
 
@@ -164,13 +168,40 @@ $ helm install postgresql bitnami/postgresql \
   --set metrics.enabled=false
 ```
 
-Here `PERSISTENT_SIZE` is a size for the PostgreSQL persistent volume. For example: `8Gi`.
+See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
+
+**If MySQL is selected as the database server, then follow these steps**
+
+Download the ONLYOFFICE Docs database scheme:
+
+```bash
+wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/createdb.sql
+```
+
+Create a configmap from it:
+
+```bash
+$ kubectl create configmap init-db-scripts \
+  --from-file=./createdb.sql
+```
+
+To install MySQL to your cluster, run the following command:
+
+```
+$ helm install mysql bitnami/mysql \
+  --set auth.database=onlyoffice \
+  --set auth.username=onlyoffice \
+  --set primary.persistence.size=PERSISTENT_SIZE \
+  --set metrics.enabled=false
+```
+
+See more details about installing MySQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/mysql).
+
+Here `PERSISTENT_SIZE` is a size for the Database persistent volume. For example: `8Gi`.
 
 It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
 
-Note: Set the `metrics.enabled=true` to enable exposing PostgreSQL metrics to be gathered by Prometheus.
-
-See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
+Note: Set the `metrics.enabled=true` to enable exposing Database metrics to be gathered by Prometheus.
 
 ### 6. Deploy StatsD exporter
 
@@ -345,13 +376,14 @@ The `helm delete` command removes all the Kubernetes components associated with 
 
 | Parameter                                                   | Description                                                                                                                                                                    | Default                                                                                   |
 |-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| `connections.dbHost`                                        | The IP address or the name of the PostgreSQL host                                                                                                                              | `postgresql`                                                                              |
+| `connections.dbType`                                        | The database type. Possible values are `postgres`, `mariadb` or `mysql`                                                                                                        | `postgres`                                                                                |
+| `connections.dbHost`                                        | The IP address or the name of the Database host                                                                                                                                | `postgresql`                                                                              |
 | `connections.dbUser`                                        | Database user                                                                                                                                                                  | `postgres`                                                                                |
-| `connections.dbPort`                                        | PostgreSQL server port number                                                                                                                                                  | `5432`                                                                                    |
-| `connections.dbName`                                        | Name of the PostgreSQL database to which the application will connect                                                                                                          | `postgres`                                                                                |
-| `connections.dbPassword`                                    | PostgreSQL user password. If set to, it takes priority over the `connections.dbExistingSecret`                                                                                 | `""`                                                                                      |
-| `connections.dbSecretKeyName`                               | The name of the key that contains the PostgreSQL user password                                                                                                                 | `postgres-password`                                                                       |
-| `connections.dbExistingSecret`                              | Name of existing secret to use for PostgreSQL passwords. Must contain the key specified in `connections.dbSecretKeyName`                                                       | `postgresql`                                                                              |
+| `connections.dbPort`                                        | Database server port number                                                                                                                                                    | `5432`                                                                                    |
+| `connections.dbName`                                        | Name of the Database database the application will be connected with                                                                                                           | `postgres`                                                                                |
+| `connections.dbPassword`                                    | Database user password. If set to, it takes priority over the `connections.dbExistingSecret`                                                                                   | `""`                                                                                      |
+| `connections.dbSecretKeyName`                               | The name of the key that contains the Database user password                                                                                                                   | `postgres-password`                                                                       |
+| `connections.dbExistingSecret`                              | Name of existing secret to use for Database passwords. Must contain the key specified in `connections.dbSecretKeyName`                                                         | `postgresql`                                                                              |
 | `connections.redistHost`                                    | The IP address or the name of the Redis host                                                                                                                                   | `redis-master`                                                                            |
 | `connections.redisPort`                                     | The Redis server port number                                                                                                                                                   | `6379`                                                                                    |
 | `connections.amqpType`                                      | Defines the AMQP server type. Possible values are `rabbitmq` or `activemq`                                                                                                     | `rabbitmq`                                                                                |
@@ -785,9 +817,18 @@ $ kubectl delete cm remove-db-scripts init-db-scripts
 
 Download the ONLYOFFICE Docs database scripts for database cleaning and database tables creating:
 
+If PostgreSQL is selected as the database server:
+
 ```bash
 $ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
 $ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+```
+
+If MySQL is selected as the database server:
+
+```bash
+$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/removetbl.sql
+$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/createdb.sql
 ```
 
 Create a configmap from them:
