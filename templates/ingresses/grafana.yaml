@@ -10,18 +10,18 @@ metadata:
     {{- end }}
 {{- end }}
 spec:
-  {{ if .Values.ingress.ssl.enabled }}
+  {{- if .Values.ingress.ssl.enabled }}
   tls:
   - hosts:
     - {{ .Values.ingress.host }}
     secretName: {{ .Values.ingress.ssl.secret }}
-  {{ end }}
+  {{- end }}
   rules:
-  {{ if .Values.ingress.host }}
+  {{- if .Values.ingress.host }}
   - host: {{ .Values.ingress.host }}
-  {{ else }}
+  {{- else }}
   - host:
-  {{ end }}
+  {{- end }}
     http:
       paths:
       - path: /grafana/

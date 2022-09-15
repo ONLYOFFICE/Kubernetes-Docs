@@ -5,7 +5,7 @@ metadata:
   labels:
     app: converter
 spec:
-  {{ if not .Values.converter.autoscaling.enabled }}
+  {{- if not .Values.converter.autoscaling.enabled }}
   replicas: {{ .Values.converter.replicas }}
   {{- end }}
   selector:
@@ -22,11 +22,11 @@ spec:
         {{- end }}
     {{- end }}
     spec:
-      {{ if .Values.securityContext.enabled }}
+      {{- if .Values.securityContext.enabled }}
       securityContext:
         runAsUser: {{ .Values.securityContext.converter.runAsUser }}
         runAsGroup: {{ .Values.securityContext.converter.runAsGroup }}
-      {{ end }}
+      {{- end }}
       affinity:
         podAntiAffinity:
         {{- if eq .Values.antiAffinity.type "soft" }}
@@ -68,16 +68,16 @@ spec:
           secret:
             secretName: {{ template "ds.license.secretName" . }}
           {{- end }}
-        {{ if .Values.extraConf.configMap }}
+        {{- if .Values.extraConf.configMap }}
         - name: custom-file
           configMap:
             name: {{ .Values.extraConf.configMap }}
-        {{ end }}
-        {{ if .Values.extraThemes.configMap }}
+        {{- end }}
+        {{- if .Values.extraThemes.configMap }}
         - name: custom-themes
           configMap:
             name: {{ .Values.extraThemes.configMap }}
-        {{ end }}
+        {{- end }}
       containers:
         - name: converter
           image: {{ .Values.converter.containerImage }}
@@ -107,13 +107,13 @@ spec:
             {{- if not .Values.license.existingClaim }}
             readOnly: true
             {{- end }}
-          {{ if .Values.extraConf.configMap }}
+          {{- if .Values.extraConf.configMap }}
           - name: custom-file
             mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.extraConf.filename }}
             subPath: {{ .Values.extraConf.filename }}
-          {{ end }}
-          {{ if .Values.extraThemes.configMap }}
+          {{- end }}
+          {{- if .Values.extraThemes.configMap }}
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
             subPath: {{ .Values.extraThemes.filename }}
-          {{ end }}
+          {{- end }}
