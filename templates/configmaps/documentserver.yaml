@@ -24,9 +24,9 @@ data:
   LOG_TYPE: {{ .Values.log.type }}
   LOG_PATTERN: {{ .Values.log.pattern | quote }}
   NGINX_GZIP_PROXIED: {{ .Values.proxy.gzipProxied | quote }}
-  {{ if .Values.example.enabled }}
+  {{- if .Values.example.enabled }}
   EXAMPLE_HOST_PORT: example:3000
-  {{ end }}
+  {{- end }}
   WOPI_ENABLED: {{ .Values.wopi.enabled | quote }}
   {{- if .Values.webProxy.enabled }}
   http_proxy: {{ .Values.webProxy.http | quote }}

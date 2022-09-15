@@ -29,7 +29,7 @@ spec:
   {{- end }}
   {{- with .Values.docservice.autoscaling.customMetricsType }}
   {{- toYaml . | nindent 2 }}
-  {{ end }}
+  {{- end }}
   {{- with .Values.docservice.autoscaling.behavior }}
   behavior:
     {{- toYaml . | nindent 4 }}
