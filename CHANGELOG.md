@@ -1,5 +1,11 @@
 # Change log
 
+## 1.1.3
+
+### Fixes
+
+* Fixed the path to sql scripts
+
 ## 1.1.2
 
 ### Fixes

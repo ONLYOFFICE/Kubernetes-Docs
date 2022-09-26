@@ -145,7 +145,7 @@ See more details about installing Redis via Helm [here](https://github.com/bitna
 Download the ONLYOFFICE Docs database scheme:
 
 ```bash
-wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
+wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/v7.1.1.23/schema/postgresql/createdb.sql
 ```
 
 Create a configmap from it:

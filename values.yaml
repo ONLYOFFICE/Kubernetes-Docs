@@ -301,7 +301,7 @@ securityContext:
     runAsGroup: 1001
 
 sqlScripts:
-  branchName: master
+  branchName: v7.1.1.23
 
 webProxy:
   enabled: false
