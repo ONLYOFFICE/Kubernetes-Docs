@@ -10,9 +10,10 @@
 
 ### Changes
 
-* Release [v7.2.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#720) of ONLYOFFICE Docs
-* Changed the Redis version
+* Released [v7.2.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#720) of ONLYOFFICE Docs
 * Changed the syntax and algorithm for processing the following parameters: `Affinity`, `SecurityContext`, `Probes`, `Images`
+* Changed the Redis version
+* Changed the Welcome page
 
 ## 1.1.3
 
