@@ -176,6 +176,7 @@ docservice:
 
 proxy:
   gzipProxied: "off"
+  secureLinkSecret: verysecretstring
   image:
     repository: onlyoffice/docs-proxy-de
     tag: 7.2.0-1
