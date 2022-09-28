@@ -550,8 +550,10 @@ The `helm delete` command removes all the Kubernetes components associated with 
   - Nothing is specified. For the open-source community version
   - `-de`. For commercial Developer Edition
   - `-ee`. For commercial Enterprise Edition
-If you use the community version, there may be problems with co-editing documents.
-The default value of this parameter refers to the ONLYOFFICE Document Server Developer Edition. To learn more about this edition and compare it with other editions, please see the comparison table on [this page](https://github.com/ONLYOFFICE/DocumentServer#onlyoffice-document-server-editions).
+
+  If you use the community version, there may be problems with co-editing documents.
+
+  The default value of this parameter refers to the ONLYOFFICE Document Server Developer Edition. To learn more about this edition and compare it with other editions, please see the comparison table on [this page](https://github.com/ONLYOFFICE/DocumentServer#onlyoffice-document-server-editions).
 
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
