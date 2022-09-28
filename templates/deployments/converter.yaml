@@ -11,6 +11,9 @@ spec:
   selector:
     matchLabels:
       app: converter
+  {{- if .Values.converter.updateStrategy }}
+  strategy: {{- toYaml .Values.converter.updateStrategy | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:
@@ -22,14 +25,12 @@ spec:
         {{- end }}
     {{- end }}
     spec:
-      {{- if .Values.securityContext.enabled }}
-      securityContext:
-        runAsUser: {{ .Values.securityContext.converter.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.converter.runAsGroup }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.converter | nindent 8 }}
       {{- end }}
       affinity:
         podAntiAffinity:
-        {{- if eq .Values.antiAffinity.type "soft" }}
+        {{- if eq .Values.podAntiAffinity.type "soft" }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
               labelSelector:
@@ -38,9 +39,9 @@ spec:
                   operator: In
                   values:
                   - converter
-              topologyKey: {{ .Values.antiAffinity.topologyKey }}
-            weight: {{ .Values.antiAffinity.weight }}
-        {{- else if eq .Values.antiAffinity.type "hard" }}
+              topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+            weight: {{ .Values.podAntiAffinity.weight }}
+        {{- else if eq .Values.podAntiAffinity.type "hard" }}
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
@@ -48,7 +49,7 @@ spec:
                 operator: In
                 values:
                 - converter
-            topologyKey: {{ .Values.antiAffinity.topologyKey }}
+            topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
         {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
@@ -80,8 +81,8 @@ spec:
         {{- end }}
       containers:
         - name: converter
-          image: {{ .Values.converter.containerImage }}
-          imagePullPolicy: {{ .Values.converter.imagePullPolicy }}
+          image: {{ .Values.converter.image.repository }}:{{ .Values.converter.image.tag }}
+          imagePullPolicy: {{ .Values.converter.image.pullPolicy }}
           resources: {{- toYaml .Values.converter.resources | nindent 12 }}
           env:
           - name: DB_PWD

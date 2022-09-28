@@ -11,8 +11,9 @@ spec:
       app: example
   serviceName: example
   replicas: 1
-  updateStrategy:
-    type: RollingUpdate
+  {{- if .Values.example.updateStrategy }}
+  updateStrategy: {{- toYaml .Values.example.updateStrategy | nindent 4 }}
+  {{- end }}
   podManagementPolicy: OrderedReady
   template:
     metadata:
@@ -25,10 +26,8 @@ spec:
         {{- end }}
       {{- end }}
     spec:
-      {{- if .Values.securityContext.enabled }}
-      securityContext:
-        runAsUser: {{ .Values.securityContext.example.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.example.runAsGroup }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.example | nindent 8 }}
       {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
@@ -38,10 +37,10 @@ spec:
       {{- end }}
       containers:
       - name: example
-        image: {{ .Values.example.containerImage | quote }}
-        imagePullPolicy: {{ .Values.example.imagePullPolicy }}
+        image: {{ .Values.example.image.repository }}:{{ .Values.example.image.tag }}
+        imagePullPolicy: {{ .Values.example.image.pullPolicy }}
         ports:
-        - containerPort: 3000
+        - containerPort: {{ .Values.example.containerPorts.http }}
           name: http
         resources: {{ toYaml .Values.example.resources | nindent 10 }}
         envFrom:

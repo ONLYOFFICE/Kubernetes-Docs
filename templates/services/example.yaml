@@ -9,8 +9,8 @@ spec:
   ports:
   - name: http
     protocol: TCP
-    port: 3000
-    targetPort: 3000
+    port: {{ .Values.example.containerPorts.http }}
+    targetPort: {{ .Values.example.containerPorts.http }}
   selector:
     statefulset.kubernetes.io/pod-name: example-0
   type: ClusterIP

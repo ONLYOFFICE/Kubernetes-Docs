@@ -11,8 +11,9 @@ spec:
   selector:
     matchLabels:
       app: docservice
-  strategy:
-    type: Recreate
+  {{- if .Values.docservice.updateStrategy }}
+  strategy: {{- toYaml .Values.docservice.updateStrategy | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:
@@ -24,10 +25,8 @@ spec:
         {{- end }}
     {{- end }}
     spec:
-      {{- if .Values.securityContext.enabled }}
-      securityContext:
-        runAsUser: {{ .Values.securityContext.docservice.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.docservice.runAsGroup }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.docservice | nindent 8 }}
       {{- end }}
       # topologySpreadConstraints:
       # - maxSkew: 1
@@ -38,7 +37,7 @@ spec:
             # app: docservice
       affinity:
         podAntiAffinity:
-        {{- if eq .Values.antiAffinity.type "soft" }}
+        {{- if eq .Values.podAntiAffinity.type "soft" }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
               labelSelector:
@@ -47,9 +46,9 @@ spec:
                   operator: In
                   values:
                   - docservice
-              topologyKey: {{ .Values.antiAffinity.topologyKey }}
-            weight: {{ .Values.antiAffinity.weight }}
-        {{- else if eq .Values.antiAffinity.type "hard" }}
+              topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+            weight: {{ .Values.podAntiAffinity.weight }}
+        {{- else if eq .Values.podAntiAffinity.type "hard" }}
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
@@ -57,7 +56,7 @@ spec:
                 operator: In
                 values:
                 - docservice
-            topologyKey: {{ .Values.antiAffinity.topologyKey }}
+            topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
         {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
@@ -89,15 +88,18 @@ spec:
         {{- end }}
       containers:
         - name: proxy
-          image: {{ .Values.proxy.proxyContainerImage }}
-          imagePullPolicy: {{ .Values.proxy.imagePullPolicy }}
+          image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
+          imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
           ports:
-            - containerPort: 8888
-          {{- if .Values.proxy.livenessProbeEnabled }}
-          livenessProbe: {{ toYaml .Values.proxy.livenessProbe | nindent 12 }}
+            - containerPort: {{ .Values.proxy.containerPorts.http }}
+          {{- if .Values.proxy.startupProbe.enabled }}
+          startupProbe: {{- omit .Values.proxy.startupProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if .Values.proxy.startupProbeEnabled }}
-          startupProbe: {{ toYaml .Values.proxy.startupProbe | nindent 12 }}
+          {{- if .Values.proxy.readinessProbe.enabled }}
+          readinessProbe: {{- omit .Values.proxy.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.proxy.livenessProbe.enabled }}
+          livenessProbe: {{- omit .Values.proxy.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
           envFrom:
@@ -113,18 +115,18 @@ spec:
           {{- end }}
 
         - name: docservice
-          image: {{ .Values.docservice.containerImage }}
-          imagePullPolicy: {{ .Values.docservice.imagePullPolicy }}
+          image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }}
+          imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
           ports:
-            - containerPort: 8000
-          {{- if .Values.docservice.readinessProbeEnabled }}
-          readinessProbe: {{ toYaml .Values.docservice.readinessProbe | nindent 12 }}
+            - containerPort: {{ .Values.docservice.containerPorts.http }}
+          {{- if .Values.docservice.startupProbe.enabled }}
+          startupProbe: {{- omit .Values.docservice.startupProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if .Values.docservice.livenessProbeEnabled }}
-          livenessProbe: {{ toYaml .Values.docservice.livenessProbe | nindent 12 }}
+          {{- if .Values.docservice.readinessProbe.enabled }}
+          readinessProbe: {{- omit .Values.docservice.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if .Values.docservice.startupProbeEnabled }}
-          startupProbe: {{ toYaml .Values.docservice.startupProbe | nindent 12 }}
+          {{- if .Values.docservice.livenessProbe.enabled }}
+          livenessProbe: {{- omit .Values.docservice.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.docservice.resources | nindent 12 }}
           env:
