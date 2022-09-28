@@ -1,6 +1,6 @@
 # Change log
 
-## 1.2.0
+## 2.0.0
 
 ### New Features
 
@@ -9,6 +9,12 @@
 ### Changes
 
 * Changed the Redis version
+
+## 1.1.3
+
+### Fixes
+
+* Fixed the path to sql scripts
 
 ## 1.1.2
 
