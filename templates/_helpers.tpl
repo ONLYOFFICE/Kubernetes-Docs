@@ -154,6 +154,20 @@ Return true if a service object should be created for ds
 {{- end -}}
 
 {{/*
+Define a branch with sql scripts for ds
+*/}}
+{{- define "ds.sqlScripts.branchName" -}}
+{{- $appVersion := .Chart.AppVersion -}}
+{{- if semverCompare ">=7.2.0" $appVersion -}}
+    {{- printf "master" -}}
+{{- else if semverCompare ">=7.1.0 <7.2.0" $appVersion -}}
+    {{- printf "v7.1.1.23" -}}
+{{- else -}}
+    {{- printf "%s" .Values.sqlScripts.branchName -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the configmap name containing the ds upgrade script
 */}}
 {{- define "ds.upgrade.configMapName" -}}
