@@ -29,9 +29,9 @@ data:
     if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
       wget -O /sql/{{ .Values.install.existingConfigmap.tblCreate.keyName }} \
         {{- if eq .Values.connections.dbType "postgres" }}
-        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ .Values.sqlScripts.branchName }}/schema/postgresql/createdb.sql
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/createdb.sql
         {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
-        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ .Values.sqlScripts.branchName }}/schema/mysql/createdb.sql
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mysql/createdb.sql
         {{- end }}
     fi
     {{- if eq .Values.connections.dbType "postgres" }}
