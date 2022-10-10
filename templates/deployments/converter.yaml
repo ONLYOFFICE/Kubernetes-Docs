@@ -100,7 +100,7 @@ spec:
           volumeMounts:
           - name: check-ready-db-scripts
             mountPath: /sql/checkReadyDB.sh
-            subPath: initdb.sh
+            subPath: checkReadyDB.sh
           command: ["/bin/sh", "-c"]
           args: ["/sql/checkReadyDB.sh"]
       {{- end }}
