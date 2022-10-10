@@ -18,7 +18,7 @@ Get the DB password secret
 {{- if .Values.connections.dbPassword -}}
     {{- printf "%s-db" .Release.Name -}}
 {{- else if .Values.connections.dbExistingSecret -}}
-    {{- printf "%s" (tpl .Values.connections.dbExistingSecret $) -}}
+    {{- printf "%s-%s" .Release.Name (tpl .Values.connections.dbExistingSecret $) -}}
 {{- end -}}
 {{- end -}}
 
@@ -49,7 +49,7 @@ Get the RabbitMQ password secret
 {{- if .Values.connections.amqpPassword -}}
     {{- printf "%s-rabbitmq" .Release.Name -}}
 {{- else if .Values.connections.amqpExistingSecret -}}
-    {{- printf "%s" (tpl .Values.connections.amqpExistingSecret $) -}}
+    {{- printf "%s-%s" .Release.Name (tpl .Values.connections.amqpExistingSecret $) -}}
 {{- end -}}
 {{- end -}}
 
