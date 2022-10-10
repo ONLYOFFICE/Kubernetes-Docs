@@ -1,4 +1,4 @@
-{{ if .Values.ingress.enabled }}
+{{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -10,18 +10,18 @@ metadata:
     {{- end }}
 {{- end }}
 spec:
-  {{ if .Values.ingress.ssl.enabled }}
+  {{- if .Values.ingress.ssl.enabled }}
   tls: 
   - hosts:
     - {{ .Values.ingress.host }}
     secretName: {{ .Values.ingress.ssl.secret }}
-  {{ end }}
+  {{- end }}
   rules:
-  {{ if .Values.ingress.host }}
+  {{- if .Values.ingress.host }}
   - host: {{ .Values.ingress.host }}
-  {{ else }}
+  {{- else }}
   - host:
-  {{ end }}
+  {{- end }}
     http:
       paths:
       - path: /
@@ -31,4 +31,4 @@ spec:
             name: {{ template "ds.svc.name" . }}
             port:
               number: 8888
-{{ end }}
+{{- end }}

@@ -5,12 +5,15 @@ metadata:
   labels:
     app: converter
 spec:
-  {{ if not .Values.converter.autoscaling.enabled }}
+  {{- if not .Values.converter.autoscaling.enabled }}
   replicas: {{ .Values.converter.replicas }}
   {{- end }}
   selector:
     matchLabels:
       app: converter
+  {{- if .Values.converter.updateStrategy }}
+  strategy: {{- toYaml .Values.converter.updateStrategy | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:
@@ -22,14 +25,12 @@ spec:
         {{- end }}
     {{- end }}
     spec:
-      {{ if .Values.securityContext.enabled }}
-      securityContext:
-        runAsUser: {{ .Values.securityContext.converter.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.converter.runAsGroup }}
-      {{ end }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.converter | nindent 8 }}
+      {{- end }}
       affinity:
         podAntiAffinity:
-        {{- if eq .Values.antiAffinity.type "soft" }}
+        {{- if eq .Values.podAntiAffinity.type "soft" }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
               labelSelector:
@@ -38,9 +39,9 @@ spec:
                   operator: In
                   values:
                   - converter
-              topologyKey: {{ .Values.antiAffinity.topologyKey }}
-            weight: {{ .Values.antiAffinity.weight }}
-        {{- else if eq .Values.antiAffinity.type "hard" }}
+              topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+            weight: {{ .Values.podAntiAffinity.weight }}
+        {{- else if eq .Values.podAntiAffinity.type "hard" }}
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
@@ -48,7 +49,7 @@ spec:
                 operator: In
                 values:
                 - converter
-            topologyKey: {{ .Values.antiAffinity.topologyKey }}
+            topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
         {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
@@ -68,26 +69,26 @@ spec:
           secret:
             secretName: {{ template "ds.license.secretName" . }}
           {{- end }}
-        {{ if .Values.extraConf.configMap }}
+        {{- if .Values.extraConf.configMap }}
         - name: custom-file
           configMap:
             name: {{ .Values.extraConf.configMap }}
-        {{ end }}
-        {{ if .Values.extraThemes.configMap }}
+        {{- end }}
+        {{- if .Values.extraThemes.configMap }}
         - name: custom-themes
           configMap:
             name: {{ .Values.extraThemes.configMap }}
-        {{ end }}
+        {{- end }}
       containers:
         - name: converter
-          image: {{ .Values.converter.containerImage }}
-          imagePullPolicy: {{ .Values.converter.imagePullPolicy }}
+          image: {{ .Values.converter.image.repository }}:{{ .Values.converter.image.tag }}
+          imagePullPolicy: {{ .Values.converter.image.pullPolicy }}
           resources: {{- toYaml .Values.converter.resources | nindent 12 }}
           env:
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
-                name: {{ template "ds.postgresql.secretName" . }}
+                name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
           - name: AMQP_PWD
             valueFrom:
@@ -107,13 +108,13 @@ spec:
             {{- if not .Values.license.existingClaim }}
             readOnly: true
             {{- end }}
-          {{ if .Values.extraConf.configMap }}
+          {{- if .Values.extraConf.configMap }}
           - name: custom-file
             mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.extraConf.filename }}
             subPath: {{ .Values.extraConf.filename }}
-          {{ end }}
-          {{ if .Values.extraThemes.configMap }}
+          {{- end }}
+          {{- if .Values.extraThemes.configMap }}
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
             subPath: {{ .Values.extraThemes.filename }}
-          {{ end }}
+          {{- end }}

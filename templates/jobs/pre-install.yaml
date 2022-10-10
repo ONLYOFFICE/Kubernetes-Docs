@@ -17,10 +17,8 @@ spec:
       {{- if .Values.tolerations }}
       tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
-      {{- if .Values.securityContext.enabled }}
-      securityContext:
-        runAsUser: {{ .Values.securityContext.jobs.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.jobs.runAsGroup }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
       {{- end }}
       volumes:
         - name: initdb-scripts
@@ -41,7 +39,7 @@ spec:
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
-                name: {{ template "ds.postgresql.secretName" . }}
+                name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
           - name: PRIVATE_CLUSTER
             value: {{ .Values.privateCluster | quote }}
@@ -57,7 +55,7 @@ spec:
           command: ["/bin/sh", "-c"]
           {{- if .Values.webProxy.enabled }}
           args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /sql/initdb.sh"]
-          {{ else }}
+          {{- else }}
           args: ["/sql/initdb.sh"]
           {{- end }}
       restartPolicy: Never

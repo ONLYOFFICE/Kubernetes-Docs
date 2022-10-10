@@ -5,14 +5,15 @@ metadata:
   labels:
     app: docservice
 spec:
-  {{ if not .Values.docservice.autoscaling.enabled }}
+  {{- if not .Values.docservice.autoscaling.enabled }}
   replicas: {{ .Values.docservice.replicas }}
   {{- end }}
   selector:
     matchLabels:
       app: docservice
-  strategy:
-    type: Recreate
+  {{- if .Values.docservice.updateStrategy }}
+  strategy: {{- toYaml .Values.docservice.updateStrategy | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:
@@ -24,11 +25,9 @@ spec:
         {{- end }}
     {{- end }}
     spec:
-      {{ if .Values.securityContext.enabled }}
-      securityContext:
-        runAsUser: {{ .Values.securityContext.docservice.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.docservice.runAsGroup }}
-      {{ end }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.docservice | nindent 8 }}
+      {{- end }}
       # topologySpreadConstraints:
       # - maxSkew: 1
         # topologyKey: doks.digitalocean.com/node-pool
@@ -38,7 +37,7 @@ spec:
             # app: docservice
       affinity:
         podAntiAffinity:
-        {{- if eq .Values.antiAffinity.type "soft" }}
+        {{- if eq .Values.podAntiAffinity.type "soft" }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
               labelSelector:
@@ -47,9 +46,9 @@ spec:
                   operator: In
                   values:
                   - docservice
-              topologyKey: {{ .Values.antiAffinity.topologyKey }}
-            weight: {{ .Values.antiAffinity.weight }}
-        {{- else if eq .Values.antiAffinity.type "hard" }}
+              topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+            weight: {{ .Values.podAntiAffinity.weight }}
+        {{- else if eq .Values.podAntiAffinity.type "hard" }}
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
@@ -57,7 +56,7 @@ spec:
                 operator: In
                 values:
                 - docservice
-            topologyKey: {{ .Values.antiAffinity.topologyKey }}
+            topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
         {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
@@ -77,28 +76,31 @@ spec:
           secret:
             secretName: {{ template "ds.license.secretName" . }}
           {{- end }}
-        {{ if .Values.extraConf.configMap }}
+        {{- if .Values.extraConf.configMap }}
         - name: custom-file
           configMap:
             name: {{ .Values.extraConf.configMap }}
-        {{ end }}
-        {{ if .Values.extraThemes.configMap }}
+        {{- end }}
+        {{- if .Values.extraThemes.configMap }}
         - name: custom-themes
           configMap:
             name: {{ .Values.extraThemes.configMap }}
-        {{ end }}
+        {{- end }}
       containers:
         - name: proxy
-          image: {{ .Values.proxy.proxyContainerImage }}
-          imagePullPolicy: {{ .Values.proxy.imagePullPolicy }}
+          image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
+          imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
           ports:
-            - containerPort: 8888
-          {{ if .Values.proxy.livenessProbeEnabled }}
-          livenessProbe: {{ toYaml .Values.proxy.livenessProbe | nindent 14 }}
-          {{ end }}
-          {{ if .Values.proxy.startupProbeEnabled }}
-          startupProbe: {{ toYaml .Values.proxy.startupProbe | nindent 14 }}
-          {{ end }}
+            - containerPort: {{ .Values.proxy.containerPorts.http }}
+          {{- if .Values.proxy.startupProbe.enabled }}
+          startupProbe: {{- omit .Values.proxy.startupProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.proxy.readinessProbe.enabled }}
+          readinessProbe: {{- omit .Values.proxy.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.proxy.livenessProbe.enabled }}
+          livenessProbe: {{- omit .Values.proxy.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
           envFrom:
           - configMapRef:
@@ -106,32 +108,32 @@ spec:
           volumeMounts:
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
-          {{ if .Values.extraThemes.configMap }}
+          {{- if .Values.extraThemes.configMap }}
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
             subPath: {{ .Values.extraThemes.filename }}
-          {{ end }}
+          {{- end }}
 
         - name: docservice
-          image: {{ .Values.docservice.containerImage }}
-          imagePullPolicy: {{ .Values.docservice.imagePullPolicy }}
+          image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }}
+          imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
           ports:
-            - containerPort: 8000
-          {{ if .Values.docservice.readinessProbeEnabled }}
-          readinessProbe: {{ toYaml .Values.docservice.readinessProbe | nindent 14 }}
-          {{ end }}
-          {{ if .Values.docservice.livenessProbeEnabled }}
-          livenessProbe: {{ toYaml .Values.docservice.livenessProbe | nindent 14 }}
-          {{ end }}
-          {{ if .Values.docservice.startupProbeEnabled }}
-          startupProbe: {{ toYaml .Values.docservice.startupProbe | nindent 14 }}
-          {{ end }}
+            - containerPort: {{ .Values.docservice.containerPorts.http }}
+          {{- if .Values.docservice.startupProbe.enabled }}
+          startupProbe: {{- omit .Values.docservice.startupProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.docservice.readinessProbe.enabled }}
+          readinessProbe: {{- omit .Values.docservice.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.docservice.livenessProbe.enabled }}
+          livenessProbe: {{- omit .Values.docservice.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           resources: {{ toYaml .Values.docservice.resources | nindent 12 }}
           env:
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
-                name: {{ template "ds.postgresql.secretName" . }}
+                name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
           - name: AMQP_PWD
             valueFrom:
@@ -151,13 +153,13 @@ spec:
             {{- if not .Values.license.existingClaim }}
             readOnly: true
             {{- end }}
-          {{ if .Values.extraConf.configMap }}
+          {{- if .Values.extraConf.configMap }}
           - name: custom-file
             mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.extraConf.filename }}
             subPath: {{ .Values.extraConf.filename }}
-          {{ end }}
-          {{ if .Values.extraThemes.configMap }}
+          {{- end }}
+          {{- if .Values.extraThemes.configMap }}
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
             subPath: {{ .Values.extraThemes.filename }}
-          {{ end }}
+          {{- end }}

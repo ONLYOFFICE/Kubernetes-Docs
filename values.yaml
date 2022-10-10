@@ -2,6 +2,7 @@ product:
   name: onlyoffice
 
 connections:
+  dbType: postgres
   dbHost: postgresql
   dbUser: postgres
   dbPort: "5432"
@@ -48,8 +49,14 @@ example:
   enabled: false
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
-  containerImage: onlyoffice/docs-example:7.1.1-4
-  imagePullPolicy: IfNotPresent
+  updateStrategy:
+    type: RollingUpdate
+  image:
+    repository: onlyoffice/docs-example
+    tag: 7.2.0-1
+    pullPolicy: IfNotPresent
+  containerPorts:
+    http: 3000
   dsUrl: "/"
   resources:
     ##Example:
@@ -70,7 +77,7 @@ extraThemes:
   configMap: ""
   filename: custom-themes.json
 
-antiAffinity:
+podAntiAffinity:
   type: "soft"
   topologyKey: kubernetes.io/hostname
   weight: "100"
@@ -83,8 +90,23 @@ docservice:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
-  readinessProbeEnabled: true
+  updateStrategy:
+    type: Recreate
+  image:
+    repository: onlyoffice/docs-docservice-de
+    tag: 7.2.0-1
+    pullPolicy: IfNotPresent
+  containerPorts:
+    http: 8000
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /index.html
+      port: 8000
+    failureThreshold: 30
+    periodSeconds: 10
   readinessProbe:
+    enabled: true
     failureThreshold: 2
     httpGet:
       path: /index.html
@@ -92,24 +114,15 @@ docservice:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 3
-  livenessProbeEnabled: true
   livenessProbe:
-    failureThreshold: 5
+    enabled: true
+    failureThreshold: 3
     httpGet:
       path: /index.html
       port: 8000
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 3
-  startupProbeEnabled: true
-  startupProbe:
-    httpGet:
-      path: /index.html
-      port: 8000
-    failureThreshold: 30
-    periodSeconds: 10
-  containerImage: onlyoffice/docs-docservice-de:7.1.1-4
-  imagePullPolicy: IfNotPresent
   resources:
     ##Example:
     ##requests:
@@ -163,8 +176,31 @@ docservice:
 
 proxy:
   gzipProxied: "off"
-  livenessProbeEnabled: true
+  secureLinkSecret: verysecretstring
+  image:
+    repository: onlyoffice/docs-proxy-de
+    tag: 7.2.0-1
+    pullPolicy: IfNotPresent
+  containerPorts:
+    http: 8888
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /index.html
+      port: 8888
+    failureThreshold: 30
+    periodSeconds: 10
+  readinessProbe:
+    enabled: true
+    failureThreshold: 2
+    httpGet:
+      path: /index.html
+      port: 8888
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 3
   livenessProbe:
+    enabled: true
     failureThreshold: 3
     httpGet:
       path: /index.html
@@ -172,15 +208,6 @@ proxy:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 3
-  startupProbeEnabled: true
-  startupProbe:
-    httpGet:
-      path: /index.html
-      port: 8888
-    failureThreshold: 30
-    periodSeconds: 10
-  proxyContainerImage: onlyoffice/docs-proxy-de:7.1.1-4
-  imagePullPolicy: IfNotPresent
   resources:
     ##Example:
     ##requests:
@@ -196,8 +223,15 @@ converter:
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
   replicas: 2
-  containerImage: onlyoffice/docs-converter-de:7.1.1-4
-  imagePullPolicy: IfNotPresent
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  image:
+    repository: onlyoffice/docs-converter-de
+    tag: 7.2.0-1
+    pullPolicy: IfNotPresent
   resources:
     ##Example:
     ##requests:
@@ -285,7 +319,7 @@ ingress:
 grafana_ingress:
   enabled: false
 
-securityContext:
+podSecurityContext:
   enabled: false
   converter:
     runAsUser: 101
@@ -301,7 +335,7 @@ securityContext:
     runAsGroup: 1001
 
 sqlScripts:
-  branchName: v7.1.1.23
+  branchName: master
 
 webProxy:
   enabled: false
@@ -316,7 +350,7 @@ install:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
+      tag: 7.2.0-1
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -339,7 +373,7 @@ upgrade:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
+      tag: 7.2.0-1
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -365,7 +399,7 @@ rollback:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
+      tag: 7.2.0-1
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -391,7 +425,7 @@ delete:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.1.1-4
+      tag: 7.2.0-1
       pullPolicy: IfNotPresent
     resources:
       ##Example:

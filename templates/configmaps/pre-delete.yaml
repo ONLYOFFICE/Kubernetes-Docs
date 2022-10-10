@@ -11,9 +11,18 @@ data:
   stop.sh: |-
     #!/bin/bash
     curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s
+    {{- if eq .Values.connections.dbType "postgres" }}
     PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+      --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} -c "\dt" > /dev/null
+    {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
+    mysql -h {{ .Values.connections.dbHost }} \
+      -P {{ .Values.connections.dbPort }} \
+      -u {{ .Values.connections.dbUser }} \
+      -p$DB_PWD \
+      -e "show databases;" > /dev/null
+    {{- end }}
     if [ $? -ne 0 ]; then	
       echo -e "\e[0;31m DB is not available \e[0m"
       exit 1
@@ -37,11 +46,24 @@ data:
     done
     if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
       wget -O /sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }} \
-        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ .Values.sqlScripts.branchName }}/schema/postgresql/removetbl.sql
+        {{- if eq .Values.connections.dbType "postgres" }}
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/removetbl.sql
+        {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mysql/removetbl.sql
+        {{- end }}
     fi
+    {{- if eq .Values.connections.dbType "postgres" }}
     PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+      --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} \
       --file=/sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+    {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
+    mysql -h {{ .Values.connections.dbHost }} \
+      -P {{ .Values.connections.dbPort }} \
+      -u {{ .Values.connections.dbUser }} \
+      -p$DB_PWD \
+      {{ .Values.connections.dbName }} < /sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+    {{- end }}
     echo work done
 {{- end }}

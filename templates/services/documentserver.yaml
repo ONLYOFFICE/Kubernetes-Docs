@@ -16,6 +16,6 @@ spec:
     - name: http
       protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: 8888
+      targetPort: {{ .Values.proxy.containerPorts.http }}
   type: {{ .Values.service.type }}
 {{- end }}

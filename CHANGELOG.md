@@ -1,5 +1,20 @@
 # Change log
 
+## 2.0.0
+
+### New Features
+
+* Added the ability to use MySQL or MariaDB as a database server
+* Added the ability set up `updateStrategy`
+* Added the ability set up `containerPorts`
+
+### Changes
+
+* Released [v7.2.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#720) of ONLYOFFICE Docs
+* Changed the syntax and algorithm for processing the following parameters: `Affinity`, `SecurityContext`, `Probes`, `Images`
+* Changed the Redis version
+* Changed the Welcome page
+
 ## 1.1.3
 
 ### Fixes
