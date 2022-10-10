@@ -4,7 +4,9 @@ kind: ConfigMap
 metadata:
   name: pre-install
   annotations:
+    {{- if not .Values.postgresql.enabled }}
     "helm.sh/hook": pre-install
+    {{- end }}
     "helm.sh/hook-weight": "2"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 data:
@@ -22,7 +24,7 @@ data:
       -p$DB_PWD \
       -e "show databases;" > /dev/null
     {{- end }}
-    if [ $? -ne 0 ]; then	
+    if [ $? -ne 0 ]; then
       echo -e "\e[0;31m DB is not available \e[0m"
       exit 1
     fi

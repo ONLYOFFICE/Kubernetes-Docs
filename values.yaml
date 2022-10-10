@@ -1,3 +1,31 @@
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      size: 8Gi
+  metrics:
+    enabled: false
+
+postgresql:
+  enabled: true
+  auth:
+    database: postgres
+  primary:
+    persistence:
+      size: 8Gi
+  metrics:
+    enabled: false
+
+rabbitmq:
+  enabled: true
+  persistence:
+    size: 8Gi
+  metrics:
+    enabled: false
+
 product:
   name: onlyoffice
 
