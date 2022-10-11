@@ -35,8 +35,6 @@ jobs:
         with:
           repo: ${{ secrets.AWS_BUCKET_URL }}/charts/4testing
           chart: ./
-          packageExtraArgs: --no-deps
-
       - name: Reindex index.yaml
         run: |
           aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/4testing/index.yaml .
