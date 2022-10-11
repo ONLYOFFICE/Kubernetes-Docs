@@ -4,25 +4,27 @@ kind: ConfigMap
 metadata:
   name: pre-install
   annotations:
+    {{- if not .Values.postgresql.enabled }}
     "helm.sh/hook": pre-install
+    {{- end }}
     "helm.sh/hook-weight": "2"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 data:
   initdb.sh: |-
     #!/bin/bash
     {{- if eq .Values.connections.dbType "postgres" }}
-    PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+    PGPASSWORD=$DB_PWD psql --host={{ template "ds.db.host" . }} \
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} -c "\l" > /dev/null
     {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
-    mysql -h {{ .Values.connections.dbHost }} \
+    mysql -h {{ template "ds.db.host" . }} \
       -P {{ .Values.connections.dbPort }} \
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
       -e "show databases;" > /dev/null
     {{- end }}
-    if [ $? -ne 0 ]; then	
+    if [ $? -ne 0 ]; then
       echo -e "\e[0;31m DB is not available \e[0m"
       exit 1
     fi
@@ -35,13 +37,13 @@ data:
         {{- end }}
     fi
     {{- if eq .Values.connections.dbType "postgres" }}
-    PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+    PGPASSWORD=$DB_PWD psql --host={{ template "ds.db.host" . }} \
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} \
       --file=/sql/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
     {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
-    mysql -h {{ .Values.connections.dbHost }} \
+    mysql -h {{ template "ds.db.host" . }} \
       -P {{ .Values.connections.dbPort }} \
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \

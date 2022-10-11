@@ -4,7 +4,9 @@ kind: Job
 metadata:
   name: pre-install
   annotations:
+    {{- if not .Values.postgresql.enabled }}
     "helm.sh/hook": pre-install
+    {{- end }}
     "helm.sh/hook-weight": "3"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
@@ -30,6 +32,31 @@ spec:
           configMap:
             name: {{ template "ds.install.configmap.tblCreate.name" . }}
         {{- end }}
+        {{- if .Values.postgresql.enabled }}
+        - name: check-ready-db-scripts
+          configMap:
+            name: check-ready-db
+            defaultMode: 0755
+        {{- end }}
+      {{- if .Values.postgresql.enabled }}
+      initContainers:
+        - name: check-ready-db
+          image: {{ .Values.install.job.image.repository }}:{{ .Values.install.job.image.tag }}
+          imagePullPolicy: {{ .Values.install.job.image.pullPolicy }}
+          resources: {{- toYaml .Values.install.job.resources | nindent 12 }}
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.db.secretName" . }}
+                key: {{ .Values.connections.dbSecretKeyName }}
+          volumeMounts:
+          - name: check-ready-db-scripts
+            mountPath: /sql/checkReadyDB.sh
+            subPath: checkReadyDB.sh
+          command: ["/bin/sh", "-c"]
+          args: ["/sql/checkReadyDB.sh"]
+      {{- end }}
       containers:
         - name: pre-install
           image: {{ .Values.install.job.image.repository }}:{{ .Values.install.job.image.tag }}

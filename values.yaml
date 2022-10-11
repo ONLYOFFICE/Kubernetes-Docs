@@ -1,19 +1,47 @@
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      size: 8Gi
+  metrics:
+    enabled: false
+
+postgresql:
+  enabled: true
+  auth:
+    database: postgres
+  primary:
+    persistence:
+      size: 8Gi
+  metrics:
+    enabled: false
+
+rabbitmq:
+  enabled: true
+  persistence:
+    size: 8Gi
+  metrics:
+    enabled: false
+
 product:
   name: onlyoffice
 
 connections:
   dbType: postgres
-  dbHost: postgresql
+  dbHost: ""
   dbUser: postgres
   dbPort: "5432"
   dbName: postgres
   dbExistingSecret: postgresql
   dbSecretKeyName: postgres-password
   dbPassword: ""
-  redisHost: redis-master
+  redisHost: ""
   redisPort: "6379"
   amqpType: rabbitmq
-  amqpHost: rabbitmq
+  amqpHost: ""
   amqpPort: "5672"
   amqpVhost: "/"
   amqpUser: user

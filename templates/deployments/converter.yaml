@@ -79,6 +79,31 @@ spec:
           configMap:
             name: {{ .Values.extraThemes.configMap }}
         {{- end }}
+        {{- if .Values.postgresql.enabled }}
+        - name: check-ready-db-scripts
+          configMap:
+            name: check-ready-db
+            defaultMode: 0755
+        {{- end }}
+      {{- if .Values.postgresql.enabled }}
+      initContainers:
+        - name: check-ready-db
+          image: {{ .Values.install.job.image.repository }}:{{ .Values.install.job.image.tag }}
+          imagePullPolicy: {{ .Values.install.job.image.pullPolicy }}
+          resources: {{- toYaml .Values.install.job.resources | nindent 12 }}
+          env:
+          - name: DB_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.db.secretName" . }}
+                key: {{ .Values.connections.dbSecretKeyName }}
+          volumeMounts:
+          - name: check-ready-db-scripts
+            mountPath: /sql/checkReadyDB.sh
+            subPath: checkReadyDB.sh
+          command: ["/bin/sh", "-c"]
+          args: ["/sql/checkReadyDB.sh"]
+      {{- end }}
       containers:
         - name: converter
           image: {{ .Values.converter.image.repository }}:{{ .Values.converter.image.tag }}
