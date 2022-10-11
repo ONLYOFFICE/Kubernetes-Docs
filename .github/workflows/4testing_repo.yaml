@@ -23,7 +23,7 @@ jobs:
             RC='1'
           fi
           NEW_VERSION=$(echo $NEW_VERSION)-rc$RC
-          sed 's/\(version:\).*/\1 '$NEW_VERSION'/' -i Chart.yaml
+          sed 's/\(^version:\).*/\1 '$NEW_VERSION'/' -i Chart.yaml
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
