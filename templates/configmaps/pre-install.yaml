@@ -13,12 +13,12 @@ data:
   initdb.sh: |-
     #!/bin/bash
     {{- if eq .Values.connections.dbType "postgres" }}
-    PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+    PGPASSWORD=$DB_PWD psql --host={{ template "ds.db.host" . }} \
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} -c "\l" > /dev/null
     {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
-    mysql -h {{ .Values.connections.dbHost }} \
+    mysql -h {{ template "ds.db.host" . }} \
       -P {{ .Values.connections.dbPort }} \
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
@@ -37,13 +37,13 @@ data:
         {{- end }}
     fi
     {{- if eq .Values.connections.dbType "postgres" }}
-    PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
+    PGPASSWORD=$DB_PWD psql --host={{ template "ds.db.host" . }} \
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} \
       --file=/sql/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
     {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
-    mysql -h {{ .Values.connections.dbHost }} \
+    mysql -h {{ template "ds.db.host" . }} \
       -P {{ .Values.connections.dbPort }} \
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \

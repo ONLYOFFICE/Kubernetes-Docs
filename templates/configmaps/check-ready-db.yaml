@@ -8,11 +8,11 @@ data:
     #!/bin/bash
     for ((i=1 ; i <= 30 ; i++)); do
       {{- if eq .Values.connections.dbType "postgres" }}
-      pg_isready --host={{ .Values.connections.dbHost }} \
+      pg_isready --host={{ template "ds.db.host" . }} \
         --port={{ .Values.connections.dbPort }} \
         --user={{ .Values.connections.dbUser }}
       {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
-      mysql -h {{ .Values.connections.dbHost }} \
+      mysql -h {{ template "ds.db.host" . }} \
         -P {{ .Values.connections.dbPort }} \
         -u {{ .Values.connections.dbUser }} \
         -p$DB_PWD \
@@ -22,7 +22,6 @@ data:
         sleep 5
       else
         echo -e "\e[0;32m DB is ready to accept connections \e[0m"
-        local DB_READY
         DB_READY='yes'
         break
       fi

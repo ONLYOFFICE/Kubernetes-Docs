@@ -12,6 +12,17 @@ Check the DB type
 {{- end -}}
 
 {{/*
+Get the DB host
+*/}}
+{{- define "ds.db.host" -}}
+{{- if not (empty .Values.connections.dbHost) }}
+    {{- .Values.connections.dbHost }}
+{{- else if .Values.postgresql.enabled -}}
+    {{- printf "%s-postgresql" .Release.Name -}}
+{{- end }}
+{{- end -}}
+
+{{/*
 Get the DB password secret
 */}}
 {{- define "ds.db.secretName" -}}
@@ -45,6 +56,17 @@ Return DB password
 {{- end -}}
 
 {{/*
+Get the AMQP host
+*/}}
+{{- define "ds.amqp.host" -}}
+{{- if not (empty .Values.connections.amqpHost) }}
+    {{- .Values.connections.amqpHost }}
+{{- else if .Values.rabbitmq.enabled -}}
+    {{- printf "%s-rabbitmq" .Release.Name -}}
+{{- end }}
+{{- end -}}
+
+{{/*
 Get the RabbitMQ password secret
 */}}
 {{- define "ds.rabbitmq.secretName" -}}
@@ -74,6 +96,17 @@ Return RabbitMQ password
     {{- .Values.connections.amqpPassword }}
 {{- else }}
     {{- required "A RabbitMQ Password is required!" .Values.connections.amqpPassword }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Get the Redis host
+*/}}
+{{- define "ds.redis.host" -}}
+{{- if not (empty .Values.connections.redisHost) }}
+    {{- .Values.connections.redisHost }}
+{{- else if .Values.redis.enabled -}}
+    {{- printf "%s-redis-master" .Release.Name -}}
 {{- end }}
 {{- end -}}
 

@@ -31,17 +31,17 @@ product:
 
 connections:
   dbType: postgres
-  dbHost: postgresql
+  dbHost: ""
   dbUser: postgres
   dbPort: "5432"
   dbName: postgres
   dbExistingSecret: postgresql
   dbSecretKeyName: postgres-password
   dbPassword: ""
-  redisHost: redis-master
+  redisHost: ""
   redisPort: "6379"
   amqpType: rabbitmq
-  amqpHost: rabbitmq
+  amqpHost: ""
   amqpPort: "5672"
   amqpVhost: "/"
   amqpUser: user
