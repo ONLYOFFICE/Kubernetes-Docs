@@ -5,15 +5,15 @@ type: application
 dependencies:
   - name: redis
     version: ">=17.2.0"
-    repository: "@bitnami"
+    repository: "https://charts.bitnami.com/bitnami"
     condition: redis.enabled
   - name: postgresql
     version: ">=11.9.5"
-    repository: "@bitnami"
+    repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.enabled
   - name: rabbitmq
     version: ">=10.3.6"
-    repository: "@bitnami"
+    repository: "https://charts.bitnami.com/bitnami"
     condition: rabbitmq.enabled
 version: 2.1.0
 appVersion: 7.2.0
