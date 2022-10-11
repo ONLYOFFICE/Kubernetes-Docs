@@ -219,8 +219,11 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ helm install prometheus -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/extraScrapeConfigs.yaml prometheus-community/prometheus
+$ helm install prometheus -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/extraScrapeConfigs.yaml prometheus-community/prometheus \
+  --set server.global.scrape_interval=1m
 ```
+
+To change the scrape interval, specify the `server.global.scrape_interval` parameter.
 
 See more details about installing Prometheus via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus).
 
