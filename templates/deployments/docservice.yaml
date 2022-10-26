@@ -102,6 +102,11 @@ spec:
           livenessProbe: {{- omit .Values.proxy.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
+          {{- if .Values.proxy.infoAllowedIP }}
+          env:
+          - name: INFO_ALLOWED_IP
+            value: {{ join " " .Values.proxy.infoAllowedIP }}
+          {{- end }}
           envFrom:
           - configMapRef:
               name: documentserver
