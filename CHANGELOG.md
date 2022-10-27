@@ -1,5 +1,15 @@
 # Change log
 
+## 2.0.1
+
+### New Features
+
+* Added the ability to set up a list of IP addresses to access the Info page
+
+### Changes
+
+* Released [v7.2.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#721) of ONLYOFFICE Docs
+
 ## 2.0.0
 
 ### New Features

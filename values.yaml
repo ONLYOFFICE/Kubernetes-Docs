@@ -53,7 +53,7 @@ example:
     type: RollingUpdate
   image:
     repository: onlyoffice/docs-example
-    tag: 7.2.0-1
+    tag: 7.2.1-1
     pullPolicy: IfNotPresent
   containerPorts:
     http: 3000
@@ -94,7 +94,7 @@ docservice:
     type: Recreate
   image:
     repository: onlyoffice/docs-docservice-de
-    tag: 7.2.0-1
+    tag: 7.2.1-1
     pullPolicy: IfNotPresent
   containerPorts:
     http: 8000
@@ -177,9 +177,14 @@ docservice:
 proxy:
   gzipProxied: "off"
   secureLinkSecret: verysecretstring
+  ##Example:
+  ##infoAllowedIP:
+  ##- 10.244.0.79
+  ##- 192.168.1.0/24
+  infoAllowedIP: []
   image:
     repository: onlyoffice/docs-proxy-de
-    tag: 7.2.0-1
+    tag: 7.2.1-1
     pullPolicy: IfNotPresent
   containerPorts:
     http: 8888
@@ -230,7 +235,7 @@ converter:
       maxSurge: 25%
   image:
     repository: onlyoffice/docs-converter-de
-    tag: 7.2.0-1
+    tag: 7.2.1-1
     pullPolicy: IfNotPresent
   resources:
     ##Example:
@@ -350,7 +355,7 @@ install:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.2.0-1
+      tag: 7.2.1-1
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -373,7 +378,7 @@ upgrade:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.2.0-1
+      tag: 7.2.1-1
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -399,7 +404,7 @@ rollback:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.2.0-1
+      tag: 7.2.1-1
       pullPolicy: IfNotPresent
     resources:
       ##Example:
@@ -425,7 +430,7 @@ delete:
     enabled: true
     image:
       repository: onlyoffice/docs-utils
-      tag: 7.2.0-1
+      tag: 7.2.1-1
       pullPolicy: IfNotPresent
     resources:
       ##Example:
