@@ -74,6 +74,37 @@ Return RabbitMQ password
 {{- end -}}
 
 {{/*
+Get the Redis password secret
+*/}}
+{{- define "ds.redis.secretName" -}}
+{{- if .Values.connections.redisPassword -}}
+    {{- printf "%s-redis" .Release.Name -}}
+{{- else if .Values.connections.redisExistingSecret -}}
+    {{- printf "%s" (tpl .Values.connections.redisExistingSecret $) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for Redis
+*/}}
+{{- define "ds.redis.createSecret" -}}
+{{- if or .Values.connections.redisPassword (not .Values.connections.redisExistingSecret) -}}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return Redis password
+*/}}
+{{- define "ds.redis.password" -}}
+{{- if not (empty .Values.connections.redisPassword) }}
+    {{- .Values.connections.redisPassword }}
+{{- else }}
+    {{- required "A Redis Password is required!" .Values.connections.redisPassword }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Get the PVC name
 */}}
 {{- define "ds.pvc.name" -}}

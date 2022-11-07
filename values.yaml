@@ -12,6 +12,11 @@ connections:
   dbPassword: ""
   redisHost: redis-master
   redisPort: "6379"
+  redisUser: default
+  redisDBNum: "0"
+  redisExistingSecret: redis
+  redisSecretKeyName: redis-password
+  redisPassword: ""
   amqpType: rabbitmq
   amqpHost: rabbitmq
   amqpPort: "5672"
