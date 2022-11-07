@@ -95,6 +95,11 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.rabbitmq.secretName" . }}
                 key: {{ .Values.connections.amqpSecretKeyName }}
+          - name: REDIS_SERVER_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.redis.secretName" . }}
+                key: {{ .Values.connections.redisSecretKeyName }}
           envFrom:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}

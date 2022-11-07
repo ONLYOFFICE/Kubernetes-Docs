@@ -10,6 +10,8 @@ data:
   DB_NAME: {{ .Values.connections.dbName }}
   REDIS_SERVER_HOST: {{ .Values.connections.redisHost }}
   REDIS_SERVER_PORT: {{ .Values.connections.redisPort | quote }}
+  REDIS_SERVER_USER: {{ .Values.connections.redisUser }}
+  REDIS_SERVER_DB_NUM: {{ .Values.connections.redisDBNum | quote }}
   AMQP_TYPE: {{ .Values.connections.amqpType }}
   AMQP_PORT: {{ .Values.connections.amqpPort | quote }}
   AMQP_VHOST: {{ .Values.connections.amqpVhost | quote }}
