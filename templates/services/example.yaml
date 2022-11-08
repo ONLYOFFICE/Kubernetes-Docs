@@ -5,6 +5,9 @@ metadata:
   name: example
   labels:
     app: example
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
 spec:
   ports:
   - name: http
@@ -13,5 +16,8 @@ spec:
     targetPort: {{ .Values.example.containerPorts.http }}
   selector:
     statefulset.kubernetes.io/pod-name: example-0
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
   type: ClusterIP
 {{- end }}

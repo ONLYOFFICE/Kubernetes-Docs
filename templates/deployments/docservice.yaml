@@ -4,6 +4,9 @@ metadata:
   name: docservice
   labels:
     app: docservice
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
 spec:
   {{- if not .Values.docservice.autoscaling.enabled }}
   replicas: {{ .Values.docservice.replicas }}
@@ -11,6 +14,9 @@ spec:
   selector:
     matchLabels:
       app: docservice
+      {{- if .Values.commonLabels }}
+      {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
+      {{- end }}
   {{- if .Values.docservice.updateStrategy }}
   strategy: {{- toYaml .Values.docservice.updateStrategy | nindent 4 }}
   {{- end }}
@@ -18,12 +24,15 @@ spec:
     metadata:
       labels:
         app: docservice
-    {{- if .Values.docservice.podAnnotations }}
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.docservice.podAnnotations }}
       annotations:
         {{- range $key, $value := .Values.docservice.podAnnotations }}
         {{ $key }}: {{ tpl $value $ }}
         {{- end }}
-    {{- end }}
+      {{- end }}
     spec:
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.docservice | nindent 8 }}

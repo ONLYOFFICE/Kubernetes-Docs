@@ -3,6 +3,10 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: pre-rollback
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
   annotations:
     "helm.sh/hook": pre-rollback
     "helm.sh/hook-weight": "3"
