@@ -343,3 +343,12 @@ Return the configmap name of creating tables for install ds
     {{- required "You set privateCluster=true and did not specify an existing secret containing the initdb script. In this case, you must set install.existingConfigmap.tblCreate.name!" .Values.install.existingConfigmap.tblCreate.name }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Get the ds labels
+*/}}
+{{- define "ds.labels.commonLabels" -}}
+{{- range $key, $value := .Values.commonLabels }}
+{{ $key }}: {{ tpl $value $ }}
+{{- end }}
+{{- end -}}

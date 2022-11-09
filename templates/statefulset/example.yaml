@@ -5,10 +5,16 @@ metadata:
   name: example
   labels:
     app: example
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
 spec:
   selector:
     matchLabels:
       app: example
+      {{- if .Values.commonLabels }}
+      {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
+      {{- end }}
   serviceName: example
   replicas: 1
   {{- if .Values.example.updateStrategy }}
@@ -19,6 +25,9 @@ spec:
     metadata:
       labels:
         app: example
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
       {{- if .Values.example.podAnnotations }}
       annotations:
         {{- range $key, $value := .Values.example.podAnnotations }}
