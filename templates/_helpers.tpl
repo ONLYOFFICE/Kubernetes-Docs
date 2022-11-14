@@ -77,7 +77,7 @@ Return RabbitMQ password
 Get the Redis password secret
 */}}
 {{- define "ds.redis.secretName" -}}
-{{- if .Values.connections.redisPassword -}}
+{{- if or .Values.connections.redisPassword .Values.connections.redisNoPass -}}
     {{- printf "%s-redis" .Release.Name -}}
 {{- else if .Values.connections.redisExistingSecret -}}
     {{- printf "%s" (tpl .Values.connections.redisExistingSecret $) -}}
@@ -88,7 +88,7 @@ Get the Redis password secret
 Return true if a secret object should be created for Redis
 */}}
 {{- define "ds.redis.createSecret" -}}
-{{- if or .Values.connections.redisPassword (not .Values.connections.redisExistingSecret) -}}
+{{- if or .Values.connections.redisPassword .Values.connections.redisNoPass (not .Values.connections.redisExistingSecret) -}}
     {{- true -}}
 {{- end -}}
 {{- end -}}
@@ -99,6 +99,8 @@ Return Redis password
 {{- define "ds.redis.password" -}}
 {{- if not (empty .Values.connections.redisPassword) }}
     {{- .Values.connections.redisPassword }}
+{{- else if .Values.connections.redisNoPass }}
+    {{- printf "" }}
 {{- else }}
     {{- required "A Redis Password is required!" .Values.connections.redisPassword }}
 {{- end }}
