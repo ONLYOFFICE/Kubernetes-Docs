@@ -17,6 +17,7 @@ connections:
   redisExistingSecret: redis
   redisSecretKeyName: redis-password
   redisPassword: ""
+  redisNoPass: false
   amqpType: rabbitmq
   amqpHost: rabbitmq
   amqpPort: "5672"
