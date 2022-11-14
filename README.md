@@ -144,19 +144,6 @@ As a database server, you can use PostgreSQL, MySQL or MariaDB
 
 **If PostgreSQL is selected as the database server, then follow these steps**
 
-Download the ONLYOFFICE Docs database scheme:
-
-```bash
-wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
-```
-
-Create a configmap from it:
-
-```bash
-$ kubectl create configmap init-db-scripts \
-  --from-file=./createdb.sql
-```
-
 To install PostgreSQL to your cluster, run the following command:
 
 ```
@@ -169,19 +156,6 @@ $ helm install postgresql bitnami/postgresql \
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
 **If MySQL is selected as the database server, then follow these steps**
-
-Download the ONLYOFFICE Docs database scheme:
-
-```bash
-wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/createdb.sql
-```
-
-Create a configmap from it:
-
-```bash
-$ kubectl create configmap init-db-scripts \
-  --from-file=./createdb.sql
-```
 
 To install MySQL to your cluster, run the following command:
 
@@ -401,6 +375,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `persistence.existingClaim`                                 | Name of an existing PVC to use. If not specified, a PVC named "ds-files" will be created                                                                                       | `""`                                                                                      |
 | `persistence.storageClass`                                  | PVC Storage Class for ONLYOFFICE Docs data volume                                                                                                                              | `nfs`                                                                                     |
 | `persistence.size`                                          | PVC Storage Request for ONLYOFFICE Docs volume                                                                                                                                 | `8Gi`                                                                                     |
+| `commonLabels`                                              | Defines labels that will be additionally added to all the deployed resources. You can also use `tpl` as the value for the key                                                      | `{}`                                                                                      |
 | `license.existingSecret`                                    | Name of the existing secret that contains the license. Must contain the key `license.lic`                                                                                      | `""`                                                                                      |
 | `license.existingClaim`                                     | Name of the existing PVC in which the license is stored. Must contain the file `license.lic`                                                                                   | `""`                                                                                      |
 | `log.level`                                                 | Defines the type and severity of a logged event. Possible values are `ALL`, `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`, `MARK`, `OFF`                                  | `WARN`                                                                                    |
