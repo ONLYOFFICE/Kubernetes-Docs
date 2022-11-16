@@ -38,8 +38,12 @@ spec:
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.example | nindent 8 }}
       {{- end }}
-      {{- if .Values.example.nodeAffinity }}
+      {{- if or .Values.example.podAffinity .Values.example.nodeAffinity }}
       affinity:
+        {{- with .Values.example.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         {{- with .Values.example.nodeAffinity }}
         nodeAffinity:
           {{- toYaml . | nindent 10 }}
