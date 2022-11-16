@@ -67,6 +67,10 @@ spec:
                 - docservice
             topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
         {{- end }}
+        {{- with .Values.docservice.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
