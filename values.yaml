@@ -63,8 +63,33 @@ example:
     rollme: "{{ randAlphaNum 5 | quote }}"
   updateStrategy:
     type: RollingUpdate
+  ## Pod affinity rules for Example Pod scheduling by nodes relative to other Pods
+  ## Pod affinity allow you to constrain which nodes Example Pod can be scheduled on based on the labels of Pods already running on that node
+  ## ref https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Example:
+  ##podAffinity:
+  ##  requiredDuringSchedulingIgnoredDuringExecution:
+  ##  - labelSelector:
+  ##      matchExpressions:
+  ##      - key: app
+  ##        operator: In
+  ##        values:
+  ##        - store
+  ##    topologyKey: topology.kubernetes.io/zone
+  ##  preferredDuringSchedulingIgnoredDuringExecution:
+  ##  - weight: 100
+  ##    podAffinityTerm:
+  ##      labelSelector:
+  ##        matchExpressions:
+  ##        - key: app
+  ##          operator: NotIn
+  ##          values:
+  ##          - database
+  ##      topologyKey: kubernetes.io/hostname
+  ##
+  podAffinity: {}
   ## Node affinity rules for Example Pod scheduling by nodes
-  ## Node affinity allowing you to constrain which nodes Example Pod can be scheduled on based on node labels
+  ## Node affinity allow you to constrain which nodes Example Pod can be scheduled on based on node labels
   ## ref https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
   ## Example:
   ##nodeAffinity:
@@ -128,8 +153,23 @@ docservice:
   replicas: 2
   updateStrategy:
     type: Recreate
+  ## Pod affinity rules for Docservice Pods scheduling by nodes relative to other Pods
+  ## Pod affinity allow you to constrain which nodes Docservice Pods can be scheduled on based on the labels of Pods already running on that node
+  ## ref https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Example:
+  ##podAffinity:
+  ##  requiredDuringSchedulingIgnoredDuringExecution:
+  ##  - labelSelector:
+  ##      matchExpressions:
+  ##      - key: app
+  ##        operator: In
+  ##        values:
+  ##        - store
+  ##    topologyKey: topology.kubernetes.io/zone
+  ##
+  podAffinity: {}
   ## Node affinity rules for Docservice Pods scheduling by nodes
-  ## Node affinity allowing you to constrain which nodes Docservice Pod can be scheduled on based on node labels
+  ## Node affinity allow you to constrain which nodes Docservice Pod can be scheduled on based on node labels
   ## ref https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
   ## Example:
   ##nodeAffinity:
@@ -285,8 +325,25 @@ converter:
     rollingUpdate:
       maxUnavailable: 25%
       maxSurge: 25%
+  ## Pod affinity rules for Converter Pods scheduling by nodes relative to other Pods
+  ## Pod affinity allow you to constrain which nodes Converter Pod can be scheduled on based on the labels of Pods already running on that node
+  ## ref https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Example:
+  ##podAffinity:
+  ##  preferredDuringSchedulingIgnoredDuringExecution:
+  ##  - weight: 100
+  ##    podAffinityTerm:
+  ##      labelSelector:
+  ##        matchExpressions:
+  ##        - key: app
+  ##          operator: NotIn
+  ##          values:
+  ##          - database
+  ##      topologyKey: kubernetes.io/hostname
+  ##
+  podAffinity: {}
   ## Node affinity rules for Converter Pods scheduling by nodes
-  ## Node affinity allowing you to constrain which nodes Converter Pod can be scheduled on based on node labels
+  ## Node affinity allow you to constrain which nodes Converter Pod can be scheduled on based on node labels
   ## ref https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
   ## Example:
   ##nodeAffinity:
