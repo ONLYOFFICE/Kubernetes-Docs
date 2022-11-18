@@ -39,6 +39,22 @@ persistence:
 ##  app.kubernetes.io/name: docs
 commonLabels: {}
 
+## Onlyoffice Docs Service account parameters
+## ref https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+serviceAccount:
+  ## serviceAccount.create Enable ServiceAccount creation
+  create: false
+  ## serviceAccount.name Name of the ServiceAccount to be used
+  ## If not set and `serviceAccount.create` is `true` the name will be taken from .Release.Name
+  ## If not set and `serviceAccount.create` is `false` the name will be "default"
+  name: ""
+  ## serviceAccount.annotations Map of annotations to add to the ServiceAccount
+  annotations: {}
+  ## serviceAccount.automountServiceAccountToken Enable auto mount of ServiceAccountToken on the serviceAccount created
+  ## Used only if `serviceAccount.create` is `true`
+  ## ref https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#opt-out-of-api-credential-automounting
+  automountServiceAccountToken: true
+
 license:
   existingSecret: ""
   existingClaim: ""

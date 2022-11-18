@@ -354,3 +354,14 @@ Get the ds labels
 {{ $key }}: {{ tpl $value $ }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Get the ds Service Account name
+*/}}
+{{- define "ds.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default .Release.Name .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}

@@ -35,6 +35,7 @@ spec:
         {{- end }}
       {{- end }}
     spec:
+      serviceAccountName: {{ include "ds.serviceAccountName" . }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.example | nindent 8 }}
       {{- end }}
