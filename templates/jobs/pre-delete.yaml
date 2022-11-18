@@ -15,6 +15,7 @@ spec:
   backoffLimit: 2
   template:
     spec:
+      serviceAccountName: {{ include "ds.serviceAccountName" . }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
