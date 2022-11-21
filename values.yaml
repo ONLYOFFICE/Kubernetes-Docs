@@ -33,6 +33,10 @@ persistence:
   storageClass: "nfs"
   size: 8Gi
 
+## namespaceOverride The name of the namespace in which Onlyoffice Docs will be deployed
+## If not set, the name will be taken from .Release.Namespace
+namespaceOverride: ""
+
 ##Example:
 ##commonLabels:
 ##  app.kubernetes.io/version: "{{ .Chart.Version }}"

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: converter
+  namespace: {{ include "ds.namespace" . | quote }}
   labels:
     app: converter
     {{- if .Values.commonLabels }}

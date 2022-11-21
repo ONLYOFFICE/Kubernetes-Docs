@@ -3,6 +3,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: documentserver
+  namespace: {{ include "ds.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
