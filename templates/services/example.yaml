@@ -3,6 +3,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: example
+  namespace: {{ include "ds.namespace" . | quote }}
   labels:
     app: example
     {{- if .Values.commonLabels }}

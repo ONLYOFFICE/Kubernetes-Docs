@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: pre-install
+  namespace: {{ include "ds.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}

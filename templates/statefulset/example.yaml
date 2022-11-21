@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: example
+  namespace: {{ include "ds.namespace" . | quote }}
   labels:
     app: example
     {{- if .Values.commonLabels }}

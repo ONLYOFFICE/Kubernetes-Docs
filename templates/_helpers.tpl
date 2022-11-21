@@ -365,3 +365,14 @@ Get the ds Service Account name
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the ds Namespace
+*/}}
+{{- define "ds.namespace" -}}
+{{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
+{{- else -}}
+    {{- .Release.Namespace -}}
+{{- end -}}
+{{- end -}}

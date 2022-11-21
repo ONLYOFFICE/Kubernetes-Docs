@@ -3,6 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: pre-rollback
+  namespace: {{ include "ds.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
