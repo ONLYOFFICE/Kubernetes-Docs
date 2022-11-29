@@ -451,46 +451,86 @@ docservice:
     ##  memory: "2Gi"
     ##  cpu: "1000m"
     limits: {}
-
+## Parameters of the proxy container of the Docservice deployment
+##
 proxy:
+  ## proxy.gzipProxied Defines the nginx config gzip_proxied directive
+  ## ref: https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied
   gzipProxied: "off"
+  ## proxy.secureLinkSecret Defines secret for the nginx config directive secure_link_md5
+  ## ref: https://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
   secureLinkSecret: verysecretstring
+  ## proxy.infoAllowedIP Defines ip addresses for accessing the info page
   ##Example:
   ##infoAllowedIP:
   ##- 10.244.0.79
   ##- 192.168.1.0/24
   infoAllowedIP: []
   image:
+    ## proxy.image.repository proxy container image repository
+    ## For more information, see after the Parameters table
+    ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
+    ## proxy.image.tag proxy container image tag
     tag: 7.2.1-1
+    ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
+  ## proxy.containerPorts.http proxy container port
   containerPorts:
     http: 8888
+  ## Probe used for the proxy container: startup, readiness and liveness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ## The parameters below for startup probes are used only when `proxy.startupProbe.enabled=true`
   startupProbe:
+    ## proxy.startupProbe.enabled Enable startupProbe for proxy container
     enabled: true
     httpGet:
+      ## proxy.startupProbe.httpGet.path Checking the path for startupProbe
       path: /index.html
+      ## proxy.startupProbe.httpGet.port Checking the port for startupProbe
       port: 8888
+    ## proxy.startupProbe.failureThreshold Failure threshold for startupProbe
     failureThreshold: 30
+    ## proxy.startupProbe.periodSeconds Period seconds for startupProbe
     periodSeconds: 10
+  ## The parameters below for readiness probes are used only when `proxy.readinessProbe.enabled=true`
   readinessProbe:
+    ## proxy.readinessProbe.enabled Enable readinessProbe for proxy container
     enabled: true
+    ## proxy.readinessProbe.failureThreshold Failure threshold for readinessProbe
     failureThreshold: 2
     httpGet:
+      ## proxy.readinessProbe.httpGet.path Checking the path for readinessProbe
       path: /index.html
+      ## proxy.readinessProbe.httpGet.port Checking the port for readinessProbe
       port: 8888
+    ## proxy.readinessProbe.periodSeconds Period seconds for readinessProbe
     periodSeconds: 10
+    ## proxy.readinessProbe.successThreshold Success threshold for readinessProbe
     successThreshold: 1
+    ## proxy.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
     timeoutSeconds: 3
+  ## The parameters below for liveness probes are used only when `proxy.livenessProbe.enabled=true`
   livenessProbe:
+    ## proxy.livenessProbe.enabled Enable livenessProbe for proxy container
     enabled: true
+    ## proxy.livenessProbe.failureThreshold Failure threshold for livenessProbe
     failureThreshold: 3
     httpGet:
+      ## proxy.livenessProbe.httpGet.path Checking the path for livenessProbe
       path: /index.html
+      ## proxy.livenessProbe.httpGet.port Checking the port for livenessProbe
       port: 8888
+    ## proxy.livenessProbe.periodSeconds Period seconds for livenessProbe
     periodSeconds: 10
+    ## proxy.livenessProbe.successThreshold Success threshold for livenessProbe
     successThreshold: 1
+    ## proxy.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
     timeoutSeconds: 3
+  ## proxy container resource requests and limits
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  ## proxy.resources.requests The requested resources for the proxy container
+  ## proxy.resources.limits The resources limits for the proxy container
   resources:
     ##Example:
     ##requests:
@@ -502,14 +542,25 @@ proxy:
     ##  cpu: "1000m"
     limits: {}
 
+## Onlyoffice Docs Converter Deployment parameters
+## This block defines the parameters common to all the Pods of this deployment
+##
 converter:
+  ## converter.podAnnotations Map of annotations to add to the Converter deployment pods
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
+  ## converter.replicas Number of Converter replicas to deploy
+  ## If the `converter.autoscaling.enabled` parameter is enabled, it is ignored
   replicas: 2
+  ## Update strategy used to replace old Pods by new ones. Allowed values: `RollingUpdate` or `Recreate`
+  ## converter.updateStrategy.type Docservice deployment update strategy type
   updateStrategy:
     type: RollingUpdate
+    ## converter.updateStrategy.rollingUpdate Used only when `converter.updateStrategy.type=RollingUpdate`
     rollingUpdate:
+      ## converter.updateStrategy.rollingUpdate.maxUnavailable Maximum number of Converter Pods unavailable during the update process
       maxUnavailable: 25%
+      ## converter.updateStrategy.rollingUpdate.maxSurge Maximum number of Converter Pods created over the desired number of Pods
       maxSurge: 25%
   ## Pod affinity rules for Converter Pods scheduling by nodes relative to other Pods
   ## Pod affinity allow you to constrain which nodes Converter Pod can be scheduled on based on the labels of Pods already running on that node
@@ -543,30 +594,29 @@ converter:
   ##        - zone2
   ##
   nodeAffinity: {}
-  image:
-    repository: onlyoffice/docs-converter-de
-    tag: 7.2.1-1
-    pullPolicy: IfNotPresent
-  resources:
-    ##Example:
-    ##requests:
-    ##  memory: "256Mi"
-    ##  cpu: "200m"
-    requests: {}
-    ##limits:
-    ##  memory: "2Gi"
-    ##  cpu: "1000m"
-    limits: {}
+  ## Horizontal Pod Autoscaling parameters
+  ## Horizontal Pod Autoscaling is used for autoscaling of the Converter deployment
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## The parameters below for autoscaling are used only when `converter.autoscaling.enabled=true`
   autoscaling:
+    ## converter.autoscaling.enabled Enable Converter deployment autoscaling
     enabled: false
+    ## converter.autoscaling.minReplicas Converter deployment autoscaling minimum number of replicas
     minReplicas: 2
+    ## converter.autoscaling.maxReplicas Converter deployment autoscaling maximum number of replicas
     maxReplicas: 16
     targetCPU:
+      ## converter.autoscaling.targetCPU.enabled Enable autoscaling of Converter deployment by CPU usage percentage
       enabled: true
+      ## converter.autoscaling.targetCPU.utilizationPercentage Converter deployment autoscaling target CPU percentage
       utilizationPercentage: 70
     targetMemory:
+      ## converter.autoscaling.targetMemory.enabled Enable autoscaling of Converter deployment by memory usage percentage
       enabled: false
+      ## converter.autoscaling.targetMemory.utilizationPercentage Converter deployment autoscaling target memory percentage
       utilizationPercentage: 70
+    ## converter.autoscaling.customMetricsType Custom, additional or external autoscaling metrics for the Converter deployment
+    ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
     ##Example:
     ##customMetricsType:
     ##  - type: Pods
@@ -577,6 +627,9 @@ converter:
     ##        type: AverageValue
     ##        averageValue: 1k
     customMetricsType: []
+    ## converter.autoscaling.behavior Configuring Converter deployment scaling behavior policies for the `scaleDown` and `scaleUp` fields
+    ## If not set the default values are used:
+    ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#default-behavior
     ##Example:
     ##behavior:
     ##  scaleDown:
@@ -596,11 +649,46 @@ converter:
     ##      periodSeconds: 15
     ##    selectPolicy: Max
     behavior: {}
+  ## Converter container image parameters
+  image:
+    ## converter.image.repository converter container image repository
+    ## For more information, see after the Parameters table
+    ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
+    repository: onlyoffice/docs-converter-de
+    ## converter.image.tag converter container image tag
+    tag: 7.2.1-1
+    ## converter.image.pullPolicy converter container image pull policy
+    pullPolicy: IfNotPresent
+  ## converter container resource requests and limits
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  ## converter.resources.requests The requested resources for the converter container
+  ## converter.resources.limits The resources limits for the converter container
+  resources:
+    ##Example:
+    ##requests:
+    ##  memory: "256Mi"
+    ##  cpu: "200m"
+    requests: {}
+    ##limits:
+    ##  memory: "2Gi"
+    ##  cpu: "1000m"
+    limits: {}
 
+## Onlyoffice Docs Example StatefulSet parameters
+##
 example:
+  ## example.enabled Enables Example installation
   enabled: false
+  ## example.dsUrl Onlyoffice Docs external address
+  ## It should be changed only if it is necessary to check the operation of the conversion in Example
+  ## E.g.
+  ## dsUrl: "http://<documentserver-address>/"
+  dsUrl: "/"
+  ## example.podAnnotations Map of annotations to add to the Example pod
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
+  ## Update strategy used to replace old Pods by new ones. Allowed values: `RollingUpdate` or `OnDelete`
+  ## example.updateStrategy.type Example StatefulSet update strategy type
   updateStrategy:
     type: RollingUpdate
   ## Pod affinity rules for Example Pod scheduling by nodes relative to other Pods
@@ -652,13 +740,21 @@ example:
   ##        - zone2
   ##
   nodeAffinity: {}
+  ## Example container image parameters
   image:
+    ## example.image.repository example container image name
     repository: onlyoffice/docs-example
+    ## example.image.tag example container image tag
     tag: 7.2.1-1
+    ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
+  ## example.containerPorts.http example container port
   containerPorts:
     http: 3000
-  dsUrl: "/"
+  ## example container resource requests and limits
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  ## example.resources.requests The requested resources for the example container
+  ## example.resources.limits The resources limits for the example container
   resources:
     ##Example:
     ##requests:
@@ -670,26 +766,48 @@ example:
     ##  cpu: "250m"
     limits: {}
 
+## Onlyoffice Docs ingress parameters
+##
 ingress:
+  ## ingress.enabled Enable the creation of an ingress for the ONLYOFFICE Docs
   enabled: false
+  ## ingress.annotations Map of annotations to add to the Ingress
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: 100m
-  host: ""
   ssl:
+    ## ingress.ssl.enabled Enable TLS for the ONLYOFFICE Docs ingress
     enabled: false
+    ## ingress.ssl.secret Secret name for TLS to mount into the Ingress
+    ## Used only when `ingress.ssl.enabled=true
     secret: tls
-
+  ## ingress.host Ingress hostname for the ONLYOFFICE Docs
+  host: ""
+## grafana_ingress.enabled Enable the creation of an ingress for the Grafana
+## Used if you set `metrics.enabled` to `true` and want to use Nginx Ingress to access Grafana
 grafana_ingress:
   enabled: false
 
+## Onlyoffice Docs jobs parameters
+##
+## Job by install has a pre-install hook and executes before any resources are created in Kubernetes
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He creates tables in the database `connections.dbName` for Onlyoffice Docs
 install:
   job:
+    ## install.job.enabled Enable the execution of job pre-install before installing ONLYOFFICE Docs
     enabled: true
     image:
+      ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
+      ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
       tag: 7.2.1-1
+      ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
+    ## Job pre-install container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## install.job.resources.requests The requested resources for the job pre-install container
+    ## install.job.resources.limits The resources limits for the job pre-install container
     resources:
       ##Example:
       ##requests:
@@ -702,17 +820,35 @@ install:
       limits: {}
   existingConfigmap:
     tblCreate:
+      ## install.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
+      ## Used if `privateCluster` is set to `true`
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
+      ## install.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
+      ## Must be the same as the `key` name in `install.existingConfigmap.tblCreate.name`
       keyName: createdb.sql
+    ## install.existingConfigmap.initdb The name of the existing ConfigMap that contains the initdb script
+    ## If set, the default configmap will not be created and the two previous parameters are ignored
+    ## Must contain a key `initdb.sh`
     initdb: ""
-
+## Job by upgrade has a pre-upgrade hook and executes on an upgrade request before all of the release's resources have been upgraded
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He stops the ONLYOFFICE Docs, clears the directory ".../cache/files/" and recreates the tables in the database `connections.dbName`
 upgrade:
   job:
+    ## upgrade.job.enabled Enable the execution of job pre-upgrade before upgrading ONLYOFFICE Docs
     enabled: true
     image:
+      ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
+      ## upgrade.job.image.tag Job by upgrade image tag
       tag: 7.2.1-1
+      ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
+    ## Job pre-upgrade container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## upgrade.job.resources.requests The requested resources for the job pre-upgrade container
+    ## upgrade.job.resources.limits The resources limits for the job pre-upgrade container
     resources:
       ##Example:
       ##requests:
@@ -725,20 +861,43 @@ upgrade:
       limits: {}
   existingConfigmap:
     tblRemove:
+      ## upgrade.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
+      ## Used if `privateCluster` is set to `true`
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
+      ## upgrade.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
+      ## Must be the same as the `key` name in `upgrade.existingConfigmap.tblRemove.name`
       keyName: removetbl.sql
     tblCreate:
+      ## upgrade.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
+      ## Used if `privateCluster` is set to `true`
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
+      ## upgrade.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
+      ## Must be the same as the `key` name in `upgrade.existingConfigmap.tblCreate.name`
       keyName: createdb.sql
+    ## upgrade.existingConfigmap.dsStop The name of the existing ConfigMap that contains the ONLYOFFICE Docs upgrade script
+    ## If set, the default configmap will not be created and the four previous parameters are ignored
+    ## Must contain a key `stop.sh`
     dsStop: ""
-
+## Job by rollback has a pre-rollback hook and executes on an rollback request before all of the release's resources have been rollback
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He stops the ONLYOFFICE Docs, clears the directory ".../cache/files/" and recreates the tables in the database `connections.dbName`
 rollback:
   job:
+    ## rollback.job.enabled Enable the execution of job pre-rollback before rolling back ONLYOFFICE Docs
     enabled: true
     image:
+      ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
+      ## rollback.job.image.tag Job by rollback image tag
       tag: 7.2.1-1
+      ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
+    ## Job pre-rollback container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## rollback.job.resources.requests The requested resources for the job pre-rollback container
+    ## rollback.job.resources.limits The resources limits for the job pre-rollback container
     resources:
       ##Example:
       ##requests:
@@ -751,20 +910,43 @@ rollback:
       limits: {}
   existingConfigmap:
     tblRemove:
+      ## rollback.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
+      ## Used if `privateCluster` is set to `true`
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
+      ## rollback.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
+      ## Must be the same as the `key` name in `rollback.existingConfigmap.tblRemove.name`
       keyName: removetbl.sql
     tblCreate:
+      ## rollback.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
+      ## Used if `privateCluster` is set to `true`
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
+      ## rollback.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
+      ## Must be the same as the `key` name in `rollback.existingConfigmap.tblCreate.name`
       keyName: createdb.sql
+    ## rollback.existingConfigmap.dsStop The name of the existing ConfigMap that contains the ONLYOFFICE Docs rollback script
+    ## If set, the default configmap will not be created and the four previous parameters are ignored
+    ## Must contain a key `stop.sh`
     dsStop: ""
-
+## Job by delete has a pre-delete hook and executes on a deletion request before all of the release's resources have been deleted
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He stops the ONLYOFFICE Docs, clears the directory ".../cache/files/" and deletes tables in the database `connections.dbName`
 delete:
   job:
+    ## delete.job.enabled Enable the execution of job pre-delete before deleting ONLYOFFICE Docs
     enabled: true
     image:
+      ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
+      ## delete.job.image.tag Job by delete image tag
       tag: 7.2.1-1
+      ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
+    ## Job pre-delete container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## delete.job.resources.requests The requested resources for the job pre-delete container
+    ## delete.job.resources.limits The resources limits for the job pre-delete container
     resources:
       ##Example:
       ##requests:
@@ -777,6 +959,14 @@ delete:
       limits: {}
   existingConfigmap:
     tblRemove:
+      ## delete.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
+      ## Used if `privateCluster` is set to `true`
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
+      ## delete.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
+      ## Must be the same as the `key` name in `delete.existingConfigmap.tblRemove.name`
       keyName: removetbl.sql
+    ## delete.existingConfigmap.dsStop The name of the existing ConfigMap that contains the ONLYOFFICE Docs delete script
+    ## If set, the default configmap will not be created and the two previous parameters are ignored
+    ## Must contain a key `stop.sh`
     dsStop: ""
