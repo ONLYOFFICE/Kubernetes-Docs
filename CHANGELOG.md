@@ -1,5 +1,17 @@
 # Change log
 
+## 2.1.0
+
+### New Features
+
+* Added additional parameters to connect to Redis
+* Added the ability to specify an existing ServiceAccount or create a new one
+* Added the ability set up custom `labels`, `nodeAffinity`, `podAffinity` and `namespace`
+
+### Fixes
+
+* Fixed service port in ONLYOFFICE Docs ingress
+
 ## 2.0.1
 
 ### New Features
