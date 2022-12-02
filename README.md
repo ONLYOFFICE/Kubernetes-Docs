@@ -800,7 +800,7 @@ For example:
 $ kubectl apply -f shutdown-ds.yaml -ns onlyoffice
 ```
 
-If after stopping ds you need to start it again then restart docservice and converter pods. For example, using the following command:
+If after stopping ONLYOFFICE Docs you need to start it again then restart docservice and converter pods. For example, using the following command:
 
 ```bash
 $ kubectl delete pod converter-*** docservice-*** -ns <NAMESPACE>
