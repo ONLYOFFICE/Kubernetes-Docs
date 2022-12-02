@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: stop-ds
+spec:
+  volumes:
+  - name: stop-ds
+    configMap:
+      name: stop-ds
+      defaultMode: 0755
+  containers:
+  - name: stop-ds
+    image: onlyoffice/docs-utils:7.2.1-2
+    command: ["/bin/sh", "-c"]
+    args: ["/sql/stop.sh"]
+    name: stop-ds
+    volumeMounts:
+    - name: stop-ds
+      mountPath: /sql/stop.sh
+      subPath: stop.sh
+  restartPolicy: Never
+  
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stop-ds
+data:
+  stop.sh: |-
+    #!/bin/bash
+    curlout="$(curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s)"
+    if [[ "${curlout}" != "true" ]]; then
+      echo -e "\e[0;31m The server could not be disabled \e[0m"
+      exit 1
+    else
+      echo work done
+    fi

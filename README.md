@@ -784,11 +784,11 @@ Note: When rolling back ONLYOFFICE Docs in a private k8s cluster behind a Web pr
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
-To perform the shutdown, clone this repository and open the repo directory.
-Next, run the following script:
+To perform the shutdown, download and apply the following manifest:
 
 ```bash
-$ ./sources/scripts/shutdown-ds.sh -ns <NAMESPACE>
+$ wget -O shutdown-ds.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/shutdown-ds.yaml
+$ kubectl apply -f shutdown-ds.yaml -ns <NAMESPACE>
 ```
 
 Where:
@@ -796,7 +796,7 @@ Where:
 
 For example:
 ```bash
-$ ./sources/scripts/shutdown-ds.sh -ns onlyoffice
+$ kubectl apply -f shutdown-ds.yaml -ns onlyoffice
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
