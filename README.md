@@ -795,8 +795,15 @@ Where:
  - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
 
 For example:
+
 ```bash
 $ kubectl apply -f shutdown-ds.yaml -ns onlyoffice
+```
+
+If after stopping ds you need to start it again then restart docservice and converter pods. For example, using the following command:
+
+```bash
+$ kubectl delete pod converter-*** docservice-*** -ns <NAMESPACE>
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
@@ -810,7 +817,7 @@ $ kubectl create secret generic license --from-file=path/to/license.lic
 ```
  - Restart `docservice` and `converter` pods. For example, using the following command:
 ```bash
-$ kubectl delete pod converter-*** docservice-***
+$ kubectl delete pod converter-*** docservice-*** -ns <NAMESPACE>
 ```
 
 ### 10. Run Jobs in a private k8s cluster (optional)
