@@ -788,22 +788,28 @@ To perform the shutdown, download and apply the following manifest:
 
 ```bash
 $ wget -O shutdown-ds.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/shutdown-ds.yaml
-$ kubectl apply -f shutdown-ds.yaml -ns <NAMESPACE>
+$ kubectl apply -f shutdown-ds.yaml -n <NAMESPACE>
 ```
 
 Where:
- - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
+ - `<NAMESPACE>` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
 
 For example:
 
 ```bash
-$ kubectl apply -f shutdown-ds.yaml -ns onlyoffice
+$ kubectl apply -f shutdown-ds.yaml -n onlyoffice
+```
+
+After successfully executing the Pod `shutdown-ds` that created the Job, delete this Job with the following command:
+
+```bash
+$ kubectl delete job shutdown-ds -n <NAMESPACE>
 ```
 
 If after stopping ONLYOFFICE Docs you need to start it again then restart docservice and converter pods. For example, using the following command:
 
 ```bash
-$ kubectl delete pod converter-*** docservice-*** -ns <NAMESPACE>
+$ kubectl delete pod converter-*** docservice-*** -n <NAMESPACE>
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
@@ -812,12 +818,12 @@ In order to update the license, you need to perform the following steps:
  - Place the license.lic file containing the new key in some directory
  - Run the following commands:
 ```bash
-$ kubectl delete secret license
-$ kubectl create secret generic license --from-file=path/to/license.lic
+$ kubectl delete secret license -n <NAMESPACE>
+$ kubectl create secret generic license --from-file=path/to/license.lic -n <NAMESPACE>
 ```
  - Restart `docservice` and `converter` pods. For example, using the following command:
 ```bash
-$ kubectl delete pod converter-*** docservice-*** -ns <NAMESPACE>
+$ kubectl delete pod converter-*** docservice-*** -n <NAMESPACE>
 ```
 
 ### 10. Run Jobs in a private k8s cluster (optional)
