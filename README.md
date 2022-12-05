@@ -131,7 +131,6 @@ To install Redis to your cluster, run the following command:
 ```bash
 $ helm install redis bitnami/redis \
   --set architecture=standalone \
-  --set auth.enabled=false \
   --set metrics.enabled=false
 ```
 
@@ -145,19 +144,6 @@ As a database server, you can use PostgreSQL, MySQL or MariaDB
 
 **If PostgreSQL is selected as the database server, then follow these steps**
 
-Download the ONLYOFFICE Docs database scheme:
-
-```bash
-wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
-```
-
-Create a configmap from it:
-
-```bash
-$ kubectl create configmap init-db-scripts \
-  --from-file=./createdb.sql
-```
-
 To install PostgreSQL to your cluster, run the following command:
 
 ```
@@ -170,19 +156,6 @@ $ helm install postgresql bitnami/postgresql \
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
 
 **If MySQL is selected as the database server, then follow these steps**
-
-Download the ONLYOFFICE Docs database scheme:
-
-```bash
-wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/createdb.sql
-```
-
-Create a configmap from it:
-
-```bash
-$ kubectl create configmap init-db-scripts \
-  --from-file=./createdb.sql
-```
 
 To install MySQL to your cluster, run the following command:
 
@@ -385,6 +358,12 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `connections.dbExistingSecret`                              | Name of existing secret to use for Database passwords. Must contain the key specified in `connections.dbSecretKeyName`                                                         | `postgresql`                                                                              |
 | `connections.redistHost`                                    | The IP address or the name of the Redis host                                                                                                                                   | `redis-master`                                                                            |
 | `connections.redisPort`                                     | The Redis server port number                                                                                                                                                   | `6379`                                                                                    |
+| `connections.redisUser`                                     | The Redis [user](https://redis.io/docs/management/security/acl/) name. The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file | `default`                                                        |
+| `connections.redisDBNum`                                    | Number of the redis logical database to be [selected](https://redis.io/commands/select/). The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file | `0`                                           |
+| `connections.redisPassword`                                 | The password set for the Redis account. If set to, it takes priority over the `connections.redisExistingSecret`. The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file | `""`                   |
+| `connections.redisSecretKeyName`                            | The name of the key that contains the Redis user password                                                                                                                      | `redis-password`                                                                          |
+| `connections.redisExistingSecret`                           | Name of existing secret to use for Redis passwords. Must contain the key specified in `connections.redisSecretKeyName`. The password from this secret overrides password set in the `options` object in `local.json` | `redis`                                             |
+| `connections.redisNoPass`                                   | Defines whether to use a Redis auth without a password. If the connection to Redis server does not require a password, set the value to `true`                                 | `false`                                                                                   |
 | `connections.amqpType`                                      | Defines the AMQP server type. Possible values are `rabbitmq` or `activemq`                                                                                                     | `rabbitmq`                                                                                |
 | `connections.amqpHost`                                      | The IP address or the name of the AMQP server                                                                                                                                  | `rabbitmq`                                                                                |
 | `connections.amqpPort`                                      | The port for the connection to AMQP server                                                                                                                                     | `5672`                                                                                    |
@@ -397,6 +376,12 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `persistence.existingClaim`                                 | Name of an existing PVC to use. If not specified, a PVC named "ds-files" will be created                                                                                       | `""`                                                                                      |
 | `persistence.storageClass`                                  | PVC Storage Class for ONLYOFFICE Docs data volume                                                                                                                              | `nfs`                                                                                     |
 | `persistence.size`                                          | PVC Storage Request for ONLYOFFICE Docs volume                                                                                                                                 | `8Gi`                                                                                     |
+| `namespaceOverride`                                         | The name of the namespace in which Onlyoffice Docs will be deployed. If not set, the name will be taken from `.Release.Namespace`                                              | `""`                                                                                      |
+| `commonLabels`                                              | Defines labels that will be additionally added to all the deployed resources. You can also use `tpl` as the value for the key                                                  | `{}`                                                                                      |
+| `serviceAccount.create`                                     | Enable ServiceAccount creation                                                                                                                                                 | `false`                                                                                   |
+| `serviceAccount.name`                                       | Name of the ServiceAccount to be used. If not set and `serviceAccount.create` is `true` the name will be taken from `.Release.Name` or `serviceAccount.create` is `false` the name will be "default" | `""`                                                                |
+| `serviceAccount.annotations`                                | Map of annotations to add to the ServiceAccount                                                                                                                                | `{}`                                                                                      |
+| `serviceAccount.automountServiceAccountToken`               | Enable auto mount of ServiceAccountToken on the serviceAccount created. Used only if `serviceAccount.create` is `true`                                                         | `true`                                                                                    |
 | `license.existingSecret`                                    | Name of the existing secret that contains the license. Must contain the key `license.lic`                                                                                      | `""`                                                                                      |
 | `license.existingClaim`                                     | Name of the existing PVC in which the license is stored. Must contain the file `license.lic`                                                                                   | `""`                                                                                      |
 | `log.level`                                                 | Defines the type and severity of a logged event. Possible values are `ALL`, `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`, `MARK`, `OFF`                                  | `WARN`                                                                                    |
@@ -410,8 +395,10 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `example.enabled`                                           | Enables the installation of Example                                                                                                                                            | `false`                                                                                   |
 | `example.podAnnotations`                                    | Map of annotations to add to the example pod                                                                                                                                   | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
 | `example.updateStrategy.type`                               | Example StatefulSet update strategy type                                                                                                                                       | `RollingUpdate`                                                                           |
+| `example.podAffinity`                                       | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Example Pod scheduling by nodes relative to other Pods | `{}`                                                              |
+| `example.nodeAffinity`                                      | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Example Pod scheduling by nodes                      | `{}`                                                                                      |
 | `example.image.repository`                                  | Example container image name                                                                                                                                                   | `onlyoffice/docs-example`                                                                 |
-| `example.image.tag`                                         | Example container image tag                                                                                                                                                    | `7.2.1-1`                                                                                 |
+| `example.image.tag`                                         | Example container image tag                                                                                                                                                    | `7.2.1-2`                                                                                 |
 | `example.image.pullPolicy`                                  | Example container image pull policy                                                                                                                                            | `IfNotPresent`                                                                            |
 | `example.dsUrl`                                             | Documentserver external address. It should be changed only if it is necessary to check the operation of the conversion in Example (e.g. http://\<documentserver-address\>/)    | `/`                                                                                       |
 | `example.resources.requests`                                | The requested resources for the Example container                                                                                                                              | `{}`                                                                                      |
@@ -428,8 +415,10 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `docservice.podAnnotations`                                 | Map of annotations to add to the Docservice deployment pods                                                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
 | `docservice.replicas`                                       | Docservice replicas quantity. If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored                                                                      | `2`                                                                                       |
 | `docservice.updateStrategy.type`                            | Docservice deployment update strategy type                                                                                                                                     | `Recreate`                                                                                |
+| `docservice.podAffinity`                                    | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Docservice Pods scheduling by nodes relative to other Pods | `{}`                                                          |
+| `docservice.nodeAffinity`                                   | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Docservice Pods scheduling by nodes                  | `{}`                                                                                      |
 | `docservice.image.repository`                               | Docservice container image repository*                                                                                                                                         | `onlyoffice/docs-docservice-de`                                                           |
-| `docservice.image.tag`                                      | Docservice container image tag                                                                                                                                                 | `7.2.1-1`                                                                                 |
+| `docservice.image.tag`                                      | Docservice container image tag                                                                                                                                                 | `7.2.1-2`                                                                                 |
 | `docservice.image.pullPolicy`                               | Docservice container image pull policy                                                                                                                                         | `IfNotPresent`                                                                            |
 | `docservice.resources.requests`                             | The requested resources for the Docservice container                                                                                                                           | `{}`                                                                                      |
 | `docservice.resources.limits`                               | The resources limits for the Docservice container                                                                                                                              | `{}`                                                                                      |
@@ -449,7 +438,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `proxy.secureLinkSecret`                                    | Defines secret for the nginx config directive [secure_link_md5](https://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5)                               | `verysecretstring`                                                                        |
 | `proxy.infoAllowedIP`                                       | Defines ip addresses for accessing the info page                                                                                                                               | `[]`                                                                                      |
 | `proxy.image.repository`                                    | Docservice Proxy container image repository*                                                                                                                                   | `onlyoffice/docs-proxy-de`                                                                |
-| `proxy.image.tag`                                           | Docservice Proxy container image tag                                                                                                                                           | `7.2.1-1`                                                                                 |
+| `proxy.image.tag`                                           | Docservice Proxy container image tag                                                                                                                                           | `7.2.1-2`                                                                                 |
 | `proxy.image.pullPolicy`                                    | Docservice Proxy container image pull policy                                                                                                                                   | `IfNotPresent`                                                                            |
 | `proxy.resources.requests`                                  | The requested resources for the Proxy container                                                                                                                                | `{}`                                                                                      |
 | `proxy.resources.limits`                                    | The resources limits for the Proxy container                                                                                                                                   | `{}`                                                                                      |
@@ -461,8 +450,10 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `converter.updateStrategy.type`                             | Converter deployment update strategy type                                                                                                                                      | `RollingUpdate`                                                                           |
 | `converter.updateStrategy.rollingUpdate.maxUnavailable`     | Maximum number of Converter Pods unavailable during the update process. Used only when `converter.updateStrategy.type=RollingUpdate`                                           | `25%`                                                                                     |
 | `converter.updateStrategy.rollingUpdate.maxSurge`           | Maximum number of Converter Pods created over the desired number of Pods. Used only when `converter.updateStrategy.type=RollingUpdate`                                         | `25%`                                                                                     |
+| `converter.podAffinity`                                     | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Converter Pods scheduling by nodes relative to other Pods | `{}`                                                           |
+| `converter.nodeAffinity`                                    | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Converter Pods scheduling by nodes                   | `{}`                                                                                      |
 | `converter.image.repository`                                | Converter container image repository*                                                                                                                                          | `onlyoffice/docs-converter-de`                                                            |
-| `converter.image.tag`                                       | Converter container image tag                                                                                                                                                  | `7.2.1-1`                                                                                 |
+| `converter.image.tag`                                       | Converter container image tag                                                                                                                                                  | `7.2.1-2`                                                                                 |
 | `converter.image.pullPolicy`                                | Converter container image pull policy                                                                                                                                          | `IfNotPresent`                                                                            |
 | `converter.resources.requests`                              | The requested resources for the Converter container                                                                                                                            | `{}`                                                                                      |
 | `converter.resources.limits`                                | The resources limits for the Converter container                                                                                                                               | `{}`                                                                                      |
@@ -508,7 +499,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `privateCluster`                                            | Specify whether the k8s cluster is used in a private network without internet access                                                                                           | `false`                                                                                   |
 | `upgrade.job.enabled`                                       | Enable the execution of job pre-upgrade before upgrading ONLYOFFICE Docs                                                                                                       | `true`                                                                                    |
 | `upgrade.job.image.repository`                              | Job by upgrade image repository                                                                                                                                                | `onlyoffice/docs-utils`                                                                   |
-| `upgrade.job.image.tag`                                     | Job by upgrade image tag                                                                                                                                                       | `7.2.1-1`                                                                                 |
+| `upgrade.job.image.tag`                                     | Job by upgrade image tag                                                                                                                                                       | `7.2.1-2`                                                                                 |
 | `upgrade.job.image.pullPolicy`                              | Job by upgrade image pull policy                                                                                                                                               | `IfNotPresent`                                                                            |
 | `upgrade.job.resources.requests`                            | The requested resources for the job pre-upgrade container                                                                                                                      | `{}`                                                                                      |
 | `upgrade.job.resources.limits`                              | The resources limits for the job pre-upgrade container                                                                                                                         | `{}`                                                                                      |
@@ -519,7 +510,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `upgrade.existingConfigmap.dsStop`                          | The name of the existing ConfigMap that contains the ONLYOFFICE Docs upgrade script. If set, the four previous parameters are ignored. Must contain a key `stop.sh`            | `""`                                                                                      |
 | `rollback.job.enabled`                                      | Enable the execution of job pre-rollback before rolling back ONLYOFFICE Docs                                                                                                   | `true`                                                                                    |
 | `rollback.job.image.repository`                             | Job by rollback image repository                                                                                                                                               | `onlyoffice/docs-utils`                                                                   |
-| `rollback.job.image.tag`                                    | Job by rollback image tag                                                                                                                                                      | `7.2.1-1`                                                                                 |
+| `rollback.job.image.tag`                                    | Job by rollback image tag                                                                                                                                                      | `7.2.1-2`                                                                                 |
 | `rollback.job.image.pullPolicy`                             | Job by rollback image pull policy                                                                                                                                              | `IfNotPresent`                                                                            |
 | `rollback.job.resources.requests`                           | The requested resources for the job rollback container                                                                                                                         | `{}`                                                                                      |
 | `rollback.job.resources.limits`                             | The resources limits for the job rollback container                                                                                                                            | `{}`                                                                                      |
@@ -530,7 +521,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `rollback.existingConfigmap.dsStop`                         | The name of the existing ConfigMap that contains the ONLYOFFICE Docs rollback script. If set, the four previous parameters are ignored. Must contain a key `stop.sh`           | `""`                                                                                      |
 | `delete.job.enabled`                                        | Enable the execution of job pre-delete before deleting ONLYOFFICE Docs                                                                                                         | `true`                                                                                    |
 | `delete.job.image.repository`                               | Job by delete image repository                                                                                                                                                 | `onlyoffice/docs-utils`                                                                   |
-| `delete.job.image.tag`                                      | Job by delete image tag                                                                                                                                                        | `7.2.1-1`                                                                                 |
+| `delete.job.image.tag`                                      | Job by delete image tag                                                                                                                                                        | `7.2.1-2`                                                                                 |
 | `delete.job.image.pullPolicy`                               | Job by delete image pull policy                                                                                                                                                | `IfNotPresent`                                                                            |
 | `delete.job.resources.requests`                             | The requested resources for the job delete container                                                                                                                           | `{}`                                                                                      |
 | `delete.job.resources.limits`                               | The resources limits for the job delete container                                                                                                                              | `{}`                                                                                      |
@@ -539,7 +530,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `delete.existingConfigmap.dsStop`                           | The name of the existing ConfigMap that contains the ONLYOFFICE Docs delete script. If set, the two previous parameters are ignored. Must contain a key `stop.sh`              | `""`                                                                                      |
 | `install.job.enabled`                                       | Enable the execution of job pre-install before installing ONLYOFFICE Docs                                                                                                      | `true`                                                                                    |
 | `install.job.image.repository`                              | Job by pre-install ONLYOFFICE Docs image repository                                                                                                                            | `onlyoffice/docs-utils`                                                                   |
-| `install.job.image.tag`                                     | Job by pre-install ONLYOFFICE Docs image tag                                                                                                                                   | `7.2.1-1`                                                                                 |
+| `install.job.image.tag`                                     | Job by pre-install ONLYOFFICE Docs image tag                                                                                                                                   | `7.2.1-2`                                                                                 |
 | `install.job.image.pullPolicy`                              | Job by pre-install ONLYOFFICE Docs image pull policy                                                                                                                           | `IfNotPresent`                                                                            |
 | `install.job.resources.requests`                            | The requested resources for the job pre-install container                                                                                                                      | `{}`                                                                                      |
 | `install.job.resources.limits`                              | The resources limits for the job pre-install container                                                                                                                         | `{}`                                                                                      |
@@ -793,19 +784,32 @@ Note: When rolling back ONLYOFFICE Docs in a private k8s cluster behind a Web pr
   
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
-To perform the shutdown, clone this repository and open the repo directory.
-Next, run the following script:
+To perform the shutdown, download and apply the following manifest:
 
 ```bash
-$ ./sources/scripts/shutdown-ds.sh -ns <NAMESPACE>
+$ wget -O shutdown-ds.yaml https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/shutdown-ds.yaml
+$ kubectl apply -f shutdown-ds.yaml -n <NAMESPACE>
 ```
 
 Where:
- - `ns` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
+ - `<NAMESPACE>` - Namespace where ONLYOFFICE Docs is installed. If not specified, the default value will be used: `default`.
 
 For example:
+
 ```bash
-$ ./sources/scripts/shutdown-ds.sh -ns onlyoffice
+$ kubectl apply -f shutdown-ds.yaml -n onlyoffice
+```
+
+After successfully executing the Pod `shutdown-ds` that created the Job, delete this Job with the following command:
+
+```bash
+$ kubectl delete job shutdown-ds -n <NAMESPACE>
+```
+
+If after stopping ONLYOFFICE Docs you need to start it again then restart docservice and converter pods. For example, using the following command:
+
+```bash
+$ kubectl delete pod converter-*** docservice-*** -n <NAMESPACE>
 ```
 
 ### 9. Update ONLYOFFICE Docs license (optional)
@@ -814,12 +818,12 @@ In order to update the license, you need to perform the following steps:
  - Place the license.lic file containing the new key in some directory
  - Run the following commands:
 ```bash
-$ kubectl delete secret license
-$ kubectl create secret generic license --from-file=path/to/license.lic
+$ kubectl delete secret license -n <NAMESPACE>
+$ kubectl create secret generic license --from-file=path/to/license.lic -n <NAMESPACE>
 ```
  - Restart `docservice` and `converter` pods. For example, using the following command:
 ```bash
-$ kubectl delete pod converter-*** docservice-***
+$ kubectl delete pod converter-*** docservice-*** -n <NAMESPACE>
 ```
 
 ### 10. Run Jobs in a private k8s cluster (optional)

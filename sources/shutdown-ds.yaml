@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: shutdown-ds
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      volumes:
+      - name: shutdown-ds
+        configMap:
+          name: shutdown-ds
+          defaultMode: 0755
+      containers:
+        - name: shutdown-ds
+          image: onlyoffice/docs-utils:7.2.1-2
+          command: ["/bin/sh", "-c"]
+          args: ["/sql/stop.sh"]
+          volumeMounts:
+          - name: shutdown-ds
+            mountPath: /sql/stop.sh
+            subPath: stop.sh
+      restartPolicy: Never
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shutdown-ds
+data:
+  stop.sh: |-
+    #!/bin/bash
+    curlout="$(curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s)"
+    if [[ "${curlout}" != "true" ]]; then
+      echo -e "\e[0;31m The server could not be disabled \e[0m"
+      exit 1
+    else
+      echo work done
+    fi

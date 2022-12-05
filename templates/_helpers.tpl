@@ -74,6 +74,39 @@ Return RabbitMQ password
 {{- end -}}
 
 {{/*
+Get the Redis password secret
+*/}}
+{{- define "ds.redis.secretName" -}}
+{{- if or .Values.connections.redisPassword .Values.connections.redisNoPass -}}
+    {{- printf "%s-redis" .Release.Name -}}
+{{- else if .Values.connections.redisExistingSecret -}}
+    {{- printf "%s" (tpl .Values.connections.redisExistingSecret $) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for Redis
+*/}}
+{{- define "ds.redis.createSecret" -}}
+{{- if or .Values.connections.redisPassword .Values.connections.redisNoPass (not .Values.connections.redisExistingSecret) -}}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return Redis password
+*/}}
+{{- define "ds.redis.password" -}}
+{{- if not (empty .Values.connections.redisPassword) }}
+    {{- .Values.connections.redisPassword }}
+{{- else if .Values.connections.redisNoPass }}
+    {{- printf "" }}
+{{- else }}
+    {{- required "A Redis Password is required!" .Values.connections.redisPassword }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Get the PVC name
 */}}
 {{- define "ds.pvc.name" -}}
@@ -311,4 +344,35 @@ Return the configmap name of creating tables for install ds
 {{- else if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) (not .Values.install.existingConfigmap.tblCreate.name) }}
     {{- required "You set privateCluster=true and did not specify an existing secret containing the initdb script. In this case, you must set install.existingConfigmap.tblCreate.name!" .Values.install.existingConfigmap.tblCreate.name }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Get the ds labels
+*/}}
+{{- define "ds.labels.commonLabels" -}}
+{{- range $key, $value := .Values.commonLabels }}
+{{ $key }}: {{ tpl $value $ }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Get the ds Service Account name
+*/}}
+{{- define "ds.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default .Release.Name .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the ds Namespace
+*/}}
+{{- define "ds.namespace" -}}
+{{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
+{{- else -}}
+    {{- .Release.Namespace -}}
+{{- end -}}
 {{- end -}}

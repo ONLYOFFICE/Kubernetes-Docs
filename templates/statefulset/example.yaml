@@ -3,12 +3,19 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: example
+  namespace: {{ include "ds.namespace" . | quote }}
   labels:
     app: example
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
 spec:
   selector:
     matchLabels:
       app: example
+      {{- if .Values.commonLabels }}
+      {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
+      {{- end }}
   serviceName: example
   replicas: 1
   {{- if .Values.example.updateStrategy }}
@@ -19,6 +26,9 @@ spec:
     metadata:
       labels:
         app: example
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
       {{- if .Values.example.podAnnotations }}
       annotations:
         {{- range $key, $value := .Values.example.podAnnotations }}
@@ -26,14 +36,26 @@ spec:
         {{- end }}
       {{- end }}
     spec:
+      serviceAccountName: {{ include "ds.serviceAccountName" . }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.example | nindent 8 }}
       {{- end }}
+      {{- if or .Values.example.podAffinity .Values.example.nodeAffinity }}
+      affinity:
+        {{- with .Values.example.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.example.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       {{- if .Values.nodeSelector }}
-      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
       {{- if .Values.tolerations }}
-      tolerations: {{ toYaml .Values.tolerations | nindent 4 }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
       containers:
       - name: example

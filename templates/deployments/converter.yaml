@@ -2,8 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: converter
+  namespace: {{ include "ds.namespace" . | quote }}
   labels:
     app: converter
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
 spec:
   {{- if not .Values.converter.autoscaling.enabled }}
   replicas: {{ .Values.converter.replicas }}
@@ -11,6 +15,9 @@ spec:
   selector:
     matchLabels:
       app: converter
+      {{- if .Values.commonLabels }}
+      {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
+      {{- end }}
   {{- if .Values.converter.updateStrategy }}
   strategy: {{- toYaml .Values.converter.updateStrategy | nindent 4 }}
   {{- end }}
@@ -18,13 +25,17 @@ spec:
     metadata:
       labels:
         app: converter
-    {{- if .Values.converter.podAnnotations }}
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.converter.podAnnotations }}
       annotations:
         {{- range $key, $value := .Values.converter.podAnnotations }}
         {{ $key }}: {{ tpl $value $ }}
         {{- end }}
-    {{- end }}
+      {{- end }}
     spec:
+      serviceAccountName: {{ include "ds.serviceAccountName" . }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.converter | nindent 8 }}
       {{- end }}
@@ -50,6 +61,14 @@ spec:
                 values:
                 - converter
             topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+        {{- end }}
+        {{- with .Values.converter.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.converter.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
         {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
@@ -95,6 +114,11 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.rabbitmq.secretName" . }}
                 key: {{ .Values.connections.amqpSecretKeyName }}
+          - name: REDIS_SERVER_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.redis.secretName" . }}
+                key: {{ .Values.connections.redisSecretKeyName }}
           envFrom:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}

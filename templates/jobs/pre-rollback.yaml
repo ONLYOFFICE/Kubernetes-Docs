@@ -3,6 +3,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: pre-rollback
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
   annotations:
     "helm.sh/hook": pre-rollback
     "helm.sh/hook-weight": "3"
@@ -11,6 +16,7 @@ spec:
   backoffLimit: 2
   template:
     spec:
+      serviceAccountName: {{ include "ds.serviceAccountName" . }}
       {{- if .Values.nodeSelector }}
       nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}

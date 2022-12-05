@@ -2,9 +2,17 @@ kind: Service
 apiVersion: v1
 metadata:
   name: docservice
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     app: docservice
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
   ports:
     - name: http
       protocol: TCP
