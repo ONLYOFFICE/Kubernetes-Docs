@@ -105,6 +105,10 @@ spec:
           configMap:
             name: {{ .Values.extraThemes.configMap }}
         {{- end }}
+      {{- with .Values.docservice.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: proxy
           image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}

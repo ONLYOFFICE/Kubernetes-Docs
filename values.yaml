@@ -374,6 +374,18 @@ docservice:
     ##      periodSeconds: 15
     ##    selectPolicy: Max
     behavior: {}
+  ## Docservice initContainers parameters
+  ## Containers that run before docservice and proxy containers in a Pod
+  ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## Example:
+  ##initContainers:
+  ##  - name: change-volume-owner
+  ##    image: busybox:latest
+  ##    command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
+  ##    volumeMounts:
+  ##    - name: ds-files
+  ##      mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+  initContainers: []
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:
@@ -649,6 +661,18 @@ converter:
     ##      periodSeconds: 15
     ##    selectPolicy: Max
     behavior: {}
+  ## Converter initContainers parameters
+  ## Containers that run before converter container in a Pod
+  ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## Example:
+  ##initContainers:
+  ##  - name: change-volume-owner
+  ##    image: busybox:latest
+  ##    command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
+  ##    volumeMounts:
+  ##    - name: ds-files
+  ##      mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+  initContainers: []
   ## Converter container image parameters
   image:
     ## converter.image.repository converter container image repository
