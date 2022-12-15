@@ -1,0 +1,20 @@
+{{- if not .Values.proxy.welcomePage.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ds-welcome-page
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+data:
+  ds-example.conf: |-
+    location /example/ {
+      proxy_pass http://example/;
+      proxy_set_header X-Forwarded-Host $the_host;
+      proxy_set_header X-Forwarded-Proto $the_scheme;
+      proxy_set_header X-Forwarded-Path /example;
+      proxy_set_header X-Forwarded-For example.com;
+    }
+{{- end }}
