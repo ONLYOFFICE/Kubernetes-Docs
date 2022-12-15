@@ -105,6 +105,11 @@ spec:
           configMap:
             name: {{ .Values.extraThemes.configMap }}
         {{- end }}
+        {{- if not .Values.proxy.welcomePage.enabled }}
+        - name: ds-welcome-page
+          configMap:
+            name: ds-welcome-page
+        {{- end }}
       {{- with .Values.docservice.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}
@@ -140,6 +145,11 @@ spec:
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
             subPath: {{ .Values.extraThemes.filename }}
+          {{- end }}
+          {{- if not .Values.proxy.welcomePage.enabled }}
+          - name: ds-welcome-page
+            mountPath: /etc/nginx/includes/ds-example.conf
+            subPath: ds-example.conf
           {{- end }}
 
         - name: docservice
