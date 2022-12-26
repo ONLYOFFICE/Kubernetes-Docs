@@ -1,5 +1,16 @@
 # Change log
 
+## 2.2.0
+
+### New Features
+
+* Added the ability to disable the welcome page
+* Added the ability set up custom Init Containers
+
+### Changes
+
+* Released [v7.2.2](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#722) of ONLYOFFICE Docs
+
 ## 2.1.0
 
 ### New Features
