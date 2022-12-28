@@ -374,6 +374,18 @@ docservice:
     ##      periodSeconds: 15
     ##    selectPolicy: Max
     behavior: {}
+  ## Docservice initContainers parameters
+  ## Containers that run before docservice and proxy containers in a Pod
+  ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## Example:
+  ##initContainers:
+  ##  - name: change-volume-owner
+  ##    image: busybox:latest
+  ##    command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
+  ##    volumeMounts:
+  ##    - name: ds-files
+  ##      mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+  initContainers: []
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:
@@ -382,7 +394,7 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 7.2.1-2
+    tag: 7.2.2-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## docservice.containerPorts.http docservice container port
@@ -466,13 +478,16 @@ proxy:
   ##- 10.244.0.79
   ##- 192.168.1.0/24
   infoAllowedIP: []
+  ## proxy.welcomePage.enabled Defines whether the welcome page will be displayed
+  welcomePage:
+    enabled: true
   image:
     ## proxy.image.repository proxy container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 7.2.1-2
+    tag: 7.2.2-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## proxy.containerPorts.http proxy container port
@@ -649,6 +664,18 @@ converter:
     ##      periodSeconds: 15
     ##    selectPolicy: Max
     behavior: {}
+  ## Converter initContainers parameters
+  ## Containers that run before converter container in a Pod
+  ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## Example:
+  ##initContainers:
+  ##  - name: change-volume-owner
+  ##    image: busybox:latest
+  ##    command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
+  ##    volumeMounts:
+  ##    - name: ds-files
+  ##      mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+  initContainers: []
   ## Converter container image parameters
   image:
     ## converter.image.repository converter container image repository
@@ -656,7 +683,7 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 7.2.1-2
+    tag: 7.2.2-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## converter container resource requests and limits
@@ -745,7 +772,7 @@ example:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 7.2.1-2
+    tag: 7.2.2-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## example.containerPorts.http example container port
@@ -801,7 +828,7 @@ install:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 7.2.1-2
+      tag: 7.2.2-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-install container resource requests and limits
@@ -842,7 +869,7 @@ upgrade:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 7.2.1-2
+      tag: 7.2.2-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-upgrade container resource requests and limits
@@ -891,7 +918,7 @@ rollback:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 7.2.1-2
+      tag: 7.2.2-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-rollback container resource requests and limits
@@ -940,7 +967,7 @@ delete:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 7.2.1-2
+      tag: 7.2.2-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-delete container resource requests and limits

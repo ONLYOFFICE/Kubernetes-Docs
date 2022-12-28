@@ -98,6 +98,10 @@ spec:
           configMap:
             name: {{ .Values.extraThemes.configMap }}
         {{- end }}
+      {{- with .Values.converter.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: converter
           image: {{ .Values.converter.image.repository }}:{{ .Values.converter.image.tag }}
