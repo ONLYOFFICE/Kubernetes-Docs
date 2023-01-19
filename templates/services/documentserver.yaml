@@ -26,4 +26,13 @@ spec:
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.proxy.containerPorts.http }}
   type: {{ .Values.service.type }}
+  {{- if .Values.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  {{- if .Values.service.sessionAffinityConfig }}
+  {{- with .Values.service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
 {{- end }}

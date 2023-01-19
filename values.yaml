@@ -180,15 +180,27 @@ nodeSelector: {}
 tolerations: []
 ## Onlyoffice Docs service parameters
 service:
-  ## The name of an existing service for ONLYOFFICE Docs. If not set, a service named `documentserver` will be created
+  ## service.existing The name of an existing service for ONLYOFFICE Docs. If not set, a service named `documentserver` will be created
   ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/templates/services/documentserver.yaml
   existing: ""
-  ## Map of annotations to add to the ONLYOFFICE Docs service
+  ## service.annotations Map of annotations to add to the ONLYOFFICE Docs service
   annotations: {}
-  ## ONLYOFFICE Docs service type
+  ## service.type ONLYOFFICE Docs service type
   type: ClusterIP
-  ## ONLYOFFICE Docs service port
+  ## service.port ONLYOFFICE Docs service port
   port: 8888
+  ## service.sessionAffinity Session Affinity for ONLYOFFICE Docs service
+  ## If not set, `None` will be set as the default value
+  ## ref: https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity
+  sessionAffinity: ""
+  ## service.sessionAffinityConfig Configuration for ONLYOFFICE Docs service Session Affinity
+  ## Used if the `service.sessionAffinity` is set
+  ## ref: https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout
+  ## Example:
+  ##sessionAffinityConfig:
+  ##  clientIP:
+  ##    timeoutSeconds: 900
+  sessionAffinityConfig: {}
 ## Onlyoffice Docs license
 license:
   ## license.existingSecret Name of the existing secret that contains the license
