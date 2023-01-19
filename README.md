@@ -75,7 +75,7 @@ $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```bash
 $ helm repo add bitnami https://charts.bitnami.com/bitnami
 $ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-$ helm repo add stable https://charts.helm.sh/stable
+$ helm repo add nfs-server-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
 $ helm repo add onlyoffice https://download.onlyoffice.com/charts/stable
 $ helm repo update
 ```
@@ -87,7 +87,7 @@ Install NFS Server Provisioner
 Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html).
 
 ```bash
-$ helm install nfs-server stable/nfs-server-provisioner \
+$ helm install nfs-server nfs-server-provisioner/nfs-server-provisioner \
   --set persistence.enabled=true \
   --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set persistence.size=PERSISTENT_SIZE
@@ -104,16 +104,16 @@ $ helm install nfs-server stable/nfs-server-provisioner \
 
 - `PERSISTENT_SIZE` is the total size of all Persistent Storages for the nfs Persistent Storage Class. You can express the size as a plain integer with one of these suffixes: `T`, `G`, `M`, `Ti`, `Gi`, `Mi`. For example: `9Gi`.
 
-See more details about installing NFS Server Provisioner via Helm [here](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner#nfs-server-provisioner).
+See more details about installing NFS Server Provisioner via Helm [here](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner/tree/master/charts/nfs-server-provisioner).
 
 Configure a Persistent Volume Claim
 
-Note: The default `nfs` Persistent Volume Claim is 8Gi. You can change it in the `values.yaml` file in the `persistence.storageClass` and `persistence.size` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. It's recommended to use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE Docs.
+Note: The default `nfs` Persistent Volume Claim is 8Gi. You can change it in the [values.yaml](values.yaml) file in the `persistence.storageClass` and `persistence.size` section. It should be less than `PERSISTENT_SIZE` at least by about 5%. It's recommended to use 8Gi or more for persistent storage for every 100 active users of ONLYOFFICE Docs.
 
 *The PersistentVolume type to be used for PVC placement must support Access Mode [ReadWriteMany](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).*
 *Also, PersistentVolume must have as the owner the user from whom the ONLYOFFICE Docs will be started. By default it is `ds` (101:101).*
 
-Note: If you want to enable `WOPI`, please set the parameter `wopi.enabled=true`. In this case Persistent Storage must be connected to the cluster nodes with the disabled caching attributes for the mounted directory for the clients. For NFS Server Provisioner it can be achieved by adding `noac` option to the parameter `storageClass.mountOptions`. Please find more information [here](https://github.com/helm/charts/blob/master/stable/nfs-server-provisioner/values.yaml#L72).
+Note: If you want to enable `WOPI`, please set the parameter `wopi.enabled=true`. In this case Persistent Storage must be connected to the cluster nodes with the disabled caching attributes for the mounted directory for the clients. For NFS Server Provisioner it can be achieved by adding `noac` option to the parameter `storageClass.mountOptions`. Please find more information [here](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner/blob/master/charts/nfs-server-provisioner/values.yaml#L83).
 ### 3. Deploy RabbitMQ
 
 To install RabbitMQ to your cluster, run the following command:
