@@ -56,7 +56,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 
 - You must have a Kubernetes or OpenShift cluster installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to set up Kubernetes. Please, checkout [the reference](https://docs.openshift.com/container-platform/4.7/installing/index.html) to setup OpenShift.
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
-- You should install Helm v3. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
+- You should install Helm v3.7+. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
 - If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. 
 - If the installation of components external to ‘Docs’ is performed from Helm Chart in an OpenShift cluster, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
 
@@ -87,7 +87,7 @@ Install NFS Server Provisioner
 Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html).
 
 ```bash
-$ helm install nfs-server nfs-server-provisioner/nfs-server-provisioner \
+$ helm install nfs-server --version 1.5.0 nfs-server-provisioner/nfs-server-provisioner \
   --set persistence.enabled=true \
   --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set persistence.size=PERSISTENT_SIZE
@@ -912,7 +912,7 @@ $ helm install grafana bitnami/grafana \
 #### 1.2.1 Installing ready-made Grafana dashboards
 
 To install ready-made Grafana dashboards, set the `grafana.enabled` and `grafana.dashboard.enabled` parameters to `true`.
-If DocumentServer is already installed you need to run the `helm upgrade documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.dashboard.enabled=true --no-hooks command or `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the [values.yaml](values.yaml) file.
+If DocumentServer is already installed you need to run the `helm upgrade documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.dashboard.enabled=true --no-hooks` command or `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the [values.yaml](values.yaml) file.
 As a result, ready-made dashboards in the `JSON` format will be downloaded from the Grafana [website](https://grafana.com/grafana/dashboards),
 the necessary edits will be made to them and configmap will be created from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
