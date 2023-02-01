@@ -493,7 +493,10 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `ingress.host`                                              | Ingress hostname for the ONLYOFFICE Docs ingress                                                                                                                               | `""`                                                                                      |
 | `ingress.ssl.enabled`                                       | Enable ssl for the ONLYOFFICE Docs ingress                                                                                                                                     | `false`                                                                                   |
 | `ingress.ssl.secret`                                        | Secret name for ssl to mount into the Ingress                                                                                                                                  | `tls`                                                                                     |
-| `grafana_ingress.enabled`                                   | Enable the creation of an ingress for the Grafana                                                                                                                              | `false`                                                                                   |
+| `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
+| `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
+| `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana                                 | `false`                                                                                   |
+| `grafana.dashboard.enabled`                                 | Enable the installation of ready-made Grafana dashboards. Used if you set `grafana.enabled` to `true`                                                                          | `false`                                                                                   |
 | `podSecurityContext.enabled`                                | Enable security context for the pods                                                                                                                                           | `false`                                                                                   |
 | `podSecurityContext.converter.runAsUser`                    | User ID for the Converter pods                                                                                                                                                 | `101`                                                                                     |
 | `podSecurityContext.converter.runAsGroup`                   | Group ID for the Converter pods                                                                                                                                                | `101`                                                                                     |
@@ -590,10 +593,11 @@ To deploy metrics, set `metrics.enabled` to true:
 ```bash
 $ helm install documentserver onlyoffice/docs --set metrics.enabled=true
 ```
-If you want to use nginx ingress, set `grafana_ingress.enabled` to true:
+
+If you want to use Grafana to visualize metrics, set `grafana.enabled` to `true`. If you want to use Nginx Ingress to access Grafana, set `grafana.ingress.enabled` to `true`:
 
 ```bash
-$ helm install documentserver onlyoffice/docs --set grafana_ingress.enabled=true
+$ helm install documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.ingress.enabled=true
 ```
 
 ### 5.3 Expose DocumentServer
@@ -905,13 +909,14 @@ $ helm install grafana bitnami/grafana \
 
 #### 1.2 Deploy Grafana with the installation of ready-made dashboards
 
-Сlone this repository and open the repo directory.
-Next, run the `./sources/metrics/get_dashboard.sh` script, which will download ready-made dashboards in the `JSON` format from the Grafana [website](https://grafana.com/grafana/dashboards),
-make the necessary edits to them and create a configmap from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
+#### 1.2.1 Installing ready-made Grafana dashboards
 
-```
-$ ./sources/metrics/get_dashboard.sh
-```
+To install ready-made Grafana dashboards, set the `grafana.enabled` and `grafana.dashboard.enabled` parameters to `true`.
+If DocumentServer is already installed you need to run the `helm upgrade documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.dashboard.enabled=true --no-hooks command or `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the [values.yaml](values.yaml) file.
+As a result, ready-made dashboards in the `JSON` format will be downloaded from the Grafana [website](https://grafana.com/grafana/dashboards),
+the necessary edits will be made to them and configmap will be created from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
+
+#### 1.2.2 Installing Grafana
 
 To install Grafana to your cluster, run the following command:
 
@@ -956,7 +961,7 @@ See more details about installing Grafana via Helm [here](https://github.com/bit
 
 Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
 
-If DocumentServer was installed with the parameter `grafana_ingress.enabled=true` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://INGRESS-ADDRESS/grafana/`
+If DocumentServer was installed with the parameter `grafana.ingress.enabled` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://INGRESS-ADDRESS/grafana/`
 
 If Ingres was installed using a secure connection (step [#5.3.2.3](#5323-expose-documentserver-via-https)), then access to Grafana will be at: `https://your-domain-name/grafana/`
 

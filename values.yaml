@@ -822,10 +822,24 @@ ingress:
     secret: tls
   ## ingress.host Ingress hostname for the ONLYOFFICE Docs
   host: ""
-## grafana_ingress.enabled Enable the creation of an ingress for the Grafana
-## Used if you set `metrics.enabled` to `true` and want to use Nginx Ingress to access Grafana
-grafana_ingress:
+
+## Grafana parameters
+## See more details about installing Grafana here:
+## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#using-grafana-to-visualize-metrics-optional
+grafana:
+  ## grafana.enabled Enable the installation of resources required for the visualization of metrics in Grafana
   enabled: false
+  ## grafana.namespace The name of the namespace in which RBAC components and Grafana resources will be deployed
+  ## If not set, the name will be taken from `namespaceOverride` or .Release.Namespace
+  namespace: ""
+  ## grafana.ingress.enabled Enable the creation of an ingress for the Grafana
+  ## Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana
+  ingress:
+    enabled: false
+  ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
+  ## Used if you set `grafana.enabled` to `true`
+  dashboard:
+    enabled: false
 
 ## Onlyoffice Docs jobs parameters
 ##

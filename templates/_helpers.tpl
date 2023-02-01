@@ -376,3 +376,16 @@ Get the ds Namespace
     {{- .Release.Namespace -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the ds Grafana Namespace
+*/}}
+{{- define "ds.grafana.namespace" -}}
+{{- if .Values.grafana.namespace -}}
+    {{- .Values.grafana.namespace -}}
+{{- else if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
+{{- else -}}
+    {{- .Release.Namespace -}}
+{{- end -}}
+{{- end -}}
