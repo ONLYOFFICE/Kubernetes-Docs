@@ -51,18 +51,18 @@ spec:
             value: {{ .Values.privateCluster | quote }}
           volumeMounts:
           - name: initdb-scripts
-            mountPath: /sql/initdb.sh
+            mountPath: /scripts/initdb.sh
             subPath: initdb.sh
           {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
           - name: create-dt-scripts
-            mountPath: /sql/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
+            mountPath: /scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
             subPath: {{ .Values.install.existingConfigmap.tblCreate.keyName }}
           {{- end }}
           command: ["/bin/sh", "-c"]
           {{- if .Values.webProxy.enabled }}
-          args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /sql/initdb.sh"]
+          args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /scripts/initdb.sh"]
           {{- else }}
-          args: ["/sql/initdb.sh"]
+          args: ["/scripts/initdb.sh"]
           {{- end }}
       restartPolicy: Never
 {{- end }}

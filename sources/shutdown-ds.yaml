@@ -15,10 +15,10 @@ spec:
         - name: shutdown-ds
           image: onlyoffice/docs-utils:7.2.1-2
           command: ["/bin/sh", "-c"]
-          args: ["/sql/stop.sh"]
+          args: ["/scripts/stop.sh"]
           volumeMounts:
           - name: shutdown-ds
-            mountPath: /sql/stop.sh
+            mountPath: /scripts/stop.sh
             subPath: stop.sh
       restartPolicy: Never
 
