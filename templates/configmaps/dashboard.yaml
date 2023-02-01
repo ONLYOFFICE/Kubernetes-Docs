@@ -1,0 +1,36 @@
+{{- if and .Values.grafana.enabled .Values.grafana.dashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard
+  namespace: {{ include "ds.grafana.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "4"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+data:
+  get_dashboard.sh: |-
+    #!/bin/bash
+    wget https://grafana.com/api/dashboards/1860/revisions/22/download -O /scripts/dashboard-node-exporter.json
+    wget https://grafana.com/api/dashboards/8588/revisions/1/download -O /scripts/dashboard-deployment.json
+    wget https://grafana.com/api/dashboards/11835/revisions/1/download -O /scripts/dashboard-redis.json
+    wget https://grafana.com/api/dashboards/10991/revisions/8/download -O /scripts/dashboard-rabbitmq.json
+    wget https://grafana.com/api/dashboards/9628/revisions/6/download -O /scripts/dashboard-postgresql.json
+    wget https://grafana.com/api/dashboards/9614/revisions/1/download -O /scripts/dashboard-nginx-ingress.json
+    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/documentserver-statsd-exporter.json -O /scripts/documentserver-statsd-exporter.json
+    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/kubernetes-cluster-resourses.json -O /scripts/kubernetes-cluster-resourses.json
+    sed -i 's/${DS_PROMETHEUS}/Prometheus/g' /scripts/*.json
+    sed -i 's/$DS_PROMETHEUS/Prometheus/g' /scripts/*.json
+    kubectl create configmap dashboard-node-exporter --from-file=/scripts/dashboard-node-exporter.json
+    kubectl create configmap dashboard-deployment --from-file=/scripts/dashboard-deployment.json
+    kubectl create configmap dashboard-redis --from-file=/scripts/dashboard-redis.json
+    kubectl create configmap dashboard-rabbitmq --from-file=/scripts/dashboard-rabbitmq.json
+    kubectl create configmap dashboard-postgresql --from-file=/scripts/dashboard-postgresql.json
+    kubectl create configmap dashboard-nginx-ingress --from-file=/scripts/dashboard-nginx-ingress.json
+    kubectl create configmap dashboard-documentserver --from-file=/scripts/documentserver-statsd-exporter.json
+    kubectl create configmap dashboard-cluster-resourses --from-file=/scripts/kubernetes-cluster-resourses.json
+{{- end }}
