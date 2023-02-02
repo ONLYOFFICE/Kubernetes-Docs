@@ -811,7 +811,7 @@ Where:
 For example:
 
 ```bash
-$ kubectl apply -f shutdown-ds.yaml -n onlyoffice
+$ kubectl apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/shutdown-ds.yaml -n onlyoffice
 ```
 
 After successfully executing the Pod `shutdown-ds` that created the Job, delete this Job with the following command:
