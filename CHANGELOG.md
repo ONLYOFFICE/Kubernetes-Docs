@@ -1,5 +1,21 @@
 # Change log
 
+## 3.0.0
+
+### New Features
+
+* Added the ability set up session affinity for the "DocumentServer" Service
+* Automated installation of ready-made Grafana dashboards
+
+### Changes
+
+* Released [v7.3.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#730) of ONLYOFFICE Docs
+* Changed the Helm repository of the NFS Server Provisioner chart
+
+### Fixes
+
+* Fixed a bug with displaying solution type on the welcome page
+
 ## 2.2.0
 
 ### New Features
