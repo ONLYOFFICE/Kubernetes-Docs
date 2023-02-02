@@ -26,7 +26,11 @@ spec:
       - name: grafana-dashboard
         image: onlyoffice/docs-utils:7.3.0-1
         command: ["/bin/sh", "-c"]
+        {{- if .Values.webProxy.enabled }}
+        args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /scripts/get_dashboard.sh"]
+        {{- else }}
         args: ["/scripts/get_dashboard.sh"]
+        {{- end }}
         volumeMounts:
         - name: grafana-dashboard
           mountPath: /scripts/get_dashboard.sh
