@@ -15,5 +15,5 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
-  verbs: ["list", "create", "update"]
+  verbs: ["list", "get", "create", "update"]
 {{- end }}
