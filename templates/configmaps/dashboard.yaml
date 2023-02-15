@@ -15,22 +15,23 @@ metadata:
 data:
   get_dashboard.sh: |-
     #!/bin/bash
+    CM=(dashboard-node-exporter dashboard-deployment dashboard-redis dashboard-rabbitmq dashboard-postgresql dashboard-nginx-ingress dashboard-documentserver dashboard-cluster-resourses)
     wget https://grafana.com/api/dashboards/1860/revisions/22/download -O /scripts/dashboard-node-exporter.json
     wget https://grafana.com/api/dashboards/8588/revisions/1/download -O /scripts/dashboard-deployment.json
     wget https://grafana.com/api/dashboards/11835/revisions/1/download -O /scripts/dashboard-redis.json
     wget https://grafana.com/api/dashboards/10991/revisions/8/download -O /scripts/dashboard-rabbitmq.json
     wget https://grafana.com/api/dashboards/9628/revisions/6/download -O /scripts/dashboard-postgresql.json
     wget https://grafana.com/api/dashboards/9614/revisions/1/download -O /scripts/dashboard-nginx-ingress.json
-    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/documentserver-statsd-exporter.json -O /scripts/documentserver-statsd-exporter.json
-    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/kubernetes-cluster-resourses.json -O /scripts/kubernetes-cluster-resourses.json
+    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/documentserver-statsd-exporter.json -O /scripts/dashboard-documentserver.json
+    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/kubernetes-cluster-resourses.json -O /scripts/dashboard-cluster-resourses.json
     sed -i 's/${DS_PROMETHEUS}/Prometheus/g' /scripts/*.json
     sed -i 's/$DS_PROMETHEUS/Prometheus/g' /scripts/*.json
-    kubectl create configmap dashboard-node-exporter --from-file=/scripts/dashboard-node-exporter.json
-    kubectl create configmap dashboard-deployment --from-file=/scripts/dashboard-deployment.json
-    kubectl create configmap dashboard-redis --from-file=/scripts/dashboard-redis.json
-    kubectl create configmap dashboard-rabbitmq --from-file=/scripts/dashboard-rabbitmq.json
-    kubectl create configmap dashboard-postgresql --from-file=/scripts/dashboard-postgresql.json
-    kubectl create configmap dashboard-nginx-ingress --from-file=/scripts/dashboard-nginx-ingress.json
-    kubectl create configmap dashboard-documentserver --from-file=/scripts/documentserver-statsd-exporter.json
-    kubectl create configmap dashboard-cluster-resourses --from-file=/scripts/kubernetes-cluster-resourses.json
+    for i in "${CM[@]}"; do
+      kubectl get cm ${i}
+      if [[ "$?" -ne 0 ]]; then
+        kubectl create configmap ${i} --from-file=/scripts/${i}.json
+      else
+        echo -e "\e[0;32m ConfigMap ${i} already exists. Skipping ... \e[0m"
+      fi
+    done
 {{- end }}
