@@ -9,7 +9,7 @@
 
 ### Changes
 
-* Released [v7.3.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#730) of ONLYOFFICE Docs
+* Released [v7.3.2](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#732) of ONLYOFFICE Docs
 * Changed the Helm repository of the NFS Server Provisioner chart
 
 ### Fixes
