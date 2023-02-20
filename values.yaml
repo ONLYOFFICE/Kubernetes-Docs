@@ -180,15 +180,27 @@ nodeSelector: {}
 tolerations: []
 ## Onlyoffice Docs service parameters
 service:
-  ## The name of an existing service for ONLYOFFICE Docs. If not set, a service named `documentserver` will be created
+  ## service.existing The name of an existing service for ONLYOFFICE Docs. If not set, a service named `documentserver` will be created
   ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/templates/services/documentserver.yaml
   existing: ""
-  ## Map of annotations to add to the ONLYOFFICE Docs service
+  ## service.annotations Map of annotations to add to the ONLYOFFICE Docs service
   annotations: {}
-  ## ONLYOFFICE Docs service type
+  ## service.type ONLYOFFICE Docs service type
   type: ClusterIP
-  ## ONLYOFFICE Docs service port
+  ## service.port ONLYOFFICE Docs service port
   port: 8888
+  ## service.sessionAffinity Session Affinity for ONLYOFFICE Docs service
+  ## If not set, `None` will be set as the default value
+  ## ref: https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity
+  sessionAffinity: ""
+  ## service.sessionAffinityConfig Configuration for ONLYOFFICE Docs service Session Affinity
+  ## Used if the `service.sessionAffinity` is set
+  ## ref: https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout
+  ## Example:
+  ##sessionAffinityConfig:
+  ##  clientIP:
+  ##    timeoutSeconds: 900
+  sessionAffinityConfig: {}
 ## Onlyoffice Docs license
 license:
   ## license.existingSecret Name of the existing secret that contains the license
@@ -394,7 +406,7 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 7.2.2-1
+    tag: 7.3.2-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## docservice.containerPorts.http docservice container port
@@ -487,7 +499,7 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 7.2.2-1
+    tag: 7.3.2-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## proxy.containerPorts.http proxy container port
@@ -683,7 +695,7 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 7.2.2-1
+    tag: 7.3.2-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## converter container resource requests and limits
@@ -772,7 +784,7 @@ example:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 7.2.2-1
+    tag: 7.3.2-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## example.containerPorts.http example container port
@@ -810,10 +822,24 @@ ingress:
     secret: tls
   ## ingress.host Ingress hostname for the ONLYOFFICE Docs
   host: ""
-## grafana_ingress.enabled Enable the creation of an ingress for the Grafana
-## Used if you set `metrics.enabled` to `true` and want to use Nginx Ingress to access Grafana
-grafana_ingress:
+
+## Grafana parameters
+## See more details about installing Grafana here:
+## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#using-grafana-to-visualize-metrics-optional
+grafana:
+  ## grafana.enabled Enable the installation of resources required for the visualization of metrics in Grafana
   enabled: false
+  ## grafana.namespace The name of the namespace in which RBAC components and Grafana resources will be deployed
+  ## If not set, the name will be taken from `namespaceOverride` or .Release.Namespace
+  namespace: ""
+  ## grafana.ingress.enabled Enable the creation of an ingress for the Grafana
+  ## Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana
+  ingress:
+    enabled: false
+  ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
+  ## Used if you set `grafana.enabled` to `true`
+  dashboard:
+    enabled: false
 
 ## Onlyoffice Docs jobs parameters
 ##
@@ -828,7 +854,7 @@ install:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 7.2.2-1
+      tag: 7.3.2-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-install container resource requests and limits
@@ -869,7 +895,7 @@ upgrade:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 7.2.2-1
+      tag: 7.3.2-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-upgrade container resource requests and limits
@@ -918,7 +944,7 @@ rollback:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 7.2.2-1
+      tag: 7.3.2-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-rollback container resource requests and limits
@@ -967,7 +993,7 @@ delete:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 7.2.2-1
+      tag: 7.3.2-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-delete container resource requests and limits

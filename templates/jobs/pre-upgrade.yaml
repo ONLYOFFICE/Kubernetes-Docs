@@ -59,21 +59,21 @@ spec:
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
           - name: stop-scripts
-            mountPath: /sql/stop.sh
+            mountPath: /scripts/stop.sh
             subPath: stop.sh
           {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
           - name: remove-dt-scripts
-            mountPath: /sql/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+            mountPath: /scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
             subPath: {{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
           - name: create-dt-scripts
-            mountPath: /sql/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+            mountPath: /scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
             subPath: {{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
           {{- end }}
           command: ["/bin/sh", "-c"]
           {{- if .Values.webProxy.enabled }}
-          args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /sql/stop.sh"]
+          args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /scripts/stop.sh"]
           {{- else }}
-          args: ["/sql/stop.sh"]
+          args: ["/scripts/stop.sh"]
           {{- end }}          
       restartPolicy: Never
 {{- end }}

@@ -50,7 +50,7 @@ data:
       esac
     done
     if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
-      wget -O /sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }} \
+      wget -O /scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }} \
         {{- if eq .Values.connections.dbType "postgres" }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/removetbl.sql
         {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
@@ -62,13 +62,13 @@ data:
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} \
-      --file=/sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+      --file=/scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
     {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
     mysql -h {{ .Values.connections.dbHost }} \
       -P {{ .Values.connections.dbPort }} \
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
-      {{ .Values.connections.dbName }} < /sql/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+      {{ .Values.connections.dbName }} < /scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
     {{- end }}
     echo work done
 {{- end }}

@@ -32,7 +32,7 @@ data:
       exit 1
     fi
     if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
-      wget -O /sql/{{ .Values.install.existingConfigmap.tblCreate.keyName }} \
+      wget -O /scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }} \
         {{- if eq .Values.connections.dbType "postgres" }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/createdb.sql
         {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
@@ -44,13 +44,13 @@ data:
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} \
-      --file=/sql/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
+      --file=/scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
     {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
     mysql -h {{ .Values.connections.dbHost }} \
       -P {{ .Values.connections.dbPort }} \
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
-      {{ .Values.connections.dbName }} < /sql/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
+      {{ .Values.connections.dbName }} < /scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
     {{- end }}
     echo work done
 {{- end }}
