@@ -1,5 +1,11 @@
 # Change log
 
+## 3.0.1
+
+### Fixes
+
+* Fixed a set of dashboards for grafana
+
 ## 3.0.0
 
 ### New Features
