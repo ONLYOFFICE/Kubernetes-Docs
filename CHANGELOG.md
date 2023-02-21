@@ -4,7 +4,7 @@
 
 ### Fixes
 
-* Fixed a set of dashboards for grafana
+* Fixed a set of dashboards for Grafana
 
 ## 3.0.0
 
