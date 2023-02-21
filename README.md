@@ -939,7 +939,9 @@ $ helm install grafana bitnami/grafana \
   --set dashboardsConfigMaps[5].configMapName=dashboard-nginx-ingress \
   --set dashboardsConfigMaps[5].fileName=dashboard-nginx-ingress.json \
   --set dashboardsConfigMaps[6].configMapName=dashboard-documentserver \
-  --set dashboardsConfigMaps[6].fileName=documentserver-statsd-exporter.json
+  --set dashboardsConfigMaps[6].fileName=dashboard-documentserver.json \
+  --set dashboardsConfigMaps[7].configMapName=dashboard-cluster-resourses \
+  --set dashboardsConfigMaps[7].fileName=dashboard-cluster-resourses.json
 ```
 
 After executing this command, the following dashboards will be imported into Grafana:
@@ -951,6 +953,7 @@ After executing this command, the following dashboards will be imported into Gra
   - PostgreSQL Database
   - NGINX Ingress controller
   - DocumentServer
+  - Resource usage by Pods and Containers
 
 Note: You can see the description of the DocumentServer metrics that are visualized in Grafana [here](https://github.com/ONLYOFFICE/Kubernetes-Docs/wiki/Document-Server-Metrics).
 
