@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-ds
+  annotations:
+    "helm.sh/hook": test-success
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  containers:
+  - image: python:3.11
+    name: test-ds
+    env:
+    - name: DB_PWD
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "ds.db.secretName" . }}
+          key: {{ .Values.connections.dbSecretKeyName }}
+    - name: AMQP_PWD
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "ds.rabbitmq.secretName" . }}
+          key: {{ .Values.connections.amqpSecretKeyName }}
+    - name: REDIS_SERVER_PWD
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "ds.redis.secretName" . }}
+          key: {{ .Values.connections.redisSecretKeyName }}
+    envFrom:
+    - configMapRef:
+        name: documentserver
+    volumeMounts:
+    - name: ds-files
+      mountPath: /ds/test/App_Data/cache/files
+    - name: test-ds
+      mountPath: /scripts/test_ds.py
+      subPath: test_ds.py
+    command: ['python', '/scripts/test_ds.py']
+  volumes:
+  - name: ds-files
+    persistentVolumeClaim:
+      claimName: {{ template "ds.pvc.name" . }}
+  - name: test-ds
+    configMap:
+      name: test-ds
+      defaultMode: 0755
+  restartPolicy: Never
