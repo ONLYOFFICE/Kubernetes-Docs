@@ -65,7 +65,7 @@ data:
         stdout.setFormatter(logging.Formatter(formatter))
         stdout.setLevel(logging.DEBUG)
         logger.addHandler(stdout)
-        logger.info('Running a script to test the availability of DocumentServer and dependencies')
+        logger.info('Running a script to test the availability of DocumentServer and dependencies\n')
 
 
     def get_redis_status():
@@ -82,7 +82,7 @@ data:
             )
             rc.ping()
         except Exception as msg_redis:
-            logger_test_ds.error(f'Failed to check the availability of the Redis... {msg_redis}')
+            logger_test_ds.error(f'Failed to check the availability of the Redis... {msg_redis}\n')
             total_result['CheckRedis'] = 'Failed'
         else:
             logger_test_ds.info('Successful connection to Redis')
@@ -97,11 +97,11 @@ data:
                 test_key = rc.get('testDocsServer').decode('utf-8')
                 logger_test_ds.info(f'Test Key: {test_key}')
             except Exception as msg_check_redis:
-                logger_test_ds.error(f'Error when trying to write a key to Redis... {msg_check_redis}')
+                logger_test_ds.error(f'Error when trying to write a key to Redis... {msg_check_redis}\n')
                 total_result['CheckRedis'] = 'Failed'
             else:
                 rc.delete('testDocsServer')
-                logger_test_ds.info('The test key was successfully recorded and deleted from Redis')
+                logger_test_ds.info('The test key was successfully recorded and deleted from Redis\n')
                 rc.close()
                 total_result['CheckRedis'] = 'Success'
 
@@ -126,10 +126,11 @@ data:
                     else:
                         logger_test_ds.error(f'The table "{tbl}" does not exists in the "{dbName}" database')
         except Exception as msg_check_dblist:
-            logger_test_ds.error(f'Error when trying to get a list of tables in the "{dbName}" database... {msg_check_dblist}')
+            logger_test_ds.error(f'Error when trying to get a list of DS tables in the "{dbName}" database... {msg_check_dblist}\n')
             total_result['CheckPostgreSQL'] = 'Failed'
         else:
             dbc.close()
+            logger_test_ds.info(f'Check of DS tables in "{dbName}" database has been finished\n')
             total_result['CheckPostgreSQL'] = 'Success'
 
 
@@ -153,10 +154,11 @@ data:
                     else:
                         logger_test_ds.error(f'The table "{tbl}" does not exists in the "{dbName}" database')
         except Exception as msg_check_dblist:
-            logger_test_ds.error(f'Error when trying to get a list of tables in the "{dbName}" database... {msg_check_dblist}')
+            logger_test_ds.error(f'Error when trying to get a list of DS tables in the "{dbName}" database... {msg_check_dblist}\n')
             total_result['CheckMySQL'] = 'Failed'
         else:
             dbc.close()
+            logger_test_ds.info(f'Check of DS tables in "{dbName}" database has been finished\n')
             total_result['CheckMySQL'] = 'Success'
 
 
@@ -175,7 +177,7 @@ data:
             mq_connect_status = mqc.is_open
             logger_test_ds.info('Successful connection to RabbitMQ')
         except Exception as msg_check_rabbitmq:
-            logger_test_ds.error(f'Failed to check the availability of the RabbitMQ... {msg_check_rabbitmq}')
+            logger_test_ds.error(f'Failed to check the availability of the RabbitMQ... {msg_check_rabbitmq}\n')
             total_result['CheckRabbitMQ'] = 'Failed'
         else:
             if mq_connect_status is True:
@@ -183,41 +185,44 @@ data:
                     mqchannel = mqc.channel()
                     mqchannel.queue_declare(queue='testDocsServer')
                 except Exception as msg_check_rabbitmq_queue:
-                    logger_test_ds.error(f'Error when trying to create a test queue in RabbitMQ... {msg_check_rabbitmq_queue}')
+                    logger_test_ds.error(f'Error when trying to create a test queue in RabbitMQ... {msg_check_rabbitmq_queue}\n')
                     total_result['CheckRabbitMQ'] = 'Failed'
                 else:
                     mqchannel.queue_delete(queue='testDocsServer')
-                    logger_test_ds.info('The test queue was successfully created and deleted in RabbitMQ')
+                    logger_test_ds.info('The test queue was successfully created and deleted in RabbitMQ\n')
                     mqc.close()
                     total_result['CheckRabbitMQ'] = 'Success'
             else:
-                logger_test_ds.error('Error when trying to create a test queue in RabbitMQ... ')
+                logger_test_ds.error('Error when trying to create a test queue in RabbitMQ\n')
 
 
     def check_mq_activemq():
-        global activemq_connected
-        activemq_connected = None
         activemq_proto = os.environ.get('AMQP_PROTO')
         if activemq_proto == 'amqp+ssl':
             activemq_proto = 'amqps'
 
         class ActivemqConnect(MessagingHandler):
+            activemq_connected = None
+
             def on_start(self, event):
                 event.container.connect(f'{activemq_proto}://{brokerHost}:{brokerPort}', user=brokerUser, password=brokerPassword)
 
             def on_connection_opened(self, event):
                 event.connection.close()
+                ActivemqConnect.activemq_connected = True
 
         try:
             Container(ActivemqConnect()).run()
         except Exception as msg_check_activemq:
-            logger_test_ds.error(f'Failed to check the availability of the ActiveMQ... {msg_check_activemq}')
-            activemq_connected = False
+            logger_test_ds.error(f'Failed to check the availability of the ActiveMQ... {msg_check_activemq}\n')
             total_result['CheckActiveMQ'] = 'Failed'
         else:
-            activemq_connected = True
-            logger_test_ds.info('Successful connection to ActiveMQ')
-            total_result['CheckActiveMQ'] = 'Success'
+            if ActivemqConnect.activemq_connected is True:
+                logger_test_ds.info('Successful connection to ActiveMQ\n')
+                total_result['CheckActiveMQ'] = 'Success'
+            else:
+                logger_test_ds.error(f'Failed to check the availability of the ActiveMQ. Incorrect username-password pair\n')
+                total_result['CheckActiveMQ'] = 'Failed'
 
 
     def check_mq():
@@ -228,7 +233,7 @@ data:
             try:
                 activemq_return_status = func_timeout(15, check_mq_activemq)
             except FunctionTimedOut:
-                logger_test_ds.error('Failed to check the availability of the ActiveMQ within 15 seconds. Terminated...')
+                logger_test_ds.error('Failed to check the availability of the ActiveMQ within 15 seconds. Terminated...\n')
                 total_result['CheckActiveMQ'] = 'Failed'
 
 
@@ -249,13 +254,13 @@ data:
                     all_status.append(code)
             array_size = len(all_status)
             if array_size > 0:
-                logger_test_ds.error('Failed when trying to write and delete a test file to the "cache/files" directory')
+                logger_test_ds.error('Failed when trying to write and delete a test file to the "cache/files" directory\n')
                 total_result['CheckDir'] = 'Failed'
             else:
-                logger_test_ds.info('The test file was successfully written and deleted to the "cache/files" directory')
+                logger_test_ds.info('The test file was successfully written and deleted to the "cache/files" directory\n')
                 total_result['CheckDir'] = 'Success'
         except Exception as msg_check_dir_access:
-            logger_test_ds.error(f'Failed when trying to write a test file to the "cache/files" directory... {msg_check_dir_access}')
+            logger_test_ds.error(f'Failed when trying to write a test file to the "cache/files" directory... {msg_check_dir_access}\n')
             total_result['CheckDir'] = 'Failed'
 
 
@@ -267,10 +272,10 @@ data:
         try:
             response = ds_session.get(url, timeout=15)
         except Exception as msg_url:
-            logger_test_ds.error(f'Failed to check the availability of the DocumentServer... {msg_url}')
+            logger_test_ds.error(f'Failed to check the availability of the DocumentServer... {msg_url}\n')
             total_result['CheckDS'] = 'Failed'
         else:
-            logger_test_ds.info(f'The DocumentServer is available: {response.text}')
+            logger_test_ds.info(f'The DocumentServer is available: {response.text}\n')
             if response.text == 'true':
                 total_result['CheckDS'] = 'Success'
             else:
