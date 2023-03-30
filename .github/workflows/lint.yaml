@@ -15,3 +15,5 @@ jobs:
     uses: ONLYOFFICE/onlyoffice.github.io/.github/workflows/helm-units.yaml@master
     with: 
       ct_version: 3.8.0
+      enable_yaml_lint: true
+      enable_kube_lint: true
