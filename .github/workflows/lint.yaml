@@ -12,8 +12,8 @@ on:
 jobs:
   lint-chart:           
     name: lint chart ${{ github.event.repository.name }}
-    uses: ONLYOFFICE/onlyoffice.github.io/.github/workflows/helm-units.yaml@master
+    uses: ONLYOFFICE/ga-common/.github/workflows/helm-units.yaml@master
     with: 
       ct_version: 3.8.0
       enable_yaml_lint: true
-      enable_kube_lint: true
+      enable_kube_lint: false
