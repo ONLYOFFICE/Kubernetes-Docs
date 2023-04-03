@@ -2,9 +2,14 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: test-ds
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
   annotations:
-    "helm.sh/hook": test-success
-    "helm.sh/hook-weight": "5"
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "2"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   containers:
@@ -35,7 +40,11 @@ spec:
     - name: test-ds
       mountPath: /scripts/test_ds.py
       subPath: test_ds.py
+    {{- if .Values.webProxy.enabled }}
+    command: ['http_proxy={{ .Values.webProxy.http }}', 'https_proxy={{ .Values.webProxy.https }}', 'no_proxy={{ .Values.webProxy.noProxy }}', 'python', '/scripts/test_ds.py']
+    {{- else }}
     command: ['python', '/scripts/test_ds.py']
+    {{- end }}
   volumes:
   - name: ds-files
     persistentVolumeClaim:

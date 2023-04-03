@@ -2,9 +2,14 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: test-ds
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
   annotations:
-    "helm.sh/hook": test-success
-    "helm.sh/hook-weight": "4"
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": before-hook-creation
 data:
   test_ds.py: |-
@@ -13,21 +18,6 @@ data:
     import subprocess
     import time
     import logging
-
-    package_name = ['redis', 'requests', 'psycopg2', 'pymysql', 'pika', 'python-qpid-proton', 'func_timeout']
-
-    for package in package_name:
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
-
-    import requests
-    from requests.adapters import HTTPAdapter
-    import redis
-    import psycopg2
-    import pymysql
-    import pika
-    from func_timeout import func_timeout, FunctionTimedOut
-    from proton.handlers import MessagingHandler
-    from proton.reactor import Container
 
     url = 'http://docservice:8000/healthcheck'
     redisHost = os.environ.get('REDIS_SERVER_HOST')
@@ -68,7 +58,18 @@ data:
         logger.info('Running a script to test the availability of DocumentServer and dependencies\n')
 
 
+    def install_module(package):
+        try:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', package],
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.STDOUT)
+        except Exception as msg_install_module:
+            logger_test_ds.error(f'Error when trying to install the "{package}" package... {msg_install_module}\n')
+
+
     def get_redis_status():
+        install_module('redis')
+        import redis
         global rc
         try:
             rc = redis.Redis(
@@ -107,6 +108,8 @@ data:
 
 
     def check_db_postgresql():
+        install_module('psycopg2')
+        import psycopg2
         try:
             dbc = psycopg2.connect(
                 host=dbHost,
@@ -130,11 +133,13 @@ data:
             total_result['CheckPostgreSQL'] = 'Failed'
         else:
             dbc.close()
-            logger_test_ds.info(f'Check of DS tables in "{dbName}" database has been finished\n')
+            logger_test_ds.info(f'Check of the existence of DS tables in the "{dbName}" database has been completed\n')
             total_result['CheckPostgreSQL'] = 'Success'
 
 
     def check_db_mysql():
+        install_module('pymysql')
+        import pymysql
         try:
             dbc = pymysql.connect(
                 host=dbHost,
@@ -158,7 +163,7 @@ data:
             total_result['CheckMySQL'] = 'Failed'
         else:
             dbc.close()
-            logger_test_ds.info(f'Check of DS tables in "{dbName}" database has been finished\n')
+            logger_test_ds.info(f'Check of the existence of DS tables in the "{dbName}" database has been completed\n')
             total_result['CheckMySQL'] = 'Success'
 
 
@@ -171,6 +176,8 @@ data:
 
 
     def check_mq_rabbitmq():
+        install_module('pika')
+        import pika
         try:
             mqp = pika.URLParameters(f'{brokerProto}://{brokerUser}:{brokerPassword}@{brokerHost}:{brokerPort}{brokerVhost}')
             mqc = pika.BlockingConnection(mqp)
@@ -197,6 +204,9 @@ data:
 
 
     def check_mq_activemq():
+        install_module('python-qpid-proton')
+        from proton.handlers import MessagingHandler
+        from proton.reactor import Container
         activemq_proto = os.environ.get('AMQP_PROTO')
         if activemq_proto == 'amqp+ssl':
             activemq_proto = 'amqps'
@@ -230,6 +240,8 @@ data:
         if brokerType == 'rabbitmq':
             check_mq_rabbitmq()
         elif brokerType == 'activemq':
+            install_module('func_timeout')
+            from func_timeout import func_timeout, FunctionTimedOut
             try:
                 activemq_return_status = func_timeout(15, check_mq_activemq)
             except FunctionTimedOut:
@@ -265,6 +277,9 @@ data:
 
 
     def get_ds_status():
+        install_module('requests')
+        import requests
+        from requests.adapters import HTTPAdapter
         logger_test_ds.info('Checking DocumentServer availability...')
         ds_adapter = HTTPAdapter(max_retries=3)
         ds_session = requests.Session()
