@@ -162,6 +162,12 @@ podSecurityContext:
     runAsUser: 1001
     ## podSecurityContext.example.runAsGroup Group ID for the Example pod
     runAsGroup: 1001
+  ## Tests Pod podSecurityContext parameters
+  tests:
+    ## podSecurityContext.tests.runAsUser User ID for the Test pod
+    runAsUser: 0
+    ## podSecurityContext.tests.runAsGroup Group ID for the Test pod
+    runAsGroup: 0
 ## Pod anti-affinity parameters
 ## Pod anti-affinity prohibits at all (required) or, if possible (preferred), placing a second pod with the same label on the same node
 podAntiAffinity:
@@ -1023,3 +1029,23 @@ delete:
     ## If set, the default configmap will not be created and the two previous parameters are ignored
     ## Must contain a key `stop.sh`
     dsStop: ""
+
+## Onlyoffice Docs tests parameters
+tests:
+  ## tests.enabled Enable the creation of resources necessary for testing the running of ONLYOFFICE Docs and access to connected dependencies
+  ## These resources will be used when running the `helm test` command
+  enabled: true
+  ## test container resource requests and limits
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  ## tests.resources.requests The requested resources for the test container
+  ## tests.resources.limits The resources limits for the test container
+  resources:
+    ##Example:
+    ##requests:
+    ##  memory: "256Mi"
+    ##  cpu: "200m"
+    requests: {}
+    ##limits:
+    ##  memory: "512Mi"
+    ##  cpu: "1000m"
+    limits: {}

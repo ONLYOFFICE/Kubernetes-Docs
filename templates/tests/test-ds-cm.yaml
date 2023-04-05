@@ -1,3 +1,4 @@
+{{- if .Values.tests.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,7 +11,7 @@ metadata:
   annotations:
     "helm.sh/hook": test
     "helm.sh/hook-weight": "1"
-    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 data:
   test_ds.py: |-
     import os
@@ -49,7 +50,7 @@ data:
 
     def init_logger(name):
         logger = logging.getLogger(name)
-        formatter = '%(asctime)s - %(name)s:%(lineno)s - %(levelname)s - %(message)s'
+        formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         logger.setLevel(logging.DEBUG)
         stdout = logging.StreamHandler()
         stdout.setFormatter(logging.Formatter(formatter))
@@ -133,7 +134,7 @@ data:
             total_result['CheckPostgreSQL'] = 'Failed'
         else:
             dbc.close()
-            logger_test_ds.info(f'Check of the existence of DS tables in the "{dbName}" database has been completed\n')
+            logger_test_ds.info(f'Check of DS tables in "{dbName}" database has been finished\n')
             total_result['CheckPostgreSQL'] = 'Success'
 
 
@@ -163,7 +164,7 @@ data:
             total_result['CheckMySQL'] = 'Failed'
         else:
             dbc.close()
-            logger_test_ds.info(f'Check of the existence of DS tables in the "{dbName}" database has been completed\n')
+            logger_test_ds.info(f'Check of DS tables in "{dbName}" database has been finished\n')
             total_result['CheckMySQL'] = 'Success'
 
 
@@ -300,7 +301,7 @@ data:
     def total_status():
         logger_test_ds.info('As a result of the check, the following results were obtained:')
         for key, value in total_result.items():
-            print(key, '=', value)
+            logger_test_ds.info(f'{key} = {value}')
         if total_result['CheckDS'] != 'Success':
             sys.exit(1)
 
@@ -314,3 +315,4 @@ data:
     get_ds_status()
     total_status()
 
+{{- end }}

@@ -1,3 +1,4 @@
+{{- if .Values.tests.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -12,9 +13,20 @@ metadata:
     "helm.sh/hook-weight": "2"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
+  serviceAccountName: {{ include "ds.serviceAccountName" . }}
+  {{- if .Values.podSecurityContext.enabled }}
+  securityContext: {{- toYaml .Values.podSecurityContext.tests | nindent 4 }}
+  {{- end }}
+  {{- if .Values.nodeSelector }}
+  nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.tolerations }}
+  tolerations: {{ toYaml .Values.tolerations | nindent 4 }}
+  {{- end }}
   containers:
   - image: python:3.11
     name: test-ds
+    resources: {{ toYaml .Values.tests.resources | nindent 6 }}
     env:
     - name: DB_PWD
       valueFrom:
@@ -54,3 +66,4 @@ spec:
       name: test-ds
       defaultMode: 0755
   restartPolicy: Never
+{{- end }}
