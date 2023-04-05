@@ -16,4 +16,4 @@ jobs:
     with: 
       ct_version: 3.8.0
       enable_yaml_lint: true
-      enable_kube_lint: false
+      enable_kube_lint: true
