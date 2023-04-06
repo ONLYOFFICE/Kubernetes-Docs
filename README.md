@@ -554,7 +554,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `install.existingConfigmap.tblCreate.name`                  | The name of the existing ConfigMap that contains the sql file for craeting tables from the database                                                                            | `init-db-scripts`                                                                         |
 | `install.existingConfigmap.tblCreate.keyName`               | The name of the sql file containing instructions for creating tables from the database. Must be the same as the `key` name in `install.existingConfigmap.tblCreate.name`       | `createdb.sql`                                                                            |
 | `install.existingConfigmap.initdb`                          | The name of the existing ConfigMap that contains the initdb script. If set, the two previous parameters are ignored. Must contain a key `initdb.sh`                            | `""`                                                                                      |
-| `tests.enabled`                                             | Enable the creation of resources necessary for testing the running of ONLYOFFICE Docs and access to connected dependencies. These resources will be used when running the `helm test` command | `true`                                                                     |
+| `tests.enabled`                                             | Enable the resources creation necessary for ONLYOFFICE Docs launch testing and connected dependencies availability testing. These resources will be used when running the `helm test` command | `true`                                                                     |
 | `tests.resources.requests`                                  | The requested resources for the test container                                                                                                                                 | `{}`                                                                                      |
 | `tests.resources.limits`                                    | The resources limits for the test container                                                                                                                                    | `{}`                                                                                      |
 
@@ -866,9 +866,9 @@ To view the log of the Pod running as a result of the `helm test` command, run t
 $ kubectl logs -f test-ds -n <NAMESPACE>
 ```
 
-The DocumentServer availability check is considered a priority, so if it fails with an error, it is considered that the test failed.
+The DocumentServer availability check is considered a priority, so if it fails with an error, the test is considered to be failed.
 
-Next, delete the `test-ds` Pod by running the following command:
+After this, you can delete the `test-ds` Pod by running the following command:
 
 ```bash
 $ kubectl delete pod test-ds -n <NAMESPACE>
@@ -876,7 +876,7 @@ $ kubectl delete pod test-ds -n <NAMESPACE>
 
 Note: This testing is for informational purposes only and cannot guarantee 100% availability results.
 It may be that even though all checks are completed successfully, an error occurs in the application.
-In this case, more detailed information can be obtained in the application logs.
+In this case, more detailed information can be found in the application logs.
 
 ### 11. Run Jobs in a private k8s cluster (optional)
 

@@ -205,7 +205,6 @@ data:
 
 
     def check_mq_activemq():
-        install_module('python-qpid-proton')
         from proton.handlers import MessagingHandler
         from proton.reactor import Container
         activemq_proto = os.environ.get('AMQP_PROTO')
@@ -241,6 +240,7 @@ data:
         if brokerType == 'rabbitmq':
             check_mq_rabbitmq()
         elif brokerType == 'activemq':
+            install_module('python-qpid-proton')
             install_module('func_timeout')
             from func_timeout import func_timeout, FunctionTimedOut
             try:

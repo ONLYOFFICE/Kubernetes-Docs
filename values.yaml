@@ -1032,7 +1032,7 @@ delete:
 
 ## Onlyoffice Docs tests parameters
 tests:
-  ## tests.enabled Enable the creation of resources necessary for testing the running of ONLYOFFICE Docs and access to connected dependencies
+  ## tests.enabled Enable the resources creation necessary for ONLYOFFICE Docs launch testing and connected dependencies availability testing
   ## These resources will be used when running the `helm test` command
   enabled: true
   ## test container resource requests and limits
