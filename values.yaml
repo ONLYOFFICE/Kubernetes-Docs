@@ -85,7 +85,7 @@ connections:
 webProxy:
   ## webProxy.enabled Specify whether a Web proxy is used in your network to access the Pods of k8s cluster to the Internet
   enabled: false
-  ## webProxy.http Web Proxy address for `HTTP` traffic 
+  ## webProxy.http Web Proxy address for `HTTP` traffic
   http: "http://proxy.example.com"
   ## webProxy.https Web Proxy address for `HTTPS` traffic
   https: "https://proxy.example.com"
