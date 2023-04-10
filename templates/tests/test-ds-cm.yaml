@@ -108,7 +108,7 @@ data:
                 total_result['CheckRedis'] = 'Success'
 
 
-    def check_db_postgresql():
+    def check_db_postgresql(tbl_dict):
         install_module('psycopg2')
         import psycopg2
         try:
@@ -127,18 +127,23 @@ data:
                     table_exists = cursor.fetchone()[0]
                     if table_exists is True:
                         logger_test_ds.info(f'The table "{tbl}" exists in the "{dbName}" database')
+                        tbl_dict[tbl] = 'Exists'
                     else:
                         logger_test_ds.error(f'The table "{tbl}" does not exists in the "{dbName}" database')
+                        tbl_dict[tbl] = 'NotExists'
         except Exception as msg_check_dblist:
             logger_test_ds.error(f'Error when trying to get a list of DS tables in the "{dbName}" database... {msg_check_dblist}\n')
             total_result['CheckPostgreSQL'] = 'Failed'
         else:
             dbc.close()
             logger_test_ds.info(f'Check of DS tables in "{dbName}" database has been finished\n')
-            total_result['CheckPostgreSQL'] = 'Success'
+            if 'NotExists' in tbl_dict.values():
+                total_result['CheckPostgreSQL'] = 'Failed'
+            else:
+                total_result['CheckPostgreSQL'] = 'Success'
 
 
-    def check_db_mysql():
+    def check_db_mysql(tbl_dict):
         install_module('pymysql')
         import pymysql
         try:
@@ -157,23 +162,29 @@ data:
                     table_exists = cursor.fetchone()[0]
                     if table_exists == 1:
                         logger_test_ds.info(f'The table "{tbl}" exists in the "{dbName}" database')
+                        tbl_dict[tbl] = 'Exists'
                     else:
                         logger_test_ds.error(f'The table "{tbl}" does not exists in the "{dbName}" database')
+                        tbl_dict[tbl] = 'NotExists'
         except Exception as msg_check_dblist:
             logger_test_ds.error(f'Error when trying to get a list of DS tables in the "{dbName}" database... {msg_check_dblist}\n')
             total_result['CheckMySQL'] = 'Failed'
         else:
             dbc.close()
             logger_test_ds.info(f'Check of DS tables in "{dbName}" database has been finished\n')
-            total_result['CheckMySQL'] = 'Success'
+            if 'NotExists' in tbl_dict.values():
+                total_result['CheckMySQL'] = 'Failed'
+            else:
+                total_result['CheckMySQL'] = 'Success'
 
 
     def check_db():
         logger_test_ds.info('Checking database availability...')
+        tbl_result = {}
         if dbType == 'postgres':
-            check_db_postgresql()
+            check_db_postgresql(tbl_result)
         elif dbType == 'mysql' or dbType == 'mariadb':
-            check_db_mysql()
+            check_db_mysql(tbl_result)
 
 
     def check_mq_rabbitmq():
