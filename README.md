@@ -44,7 +44,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
   * [8. Shutdown ONLYOFFICE Docs (optional)](#8-shutdown-onlyoffice-docs-optional)
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
-  * [10. Run Jobs in a private k8s cluster (optional)](#10-run-jobs-in-a-private-k8s-cluster-optional)
+  * [10. ONLYOFFICE Docs installation test (optional)](#10-onlyoffice-docs-installation-test-optional)
+  * [11. Run Jobs in a private k8s cluster (optional)](#11-run-jobs-in-a-private-k8s-cluster-optional)
 - [Using Grafana to visualize metrics (optional)](#using-grafana-to-visualize-metrics-optional)
   * [1. Deploy Grafana](#1-deploy-grafana)
     + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
@@ -506,6 +507,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `podSecurityContext.jobs.runAsGroup`                        | Group ID for pods created by jobs                                                                                                                                              | `101`                                                                                     |
 | `podSecurityContext.example.runAsUser`                      | User ID for the Example pod                                                                                                                                                    | `1001`                                                                                    |
 | `podSecurityContext.example.runAsGroup`                     | Group ID for the Example pod                                                                                                                                                   | `1001`                                                                                    |
+| `podSecurityContext.tests.runAsUser`                        | User ID for the Test pod                                                                                                                                                       | `0`                                                                                       |
+| `podSecurityContext.tests.runAsGroup`                       | Group ID for the Test pod                                                                                                                                                      | `0`                                                                                       |
 | `webProxy.enabled`                                          | Specify whether a Web proxy is used in your network to access the Pods of k8s cluster to the Internet                                                                          | `false`                                                                                   |
 | `webProxy.http`                                             | Web Proxy address for `HTTP` traffic                                                                                                                                           | `http://proxy.example.com`                                                                |
 | `webProxy.https`                                            | Web Proxy address for `HTTPS` traffic                                                                                                                                          | `https://proxy.example.com`                                                               |
@@ -551,6 +554,9 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `install.existingConfigmap.tblCreate.name`                  | The name of the existing ConfigMap that contains the sql file for craeting tables from the database                                                                            | `init-db-scripts`                                                                         |
 | `install.existingConfigmap.tblCreate.keyName`               | The name of the sql file containing instructions for creating tables from the database. Must be the same as the `key` name in `install.existingConfigmap.tblCreate.name`       | `createdb.sql`                                                                            |
 | `install.existingConfigmap.initdb`                          | The name of the existing ConfigMap that contains the initdb script. If set, the two previous parameters are ignored. Must contain a key `initdb.sh`                            | `""`                                                                                      |
+| `tests.enabled`                                             | Enable the resources creation necessary for ONLYOFFICE Docs launch testing and connected dependencies availability testing. These resources will be used when running the `helm test` command | `true`                                                                     |
+| `tests.resources.requests`                                  | The requested resources for the test container                                                                                                                                 | `{}`                                                                                      |
+| `tests.resources.limits`                                    | The resources limits for the test container                                                                                                                                    | `{}`                                                                                      |
 
 * *Note: The prefix `-de` is specified in the value of the image repository, which means solution type. Possible options:
   - Nothing is specified. For the open-source community version
@@ -840,7 +846,39 @@ $ kubectl create secret generic license --from-file=path/to/license.lic -n <NAME
 $ kubectl delete pod converter-*** docservice-*** -n <NAMESPACE>
 ```
 
-### 10. Run Jobs in a private k8s cluster (optional)
+### 10. ONLYOFFICE Docs installation test (optional)
+
+You can test ONLYOFFICE Docs availability and access to connected dependencies by running the following command:
+
+```bash
+$ helm test documentserver
+```
+
+The output should have the following line:
+
+```bash
+Phase: Succeeded
+```
+
+To view the log of the Pod running as a result of the `helm test` command, run the following command:
+
+```bash
+$ kubectl logs -f test-ds -n <NAMESPACE>
+```
+
+The DocumentServer availability check is considered a priority, so if it fails with an error, the test is considered to be failed.
+
+After this, you can delete the `test-ds` Pod by running the following command:
+
+```bash
+$ kubectl delete pod test-ds -n <NAMESPACE>
+```
+
+Note: This testing is for informational purposes only and cannot guarantee 100% availability results.
+It may be that even though all checks are completed successfully, an error occurs in the application.
+In this case, more detailed information can be found in the application logs.
+
+### 11. Run Jobs in a private k8s cluster (optional)
 
 When running `Job` for installation, update, rollback and deletion, the container being launched needs Internet access to download the latest sql scripts.
 If the access of containers to the external network is prohibited in your k8s cluster, then you can perform these Jobs by setting the `privateCluster=true` parameter and manually create a `ConfigMap` with the necessary sql scripts.
