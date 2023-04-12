@@ -17,6 +17,10 @@ spec:
   template:
     spec:
       serviceAccountName: dashboard-sa
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
       volumes:
       - name: grafana-dashboard
         configMap:

@@ -184,6 +184,9 @@ nodeSelector: {}
 ## tolerations Tolerations for pods assignment
 ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 tolerations: []
+## imagePullSecrets Container image registry secret name
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: ""
 ## Onlyoffice Docs service parameters
 service:
   ## service.existing The name of an existing service for ONLYOFFICE Docs. If not set, a service named `documentserver` will be created
