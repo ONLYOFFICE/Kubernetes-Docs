@@ -24,9 +24,11 @@ data:
   AMQP_USER: {{ .Values.connections.amqpUser }}
   AMQP_PROTO: {{ .Values.connections.amqpProto }}
   METRICS_ENABLED: {{ .Values.metrics.enabled | quote }}
+  {{- if .Values.metrics.enabled }}
   METRICS_HOST: {{ .Values.metrics.host }}
   METRICS_PORT: {{ .Values.metrics.port | quote }}
   METRICS_PREFIX: {{ .Values.metrics.prefix }}
+  {{- end }}
   LOG_LEVEL: {{ .Values.log.level }}
   LOG_TYPE: {{ .Values.log.type }}
   LOG_PATTERN: {{ .Values.log.pattern | quote }}
