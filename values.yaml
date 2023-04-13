@@ -228,7 +228,7 @@ log:
   type: pattern
   ## log.pattern Defines the log pattern if `log.type=pattern`
   ## ref: https://github.com/log4js-node/log4js-node/blob/master/docs/layouts.md#pattern-format
-  pattern: "[%d] [%p] %c - %.10000m"
+  pattern: "[%d] [%p] [%X{DOCID}] [%X{USERID}] %c - %.10000m"
 ## Defines if `WOPI` is enabled
 ## If the parameter is enabled, then caching attributes for the mounted directory (`PVC`) should be disabled for the client
 wopi:
