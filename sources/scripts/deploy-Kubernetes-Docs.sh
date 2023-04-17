@@ -83,7 +83,6 @@ function k8s_deploy_deps() {
                  --set primary.persistence.size=2G \
                  --set metrics.enabled=false > /dev/null 2>&1
             echo "${COLOR_GREEN}☑ OK: Postgresql was deployed${COLOR_RESET}"
-
      }
 
 function k8s_wait_deps() {
