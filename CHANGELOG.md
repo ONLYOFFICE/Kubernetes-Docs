@@ -1,5 +1,17 @@
 # Change log
 
+## 3.1.0
+
+### New Features
+
+* Added `helm test` for ONLYOFFICE Docs launch testing and connected dependencies availability testing
+* Added `NOTES.txt`
+* Added the ability set up `imagePullSecrets`
+
+### Fixes
+
+* Fixed variable handling for DocumentServer metrics
+
 ## 3.0.2
 
 ### Changes
