@@ -2,7 +2,7 @@
 
 # Scripts for deploys and check Kuberneted-Docs helm chart
 
-set -euo pipefail 
+set -e
 
 K8S_STORAGE_CLASS="standard"
 NFS_PERSISTANCE_SIZE="8Gi"
