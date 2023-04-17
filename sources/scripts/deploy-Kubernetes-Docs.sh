@@ -92,7 +92,7 @@ function k8s_wait_deps() {
 
 function k8s_ct_install() {
             echo "${COLOR_YELLOW}⚠ Attention: Start ct install test..${COLOR_RESET}"
-            ct install --chart-dirs . --charts . --helm-extra-set-args "--set=namespaceOverride=default"
+            ct install --chart-dirs . --charts . --helm-extra-set-args "--set=namespaceOverride=default --wait"
             if [[ "$?" == 0 ]]; then
                echo "${COLOR_GREEN}👌👌👌⎈ Helm install/test/upgrade successfull finished${COLOR_RESET}"
                echo "${COLOR_BLUE}🔨⎈ Get test logs...${COLOR_RESET}"
