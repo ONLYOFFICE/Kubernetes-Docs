@@ -48,6 +48,23 @@ function k8s_get_info() {
             kubectl get nodes
 }
 
+function k8s_pods_logs() {
+            ## Get not ready pods
+            local PODS=$(kubectl get pods --all-namespaces -o go-template='{{ range $item := .items }}
+            {{ range .status.conditions }}{{ if (or (and (eq .type "PodScheduled")
+            (eq .status "False")) (and (eq .type "Ready") (eq .status "False"))) }}
+            {{ $item.metadata.name}} {{ end }}{{ end }}{{ end }}')
+
+            ## Get pods logs
+            if [[ -z ${PODS} ]]; then
+                 echo "${COLOR_RED}⚠ ⚠ ⚠  Attention: looks like some pods is not running. Get logs${COLOR_RESET}"
+                 for p in ${PODS}; do
+                    echo "${COLOR_BLUE} 🔨⎈ Get ${p} logs${COLOR_RESET}"
+                    kubectl logs ${p}
+                 done
+            fi
+}
+
 function k8s_deploy_deps() {
             echo "${COLOR_BLUE}🔨⎈ Add depends helm repos...${COLOR_RESET}"
             # Add dependency helm charts
@@ -86,24 +103,32 @@ function k8s_deploy_deps() {
      }
 
 function k8s_wait_deps() {
-                echo "${COLOR_BLUE}🔨⎈ Wait Docs dependencies${COLOR_RESET}"
+                echo "${COLOR_BLUE}🔨⎈ Wait 2 minutes for k8s-Docs dependencies${COLOR_RESET}"
                 sleep 120
      }
 
 function k8s_ct_install() {
+	    EXIT_CODE=0
             echo "${COLOR_YELLOW}⚠ Attention: Start ct install test..${COLOR_RESET}"
-            ct install --chart-dirs . --charts . --helm-extra-set-args "--set=namespaceOverride=default --wait"
-            if [[ "$?" == 0 ]]; then
+            ct install --chart-dirs . --charts . --helm-extra-set-args "--set=namespaceOverride=default --wait" || EXIT_CODE=$?
+            if [[ "${EXIT_CODE}" == 0 ]]; then
+	       local CT_STATUS="success"
+	       echo
                echo "${COLOR_GREEN}👌👌👌⎈ Helm install/test/upgrade successfull finished${COLOR_RESET}"
-               echo "${COLOR_BLUE}🔨⎈ Get test logs...${COLOR_RESET}"
-               kubectl logs -f test-ds --namespace=default
+               echo
+	       echo "${COLOR_BLUE}🔨⎈ Get test logs...${COLOR_RESET}"
+               echo
+	       kubectl logs -f test-ds --namespace=default
 	       k8s_get_info
-	       exit 0
+	       exit ${EXIT_CODE}
             else 
+	       local CT_STATUS="failed"
+	       echo
                echo "${COLOR_RED}🔥Tests failed. Get test logs and exit with 1${COLOR_RESET}"
-               kubectl logs -f test-ds --namespace=default
+               echo
+	       k8s_pods_logs
 	       k8s_get_info
-               exit 1
+               exit ${EXIT_CODE}
             fi
      }
 
