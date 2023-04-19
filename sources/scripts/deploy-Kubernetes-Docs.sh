@@ -56,7 +56,7 @@ function k8s_pods_logs() {
             {{ $item.metadata.name}} {{ end }}{{ end }}{{ end }}')
 
             ## Get pods logs
-            if [[ -z ${PODS} ]]; then
+            if [[ -n ${PODS} ]]; then
                  echo "${COLOR_RED}⚠ ⚠ ⚠  Attention: looks like some pods is not running. Get logs${COLOR_RESET}"
                  for p in ${PODS}; do
                     echo "${COLOR_BLUE} 🔨⎈ Get ${p} logs${COLOR_RESET}"
