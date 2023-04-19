@@ -126,7 +126,6 @@ function k8s_ct_install() {
 	       echo
                echo "${COLOR_RED}🔥Tests failed. Get test logs and exit with 1${COLOR_RESET}"
                echo
-	       k8s_pods_logs
 	       k8s_get_info
                exit ${EXIT_CODE}
             fi
