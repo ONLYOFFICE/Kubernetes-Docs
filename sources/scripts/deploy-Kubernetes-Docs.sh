@@ -164,7 +164,7 @@ function k8s_helm_test() {
 function k8s_helm_upgrade() {
             echo "${COLOR_BLUE}🔨⎈ Start helm upgrade..${COLOR_RESET}"
 	    local EXIT_CODE=0
-	    helm upgrade ${DEPLOY_NAME} . || EXIT_CODE=$?
+	    helm upgrade ${DEPLOY_NAME} . --wait || EXIT_CODE=$?
 	    if [[ $? == 0 ]]; then
 	       echo "${COLOR_GREEN} 👌👌👌⎈ Helm upgrade success! ${COLOR_RESET}"
 	    else
@@ -190,6 +190,13 @@ function k8s_remove_pods() {
 
 }
 
+function k8s_docs_test() {
+   k8s_helm_test
+   k8s_helm_upgrade
+   k8s_remove_pods
+   k8s_helm_test
+}
+
 function main () {
    common::get_colors
    k8s_get_info
@@ -197,9 +204,7 @@ function main () {
    k8s_deploy_deps
    k8s_wait_deps
    k8s_deploy_docs
-   k8s_helm_test
-   k8s_helm_upgrade
-   k8s_remove_pods
- }
+   k8s_docs_test 
+}
 
 main
