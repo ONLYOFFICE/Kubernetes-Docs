@@ -6,6 +6,7 @@ set -e
 
 K8S_STORAGE_CLASS="standard"
 NFS_PERSISTANCE_SIZE="8Gi"
+DEPLOY_NAME="documentserver"
 
 export TERM=xterm-256color^M
 
@@ -131,13 +132,74 @@ function k8s_ct_install() {
             fi
      }
 
+function k8s_deploy_docs() {
+            echo "${COLOR_BLUE}🔨⎈ Deploy docs in k8s...${COLOR_RESET}"
+	    local EXIT_CODE=0
+            helm install ${DEPLOY_NAME} . --set namespaceOverride=default --wait || EXIT_CODE=$?
+	    if [[ "${EXIT_CODE}" == 0 ]]; then
+	       sleep 60
+	       k8s_get_info
+	       echo "${COLOR_BLUE} 🔨⎈ Docs successfully deployed. Continue.. Run Helm test.${COLOR_RESET}"
+	    else
+	       echo "${COLOR_RED}🔥 Docs deploy failed. Exit${COLOR_RESET}"
+	       k8s_get_info
+	       k8s_pods_logs
+	       exit ${EXIT_CODE}
+	    fi
+     }
+
+function k8s_helm_test() {
+            echo "${COLOR_BLUE}🔨⎈ Start helm test..${COLOR_RESET}"
+            helm test ${DEPLOY_NAME} --namespace=default
+            if [[ $? == 0 ]]; then
+               echo "${COLOR_GREEN} 👌👌👌⎈ Helm test success! ${COLOR_RESET}"
+	       echo "${COLOR_BLUE} 🔨⎈ Get test logs... ${COLOR_RESET}"
+               kubectl logs -f test-ds --namespace=default
+	    else
+	       echo "${COLOR_RED} Helm test FAILED. ${COLOR_RESET}"
+	       exit 1
+            fi
+     }
+
+function k8s_helm_upgrade() {
+            echo "${COLOR_BLUE}🔨⎈ Start helm upgrade..${COLOR_RESET}"
+	    local EXIT_CODE=0
+	    helm upgrade ${DEPLOY_NAME} . || EXIT_CODE=$?
+	    if [[ $? == 0 ]]; then
+	       echo "${COLOR_GREEN} 👌👌👌⎈ Helm upgrade success! ${COLOR_RESET}"
+	    else
+	       echo "${COLOR_RED} Helm upgrade FAILED. ${COLOR_RESET}"
+	       exit ${EXIT_CODE}
+	    fi
+}
+
+function k8s_remove_pods() {
+            local RANDOM_PODS=$(echo "$(kubectl -n default get pods -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | uniq | shuf)" )
+	    echo
+            echo "${COLOR_BLUE}🔨⎈ Try to remove random pods and Helm test again...${COLOR_RESET}"
+	    echo
+
+            local pods_array=()
+            local pods_array+=(${RANDOM_PODS})
+            echo ${pods_array[@]}
+
+            for i in "${pods_array[@]:0:5}"; do
+	       kubectl delete pod ${i}
+               echo "${COLOR_BLUE}pod ${i} was deleted${COLOR_RESET}"
+            done
+
+}
+
 function main () {
    common::get_colors
    k8s_get_info
    k8s_w8_workers
    k8s_deploy_deps
    k8s_wait_deps
-   k8s_ct_install
+   k8s_deploy_docs
+   k8s_helm_test
+   k8s_helm_upgrade
+   k8s_remove_pods
  }
 
 main
