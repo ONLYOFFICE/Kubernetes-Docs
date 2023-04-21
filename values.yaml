@@ -100,13 +100,13 @@ namespaceOverride: ""
 ## commonLabels Defines labels that will be additionally added to all the deployed resources
 ## You can also use `tpl` as the value for the key
 ## ref: https://helm.sh/docs/chart_best_practices/labels/
-##Example:
-##commonLabels:
-##  app.kubernetes.io/name: "{{ .Chart.Name }}"
-##  helm.sh/chart: '{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
-##  app.kubernetes.io/managed-by: "{{ .Release.Service }}"
-##  app.kubernetes.io/instance: "{{ .Release.Name }}"
-##  app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+## Example:
+## commonLabels:
+##   app.kubernetes.io/name: "{{ .Chart.Name }}"
+##   helm.sh/chart: '{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
+##   app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+##   app.kubernetes.io/instance: "{{ .Release.Name }}"
+##   app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
 commonLabels: {}
 ## Service account parameters
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
@@ -206,9 +206,9 @@ service:
   ## Used if the `service.sessionAffinity` is set
   ## ref: https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout
   ## Example:
-  ##sessionAffinityConfig:
-  ##  clientIP:
-  ##    timeoutSeconds: 900
+  ## sessionAffinityConfig:
+  ##   clientIP:
+  ##     timeoutSeconds: 900
   sessionAffinityConfig: {}
 ## Onlyoffice Docs license
 license:
@@ -260,16 +260,16 @@ jwt:
   ## jwt.inbox JSON Web Token validation parameters for inbox requests only
   ## jwt.outbox JSON Web Token validation parameters for outbox requests only
   ## If not specified, the values of the parameters of the common `jwt` are used
-  ##Example:
-  ##inbox:
-  ##  enabled: true
-  ##  secret: "MYSECRET"
-  ##  header: "Authorization"
+  ## Example:
+  ## inbox:
+  ##   enabled: true
+  ##   secret: "MYSECRET"
+  ##   header: "Authorization"
   inbox: {}
-  ##outbox:
-  ##  enabled: true
-  ##  secret: "MYSECRET"
-  ##  header: "Authorization"
+  ## outbox:
+  ##   enabled: true
+  ##   secret: "MYSECRET"
+  ##   header: "Authorization"
   outbox: {}
   ## jwt.existingSecret The name of an existing secret containing variables for jwt
   ## If not specified, a secret named `jwt` will be created
@@ -312,31 +312,31 @@ docservice:
   ## Pod affinity allow you to constrain which nodes Docservice Pods can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
   ## Example:
-  ##podAffinity:
-  ##  requiredDuringSchedulingIgnoredDuringExecution:
-  ##  - labelSelector:
-  ##      matchExpressions:
-  ##      - key: app
-  ##        operator: In
-  ##        values:
-  ##        - store
-  ##    topologyKey: topology.kubernetes.io/zone
+  ## podAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - store
+  ##     topologyKey: topology.kubernetes.io/zone
   ##
   podAffinity: {}
   ## Node affinity rules for Docservice Pods scheduling by nodes
   ## Node affinity allow you to constrain which nodes Docservice Pod can be scheduled on based on node labels
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
   ## Example:
-  ##nodeAffinity:
-  ##  preferredDuringSchedulingIgnoredDuringExecution:
-  ##  - weight: 100
-  ##    preference:
-  ##      matchExpressions:
-  ##      - key: kubernetes.io/name
-  ##        operator: In
-  ##        values:
-  ##        - name1
-  ##        - name2
+  ## nodeAffinity:
+  ##   preferredDuringSchedulingIgnoredDuringExecution:
+  ##   - weight: 100
+  ##     preference:
+  ##       matchExpressions:
+  ##       - key: kubernetes.io/name
+  ##         operator: In
+  ##         values:
+  ##         - name1
+  ##         - name2
   ##
   nodeAffinity: {}
   ## Horizontal Pod Autoscaling parameters
@@ -362,50 +362,50 @@ docservice:
       utilizationPercentage: 70
     ## docservice.autoscaling.customMetricsType Custom, additional or external autoscaling metrics for the Docservice deployment
     ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
-    ##Example:
-    ##customMetricsType:
-    ##  - type: Object
-    ##    object:
-    ##      metric:
-    ##        name: requests-per-second
-    ##      describedObject:
-    ##        apiVersion: networking.k8s.io/v1
-    ##        kind: Ingress
-    ##        name: main-route
-    ##      target:
-    ##        type: Value
-    ##        value: 2k
+    ## Example:
+    ## customMetricsType:
+    ##   - type: Object
+    ##     object:
+    ##       metric:
+    ##         name: requests-per-second
+    ##       describedObject:
+    ##         apiVersion: networking.k8s.io/v1
+    ##         kind: Ingress
+    ##         name: main-route
+    ##       target:
+    ##         type: Value
+    ##         value: 2k
     customMetricsType: []
     ## docservice.autoscaling.behavior Configuring Docservice deployment scaling behavior policies for the `scaleDown` and `scaleUp` fields
     ## If not set the default values are used:
     ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#default-behavior
-    ##Example:
-    ##behavior:
-    ##  scaleDown:
-    ##    stabilizationWindowSeconds: 300
-    ##    policies:
-    ##    - type: Pods
-    ##      value: 4
-    ##      periodSeconds: 60
-    ##  scaleUp:
-    ##    stabilizationWindowSeconds: 0
-    ##    policies:
-    ##    - type: Percent
-    ##      value: 70
-    ##      periodSeconds: 15
-    ##    selectPolicy: Max
+    ## Example:
+    ## behavior:
+    ##   scaleDown:
+    ##     stabilizationWindowSeconds: 300
+    ##     policies:
+    ##     - type: Pods
+    ##       value: 4
+    ##       periodSeconds: 60
+    ##   scaleUp:
+    ##     stabilizationWindowSeconds: 0
+    ##     policies:
+    ##     - type: Percent
+    ##       value: 70
+    ##       periodSeconds: 15
+    ##     selectPolicy: Max
     behavior: {}
   ## Docservice initContainers parameters
   ## Containers that run before docservice and proxy containers in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## Example:
-  ##initContainers:
-  ##  - name: change-volume-owner
-  ##    image: busybox:latest
-  ##    command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
-  ##    volumeMounts:
-  ##    - name: ds-files
-  ##      mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+  ## initContainers:
+  ##   - name: change-volume-owner
+  ##     image: busybox:latest
+  ##     command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
+  ##     volumeMounts:
+  ##     - name: ds-files
+  ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
   initContainers: []
   ## Parameters of the docservice container of the Docservice deployment
   ##
@@ -475,14 +475,14 @@ docservice:
   ## docservice.resources.requests The requested resources for the docservice container
   ## docservice.resources.limits The resources limits for the docservice container
   resources:
-    ##Example:
-    ##requests:
-    ##  memory: "256Mi"
-    ##  cpu: "100m"
+    ## Example:
+    ## requests:
+    ##   memory: "256Mi"
+    ##   cpu: "100m"
     requests: {}
-    ##limits:
-    ##  memory: "2Gi"
-    ##  cpu: "1000m"
+    ## limits:
+    ##   memory: "2Gi"
+    ##   cpu: "1000m"
     limits: {}
 ## Parameters of the proxy container of the Docservice deployment
 ##
@@ -494,10 +494,10 @@ proxy:
   ## ref: https://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
   secureLinkSecret: verysecretstring
   ## proxy.infoAllowedIP Defines ip addresses for accessing the info page
-  ##Example:
-  ##infoAllowedIP:
-  ##- 10.244.0.79
-  ##- 192.168.1.0/24
+  ## Example:
+  ## infoAllowedIP:
+  ## - 10.244.0.79
+  ## - 192.168.1.0/24
   infoAllowedIP: []
   ## proxy.welcomePage.enabled Defines whether the welcome page will be displayed
   welcomePage:
@@ -568,14 +568,14 @@ proxy:
   ## proxy.resources.requests The requested resources for the proxy container
   ## proxy.resources.limits The resources limits for the proxy container
   resources:
-    ##Example:
-    ##requests:
-    ##  memory: "256Mi"
-    ##  cpu: "100m"
+    ## Example:
+    ## requests:
+    ##   memory: "256Mi"
+    ##   cpu: "100m"
     requests: {}
-    ##limits:
-    ##  memory: "2Gi"
-    ##  cpu: "1000m"
+    ## limits:
+    ##   memory: "2Gi"
+    ##   cpu: "1000m"
     limits: {}
 
 ## Onlyoffice Docs Converter Deployment parameters
@@ -602,32 +602,32 @@ converter:
   ## Pod affinity allow you to constrain which nodes Converter Pod can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
   ## Example:
-  ##podAffinity:
-  ##  preferredDuringSchedulingIgnoredDuringExecution:
-  ##  - weight: 100
-  ##    podAffinityTerm:
-  ##      labelSelector:
-  ##        matchExpressions:
-  ##        - key: app
-  ##          operator: NotIn
-  ##          values:
-  ##          - database
-  ##      topologyKey: kubernetes.io/hostname
+  ## podAffinity:
+  ##   preferredDuringSchedulingIgnoredDuringExecution:
+  ##   - weight: 100
+  ##     podAffinityTerm:
+  ##       labelSelector:
+  ##         matchExpressions:
+  ##         - key: app
+  ##           operator: NotIn
+  ##           values:
+  ##           - database
+  ##       topologyKey: kubernetes.io/hostname
   ##
   podAffinity: {}
   ## Node affinity rules for Converter Pods scheduling by nodes
   ## Node affinity allow you to constrain which nodes Converter Pod can be scheduled on based on node labels
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
   ## Example:
-  ##nodeAffinity:
-  ##  requiredDuringSchedulingIgnoredDuringExecution:
-  ##    nodeSelectorTerms:
-  ##    - matchExpressions:
-  ##      - key: topology.kubernetes.io/zone
-  ##        operator: In
-  ##        values:
-  ##        - zone1
-  ##        - zone2
+  ## nodeAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##     nodeSelectorTerms:
+  ##     - matchExpressions:
+  ##       - key: topology.kubernetes.io/zone
+  ##         operator: In
+  ##         values:
+  ##         - zone1
+  ##         - zone2
   ##
   nodeAffinity: {}
   ## Horizontal Pod Autoscaling parameters
@@ -653,49 +653,49 @@ converter:
       utilizationPercentage: 70
     ## converter.autoscaling.customMetricsType Custom, additional or external autoscaling metrics for the Converter deployment
     ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
-    ##Example:
-    ##customMetricsType:
-    ##  - type: Pods
-    ##    pods:
-    ##      metric:
-    ##        name: packets-per-second
-    ##      target:
-    ##        type: AverageValue
-    ##        averageValue: 1k
+    ## Example:
+    ## customMetricsType:
+    ##   - type: Pods
+    ##     pods:
+    ##       metric:
+    ##         name: packets-per-second
+    ##       target:
+    ##         type: AverageValue
+    ##         averageValue: 1k
     customMetricsType: []
     ## converter.autoscaling.behavior Configuring Converter deployment scaling behavior policies for the `scaleDown` and `scaleUp` fields
     ## If not set the default values are used:
     ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#default-behavior
-    ##Example:
-    ##behavior:
-    ##  scaleDown:
-    ##    stabilizationWindowSeconds: 300
-    ##    policies:
-    ##    - type: Percent
-    ##      value: 10
-    ##      periodSeconds: 60
-    ##  scaleUp:
-    ##    stabilizationWindowSeconds: 0
-    ##    policies:
-    ##    - type: Percent
-    ##      value: 10
-    ##      periodSeconds: 15
-    ##    - type: Pods
-    ##      value: 2
-    ##      periodSeconds: 15
-    ##    selectPolicy: Max
+    ## Example:
+    ## behavior:
+    ##   scaleDown:
+    ##     stabilizationWindowSeconds: 300
+    ##     policies:
+    ##     - type: Percent
+    ##       value: 10
+    ##       periodSeconds: 60
+    ##   scaleUp:
+    ##     stabilizationWindowSeconds: 0
+    ##     policies:
+    ##     - type: Percent
+    ##       value: 10
+    ##       periodSeconds: 15
+    ##     - type: Pods
+    ##       value: 2
+    ##       periodSeconds: 15
+    ##     selectPolicy: Max
     behavior: {}
   ## Converter initContainers parameters
   ## Containers that run before converter container in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## Example:
-  ##initContainers:
-  ##  - name: change-volume-owner
-  ##    image: busybox:latest
-  ##    command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
-  ##    volumeMounts:
-  ##    - name: ds-files
-  ##      mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+  ## initContainers:
+  ##   - name: change-volume-owner
+  ##     image: busybox:latest
+  ##     command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
+  ##     volumeMounts:
+  ##     - name: ds-files
+  ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
   initContainers: []
   ## Converter container image parameters
   image:
@@ -712,14 +712,14 @@ converter:
   ## converter.resources.requests The requested resources for the converter container
   ## converter.resources.limits The resources limits for the converter container
   resources:
-    ##Example:
-    ##requests:
-    ##  memory: "256Mi"
-    ##  cpu: "200m"
+    ## Example:
+    ## requests:
+    ##   memory: "256Mi"
+    ##   cpu: "200m"
     requests: {}
-    ##limits:
-    ##  memory: "2Gi"
-    ##  cpu: "1000m"
+    ## limits:
+    ##   memory: "2Gi"
+    ##   cpu: "1000m"
     limits: {}
 
 ## Onlyoffice Docs Example StatefulSet parameters
@@ -743,49 +743,49 @@ example:
   ## Pod affinity allow you to constrain which nodes Example Pod can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
   ## Example:
-  ##podAffinity:
-  ##  requiredDuringSchedulingIgnoredDuringExecution:
-  ##  - labelSelector:
-  ##      matchExpressions:
-  ##      - key: app
-  ##        operator: In
-  ##        values:
-  ##        - store
-  ##    topologyKey: topology.kubernetes.io/zone
-  ##  preferredDuringSchedulingIgnoredDuringExecution:
-  ##  - weight: 100
-  ##    podAffinityTerm:
-  ##      labelSelector:
-  ##        matchExpressions:
-  ##        - key: app
-  ##          operator: NotIn
-  ##          values:
-  ##          - database
-  ##      topologyKey: kubernetes.io/hostname
+  ## podAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - store
+  ##     topologyKey: topology.kubernetes.io/zone
+  ##   preferredDuringSchedulingIgnoredDuringExecution:
+  ##   - weight: 100
+  ##     podAffinityTerm:
+  ##       labelSelector:
+  ##         matchExpressions:
+  ##         - key: app
+  ##           operator: NotIn
+  ##           values:
+  ##           - database
+  ##       topologyKey: kubernetes.io/hostname
   ##
   podAffinity: {}
   ## Node affinity rules for Example Pod scheduling by nodes
   ## Node affinity allow you to constrain which nodes Example Pod can be scheduled on based on node labels
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
   ## Example:
-  ##nodeAffinity:
-  ##  preferredDuringSchedulingIgnoredDuringExecution:
-  ##  - weight: 100
-  ##    preference:
-  ##      matchExpressions:
-  ##      - key: kubernetes.io/name
-  ##        operator: In
-  ##        values:
-  ##        - name1
-  ##        - name2
-  ##  requiredDuringSchedulingIgnoredDuringExecution:
-  ##    nodeSelectorTerms:
-  ##    - matchExpressions:
-  ##      - key: topology.kubernetes.io/zone
-  ##        operator: NotIn
-  ##        values:
-  ##        - zone1
-  ##        - zone2
+  ## nodeAffinity:
+  ##   preferredDuringSchedulingIgnoredDuringExecution:
+  ##   - weight: 100
+  ##     preference:
+  ##       matchExpressions:
+  ##       - key: kubernetes.io/name
+  ##         operator: In
+  ##         values:
+  ##         - name1
+  ##         - name2
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##     nodeSelectorTerms:
+  ##     - matchExpressions:
+  ##       - key: topology.kubernetes.io/zone
+  ##         operator: NotIn
+  ##         values:
+  ##         - zone1
+  ##         - zone2
   ##
   nodeAffinity: {}
   ## Example container image parameters
@@ -804,14 +804,14 @@ example:
   ## example.resources.requests The requested resources for the example container
   ## example.resources.limits The resources limits for the example container
   resources:
-    ##Example:
-    ##requests:
-    ##  memory: "128Mi"
-    ##  cpu: "100m"
+    ## Example:
+    ## requests:
+    ##   memory: "128Mi"
+    ##   cpu: "100m"
     requests: {}
-    ##limits:
-    ##  memory: "128Mi"
-    ##  cpu: "250m"
+    ## limits:
+    ##   memory: "128Mi"
+    ##   cpu: "250m"
     limits: {}
 
 ## Onlyoffice Docs ingress parameters
@@ -871,14 +871,14 @@ install:
     ## install.job.resources.requests The requested resources for the job pre-install container
     ## install.job.resources.limits The resources limits for the job pre-install container
     resources:
-      ##Example:
-      ##requests:
-      ##  memory: "256Mi"
-      ##  cpu: "200m"
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
       requests: {}
-      ##limits:
-      ##  memory: "2Gi"
-      ##  cpu: "1000m"
+      ## limits:
+      ##   memory: "2Gi"
+      ##   cpu: "1000m"
       limits: {}
   existingConfigmap:
     tblCreate:
@@ -912,14 +912,14 @@ upgrade:
     ## upgrade.job.resources.requests The requested resources for the job pre-upgrade container
     ## upgrade.job.resources.limits The resources limits for the job pre-upgrade container
     resources:
-      ##Example:
-      ##requests:
-      ##  memory: "256Mi"
-      ##  cpu: "200m"
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
       requests: {}
-      ##limits:
-      ##  memory: "2Gi"
-      ##  cpu: "1000m"
+      ## limits:
+      ##   memory: "2Gi"
+      ##   cpu: "1000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -961,14 +961,14 @@ rollback:
     ## rollback.job.resources.requests The requested resources for the job pre-rollback container
     ## rollback.job.resources.limits The resources limits for the job pre-rollback container
     resources:
-      ##Example:
-      ##requests:
-      ##  memory: "256Mi"
-      ##  cpu: "200m"
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
       requests: {}
-      ##limits:
-      ##  memory: "2Gi"
-      ##  cpu: "1000m"
+      ## limits:
+      ##   memory: "2Gi"
+      ##   cpu: "1000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -1010,14 +1010,14 @@ delete:
     ## delete.job.resources.requests The requested resources for the job pre-delete container
     ## delete.job.resources.limits The resources limits for the job pre-delete container
     resources:
-      ##Example:
-      ##requests:
-      ##  memory: "256Mi"
-      ##  cpu: "200m"
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
       requests: {}
-      ##limits:
-      ##  memory: "2Gi"
-      ##  cpu: "1000m"
+      ## limits:
+      ##   memory: "2Gi"
+      ##   cpu: "1000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -1043,12 +1043,12 @@ tests:
   ## tests.resources.requests The requested resources for the test container
   ## tests.resources.limits The resources limits for the test container
   resources:
-    ##Example:
-    ##requests:
-    ##  memory: "256Mi"
-    ##  cpu: "200m"
+    ## Example:
+    ## requests:
+    ##   memory: "256Mi"
+    ##   cpu: "200m"
     requests: {}
-    ##limits:
-    ##  memory: "512Mi"
-    ##  cpu: "1000m"
+    ## limits:
+    ##   memory: "512Mi"
+    ##   cpu: "1000m"
     limits: {}
