@@ -490,6 +490,9 @@ proxy:
   ## proxy.gzipProxied Defines the nginx config gzip_proxied directive
   ## ref: https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied
   gzipProxied: "off"
+  ## proxy.workerConnections Defines the nginx config worker_connections directive
+  ## ref: https://nginx.org/en/docs/ngx_core_module.html#worker_connections
+  workerConnections: "4096"
   ## proxy.secureLinkSecret Defines secret for the nginx config directive secure_link_md5
   ## ref: https://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
   secureLinkSecret: verysecretstring
