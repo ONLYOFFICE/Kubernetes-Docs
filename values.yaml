@@ -487,6 +487,11 @@ docservice:
 ## Parameters of the proxy container of the Docservice deployment
 ##
 proxy:
+  ## proxy.accessLog Defines the nginx config access_log format directive
+  ## ref: https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log
+  ## Example:
+  ## accessLog: "main"
+  accessLog: "off"
   ## proxy.gzipProxied Defines the nginx config gzip_proxied directive
   ## ref: https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied
   gzipProxied: "off"
