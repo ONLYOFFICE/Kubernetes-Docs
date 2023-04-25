@@ -24,13 +24,17 @@ data:
   AMQP_USER: {{ .Values.connections.amqpUser }}
   AMQP_PROTO: {{ .Values.connections.amqpProto }}
   METRICS_ENABLED: {{ .Values.metrics.enabled | quote }}
+  {{- if .Values.metrics.enabled }}
   METRICS_HOST: {{ .Values.metrics.host }}
   METRICS_PORT: {{ .Values.metrics.port | quote }}
   METRICS_PREFIX: {{ .Values.metrics.prefix }}
+  {{- end }}
   LOG_LEVEL: {{ .Values.log.level }}
   LOG_TYPE: {{ .Values.log.type }}
   LOG_PATTERN: {{ .Values.log.pattern | quote }}
+  NGINX_ACCESS_LOG: {{ .Values.proxy.accessLog | quote }}
   NGINX_GZIP_PROXIED: {{ .Values.proxy.gzipProxied | quote }}
+  NGINX_WORKER_CONNECTIONS: {{ .Values.proxy.workerConnections | quote }}
   SECURE_LINK_SECRET: {{ .Values.proxy.secureLinkSecret | quote }}
   {{- if .Values.example.enabled }}
   EXAMPLE_HOST_PORT: example:3000

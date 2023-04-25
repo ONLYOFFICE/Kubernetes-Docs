@@ -1,0 +1,19 @@
+RELEASE VERSION: {{ .Chart.Version }}
+APP VERSION: {{ .Chart.AppVersion }}
+
+{{- if .Values.example.enabled }}
+
+Example was marked for installation.
+  Note: Example is intended for editors testing purposes only and must be disabled before launching the editors in production.
+
+{{- end }}
+
+{{- if .Values.tests.enabled }}
+
+You can test ONLYOFFICE Docs availability and access to connected dependencies using Helm test:
+    $ helm test {{ .Release.Name }} --namespace={{ .Release.Namespace }}
+  To view the log of the Pod, run the following command:
+    $ kubectl logs -f test-ds --namespace={{ .Release.Namespace }}
+  Note: This testing is for informational purposes only and cannot guarantee 100% availability results
+
+{{- end }}

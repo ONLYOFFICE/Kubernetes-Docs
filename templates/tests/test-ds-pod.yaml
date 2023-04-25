@@ -1,0 +1,73 @@
+{{- if .Values.tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-ds
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  serviceAccountName: {{ include "ds.serviceAccountName" . }}
+  {{- if .Values.podSecurityContext.enabled }}
+  securityContext: {{- toYaml .Values.podSecurityContext.tests | nindent 4 }}
+  {{- end }}
+  {{- if .Values.nodeSelector }}
+  nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.tolerations }}
+  tolerations: {{ toYaml .Values.tolerations | nindent 4 }}
+  {{- end }}
+  {{- if .Values.imagePullSecrets }}
+  imagePullSecrets:
+  - name: {{ .Values.imagePullSecrets }}
+  {{- end }}
+  containers:
+  - image: python:3.11
+    name: test-ds
+    resources: {{ toYaml .Values.tests.resources | nindent 6 }}
+    env:
+    - name: DB_PWD
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "ds.db.secretName" . }}
+          key: {{ .Values.connections.dbSecretKeyName }}
+    - name: AMQP_PWD
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "ds.rabbitmq.secretName" . }}
+          key: {{ .Values.connections.amqpSecretKeyName }}
+    - name: REDIS_SERVER_PWD
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "ds.redis.secretName" . }}
+          key: {{ .Values.connections.redisSecretKeyName }}
+    envFrom:
+    - configMapRef:
+        name: documentserver
+    volumeMounts:
+    - name: ds-files
+      mountPath: /ds/test/App_Data/cache/files
+    - name: test-ds
+      mountPath: /scripts/test_ds.py
+      subPath: test_ds.py
+    {{- if .Values.webProxy.enabled }}
+    command: ['http_proxy={{ .Values.webProxy.http }}', 'https_proxy={{ .Values.webProxy.https }}', 'no_proxy={{ .Values.webProxy.noProxy }}', 'python', '/scripts/test_ds.py']
+    {{- else }}
+    command: ['python', '/scripts/test_ds.py']
+    {{- end }}
+  volumes:
+  - name: ds-files
+    persistentVolumeClaim:
+      claimName: {{ template "ds.pvc.name" . }}
+  - name: test-ds
+    configMap:
+      name: test-ds
+      defaultMode: 0755
+  restartPolicy: Never
+{{- end }}

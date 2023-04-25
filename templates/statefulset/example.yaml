@@ -57,6 +57,10 @@ spec:
       {{- if .Values.tolerations }}
       tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
       containers:
       - name: example
         image: {{ .Values.example.image.repository }}:{{ .Values.example.image.tag }}

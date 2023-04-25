@@ -26,6 +26,10 @@ spec:
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
       {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
       volumes:
         - name: initdb-scripts
           configMap:
