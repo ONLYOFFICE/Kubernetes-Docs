@@ -4,9 +4,25 @@
 
 set -e
 
+while [ "$1" != "" ]; do
+	case $1 in
+
+		-tb | --target-branch )
+                        if [ "$2" != "" ]; then
+                                TARGET_BRANCH=$2
+                                shift
+                        fi
+                ;;
+		
+	esac
+	shift
+done
+
 K8S_STORAGE_CLASS="standard"
-NFS_PERSISTANCE_SIZE="8Gi"
-DEPLOY_NAME="documentserver"
+NFS_PERSISTANCE_SIZE="10Gi"
+LITMUS_VERSION="1.13.8"
+
+WORK_DIR=$(pwd)
 
 export TERM=xterm-256color^M
 
@@ -36,7 +52,7 @@ function k8s_w8_workers() {
             fi
          done
          if [[ "${k8s_workers_ready}" != 'true' ]]; then
-           err "\e[0;31m Something goes wrong. k8s is not ready \e[0m"
+           echo "${COLOR_RED} Something goes wrong. k8s is not ready ${COLOR_RESET}"
            exit 1
          fi
 }
@@ -52,23 +68,29 @@ function k8s_get_info() {
 function k8s_pods_logs() {
             ## Get not ready pods
             local PODS=$(kubectl get pods --all-namespaces -o go-template='{{ range $item := .items }}
-            {{ range .status.conditions }}{{ if (or (and (eq .type "PodScheduled")
-            (eq .status "False")) (and (eq .type "Ready") (eq .status "False"))) }}
-            {{ $item.metadata.name}} {{ end }}{{ end }}{{ end }}')
+                                                                           {{ range .status.conditions }}
+									   {{ if (or (and (eq .type "PodScheduled")
+                                                                           (eq .status "False")) (and (eq .type "Ready") 
+									   (eq .status "False"))) }}
+                                                                           {{ $item.metadata.name}} {{ end }}{{ end }}{{ end }}')
 
             ## Get pods logs
             if [[ -n ${PODS} ]]; then
+	         echo ${PODS}
                  echo "${COLOR_RED}⚠ ⚠ ⚠  Attention: looks like some pods is not running. Get logs${COLOR_RESET}"
                  for p in ${PODS}; do
                     echo "${COLOR_BLUE} 🔨⎈ Get ${p} logs${COLOR_RESET}"
                     kubectl logs ${p}
                  done
+            else 
+	         echo "${COLOR_BLUE} 🔨⎈ All pods is ready!${COLOR_RESET}"
             fi
 }
 
 function k8s_deploy_deps() {
             echo "${COLOR_BLUE}🔨⎈ Add depends helm repos...${COLOR_RESET}"
             # Add dependency helm charts
+	    helm repo add kubemonkey https://asobti.github.io/kube-monkey/charts/repo
             helm repo add bitnami https://charts.bitnami.com/bitnami
             helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
             helm repo add nfs-server-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
@@ -106,79 +128,263 @@ function k8s_deploy_deps() {
 function k8s_wait_deps() {
                 echo "${COLOR_BLUE}🔨⎈ Wait 2 minutes for k8s-Docs dependencies${COLOR_RESET}"
                 sleep 120
+		kubectl get pods
      }
 
 function k8s_ct_install() {
-	    EXIT_CODE=0
+	    local EXIT_CODE=0
+	    
             echo "${COLOR_YELLOW}⚠ Attention: Start ct install test..${COLOR_RESET}"
-            ct install --chart-dirs . --charts . --helm-extra-set-args "--set=namespaceOverride=default --wait" || EXIT_CODE=$?
+            ct install --chart-dirs . --charts . --helm-extra-set-args "--wait" --skip-clean-up --namespace default || EXIT_CODE=$?
             if [[ "${EXIT_CODE}" == 0 ]]; then
 	       local CT_STATUS="success"
-	       echo
-               echo "${COLOR_GREEN}👌👌👌⎈ Helm install/test/upgrade successfull finished${COLOR_RESET}"
-               echo
-	       echo "${COLOR_BLUE}🔨⎈ Get test logs...${COLOR_RESET}"
-               echo
+               # Get release name
+               RELEASE_NAME=$(helm list | grep docs | awk '{print $1}')
+	       
+	         echo
+                 echo "${COLOR_GREEN}👌👌👌⎈ Helm install/test/upgrade successfull finished${COLOR_RESET}"
+                 echo
+	         echo "${COLOR_BLUE}🔨⎈ Get test logs...${COLOR_RESET}"
+                 echo
+	       
 	       kubectl logs -f test-ds --namespace=default
 	       k8s_get_info
-	       exit ${EXIT_CODE}
             else 
 	       local CT_STATUS="failed"
-	       echo
-               echo "${COLOR_RED}🔥Tests failed. Get test logs and exit with 1${COLOR_RESET}"
-               echo
+	       
+	          echo
+                  echo "${COLOR_RED}🔥 CT install\tests\upgrade failed. Get test logs and exit with ${EXIT_CODE}${COLOR_RESET}"
+                  echo
+	       
+	       kubectl logs -f test-ds --namespace=default
+	       k8s_pods_logs
 	       k8s_get_info
                exit ${EXIT_CODE}
             fi
-     }
 
-function k8s_deploy_docs() {
+}
+
+function k8s_litmus_install () {
+            echo "${COLOR_BLUE}🔨⎈ Install Litmus Chaos...${COLOR_RESET}"
+            kubectl apply -f https://litmuschaos.github.io/litmus/litmus-operator-v${LITMUS_VERSION}.yaml
+            echo    
+            echo "${COLOR_BLUE}🔨⎈ Litmus was deployed with helm. Namespace litmus is created. Wait for ready status...${COLOR_RESET}"
+            echo
+	    local READY_LITMUS_PODS=""
+	    
+	    while [ "${READY_LITMUS_PODS}" == "" ]; do
+	        echo "${COLOR_YELLOW}Litmus is not ready yet, please wait... ${COLOR_RESET}"
+                READY_LITMUS_PODS=$(kubectl get pods -n litmus | grep Running | awk '{ print $3 }')            
+                sleep 5
+            done
+	    
+            if [ -n "${READY_LITMUS_PODS}" ]; then
+                 echo "${COLOR_GREEN}☑ OK:Litmus is ready ${COLOR_RESET}"
+            fi
+	    
+            kubectl get pods --namespace litmus
+	    
+	    echo "${COLOR_BLUE}🔨⎈ Install litmus experiments...${COLORE_RESET}"
+	    kubectl apply -f https://hub.litmuschaos.io/api/chaos/1.13.7?file=charts/generic/experiments.yaml -n default
+}
+
+function k8s_litmus_test() {
+            # Declare litmus variables
+            local litmus_failed=()
+	    local litmus_passed=()
+            local litmus_path="./sources/litmus"   
+	    local litmus_rbac_path="${litmus_path}/rbac"
+	    local litmus_ex_path="${litmus_path}/experiments"
+	    
+	    local litmus_ex_array=($(ls ${litmus_ex_path} | shuf ))
+            local litmus_rbac_array=($(ls ${litmus_rbac_path}))
+	    
+	    local litmus_ex_name=(
+			  "docs-chaos-pod-delete"
+			  "docs-chaos-pod-cpu-hog"
+			  "docs-chaos-pod-memory-hog"
+			  "docs-chaos-pod-network-latency"
+			  "docs-chaos-container-kill"
+			  "docs-chaos-pod-network-loss")
+			  
+            # Prepare ex manifests for tests on converter deployment too
+	    for ex in "${litmus_ex_array[@]:0:3}"; do
+	           sed -i 's|app=docservice|app=converter|' ${litmus_ex_path}/${ex}
+            done
+	    
+	    # Apply all litmus rbac
+	    for rbac in ${litmus_rbac_array[@]}; do
+	        echo "${COLOR_BLUE}Apply ${rbac}${COLOR_RESET}"
+	        kubectl apply -f ${litmus_rbac_path}/${rbac}
+		sleep 4
+	    done
+	    
+	    echo 
+	    echo "${COLOR_BLUE}🔨⎈ All rbac for litmus was applied${COLOR_RESET}"
+	    echo
+	    	    
+            # Start litmus chaos tests
+            for ex in ${litmus_ex_name[@]}; do
+	         
+		 echo
+	         echo "${COLOR_BLUE}🔨⎈ Start test: ${ex}${COLOR_RESET}"
+	         echo
+		 
+		 kubectl apply -f ${litmus_ex_path}/${ex}.yaml
+		 kubectl get pods -n default 
+		 sleep 160
+		 
+		 for i in {1..40}; do	
+		      local PHASE="$(kubectl describe chaosresult ${ex} -n default | grep Phase | awk '{print $2}' || true )"
+		      local VERDICT="$(kubectl describe chaosresult ${ex} -n default | grep Verdict | awk '{print $2}' || true )"
+                      if [ "${PHASE}" == "Running" ] || [ "${VERDICT}" == "Awaited" ]; then
+                          echo "${COLOR_BLUE}${i}. Test ${ex} is in progress, please wait...${COLOR_RESET}"
+                          sleep 5
+                      else
+		          if [ "${PHASE}" == "Completed" ] && [ "${VERDICT}" != "Awaited" ]; then
+		             echo "${COLOR_BLUE}Test ${ex} is completed${COLOR_RESET}"
+		  	  fi
+		          break
+                      fi
+                 done
+		 
+		 local GENERAL_VERDICT="$(kubectl describe chaosresult ${ex} -n default | grep Verdict | awk '{print $2}' || true )"
+		 
+		 if [ "${GENERAL_VERDICT}" == "Pass" ]; then 
+		      echo "${COLOR_GREEN}☑ OK: Test ${ex} successfully passed${COLOR_RESET}"
+		      litmus_passed+=("${ex}")
+		 elif [ "${GENERAL_VERDICT}" != "Pass" ]; then
+		      echo "${COLOR_RED}FAILED: Test ${ex} is failed${COLOR_RESET}"
+	              litmus_failed+=("${ex}")
+		 fi
+		 
+		 echo
+                 echo "${COLOR_BLUE}🔨⎈ Get ${ex} result${COLOR_RESET}"
+		 echo
+		 
+		 kubectl describe chaosresult ${ex} -n default
+		 kubectl delete chaosresult ${ex} -n default
+		 
+            done
+            
+	    kubectl get pods --namespace default
+	    
+	    # Test results
+	    if [[ -n "${litmus_passed}" ]]; then
+	         for test in ${litmus_passed[@]}; do
+		   echo "${COLOR_GREEN}☑ OK: Test ${test} successfully Passed${COLOR_RESET}"
+		 done
+		 k8s_helm_test
+            fi
+	    
+	    if [[ -n "${litmus_failed}" ]]; then
+	         for test in ${litmus_failed[@]}; do
+	           echo "${COLOR_RED}⚠ FAILED: ${test} has no Passed verdict${COLOR_RESET}"
+		 done
+		 k8s_helm_test
+		 exit 1
+	    fi
+
+}
+
+function k8s_chaos_monkey() {
+              # Add docservice as kube-monkey target
+              kubectl -n default label deployment docservice kube-monkey/enabled=enabled
+              kubectl -n default label deployment docservice kube-monkey/kill-mode=random-max-percent
+              kubectl -n default label deployment docservice kube-monkey/kill-value=100
+              kubectl -n default label deployment docservice kube-monkey/identifier=docservice
+	      kubectl -n default label deployment docservice kube-monkey/mtbf=2
+	      
+	      kubectl patch deployment docservice --patch '{"spec": {"template": {"metadata": {"labels": {"kube-monkey/enabled": "enable", "kube-monkey/identifier": "docservice"}}}}}'
+	      
+	      # Add converter as kube-monkey target
+	      kubectl -n default label deployment converter kube-monkey/enabled=enabled
+              kubectl -n default label deployment converter kube-monkey/kill-mode=random-max-percent
+              kubectl -n default label deployment converter kube-monkey/kill-value=100
+              kubectl -n default label deployment converter kube-monkey/identifier=converter
+	      kubectl -n default label deployment converter kube-monkey/mtbf=2
+	      
+	      kubectl patch deployment converter --patch '{"spec": {"template": {"metadata": {"labels": {"kube-monkey/enabled": "enable", "kube-monkey/identifier": "converter"}}}}}'
+	      
+	      sleep  60
+	      
+	      echo
+              echo "${COLOR_BLUE} 🔨⎈ Install Kube-monkey ${COLOR_RESET}"
+	      echo
+	      
+              git clone https://github.com/asobti/kube-monkey.git
+              cd ./kube-monkey/helm/kubemonkey
+	      helm install kubemonkey --namespace default --wait --set config.dryRun=false \
+	                                                         --set config.runHour=0 \
+							         --set config.startHour=1 \
+							         --set config.endHour=23 \
+							         --set config.timeZone=Europe/Moscow \
+							         --set config.debug.schedule_immediate_kill=true \
+							         --set config.debug.enabled=true .			  
+	      sleep 120
+	      kubectl logs deployment.apps/kubemonkey-kube-monkey -n default 
+	      
+	      cd ${WORK_DIR}
+	      k8s_helm_test
+}
+
+
+function k8s_helm_install() {
             echo "${COLOR_BLUE}🔨⎈ Deploy docs in k8s...${COLOR_RESET}"
 	    local EXIT_CODE=0
-            helm install ${DEPLOY_NAME} . --set namespaceOverride=default --wait || EXIT_CODE=$?
+            helm install ${RELEASE_NAME:="docs"} . --set namespaceOverride=default --wait || EXIT_CODE=$?
 	    if [[ "${EXIT_CODE}" == 0 ]]; then
 	       sleep 60
 	       k8s_get_info
 	       echo "${COLOR_BLUE} 🔨⎈ Docs successfully deployed. Continue.. Run Helm test.${COLOR_RESET}"
-	    else
+	    else 
 	       echo "${COLOR_RED}🔥 Docs deploy failed. Exit${COLOR_RESET}"
 	       k8s_get_info
 	       k8s_pods_logs
 	       exit ${EXIT_CODE}
 	    fi
      }
-
+     
 function k8s_helm_test() {
-            echo "${COLOR_BLUE}🔨⎈ Start helm test..${COLOR_RESET}"
-            helm test ${DEPLOY_NAME} --namespace=default
+            echo "${COLOR_BLUE}🔨⎈ Start helm test..${COLOR_RESET}" 
+            helm test ${RELEASE_NAME} --namespace=default 
             if [[ $? == 0 ]]; then
                echo "${COLOR_GREEN} 👌👌👌⎈ Helm test success! ${COLOR_RESET}"
 	       echo "${COLOR_BLUE} 🔨⎈ Get test logs... ${COLOR_RESET}"
                kubectl logs -f test-ds --namespace=default
-	    else
+	    else 
 	       echo "${COLOR_RED} Helm test FAILED. ${COLOR_RESET}"
 	       exit 1
             fi
-     }
+     }        
 
 function k8s_helm_upgrade() {
             echo "${COLOR_BLUE}🔨⎈ Start helm upgrade..${COLOR_RESET}"
 	    local EXIT_CODE=0
-	    helm upgrade ${DEPLOY_NAME} . --wait || EXIT_CODE=$?
+	    helm upgrade documentserver . --wait || EXIT_CODE=$?
 	    if [[ $? == 0 ]]; then
 	       echo "${COLOR_GREEN} 👌👌👌⎈ Helm upgrade success! ${COLOR_RESET}"
-	    else
+	       k8s_get_info
+	    else 
 	       echo "${COLOR_RED} Helm upgrade FAILED. ${COLOR_RESET}"
 	       exit ${EXIT_CODE}
 	    fi
 }
 
+function k8s_remove_node() {
+            local NODE_NAME=chart-testing-worker
+            echo "${COLOR_BLUE}🔨⎈ Try to remove one node and run Helm test again${COLOR_RESET}"
+	    kubectl drain --ignore-daemonsets --delete-emptydir-data ${NODE_NAME}
+	    sleep 300
+	    k8s_helm_test
+}
+
 function k8s_remove_pods() {
             local RANDOM_PODS=$(echo "$(kubectl -n default get pods -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | uniq | shuf)" )
-	    echo
+	    echo 
             echo "${COLOR_BLUE}🔨⎈ Try to remove random pods and Helm test again...${COLOR_RESET}"
-	    echo
-
+	    echo 
+	    
             local pods_array=()
             local pods_array+=(${RANDOM_PODS})
             echo ${pods_array[@]}
@@ -187,14 +393,21 @@ function k8s_remove_pods() {
 	       kubectl delete pod ${i}
                echo "${COLOR_BLUE}pod ${i} was deleted${COLOR_RESET}"
             done
-
+	    
 }
 
-function k8s_docs_test() {
-   k8s_helm_test
-   k8s_helm_upgrade
-   k8s_remove_pods
-   k8s_helm_test
+function k8s_helm_test_only() {
+            # Run only helm install/test/upgrade 
+	    # This function will be runed on every created PR   
+            k8s_ct_install
+}
+
+function k8s_all_tests() {
+            # Run all availiable tests for k8s-Docs helm chart
+            # This function will be runed only if target branch is master
+            k8s_litmus_install
+            k8s_ct_install
+            k8s_litmus_test
 }
 
 function main () {
@@ -203,8 +416,13 @@ function main () {
    k8s_w8_workers
    k8s_deploy_deps
    k8s_wait_deps
-   k8s_deploy_docs
-   k8s_docs_test 
-}
+   if [[ "${TARGET_BRANCH}" == "master" ]] || [[ "${TARGET_BRANCH}" == "main" ]]; then
+      k8s_all_tests
+   else
+      echo ">>> Target branch is not master, run helm test only <<<"
+      k8s_helm_test_only
+   fi
+ }
 
 main
+

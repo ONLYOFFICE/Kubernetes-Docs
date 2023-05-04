@@ -2,12 +2,10 @@ name: Integrations test
 
 run-name: >
   Integrations tests on PR: "${{ github.event.pull_request.title }}" by @${{ github.actor }}
-  
+
 on:
   pull_request:
     types: [opened, reopened, synchronize]
-    branches: 
-      - 'master'
     paths-ignore:
       - '.github/**'
       - '**/README.md'
@@ -23,6 +21,8 @@ env:
   INSTALL_SCRIPT: './sources/scripts/deploy-${{ github.event.repository.name }}.sh'
   K8S_STORAGE_CLASS: "standard"
   NFS_PERSISTANCE_SIZE: "8Gi"
+  TARGET_BRANCH: ${{ github.base_ref }}
+  HEAD_BRANCH: ${{ github.head_ref }}
 
 jobs:
   spin-up:
@@ -43,20 +43,15 @@ jobs:
           version: 'latest'
           token: ${{ secrets.GITHUB_TOKEN }} 
 
-      - name: setup kind k8s
-        id: setup-kind-k8s
-        uses: helm/kind-action@v1.4.0
-        with: 
-          config: ./sources/kind-config.yaml
+      - name: Setup minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.4.0
 
       - name: Start deploy
         run: | 
-            set -euo pipefail 
-            
             export K8S_STORAGE_CLASS=${K8S_STORAGE_CLASS}
             export NFS_PERSISTANCE_SIZE=${NFS_PERSISTANCE_SIZE}
-            sudo chmod +x ${INSTALL_SCRIPT}
-            bash ${INSTALL_SCRIPT}     
+            bash ${INSTALL_SCRIPT} --target-branch ${TARGET_BRANCH}
