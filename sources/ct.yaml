@@ -1,5 +1,0 @@
-chart-repos:
-  - bitnami=https://charts.bitnami.com/bitnami
-  - ingress-nginx=https://kubernetes.github.io/ingress-nginx
-  - nfs-server-provisioner=https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
-  - onlyoffice=https://download.onlyoffice.com/charts/stable
