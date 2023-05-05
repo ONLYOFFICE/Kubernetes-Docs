@@ -153,11 +153,11 @@ function k8s_ct_install() {
 	       local CT_STATUS="failed"
 	       
 	          echo
-                  echo "${COLOR_RED}🔥 CT install\tests\upgrade failed. Get test logs and exit with ${EXIT_CODE}${COLOR_RESET}"
+                  echo "${COLOR_RED}🔥 Helm install\tests\upgrade failed. Get test logs and exit with ${EXIT_CODE}${COLOR_RESET}"
                   echo
 	       
 	       kubectl logs -f test-ds --namespace=default
-	       k8s_pods_logs
+	       k8s_pods_logs || true
 	       k8s_get_info
                exit ${EXIT_CODE}
             fi
@@ -287,52 +287,10 @@ function k8s_litmus_test() {
 
 }
 
-function k8s_chaos_monkey() {
-              # Add docservice as kube-monkey target
-              kubectl -n default label deployment docservice kube-monkey/enabled=enabled
-              kubectl -n default label deployment docservice kube-monkey/kill-mode=random-max-percent
-              kubectl -n default label deployment docservice kube-monkey/kill-value=100
-              kubectl -n default label deployment docservice kube-monkey/identifier=docservice
-	      kubectl -n default label deployment docservice kube-monkey/mtbf=2
-	      
-	      kubectl patch deployment docservice --patch '{"spec": {"template": {"metadata": {"labels": {"kube-monkey/enabled": "enable", "kube-monkey/identifier": "docservice"}}}}}'
-	      
-	      # Add converter as kube-monkey target
-	      kubectl -n default label deployment converter kube-monkey/enabled=enabled
-              kubectl -n default label deployment converter kube-monkey/kill-mode=random-max-percent
-              kubectl -n default label deployment converter kube-monkey/kill-value=100
-              kubectl -n default label deployment converter kube-monkey/identifier=converter
-	      kubectl -n default label deployment converter kube-monkey/mtbf=2
-	      
-	      kubectl patch deployment converter --patch '{"spec": {"template": {"metadata": {"labels": {"kube-monkey/enabled": "enable", "kube-monkey/identifier": "converter"}}}}}'
-	      
-	      sleep  60
-	      
-	      echo
-              echo "${COLOR_BLUE} 🔨⎈ Install Kube-monkey ${COLOR_RESET}"
-	      echo
-	      
-              git clone https://github.com/asobti/kube-monkey.git
-              cd ./kube-monkey/helm/kubemonkey
-	      helm install kubemonkey --namespace default --wait --set config.dryRun=false \
-	                                                         --set config.runHour=0 \
-							         --set config.startHour=1 \
-							         --set config.endHour=23 \
-							         --set config.timeZone=Europe/Moscow \
-							         --set config.debug.schedule_immediate_kill=true \
-							         --set config.debug.enabled=true .			  
-	      sleep 120
-	      kubectl logs deployment.apps/kubemonkey-kube-monkey -n default 
-	      
-	      cd ${WORK_DIR}
-	      k8s_helm_test
-}
-
-
 function k8s_helm_install() {
             echo "${COLOR_BLUE}🔨⎈ Deploy docs in k8s...${COLOR_RESET}"
 	    local EXIT_CODE=0
-            helm install ${RELEASE_NAME:="docs"} . --set namespaceOverride=default --wait || EXIT_CODE=$?
+            helm install ${RELEASE_NAME:="docs"} . --wait || EXIT_CODE=$?
 	    if [[ "${EXIT_CODE}" == 0 ]]; then
 	       sleep 60
 	       k8s_get_info
@@ -361,7 +319,7 @@ function k8s_helm_test() {
 function k8s_helm_upgrade() {
             echo "${COLOR_BLUE}🔨⎈ Start helm upgrade..${COLOR_RESET}"
 	    local EXIT_CODE=0
-	    helm upgrade documentserver . --wait || EXIT_CODE=$?
+	    helm upgrade ${RELEASE_NAME} --wait || EXIT_CODE=$?
 	    if [[ $? == 0 ]]; then
 	       echo "${COLOR_GREEN} 👌👌👌⎈ Helm upgrade success! ${COLOR_RESET}"
 	       k8s_get_info
@@ -369,31 +327,6 @@ function k8s_helm_upgrade() {
 	       echo "${COLOR_RED} Helm upgrade FAILED. ${COLOR_RESET}"
 	       exit ${EXIT_CODE}
 	    fi
-}
-
-function k8s_remove_node() {
-            local NODE_NAME=chart-testing-worker
-            echo "${COLOR_BLUE}🔨⎈ Try to remove one node and run Helm test again${COLOR_RESET}"
-	    kubectl drain --ignore-daemonsets --delete-emptydir-data ${NODE_NAME}
-	    sleep 300
-	    k8s_helm_test
-}
-
-function k8s_remove_pods() {
-            local RANDOM_PODS=$(echo "$(kubectl -n default get pods -o go-template='{{range $index, $element := .items}}{{range .status.containerStatuses}}{{if .ready}}{{$element.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}' | uniq | shuf)" )
-	    echo 
-            echo "${COLOR_BLUE}🔨⎈ Try to remove random pods and Helm test again...${COLOR_RESET}"
-	    echo 
-	    
-            local pods_array=()
-            local pods_array+=(${RANDOM_PODS})
-            echo ${pods_array[@]}
-
-            for i in "${pods_array[@]:0:5}"; do
-	       kubectl delete pod ${i}
-               echo "${COLOR_BLUE}pod ${i} was deleted${COLOR_RESET}"
-            done
-	    
 }
 
 function k8s_helm_test_only() {
@@ -425,4 +358,3 @@ function main () {
  }
 
 main
-
