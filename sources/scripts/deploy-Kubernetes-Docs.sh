@@ -352,7 +352,7 @@ function main () {
    if [[ "${TARGET_BRANCH}" == "master" ]] || [[ "${TARGET_BRANCH}" == "main" ]]; then
       k8s_all_tests
    else
-      echo ">>> Target branch is not master, run helm test only <<<"
+      echo ">>> Target branch is not master, run ct install test only <<<"
       k8s_helm_test_only
    fi
  }
