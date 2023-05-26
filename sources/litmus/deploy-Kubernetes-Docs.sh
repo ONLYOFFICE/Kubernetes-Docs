@@ -271,7 +271,7 @@ function k8s_litmus_test() {
 	         echo
 
 		 # Start to get docs_status
-		 docs_status --get
+		 k8s_docs_status --get
 		 
 		 # Apply litmus chaos test manifest
 		 kubectl apply -f ${litmus_ex_path}/${ex}.yaml
@@ -319,7 +319,7 @@ function k8s_litmus_test() {
 		 kubectl delete chaosengine --all -n default
 		 
 		 now=$(date)
-		 docs_status --stop ${ex}
+		 k8s_docs_status --stop ${ex}
 		 echo "${COLOR_BLUE} TEST WAS ENDED AT ${now}${COLOR_RESET}"
 		 # Wait before new test is started
 		 sleep 30
