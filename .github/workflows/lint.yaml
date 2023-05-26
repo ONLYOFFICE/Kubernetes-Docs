@@ -1,7 +1,7 @@
 name: lint
 
 run-name: >
-  lint tests on PR: "${{ github.event.pull_request }}" by @${{ github.actor }}
+  lint tests on PR: "${{ github.event.pull_request.title }}" by @${{ github.actor }}
 
 on:
   pull_request:
