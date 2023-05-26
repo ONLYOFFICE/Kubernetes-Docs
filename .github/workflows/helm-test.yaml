@@ -18,7 +18,7 @@ permissions:
   packages: read
 
 env: 
-  INSTALL_SCRIPT: './sources/scripts/deploy-${{ github.event.repository.name }}.sh'
+  INSTALL_SCRIPT: './sources/litmus/deploy-${{ github.event.repository.name }}.sh'
   K8S_STORAGE_CLASS: "standard"
   NFS_PERSISTANCE_SIZE: "8Gi"
   TARGET_BRANCH: ${{ github.base_ref }}
@@ -46,6 +46,9 @@ jobs:
       - name: Setup minikube
         id: minikube
         uses: medyagh/setup-minikube@latest
+        with:
+          cpus: 2
+          memory: 6200
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.4.0

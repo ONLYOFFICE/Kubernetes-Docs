@@ -24,6 +24,9 @@ LITMUS_VERSION="1.13.8"
 
 WORK_DIR=$(pwd)
 
+# Create log file for debug
+touch ./log.txt
+
 export TERM=xterm-256color^M
 
 function common::get_colors() {
@@ -135,11 +138,29 @@ function k8s_ct_install() {
 	    local EXIT_CODE=0
 	    
             echo "${COLOR_YELLOW}⚠ Attention: Start ct install test..${COLOR_RESET}"
-            ct install --chart-dirs . --charts . --helm-extra-set-args "--wait" --skip-clean-up --namespace default || EXIT_CODE=$?
+            ct install --chart-dirs . --charts . --helm-extra-set-args "--set=docservice.livenessProbe.periodSeconds=1 \
+	                                                                --set=docservice.livenessProbe.failureThreshold=1 \
+									--set=docservice.livenessProbe.timeoutSeconds=2 \
+									--set=docservice.resources.requests.memory="256Mi" \
+									--set=docservice.resources.requests.cpu="100m" \
+									--set=docservice.resources.limits.memory="2000Mi" \
+									--set=docservice.resources.limits.cpu="1" \
+									--set=proxy.livenessProbe.periodSeconds=1 \
+	                                                                --set=proxy.livenessProbe.failureThreshold=1 \
+									--set=proxy.livenessProbe.timeoutSeconds=2 \
+									--set=proxy.resources.requests.memory="256Mi" \
+									--set=proxy.resources.requests.cpu="100m" \
+									--set=proxy.resources.limits.memory="2000Mi" \
+									--set=proxy.resources.limits.cpu="1" \
+									--wait" \
+									--skip-clean-up --namespace default || EXIT_CODE=$?
             if [[ "${EXIT_CODE}" == 0 ]]; then
 	       local CT_STATUS="success"
                # Get release name
                RELEASE_NAME=$(helm list | grep docs | awk '{print $1}')
+
+	       # Expose docservice for tests
+	       kubectl apply -f ./sources/litmus/docs-node.yaml
 	       
 	         echo
                  echo "${COLOR_GREEN}👌👌👌⎈ Helm install/test/upgrade successfull finished${COLOR_RESET}"
@@ -188,10 +209,26 @@ function k8s_litmus_install () {
 	    kubectl apply -f https://hub.litmuschaos.io/api/chaos/1.13.7?file=charts/generic/experiments.yaml -n default
 }
 
+function k8s_docs_status() {	    	    
+            if   [ "${1}" == "--get" ]; then
+                echo "${COLOR_YELLOW}Message from docs_status function:${COLOR_RESET} Start to get status docservice"
+                bash ./sources/litmus/docs-status.sh > /dev/null 2>&1 &
+                docs_statusPID=$!
+		echo "${COLOR_YELLOW}Message from docs_status function:${COLOR_RESET} docs_status script PID is: ${docs_statusPID}"
+            elif [ "${1}" == "--stop" ]; then
+	          if ps | grep "${docs_statusPID}"; then
+                     echo "${COLOR_YELLOW}Message from docs_status function:${COLOR_RESET} Process is running now. Kill docs-status script with PID: ${docs_statusPID}"
+                     kill ${docs_statusPID}
+		     docs_status_passed+=("${2}")
+		  else
+		     echo "${COLOR_RED}Message from docs_status function:${COLOR_RESET} Process with PID ${docs_statusPID} did not found. looks like docs_status did not get 200 code"
+		     docs_status_failed+=("${2}")
+		  fi
+            fi
+}
+
 function k8s_litmus_test() {
             # Declare litmus variables
-            local litmus_failed=()
-	    local litmus_passed=()
             local litmus_path="./sources/litmus"   
 	    local litmus_rbac_path="${litmus_path}/rbac"
 	    local litmus_ex_path="${litmus_path}/experiments"
@@ -205,12 +242,15 @@ function k8s_litmus_test() {
 			  "docs-chaos-pod-memory-hog"
 			  "docs-chaos-pod-network-latency"
 			  "docs-chaos-container-kill"
-			  "docs-chaos-pod-network-loss")
+			  "docs-chaos-pod-network-loss"
+		          "docs-chaos-pod-network-duplication")
 			  
             # Prepare ex manifests for tests on converter deployment too
-	    for ex in "${litmus_ex_array[@]:0:3}"; do
-	           sed -i 's|app=docservice|app=converter|' ${litmus_ex_path}/${ex}
-            done
+	    # Uncomment if need tests on converter deployment too
+
+	    #for ex in "${litmus_ex_array[@]:0:3}"; do
+	    #       sed -i 's|app=docservice|app=converter|' ${litmus_ex_path}/${ex}
+            #done
 	    
 	    # Apply all litmus rbac
 	    for rbac in ${litmus_rbac_array[@]}; do
@@ -229,9 +269,17 @@ function k8s_litmus_test() {
 		 echo
 	         echo "${COLOR_BLUE}🔨⎈ Start test: ${ex}${COLOR_RESET}"
 	         echo
+
+		 # Start to get docs_status
+		 docs_status --get
 		 
+		 # Apply litmus chaos test manifest
 		 kubectl apply -f ${litmus_ex_path}/${ex}.yaml
-		 kubectl get pods -n default 
+
+		 # Get cluster info
+		 kubectl get pods -n default
+
+		 # Wait for Litmus chaos will be injected 
 		 sleep 160
 		 
 		 for i in {1..40}; do	
@@ -258,31 +306,57 @@ function k8s_litmus_test() {
 	              litmus_failed+=("${ex}")
 		 fi
 		 
+		 sleep 10
 		 echo
                  echo "${COLOR_BLUE}🔨⎈ Get ${ex} result${COLOR_RESET}"
 		 echo
 		 
+		 # Check test result
 		 kubectl describe chaosresult ${ex} -n default
+
+                 # Cleanup all litmus chaosengines
 		 kubectl delete chaosresult ${ex} -n default
+		 kubectl delete chaosengine --all -n default
 		 
+		 now=$(date)
+		 docs_status --stop ${ex}
+		 echo "${COLOR_BLUE} TEST WAS ENDED AT ${now}${COLOR_RESET}"
+		 # Wait before new test is started
+		 sleep 30
             done
             
 	    kubectl get pods --namespace default
 	    
 	    # Test results
-	    if [[ -n "${litmus_passed}" ]]; then
-	         for test in ${litmus_passed[@]}; do
-		   echo "${COLOR_GREEN}☑ OK: Test ${test} successfully Passed${COLOR_RESET}"
+	    if [ -n "${docs_status_passed}" ]; then
+	         for v in ${docs_status_passed[@]}; do
+		   echo "${COLOR_YELLOW}⚠ DOCS STATUS RESULT${COLOR_RESET}: docs_status all time get 200 from docservice pod on litmus test: ${v}"
+		 done
+	    fi
+
+	    if [ -n "${docs_status_failed}" ]; then
+	         for v in ${docs_status_failed[@]}; do
+		   echo "${COLOR_RED}⚠ DOCS STATUS RESULT${COLOR_RESET}: docs_status did not get 200 from docservice pod on litmus test: ${v} ${COLOR_RESET}"
+		 done
+	    fi
+
+            if [ -n "${litmus_passed}" ]; then
+	         for v in ${litmus_passed[@]}; do
+		   echo "${COLOR_GREEN}☑ OK: litmus test ${v} successfully Passed${COLOR_RESET}"
 		 done
 		 k8s_helm_test
-            fi
+            fi	 
 	    
-	    if [[ -n "${litmus_failed}" ]]; then
-	         for test in ${litmus_failed[@]}; do
-	           echo "${COLOR_RED}⚠ FAILED: ${test} has no Passed verdict${COLOR_RESET}"
+	    if [ -n "${litmus_failed}" ]; then
+	         for v in ${litmus_failed[@]}; do
+	           echo "${COLOR_RED}⚠ FAILED: litmus test ${v} has no Passed verdict${COLOR_RESET}"
 		 done
 		 k8s_helm_test
-		 exit 1
+	    fi
+	    
+	    if [ -n "${litmus_failed}" ] || [ -n "${docs_status_failed}" ]; then
+	          echo "${COLOR_RED} ⚠ ⚠ ATTENTION: Some tests if failed. Please check logs ${COLOR_RESET}"
+		  exit 1
 	    fi
 
 }
@@ -349,12 +423,13 @@ function main () {
    k8s_w8_workers
    k8s_deploy_deps
    k8s_wait_deps
-   if [[ "${TARGET_BRANCH}" == "master" ]] || [[ "${TARGET_BRANCH}" == "main" ]]; then
-      k8s_all_tests
-   else
-      echo ">>> Target branch is not master, run ct install test only <<<"
-      k8s_helm_test_only
-   fi
+   #if [ "${TARGET_BRANCH}" == "master" ] || [ "${TARGET_BRANCH}" == "main" ]; then
+   #   k8s_all_tests
+   #else
+   #   echo "${COLOR_YELLOW}ATTENTION: Target branch is not master, run ct install test only${COLOR_RESET}"
+   #   k8s_helm_test_only
+   #fi
+   k8s_all_tests
  }
 
 main

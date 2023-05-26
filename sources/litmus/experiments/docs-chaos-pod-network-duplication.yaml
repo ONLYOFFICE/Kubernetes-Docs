@@ -6,24 +6,23 @@ metadata:
 spec:
   # It can be active/stop
   engineState: 'active'
-  appinfo:
+  appinfo: 
     appns: 'default'
+    # FYI, To see app label, apply kubectl get pods --show-labels
     applabel: 'app=docservice'
     appkind: 'deployment'
-  chaosServiceAccount: container-kill-sa
+  chaosServiceAccount: pod-network-duplication-sa 
   experiments:
-    - name: container-kill
+    - name: pod-network-duplication
       spec:
         components:
           env:
-            # provide the total chaos duration
             - name: TOTAL_CHAOS_DURATION
-              value: '60'
+              value: '60' # in seconds
 
-            # provide the chaos interval
-            - name: CHAOS_INTERVAL
-              value: '60'
-
+            - name: NETWORK_PACKET_DUPLICATION_PERCENTAGE
+              value: '100'
+  
             # provide the name of container runtime
             # for litmus LIB, it supports docker, containerd, crio
             # for pumba LIB, it supports docker only
@@ -33,9 +32,7 @@ spec:
             # provide the socket file path
             - name: SOCKET_PATH
               value: '/var/run/docker.sock'
-
+              
+            ## percentage of total pods to target
             - name: PODS_AFFECTED_PERC
               value: ''
-
-            - name: TARGET_CONTAINER
-              value: 'docservice'

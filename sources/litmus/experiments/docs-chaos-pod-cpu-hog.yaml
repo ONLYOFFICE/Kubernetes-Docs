@@ -32,4 +32,8 @@ spec:
 
             # provide the socket file path
             - name: SOCKET_PATH
-              value: '/var/run/docker.sock'    
+              value: '/var/run/docker.sock'
+
+            # procide container name under the chaos
+            - name: TARGET_CONTAINER
+              value: 'docservice'   

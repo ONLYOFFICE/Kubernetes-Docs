@@ -21,7 +21,7 @@ spec:
               value: '60' # in seconds
 
             - name: NETWORK_LATENCY
-              value: '2000'
+              value: '5000'
 
             # provide the name of container runtime
             # for litmus LIB, it supports docker, containerd, crio

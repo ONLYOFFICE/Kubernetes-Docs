@@ -21,7 +21,7 @@ spec:
 
             # Enter the amount of memory in megabytes to be consumed by the application pod
             - name: MEMORY_CONSUMPTION
-              value: '500'
+              value: '3000'
 
              ## percentage of total pods to target
             - name: PODS_AFFECTED_PERC
@@ -33,4 +33,8 @@ spec:
 
             # provide the socket file path
             - name: SOCKET_PATH
-              value: '/var/run/docker.sock'             
+              value: '/var/run/docker.sock'
+
+            # provide name of the target container under chaos
+            - name: TARGET_CONTAINER
+              value: 'docservice'             
