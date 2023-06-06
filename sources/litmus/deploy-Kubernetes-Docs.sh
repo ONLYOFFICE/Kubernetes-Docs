@@ -423,13 +423,12 @@ function main () {
    k8s_w8_workers
    k8s_deploy_deps
    k8s_wait_deps
-   #if [ "${TARGET_BRANCH}" == "master" ] || [ "${TARGET_BRANCH}" == "main" ]; then
-   #   k8s_all_tests
-   #else
-   #   echo "${COLOR_YELLOW}ATTENTION: Target branch is not master, run ct install test only${COLOR_RESET}"
-   #   k8s_helm_test_only
-   #fi
-   k8s_all_tests
+   if [ "${TARGET_BRANCH}" == "master" ] || [ "${TARGET_BRANCH}" == "main" ]; then
+      k8s_all_tests
+   else
+      echo "${COLOR_YELLOW}ATTENTION: Target branch is not master, run helm install/upgrade/test only${COLOR_RESET}"
+      k8s_helm_test_only
+   fi
  }
 
 main
