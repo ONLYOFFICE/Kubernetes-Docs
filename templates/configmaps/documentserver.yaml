@@ -45,3 +45,15 @@ data:
   https_proxy: {{ .Values.webProxy.https | quote }}
   no_proxy: {{ .Values.webProxy.noProxy | quote }}
   {{- end }}
+  {{- if typeIs "bool" .Values.requestFilteringAgent.allowPrivateIPAddress }}
+  ALLOW_PRIVATE_IP_ADDRESS: {{ .Values.requestFilteringAgent.allowPrivateIPAddress | quote }}
+  {{- end }}
+  {{- if typeIs "bool" .Values.requestFilteringAgent.allowMetaIPAddress }}
+  ALLOW_META_IP_ADDRESS: {{ .Values.requestFilteringAgent.allowMetaIPAddress | quote }}
+  {{- end }}
+  {{- if .Values.requestFilteringAgent.allowIPAddressList }}
+  ALLOW_IP_ADDRESS_LIST: {{ toJson .Values.requestFilteringAgent.allowIPAddressList | squote }}
+  {{- end }}
+  {{- if .Values.requestFilteringAgent.denyIPAddressList }}
+  DENY_IP_ADDRESS_LIST: {{ toJson .Values.requestFilteringAgent.denyIPAddressList | squote }}
+  {{- end }}

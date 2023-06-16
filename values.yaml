@@ -292,6 +292,25 @@ extraThemes:
 ## ref: https://github.com/ONLYOFFICE/server/tree/master/schema
 sqlScripts:
   branchName: master
+## Onlyoffice Docs request-filtering-agent parameters
+## These parameters are used if JWT is disabled: `jwt.enabled=false`
+requestFilteringAgent:
+  ## requestFilteringAgent.allowPrivateIPAddress Defines if it is allowed to connect private IP address or not
+  allowPrivateIPAddress: false
+  ## requestFilteringAgent.allowMetaIPAddress Defines if it is allowed to connect meta address or not
+  allowMetaIPAddress: false
+  ## requestFilteringAgent.allowIPAddressList Defines the list of IP addresses allowed to connect
+  ## This values are preferred than `requestFilteringAgent.denyIPAddressList`.
+  ## Example:
+  ## allowIPAddressList:
+  ## - 10.244.0.79
+  ## - 192.168.1.25
+  allowIPAddressList: []
+  ## requestFilteringAgent.denyIPAddressList Defines the list of IP addresses allowed to connect
+  ## Example:
+  ## denyIPAddressList:
+  ## - 10.244.0.80
+  denyIPAddressList: []
 
 ## Onlyoffice Docs Docservice Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
