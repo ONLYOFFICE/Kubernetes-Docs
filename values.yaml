@@ -229,7 +229,7 @@ log:
   ## log.pattern Defines the log pattern if `log.type=pattern`
   ## ref: https://github.com/log4js-node/log4js-node/blob/master/docs/layouts.md#pattern-format
   pattern: "[%d] [%p] [%X{DOCID}] [%X{USERID}] %c - %.10000m"
-## Defines if `WOPI` is enabled
+## wopi.enabled Defines if `WOPI` is enabled
 ## If the parameter is enabled, then caching attributes for the mounted directory (`PVC`) should be disabled for the client
 wopi:
   enabled: false
@@ -300,7 +300,7 @@ requestFilteringAgent:
   ## requestFilteringAgent.allowMetaIPAddress Defines if it is allowed to connect meta address or not
   allowMetaIPAddress: false
   ## requestFilteringAgent.allowIPAddressList Defines the list of IP addresses allowed to connect
-  ## This values are preferred than `requestFilteringAgent.denyIPAddressList`.
+  ## This values are preferred than `requestFilteringAgent.denyIPAddressList`
   ## Example:
   ## allowIPAddressList:
   ## - 10.244.0.79
