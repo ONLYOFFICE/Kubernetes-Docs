@@ -1,5 +1,5 @@
 {{- if .Values.converter.autoscaling.enabled }}
-apiVersion: autoscaling/v2beta2
+apiVersion: {{ .Capabilities.APIVersions.Has "autoscaling/v2" | ternary "autoscaling/v2" "autoscaling/v2beta2" }}
 kind: HorizontalPodAutoscaler
 metadata:
   name: converter-hpa
