@@ -17,3 +17,32 @@ jobs:
       ct_version: 3.8.0
       enable_yaml_lint: true
       enable_kube_lint: true
+
+  validate-manifests:
+    name: "Validate manifests with k8s versions"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install helm
+        id: helm-setup
+        uses: azure/setup-helm@v3
+        with:
+          version: 3.11.3
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: cpanato/kubepug-installer@v1.0.0
+
+      - name: Check manifests
+        run: |
+           helm template  -f values.yaml . \
+           --set grafana.enabled=true \
+           --set grafana.dashboard.enabled=true \
+           --set example.enabled=true \
+           --set proxy.welcomePage.enabled=true \
+           --set converter.autoscaling.enabled=true \
+           --set ingress.enabled=true \
+           --set serviceAccount.create=true \
+           | kubepug --error-on-deprecated --error-on-deleted --input-file /dev/stdin
+        shell: bash
