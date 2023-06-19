@@ -1,5 +1,20 @@
 # Change log
 
+## 3.2.0
+
+### New Features
+
+* Added the ability to use private IP addresses to connect to ONLYOFFICE Docs
+
+### Changes
+
+* Released [v7.4.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#740) of ONLYOFFICE Docs
+
+### Fixes
+
+* Fixed ONLYOFFICE Docs crash in k8s cluster without ipv6
+* Fixed an error with the Api Version when running Horizontal Pod Autoscaling in k8s cluster v1.26+
+
 ## 3.1.0
 
 ### New Features
