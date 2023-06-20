@@ -24,4 +24,4 @@
 *.tmproj
 .vscode/
 # Test dirs
-./sources/litmus
+sources/litmus/
