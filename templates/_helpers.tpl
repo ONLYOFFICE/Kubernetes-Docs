@@ -389,3 +389,25 @@ Get the ds Grafana Namespace
     {{- .Release.Namespace -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the virtual path
+*/}}
+{{- define "ds.ingress.path" -}}
+{{- if eq .Values.ingress.path "/" -}}
+    {{- printf "/" -}}
+{{- else }}
+    {{- printf "%s(/|$)(.*)" .Values.ingress.path -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get documentserver url for example
+*/}}
+{{- define "ds.example.dsUrl" -}}
+{{- if and (ne .Values.ingress.path "/") (eq .Values.example.dsUrl "/") -}}
+    {{- printf "%s/" (tpl .Values.ingress.path $) -}}
+{{- else }}
+    {{- printf "%s" (tpl .Values.example.dsUrl $) -}}
+{{- end -}}
+{{- end -}}

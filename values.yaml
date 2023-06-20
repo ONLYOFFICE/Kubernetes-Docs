@@ -839,6 +839,7 @@ ingress:
     secret: tls
   ## ingress.host Ingress hostname for the ONLYOFFICE Docs
   host: ""
+  path: "/"
 
 ## Grafana parameters
 ## See more details about installing Grafana here:

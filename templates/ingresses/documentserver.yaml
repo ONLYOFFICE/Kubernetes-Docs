@@ -7,13 +7,15 @@ metadata:
   {{- if .Values.commonLabels }}
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
-  {{- end }}
-  {{- if .Values.ingress.annotations }}
+  {{- end }} 
   annotations:
     {{- range $key, $value := .Values.ingress.annotations }}
     {{ $key }}: {{ tpl $value $ }}
     {{- end }}
-  {{- end }}
+    {{- if not (eq .Values.ingress.path "/") }}
+    nginx.ingress.kubernetes.io/x-forwarded-prefix: {{ .Values.ingress.path }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    {{- end }}
 spec:
   {{- if .Values.ingress.ssl.enabled }}
   tls: 
@@ -29,7 +31,7 @@ spec:
   {{- end }}
     http:
       paths:
-      - path: /
+      - path: {{ template "ds.ingress.path" . }}
         pathType: Prefix
         backend:
           service:
