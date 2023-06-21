@@ -9,5 +9,5 @@ metadata:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
 data:
-  DS_URL: DS_URL: {{ include "ds.example.dsUrl" . }}
+  DS_URL: {{ include "ds.example.dsUrl" . }}
 {{- end }}
