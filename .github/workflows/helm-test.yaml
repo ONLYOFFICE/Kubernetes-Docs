@@ -1,0 +1,60 @@
+name: Integrations test
+
+run-name: >
+  Integrations tests on PR: "${{ github.event.pull_request.title }}" by @${{ github.actor }}
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths-ignore:
+      - '.github/**'
+      - '**/README.md'
+      - '**/CHANGELOG.md'
+      - '**/LICENSE'    
+
+permissions:
+  # All other permissions are set to none
+  contents: read
+  packages: read
+
+env: 
+  INSTALL_SCRIPT: './sources/litmus/deploy-${{ github.event.repository.name }}.sh'
+  K8S_STORAGE_CLASS: "standard"
+  NFS_PERSISTANCE_SIZE: "8Gi"
+  TARGET_BRANCH: ${{ github.base_ref }}
+  HEAD_BRANCH: ${{ github.head_ref }}
+
+jobs:
+  spin-up:
+    name: integration-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout chart
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          check-latest: true
+
+      - uses: azure/setup-helm@v3
+        id: setup-helm
+        with:
+          version: 'latest'
+          token: ${{ secrets.GITHUB_TOKEN }} 
+
+      - name: Setup minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          cpus: 2
+          memory: 6200
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.4.0
+
+      - name: Start deploy
+        run: | 
+            export K8S_STORAGE_CLASS=${K8S_STORAGE_CLASS}
+            export NFS_PERSISTANCE_SIZE=${NFS_PERSISTANCE_SIZE}
+            bash ${INSTALL_SCRIPT} --target-branch ${TARGET_BRANCH}

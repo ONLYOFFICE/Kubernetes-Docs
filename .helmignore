@@ -23,3 +23,5 @@
 .idea/
 *.tmproj
 .vscode/
+# Test dirs
+sources/litmus/
