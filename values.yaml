@@ -1,5 +1,5 @@
 ## Default values for Onlyoffice Docs
- 
+
 ## product.name Specifies name of the product
 ## This is a service variable. You don't need to change it
 product:
