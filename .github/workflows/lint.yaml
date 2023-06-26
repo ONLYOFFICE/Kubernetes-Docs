@@ -78,11 +78,8 @@ jobs:
                                          --target-versions k8s=${{ env.kube-latest }} \
                                          -ojson)
 
-           DEPRECATED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .deprecated==true and .removed==false ).name' | paste -sd, || true)
-           REMOVED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .removed==true ).name' | paste -sd, || true)
-
-           echo "deprecated-api=${DEPRECATED_API}" >> "$GITHUB_OUTPUT"
-           echo "removed-api=${REMOVED_API}" >> "$GITHUB_OUTPUT"
+           DEPRECATED=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .deprecated==true and .removed==false ).name' | paste -sd, || true)
+           REMOVED=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .removed==true ).name' | paste -sd, || true)
 
            helm template -f values.yaml . ${KEYS} \
                         | pluto detect - --ignore-deprecations \
@@ -90,17 +87,10 @@ jobs:
                                          --target-versions k8s=${{ env.kube-latest }} \
                                          -omarkdown
 
-      - name: Set warnings
-        if: always()
-        env:
-          DEPRECATED: ${{ steps.check-manifests.outputs.deprecated-api }}
-          REMOVED: ${{ steps.check-manifests.outputs.removed-api }}
-        run: |
            if [ "${REMOVED}" != "" ]; then
               echo "::error title=Removed api detected!,line=1,col=5,endColumn=7::\
               Api  for this resources: ${REMOVED} will be removed in k8s version: ${{ env.kube-latest }} \
               Please check log and get more information"
-              echo "↑↑↑ More information about deleted api in previous step ↑↑↑"
               exit 1
            fi
 
@@ -108,6 +98,5 @@ jobs:
               echo "::warning title=Deprecated api detected,line=1,col=5,endColumn=7::\
               Api for this recources: ${DEPRECATED} will be deprecated in k8s version ${{ env.kube-latest }} \
               Please check log and get move information"
-              echo "↑↑↑ More informations about deprecated api in previous step ↑↑↑"
               exit 0
            fi
