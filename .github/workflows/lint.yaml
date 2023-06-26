@@ -78,8 +78,8 @@ jobs:
                                          --target-versions k8s=${{ env.kube-latest }} \
                                          -ojson)
 
-           DEPRECATED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .deprecated==true and .removed==false ).name' | paste -sd,)
-           REMOVED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .removed==true ).name' | paste -sd,)
+           DEPRECATED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .deprecated==true and .removed==false ).name' | paste -sd, || true)
+           REMOVED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .removed==true ).name' | paste -sd, || true)
 
            echo "deprecated-api=${DEPRECATED_API}" >> "$GITHUB_OUTPUT"
            echo "removed-api=${REMOVED_API}" >> "$GITHUB_OUTPUT"
