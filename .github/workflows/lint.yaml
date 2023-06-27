@@ -89,14 +89,14 @@ jobs:
 
            if [ "${REMOVED}" != "" ]; then
               echo "::error title=Removed api detected!,line=1,col=5,endColumn=7::\
-              Api  for this resources: ${REMOVED} will be removed in k8s version: ${{ env.kube-latest }} \
+              Api  for this resources: ${REMOVED} will be removed. Target version: ${{ env.kube-latest }} \
               Please check log and get more information"
               exit 1
            fi
 
            if [ "${DEPRECATED}" != "" ]; then
               echo "::warning title=Deprecated api detected,line=1,col=5,endColumn=7::\
-              Api for this recources: ${DEPRECATED} will be deprecated in k8s version ${{ env.kube-latest }} \
+              Api for this recources: ${DEPRECATED} will be deprecated. Target version: ${{ env.kube-latest }} \
               Please check log and get move information"
               exit 0
            fi
