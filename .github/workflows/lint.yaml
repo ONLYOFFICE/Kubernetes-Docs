@@ -1,7 +1,7 @@
 name: lint
 
 run-name: >
-  lint tests on PR: "${{ github.event.pull_request.title }}" by @${{ github.actor }}
+   Tests on PR: "${{ github.event.pull_request.title }}" by @${{ github.actor }}
 
 on:
   pull_request:
@@ -11,6 +11,13 @@ on:
       - '**/README.md'
       - '**/CHANGELOG.md'
       - '**/LICENSE'
+
+env: 
+  PLUTO_VER: '5.17.0'
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   lint-chart:           
@@ -22,30 +29,74 @@ jobs:
       enable_kube_lint: true
 
   validate-manifests:
-    name: "Validate manifests with k8s versions"
+    name: "K8s manifests api validation"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
 
-      - name: install helm
+      - name: Install helm
         id: helm-setup
         uses: azure/setup-helm@v3
         with:
           version: 3.11.3
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: cpanato/kubepug-installer@v1.0.0
-
-      - name: Check manifests
+      
+      - name: Get lates k8s release
+        id: k8s-release
         run: |
-           helm template  -f values.yaml . \
-           --set grafana.enabled=true \
-           --set grafana.dashboard.enabled=true \
-           --set example.enabled=true \
-           --set proxy.welcomePage.enabled=true \
-           --set converter.autoscaling.enabled=true \
-           --set ingress.enabled=true \
-           --set serviceAccount.create=true \
-           | kubepug --error-on-deprecated --error-on-deleted --input-file /dev/stdin
-        shell: bash
+            KUBE_RELEASE=$(curl -L -H "Accept: aplication/vnd.github+json" https://api.github.com/repos/kubernetes/kubernetes/releases/latest)
+            echo "kube-latest=$(echo ${KUBE_RELEASE} | jq -r '.tag_name')" >> "$GITHUB_ENV"
+
+      - name: Setup pluto
+        run: |
+            wget https://github.com/FairwindsOps/pluto/releases/download/v${PLUTO_VER}/pluto_${PLUTO_VER}_linux_amd64.tar.gz
+            tar -zxvf pluto_${PLUTO_VER}_linux_amd64.tar.gz
+            chmod +x pluto
+            sudo cp pluto /bin/pluto
+
+      - name: Manifests validation INFO
+        id: check-manifests
+        run: |
+
+           # ================================================
+           # All set keys should be delcared is KEYS variable
+           # ================================================
+
+           KEYS="--set grafana.enabled=true \
+                 --set grafana.dashboard.enabled=true \
+                 --set example.enabled=true \
+                 --set proxy.welcomePage.enabled=true \
+                 --set docservice.autoscaling.enabled=true \
+                 --set converter.autoscaling.enabled=true \
+                 --set ingress.enabled=true \
+                 --set serviceAccount.create=true"
+
+           RESULT_JSON=$(helm template -f values.yaml . ${KEYS} \
+                        | pluto detect - --ignore-deprecations \
+                                         --ignore-removals  \
+                                         --target-versions k8s=${{ env.kube-latest }} \
+                                         -ojson)
+
+           DEPRECATED=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .deprecated==true and .removed==false ).name' | paste -sd, || true)
+           REMOVED=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .removed==true ).name' | paste -sd, || true)
+
+           helm template -f values.yaml . ${KEYS} \
+                        | pluto detect - --ignore-deprecations \
+                                         --ignore-removals  \
+                                         --target-versions k8s=${{ env.kube-latest }} \
+                                         -omarkdown
+
+           if [ "${REMOVED}" != "" ]; then
+              echo "::error title=Removed api detected!,line=1,col=5,endColumn=7::\
+              Api  for this resources: ${REMOVED} will be removed. Target version: ${{ env.kube-latest }} \
+              Please check log and get more information"
+              exit 1
+           fi
+
+           if [ "${DEPRECATED}" != "" ]; then
+              echo "::warning title=Deprecated api detected,line=1,col=5,endColumn=7::\
+              Api for this recources: ${DEPRECATED} will be deprecated. Target version: ${{ env.kube-latest }} \
+              Please check log and get move information"
+              exit 0
+           fi
