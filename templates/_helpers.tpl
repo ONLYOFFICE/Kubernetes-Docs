@@ -391,7 +391,7 @@ Get the ds Grafana Namespace
 {{- end -}}
 
 {{/*
-Get the virtual path
+Get the ds virtual path
 */}}
 {{- define "ds.ingress.path" -}}
 {{- if eq .Values.ingress.path "/" -}}
@@ -402,7 +402,7 @@ Get the virtual path
 {{- end -}}
 
 {{/*
-Get documentserver url for example
+Get ds url for example
 */}}
 {{- define "ds.example.dsUrl" -}}
 {{- if and (ne .Values.ingress.path "/") (eq .Values.example.dsUrl "/") -}}

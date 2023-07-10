@@ -839,6 +839,9 @@ ingress:
     secret: tls
   ## ingress.host Ingress hostname for the ONLYOFFICE Docs
   host: ""
+  ## Specifies the path where ONLYOFFICE Docs will be available
+  ## Example:
+  ## path: "/ds"
   path: "/"
 
 ## Grafana parameters
