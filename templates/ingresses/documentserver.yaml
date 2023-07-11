@@ -17,6 +17,9 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     {{- end }}
 spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
   {{- if .Values.ingress.ssl.enabled }}
   tls: 
   - hosts:

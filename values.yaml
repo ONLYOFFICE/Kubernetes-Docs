@@ -848,8 +848,10 @@ ingress:
   enabled: false
   ## ingress.annotations Map of annotations to add to the Ingress
   annotations:
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: 100m
+  # ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
+  # ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
+  ingressClassName: nginx
   ssl:
     ## ingress.ssl.enabled Enable TLS for the ONLYOFFICE Docs ingress
     enabled: false
@@ -858,7 +860,7 @@ ingress:
     secret: tls
   ## ingress.host Ingress hostname for the ONLYOFFICE Docs
   host: ""
-  ## Specifies the path where ONLYOFFICE Docs will be available
+  ## ingress.path Specifies the path where ONLYOFFICE Docs will be available
   ## Example:
   ## path: "/ds"
   path: "/"
