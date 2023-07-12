@@ -31,6 +31,9 @@ connections:
   ## connections.dbPassword Database user password
   ## If set to, it takes priority over the `connections.dbExistingSecret`
   dbPassword: ""
+  ## connections.redisConnectorName Defines which connector to use to connect to Redis
+  ## If you need to connect to Redis Sentinel, set the value `ioredis`
+  redisConnectorName: redis
   ## connections.redisHost The IP address or the name of the Redis host
   redisHost: redis-master
   ## connections.redisPort The Redis server port number
@@ -43,6 +46,9 @@ connections:
   ## ref: https://redis.io/commands/select/
   ## The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file
   redisDBNum: "0"
+  ## connections.redisSentinelGroupName Name of a group of Redis instances composed of a master and one or more slaves
+  ## Used if `connections.redisConnectorName` is set to `ioredis`
+  redisSentinelGroupName: mymaster
   ## connections.redisExistingSecret Name of existing secret to use for Redis passwords
   ## Must contain the key specified in `connections.redisSecretKeyName`
   ## The password from this secret overrides the value for the password set in the `options` object in `local.json` if you add custom configuration file
