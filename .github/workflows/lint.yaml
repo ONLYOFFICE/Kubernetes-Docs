@@ -48,6 +48,14 @@ jobs:
             KUBE_RELEASE=$(curl -L -H "Accept: aplication/vnd.github+json" https://api.github.com/repos/kubernetes/kubernetes/releases/latest)
             echo "kube-latest=$(echo ${KUBE_RELEASE} | jq -r '.tag_name')" >> "$GITHUB_ENV"
 
+      - name: start minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          cpus: 2
+          memory: 6500m
+          kubernetes-version: ${{ env.kube-latest }}
+
       - name: Setup pluto
         run: |
             wget https://github.com/FairwindsOps/pluto/releases/download/v${PLUTO_VER}/pluto_${PLUTO_VER}_linux_amd64.tar.gz
@@ -78,8 +86,8 @@ jobs:
                                          --target-versions k8s=${{ env.kube-latest }} \
                                          -ojson)
 
-           DEPRECATED=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .deprecated==true and .removed==false ).name' | paste -sd, || true)
-           REMOVED=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .removed==true ).name' | paste -sd, || true)
+           DEPRECATED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .deprecated==true and .removed==false ).name' | paste -sd, || true)
+           REMOVED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .removed==true ).name' | paste -sd, || true)
 
            helm template -f values.yaml . ${KEYS} \
                         | pluto detect - --ignore-deprecations \
@@ -87,16 +95,31 @@ jobs:
                                          --target-versions k8s=${{ env.kube-latest }} \
                                          -omarkdown
 
-           if [ "${REMOVED}" != "" ]; then
-              echo "::error title=Removed api detected!,line=1,col=5,endColumn=7::\
-              Api  for this resources: ${REMOVED} will be removed. Target version: ${{ env.kube-latest }} \
-              Please check log and get more information"
-              exit 1
+           #############################################
+           ## Check deprecated recources in manifests ##
+           #############################################
+
+           helm template -f ./values.yaml . ${KEYS} > deprecate-check.yaml
+           kubectl --dry-run=server --warnings-as-errors apply -f ./deprecate-check.yaml >out.log 2>&1 || true
+           DEPRECATED_REC=$(awk '/Warning/{print}' out.log)
+
+           if [ "${DEPRECATED_REC}" != "" ]; then
+              echo "::error title=Warning message from k8s api detected,line=1,col=5,endColumn=7::"${DEPRECATED_REC}""
+              EXIT_CODE=1
            fi
 
-           if [ "${DEPRECATED}" != "" ]; then
-              echo "::warning title=Deprecated api detected,line=1,col=5,endColumn=7::\
-              Api for this recources: ${DEPRECATED} will be deprecated. Target version: ${{ env.kube-latest }} \
-              Please check log and get move information"
-              exit 0
+           if [ "${REMOVED_API}" != "" ]; then
+              echo "::error title=Removed api detected!,line=1,col=5,endColumn=7::\
+              Api  for this resources: ${REMOVED_API} will be removed. Target version: ${{ env.kube-latest }} \
+              Please check log and get more information"
+              EXIT_CODE=1
            fi
+
+           if [ "${DEPRECATED_API}" != "" ]; then
+              echo "::warning title=Deprecated api detected,line=1,col=5,endColumn=7::\
+              Api for this recources: ${DEPRECATED_API} will be deprecated. Target version: ${{ env.kube-latest }} \
+              Please check log and get move information"
+              EXIT_CODE=1
+           fi
+
+           exit ${EXIT_CODE}
