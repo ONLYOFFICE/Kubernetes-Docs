@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       kubernetes_version:
-        description: 'Choose k8s version (example 1.22)'
+        description: 'Choose k8s version (example v1.22)'
         type: string
         required: true
 
