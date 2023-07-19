@@ -73,7 +73,7 @@ jobs:
       - name: Manifests validation INFO
         id: check-manifests
         env:
-          MANUAL_VER: "v${{ github.event.inputs.kubernetes_version }}"
+          MANUAL_VER: "${{ github.event.inputs.kubernetes_version }}"
         run: |
 
            # ================================================
