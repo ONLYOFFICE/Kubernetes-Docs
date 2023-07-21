@@ -19,13 +19,6 @@ on:
         type: string
         required: true
 
-env: 
-  PLUTO_VER: '5.17.0'
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
   lint-chart:           
     name: lint chart ${{ github.event.repository.name }}
@@ -36,99 +29,16 @@ jobs:
       enable_kube_lint: true
 
   validate-manifests:
-    name: "K8s manifests api validation"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-
-      - name: Install helm
-        id: helm-setup
-        uses: azure/setup-helm@v3
-        with:
-          version: 3.11.3
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Get lates k8s release
-        id: k8s-release
-        run: |
-            KUBE_RELEASE=$(curl -L -H "Accept: aplication/vnd.github+json" https://api.github.com/repos/kubernetes/kubernetes/releases/latest)
-            echo "kube-latest=$(echo ${KUBE_RELEASE} | jq -r '.tag_name')" >> "$GITHUB_ENV"
-
-      - name: start minikube
-        id: minikube
-        uses: medyagh/setup-minikube@latest
-        with:
-          cpus: 2
-          memory: 6500m
-          kubernetes-version: ${{ env.kube-latest }}
-
-      - name: Setup pluto
-        run: |
-            wget https://github.com/FairwindsOps/pluto/releases/download/v${PLUTO_VER}/pluto_${PLUTO_VER}_linux_amd64.tar.gz
-            tar -zxvf pluto_${PLUTO_VER}_linux_amd64.tar.gz
-            chmod +x pluto
-            sudo cp pluto /bin/pluto
-
-      - name: Manifests validation INFO
-        id: check-manifests
-        env:
-          MANUAL_VER: "${{ github.event.inputs.kubernetes_version }}"
-        run: |
-
-           # ================================================
-           # All set keys should be delcared is KEYS variable
-           # ================================================
-
-           KEYS="--set grafana.enabled=true \
-                 --set grafana.dashboard.enabled=true \
-                 --set example.enabled=true \
-                 --set proxy.welcomePage.enabled=true \
-                 --set docservice.autoscaling.enabled=true \
-                 --set converter.autoscaling.enabled=true \
-                 --set ingress.enabled=true \
-                 --set serviceAccount.create=true"
-
-           RESULT_JSON=$(helm template -f values.yaml . ${KEYS} \
-                        | pluto detect - --ignore-deprecations \
-                                         --ignore-removals  \
-                                         --target-versions k8s=${MANUAL_VER:-${{ env.kube-latest }}} \
-                                         -ojson)
-
-           DEPRECATED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .deprecated==true and .removed==false ).name' | paste -sd, || true)
-           REMOVED_API=$(echo ${RESULT_JSON} | jq -r '.items[] | select ( .removed==true ).name' | paste -sd, || true)
-
-           helm template -f values.yaml . ${KEYS} \
-                        | pluto detect - --ignore-deprecations \
-                                         --ignore-removals  \
-                                         --target-versions k8s=${MANUAL_VER:-${{ env.kube-latest }}} \
-                                         -omarkdown
-
-           #############################################
-           ## Check deprecated recources in manifests ##
-           #############################################
-
-           helm template -f ./values.yaml . ${KEYS} > deprecate-check.yaml
-           kubectl --dry-run=server --warnings-as-errors apply -f ./deprecate-check.yaml >out.log 2>&1 || true
-           DEPRECATED_REC=$(awk '/Warning/{print}' out.log)
-
-           if [ "${DEPRECATED_REC}" != "" ]; then
-              echo "::error title=Warning message from k8s api detected,line=1,col=5,endColumn=7::"${DEPRECATED_REC}""
-              EXIT_CODE=1
-           fi
-
-           if [ "${REMOVED_API}" != "" ]; then
-              echo "::error title=Removed api detected!,line=1,col=5,endColumn=7::\
-              Api  for this resources: ${REMOVED_API} will be removed. Target version: ${{ env.kube-latest }} \
-              Please check log and get more information"
-              EXIT_CODE=1
-           fi
-
-           if [ "${DEPRECATED_API}" != "" ]; then
-              echo "::warning title=Deprecated api detected,line=1,col=5,endColumn=7::\
-              Api for this recources: ${DEPRECATED_API} will be deprecated. Target version: ${{ env.kube-latest }} \
-              Please check log and get move information"
-              EXIT_CODE=1
-           fi
-
-           exit ${EXIT_CODE}
+    name: "k8s manifests api validation"
+    uses: ONLYOFFICE/ga-common/.github/workflows/deprecated-recources.yaml@master
+    with:
+      manual_k8s: ${{ github.event.inputs.kubernetes_version }}
+      set_keys: |
+              "--set grafana.enabled=true \
+               --set grafana.dashboard.enabled=true \
+               --set example.enabled=true \
+               --set proxy.welcomePage.enabled=true \
+               --set docservice.autoscaling.enabled=true \
+               --set converter.autoscaling.enabled=true \
+               --set ingress.enabled=true \
+               --set serviceAccount.create=true"
