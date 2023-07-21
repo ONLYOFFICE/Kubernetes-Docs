@@ -849,6 +849,7 @@ example:
 
 ## Onlyoffice Docs ingress parameters
 ##
+##
 ingress:
   ## ingress.enabled Enable the creation of an ingress for the ONLYOFFICE Docs
   enabled: false
