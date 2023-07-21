@@ -30,7 +30,7 @@ jobs:
 
   validate-manifests:
     name: "k8s manifests api validation"
-    uses: ONLYOFFICE/ga-common/.github/workflows/deprecated-recources.yaml@feature/deprecated-recources
+    uses: ONLYOFFICE/ga-common/.github/workflows/deprecated-recources.yaml@master
     with:
       manual_k8s: ${{ github.event.inputs.kubernetes_version }}
       set_keys: |
