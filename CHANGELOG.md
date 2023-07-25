@@ -1,5 +1,20 @@
 # Change log
 
+## 3.3.0
+
+### New Features
+
+* Added the ability to connect to the ONLYOFFICE Docs via a virtual path
+* Added the ability to connect to Redis Sentinel 
+
+### Changes
+
+* Released [v7.4.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#741) of ONLYOFFICE Docs
+
+### Fixes
+
+* Fixed Ingress Class definition
+
 ## 3.2.0
 
 ### New Features
