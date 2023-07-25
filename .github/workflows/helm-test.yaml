@@ -25,9 +25,34 @@ env:
   HEAD_BRANCH: ${{ github.head_ref }}
 
 jobs:
+  selective-check:
+    name: selective-check
+    runs-on: ubuntu-latest
+    outputs:
+      images-present: ${{ steps.selective-check.outputs.images-present }}
+    steps:
+      - name: Checkout chart
+        uses: actions/checkout@v3
+      - name: selective-check
+        id: selective-check
+        run: |
+            tag=$(yq -r .docservice.image.tag ./values.yaml)
+
+            if docker buildx imagetools inspect onlyoffice/docs-docservice:${tag} > /dev/null; then
+               IMAGE_PRESENT=true
+               echo "Images present, continue..."
+            else
+               echo "Image not present, skip integration tests"
+               IMAGE_PRESENT=false
+            fi
+
+            echo "images-present=${IMAGE_PRESENT}" >> "$GITHUB_OUTPUT"
+
   spin-up:
     name: integration-test
     runs-on: ubuntu-latest
+    needs: [selective-check]
+    if: needs.selective-check.outputs.images-present == 'true'
     steps:
       - name: Checkout chart
         uses: actions/checkout@v3
