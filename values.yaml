@@ -440,7 +440,7 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 7.4.1-1
+    tag: 7.4.1-2
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## docservice.containerPorts.http docservice container port
@@ -541,7 +541,7 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 7.4.1-1
+    tag: 7.4.1-2
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## proxy.containerPorts.http proxy container port
@@ -737,7 +737,7 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 7.4.1-1
+    tag: 7.4.1-2
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## converter container resource requests and limits
@@ -826,7 +826,7 @@ example:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 7.4.1-1
+    tag: 7.4.1-2
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## example.containerPorts.http example container port
@@ -902,7 +902,7 @@ install:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 7.4.1-1
+      tag: 7.4.1-2
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-install container resource requests and limits
@@ -943,7 +943,7 @@ upgrade:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 7.4.1-1
+      tag: 7.4.1-2
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-upgrade container resource requests and limits
@@ -992,7 +992,7 @@ rollback:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 7.4.1-1
+      tag: 7.4.1-2
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-rollback container resource requests and limits
@@ -1041,7 +1041,7 @@ delete:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 7.4.1-1
+      tag: 7.4.1-2
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-delete container resource requests and limits
