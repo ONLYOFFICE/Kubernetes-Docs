@@ -1,7 +1,7 @@
 name: lint
 
 run-name: >
-  lint tests on PR: "${{ github.event.pull_request.title }}" by @${{ github.actor }}
+   Tests on PR: "${{ github.event.pull_request.title }}" by @${{ github.actor }}
 
 on:
   pull_request:
@@ -11,6 +11,13 @@ on:
       - '**/README.md'
       - '**/CHANGELOG.md'
       - '**/LICENSE'
+
+  workflow_dispatch:
+    inputs:
+      kubernetes_version:
+        description: 'Choose k8s version (example v1.22)'
+        type: string
+        required: true
 
 jobs:
   lint-chart:           
@@ -22,30 +29,16 @@ jobs:
       enable_kube_lint: true
 
   validate-manifests:
-    name: "Validate manifests with k8s versions"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-
-      - name: install helm
-        id: helm-setup
-        uses: azure/setup-helm@v3
-        with:
-          version: 3.11.3
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: cpanato/kubepug-installer@v1.0.0
-
-      - name: Check manifests
-        run: |
-           helm template  -f values.yaml . \
-           --set grafana.enabled=true \
-           --set grafana.dashboard.enabled=true \
-           --set example.enabled=true \
-           --set proxy.welcomePage.enabled=true \
-           --set converter.autoscaling.enabled=true \
-           --set ingress.enabled=true \
-           --set serviceAccount.create=true \
-           | kubepug --error-on-deprecated --error-on-deleted --input-file /dev/stdin
-        shell: bash
+    name: "k8s manifests api validation"
+    uses: ONLYOFFICE/ga-common/.github/workflows/deprecated-recources.yaml@master
+    with:
+      manual_k8s: ${{ github.event.inputs.kubernetes_version }}
+      set_keys: |
+              "--set grafana.enabled=true \
+               --set grafana.dashboard.enabled=true \
+               --set example.enabled=true \
+               --set proxy.welcomePage.enabled=true \
+               --set docservice.autoscaling.enabled=true \
+               --set converter.autoscaling.enabled=true \
+               --set ingress.enabled=true \
+               --set serviceAccount.create=true"

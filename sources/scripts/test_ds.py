@@ -5,12 +5,16 @@ import time
 import logging
 
 url = 'http://docservice:8000/healthcheck'
+
+redisConnectorName = os.environ.get('REDIS_CONNECTOR_NAME')
 redisHost = os.environ.get('REDIS_SERVER_HOST')
 redisPort = os.environ.get('REDIS_SERVER_PORT')
 redisUser = os.environ.get('REDIS_SERVER_USER')
 redisPassword = os.environ.get('REDIS_SERVER_PWD')
 redisDBNum = os.environ.get('REDIS_SERVER_DB_NUM')
 redisConnectTimeout = 15
+if redisConnectorName == 'ioredis':
+    redisSentinelGroupName = os.environ.get('REDIS_SENTINEL_GROUP_NAME')
 
 dbType = os.environ.get('DB_TYPE')
 dbHost = os.environ.get('DB_HOST')
@@ -75,21 +79,55 @@ def get_redis_status():
         return rc.ping()
 
 
+def get_redis_sentinel_status():
+    install_module('redis')
+    import redis
+    from redis import Sentinel
+    global rc
+    try:
+        sentinel = Sentinel([(redisHost, redisPort)], socket_timeout=redisConnectTimeout)
+        master_host, master_port = sentinel.discover_master(redisSentinelGroupName)
+        rc = redis.Redis(
+            host=master_host,
+            port=master_port,
+            db=redisDBNum,
+            password=redisPassword,
+            username=redisUser,
+            socket_connect_timeout=redisConnectTimeout,
+            retry_on_timeout=True
+        )
+        rc.ping()
+    except Exception as msg_redis:
+        logger_test_ds.error(f'Failed to check the availability of the Redis... {msg_redis}\n')
+        total_result['CheckRedis'] = 'Failed'
+    else:
+        logger_test_ds.info('Successful connection to Redis')
+        return rc.ping()
+
+
+def check_redis_key():
+    try:
+        rc.set('testDocsServer', 'ok')
+        test_key = rc.get('testDocsServer').decode('utf-8')
+        logger_test_ds.info(f'Test Key: {test_key}')
+    except Exception as msg_check_redis:
+        logger_test_ds.error(f'Error when trying to write a key to Redis... {msg_check_redis}\n')
+        total_result['CheckRedis'] = 'Failed'
+    else:
+        rc.delete('testDocsServer')
+        logger_test_ds.info('The test key was successfully recorded and deleted from Redis\n')
+        rc.close()
+        total_result['CheckRedis'] = 'Success'
+
+
 def check_redis():
     logger_test_ds.info('Checking Redis availability...')
-    if get_redis_status() is True:
-        try:
-            rc.set('testDocsServer', 'ok')
-            test_key = rc.get('testDocsServer').decode('utf-8')
-            logger_test_ds.info(f'Test Key: {test_key}')
-        except Exception as msg_check_redis:
-            logger_test_ds.error(f'Error when trying to write a key to Redis... {msg_check_redis}\n')
-            total_result['CheckRedis'] = 'Failed'
-        else:
-            rc.delete('testDocsServer')
-            logger_test_ds.info('The test key was successfully recorded and deleted from Redis\n')
-            rc.close()
-            total_result['CheckRedis'] = 'Success'
+    if redisConnectorName == 'redis':
+        if get_redis_status() is True:
+            check_redis_key()
+    elif redisConnectorName == 'ioredis':
+        if get_redis_sentinel_status() is True:
+            check_redis_key()
 
 
 def check_db_postgresql(tbl_dict):

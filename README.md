@@ -16,29 +16,29 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [6.3 Installing StatsD exporter](#63-installing-statsd-exporter)
   * [7. Make changes to Node-config configuration files](#7-make-changes-to-Node-config-configuration-files)
     + [7.1 Create a ConfigMap containing a json file](#71-create-a-configmap-containing-a-json-file)
-    + [7.2 Specify parameters when installing DocumentServer](#72-specify-parameters-when-installing-documentserver)
+    + [7.2 Specify parameters when installing ONLYOFFICE Docs](#72-specify-parameters-when-installing-onlyoffice-docs)
   * [8. Add custom Fonts](#8-add-custom-fonts)
   * [9. Add Plugins](#9-add-plugins)
   * [10. Change interface themes](#10-change-interface-themes)
     + [10.1 Create a ConfigMap containing a json file](#101-create-a-configmap-containing-a-json-file)
-    + [10.2 Specify parameters when installing DocumentServer](#102-specify-parameters-when-installing-documentserver)
+    + [10.2 Specify parameters when installing ONLYOFFICE Docs](#102-specify-parameters-when-installing-onlyoffice-docs)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
     + [1.1 Create secret](#11-create-secret)
-    + [1.2 Specify parameters when installing DocumentServer](#12-specify-parameters-when-installing-documentserver)
+    + [1.2 Specify parameters when installing ONLYOFFICE Docs](#12-specify-parameters-when-installing-onlyoffice-docs)
   * [2. Deploy ONLYOFFICE Docs](#2-deploy-onlyoffice-docs)
   * [3. Uninstall ONLYOFFICE Docs](#3-uninstall-onlyoffice-docs)
   * [4. Parameters](#4-parameters)
   * [5. Configuration and installation details](#5-configuration-and-installation-details)
   * [5.1 Example deployment (optional)](#51-example-deployment-optional)
   * [5.2 Metrics deployment (optional)](#52-metrics-deployment-optional)
-  * [5.3 Expose DocumentServer](#53-expose-documentserver)
-    + [5.3.1 Expose DocumentServer via Service (HTTP Only)](#531-expose-documentserver-via-service-http-only)
-    + [5.3.2 Expose DocumentServer via Ingress](#532-expose-documentserver-via-ingress)
+  * [5.3 Expose ONLYOFFICE Docs](#53-expose-onlyoffice-docs)
+    + [5.3.1 Expose ONLYOFFICE Docs via Service (HTTP Only)](#531-expose-onlyoffice-docs-via-service-http-only)
+    + [5.3.2 Expose ONLYOFFICE Docs via Ingress](#532-expose-onlyoffice-docs-via-ingress)
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
-    + [5.3.2.2 Expose DocumentServer via HTTP](#5322-expose-documentserver-via-http)
-    + [5.3.2.3 Expose DocumentServer via HTTPS](#5323-expose-documentserver-via-https)
-  * [6. Scale DocumentServer (optional)](#6-scale-documentserver-optional) 
+    + [5.3.2.2 Expose ONLYOFFICE Docs via HTTP](#5322-expose-onlyoffice-docs-via-http)
+    + [5.3.2.3 Expose ONLYOFFICE Docs via HTTPS](#5323-expose-onlyoffice-docs-via-https)
+  * [6. Scale ONLYOFFICE Docs (optional)](#6-scale-onlyoffice-docs-optional) 
       + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
       + [6.2 Manual scaling](#62-manual-scaling) 
   * [7. Update ONLYOFFICE Docs](#7-update-onlyoffice-docs)
@@ -126,7 +126,7 @@ $ helm install rabbitmq bitnami/rabbitmq \
 
 Note: Set the `metrics.enabled=true` to enable exposing RabbitMQ metrics to be gathered by Prometheus.
 
-See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/rabbitmq#rabbitmq).
+See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#rabbitmq).
 
 ### 4. Deploy Redis
 
@@ -140,7 +140,7 @@ $ helm install redis bitnami/redis \
 
 Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gathered by Prometheus.
 
-See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/redis).
+See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/redis).
 
 ### 5. Deploy Database
 
@@ -157,7 +157,7 @@ $ helm install postgresql bitnami/postgresql \
   --set metrics.enabled=false
 ```
 
-See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#postgresql).
+See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/postgresql#postgresql).
 
 **If MySQL is selected as the database server, then follow these steps**
 
@@ -171,7 +171,7 @@ $ helm install mysql bitnami/mysql \
   --set metrics.enabled=false
 ```
 
-See more details about installing MySQL via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/mysql).
+See more details about installing MySQL via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/mysql).
 
 Here `PERSISTENT_SIZE` is a size for the Database persistent volume. For example: `8Gi`.
 
@@ -207,6 +207,7 @@ See more details about installing Prometheus via Helm [here](https://github.com/
 #### 6.3 Installing StatsD exporter
 
 To install StatsD exporter to your cluster, run the following command:
+
 ```
 $ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
   --set statsd.udpPort=8125 \
@@ -233,11 +234,11 @@ $ kubectl create configmap local-config \
 
 Note: Any name can be used instead of `local-config`.
 
-#### 7.2 Specify parameters when installing DocumentServer
+#### 7.2 Specify parameters when installing ONLYOFFICE Docs
 
-When installing DocumentServer, specify the `extraConf.configMap=local-config` and `extraConf.filename=local.json` parameters
+When installing ONLYOFFICE Docs, specify the `extraConf.configMap=local-config` and `extraConf.filename=local.json` parameters
 
-Note: If you need to add a configuration file after the DocumentServer is already installed, you need to execute step [7.1](#71-create-a-configmap-containing-a-json-file) 
+Note: If you need to add a configuration file after the ONLYOFFICE Docs is already installed, you need to execute step [7.1](#71-create-a-configmap-containing-a-json-file) 
 and then run the `helm upgrade documentserver onlyoffice/docs --set extraConf.configMap=local-config --set extraConf.filename=local.json --no-hooks` command or 
 `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
@@ -246,14 +247,14 @@ and then run the `helm upgrade documentserver onlyoffice/docs --set extraConf.co
 *This step is optional. You can skip step [#8](#8-add-custom-fonts) entirely if you don't need to add your fonts*
 
 In order to add fonts to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
-Then specify your images when installing the DocumentServer.
+Then specify your images when installing the ONLYOFFICE Docs.
 
 ### 9. Add Plugins
 
 *This step is optional. You can skip step [#9](#9-add-plugins) entirely if you don't need to add plugins*
 
 In order to add plugins to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
-Then specify your images when installing the DocumentServer.
+Then specify your images when installing the ONLYOFFICE Docs.
 
 ### 10. Change interface themes
 
@@ -270,11 +271,11 @@ $ kubectl create configmap custom-themes \
 
 Note: Instead of `custom-themes` and `custom-themes.json` you can use any other names.
 
-#### 10.2 Specify parameters when installing DocumentServer
+#### 10.2 Specify parameters when installing ONLYOFFICE Docs
 
-When installing DocumentServer, specify the `extraThemes.configMap=custom-themes` and `extraThemes.filename=custom-themes.json` parameters.
+When installing ONLYOFFICE Docs, specify the `extraThemes.configMap=custom-themes` and `extraThemes.filename=custom-themes.json` parameters.
 
-Note: If you need to add interface themes after the DocumentServer is already installed, you need to execute step [10.1](#101-create-a-configmap-containing-a-json-file)
+Note: If you need to add interface themes after the ONLYOFFICE Docs is already installed, you need to execute step [10.1](#101-create-a-configmap-containing-a-json-file)
 and then run the `helm upgrade documentserver onlyoffice/docs --set extraThemes.configMap=custom-themes --set extraThemes.filename=custom-themes.json --no-hooks` command or
 `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
@@ -283,11 +284,14 @@ and then run the `helm upgrade documentserver onlyoffice/docs --set extraThemes.
 Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 101`.
 
 To do this, run the following commands:
+
 ```
 $ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/docs-components.yaml
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
+
 Also, you must set the `podSecurityContext.enabled` parameter to `true`:
+
 ```
 $ helm install documentserver onlyoffice/docs --set podSecurityContext.enabled=true
 ```
@@ -304,25 +308,25 @@ $ kubectl create secret generic license --from-file=path/to/license.lic
 
 Note: The source license file name should be 'license.lic' because this name would be used as a field in the created secret.
 
-#### 1.2. Specify parameters when installing DocumentServer
+#### 1.2. Specify parameters when installing ONLYOFFICE Docs
 
-When installing DocumentServer, specify the `license.existingSecret=license` parameter.
+When installing ONLYOFFICE Docs, specify the `license.existingSecret=license` parameter.
 
 ```
 $ helm install documentserver onlyoffice/docs --set license.existingSecret=license
 ```
 
-Note: If you need to add license after the DocumentServer is already installed, you need to execute step [1.1](#11-create-secret) and then run the `helm upgrade documentserver onlyoffice/docs --set license.existingSecret=license --no-hooks` command or `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
+Note: If you need to add license after the ONLYOFFICE Docs is already installed, you need to execute step [1.1](#11-create-secret) and then run the `helm upgrade documentserver onlyoffice/docs --set license.existingSecret=license --no-hooks` command or `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ### 2. Deploy ONLYOFFICE Docs
 
-To deploy DocumentServer with the release name `documentserver`:
+To deploy ONLYOFFICE Docs with the release name `documentserver`:
 
 ```bash
 $ helm install documentserver onlyoffice/docs
 ```
 
-The command deploys DocumentServer on the Kubernetes cluster in the default configuration. The [Parameters](#4-parameters) section lists the parameters that can be configured during installation.
+The command deploys ONLYOFFICE Docs on the Kubernetes cluster in the default configuration. The [Parameters](#4-parameters) section lists the parameters that can be configured during installation.
 
 Note: When installing ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
@@ -334,7 +338,7 @@ To uninstall/delete the `documentserver` deployment:
 $ helm delete documentserver
 ```
 
-Executing the `helm delete` command launches hooks, which perform some preparatory actions before completely deleting the documentserver, which include stopping the server, cleaning up the used PVC and database tables.
+Executing the `helm delete` command launches hooks, which perform some preparatory actions before completely deleting the ONLYOFFICE Docs, which include stopping the server, cleaning up the used PVC and database tables.
 The default hook execution time is 300s. The execution time can be changed using `--timeout [time]`, for example:
 
 ```bash
@@ -343,7 +347,7 @@ $ helm delete documentserver --timeout 25m
 
 Note: When deleting ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
-If you want to delete the documentserver without any preparatory actions, run the following command:
+If you want to delete the ONLYOFFICE Docs without any preparatory actions, run the following command:
 
 ```bash
 $ helm delete documentserver --no-hooks
@@ -363,10 +367,12 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `connections.dbPassword`                                    | Database user password. If set to, it takes priority over the `connections.dbExistingSecret`                                                                                   | `""`                                                                                      |
 | `connections.dbSecretKeyName`                               | The name of the key that contains the Database user password                                                                                                                   | `postgres-password`                                                                       |
 | `connections.dbExistingSecret`                              | Name of existing secret to use for Database passwords. Must contain the key specified in `connections.dbSecretKeyName`                                                         | `postgresql`                                                                              |
+| `connections.redisConnectorName`                            | Defines which connector to use to connect to Redis. If you need to connect to Redis Sentinel, set the value `ioredis`                                                          | `redis`                                                                                   |
 | `connections.redistHost`                                    | The IP address or the name of the Redis host                                                                                                                                   | `redis-master`                                                                            |
 | `connections.redisPort`                                     | The Redis server port number                                                                                                                                                   | `6379`                                                                                    |
 | `connections.redisUser`                                     | The Redis [user](https://redis.io/docs/management/security/acl/) name. The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file | `default`                                                        |
 | `connections.redisDBNum`                                    | Number of the redis logical database to be [selected](https://redis.io/commands/select/). The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file | `0`                                           |
+| `connections.redisSentinelGroupName`                        | Name of a group of Redis instances composed of a master and one or more slaves. Used if `connections.redisConnectorName` is set to `ioredis`                                   | `mymaster`                                                                                |
 | `connections.redisPassword`                                 | The password set for the Redis account. If set to, it takes priority over the `connections.redisExistingSecret`. The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file | `""`                   |
 | `connections.redisSecretKeyName`                            | The name of the key that contains the Redis user password                                                                                                                      | `redis-password`                                                                          |
 | `connections.redisExistingSecret`                           | Name of existing secret to use for Redis passwords. Must contain the key specified in `connections.redisSecretKeyName`. The password from this secret overrides password set in the `options` object in `local.json` | `redis`                                             |
@@ -420,7 +426,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `docservice.nodeAffinity`                                   | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Docservice Pods scheduling by nodes                  | `{}`                                                                                      |
 | `docservice.initContainers`                                 | Defines containers that run before docservice and proxy containers in the Docservice deployment pod. For example, a container that changes the owner of the PersistentVolume   | `[]`                                                                                      |
 | `docservice.image.repository`                               | Docservice container image repository*                                                                                                                                         | `onlyoffice/docs-docservice-de`                                                           |
-| `docservice.image.tag`                                      | Docservice container image tag                                                                                                                                                 | `7.4.0-1`                                                                                 |
+| `docservice.image.tag`                                      | Docservice container image tag                                                                                                                                                 | `7.4.1-2`                                                                                 |
 | `docservice.image.pullPolicy`                               | Docservice container image pull policy                                                                                                                                         | `IfNotPresent`                                                                            |
 | `docservice.resources.requests`                             | The requested resources for the Docservice container                                                                                                                           | `{}`                                                                                      |
 | `docservice.resources.limits`                               | The resources limits for the Docservice container                                                                                                                              | `{}`                                                                                      |
@@ -443,7 +449,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `proxy.infoAllowedIP`                                       | Defines ip addresses for accessing the info page                                                                                                                               | `[]`                                                                                      |
 | `proxy.welcomePage.enabled`                                 | Defines whether the welcome page will be displayed                                                                                                                             | `true`                                                                                    |
 | `proxy.image.repository`                                    | Docservice Proxy container image repository*                                                                                                                                   | `onlyoffice/docs-proxy-de`                                                                |
-| `proxy.image.tag`                                           | Docservice Proxy container image tag                                                                                                                                           | `7.4.0-1`                                                                                 |
+| `proxy.image.tag`                                           | Docservice Proxy container image tag                                                                                                                                           | `7.4.1-2`                                                                                 |
 | `proxy.image.pullPolicy`                                    | Docservice Proxy container image pull policy                                                                                                                                   | `IfNotPresent`                                                                            |
 | `proxy.resources.requests`                                  | The requested resources for the Proxy container                                                                                                                                | `{}`                                                                                      |
 | `proxy.resources.limits`                                    | The resources limits for the Proxy container                                                                                                                                   | `{}`                                                                                      |
@@ -459,7 +465,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `converter.nodeAffinity`                                    | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Converter Pods scheduling by nodes                   | `{}`                                                                                      |
 | `converter.initContainers`                                  | Defines containers that run before docservice and proxy containers in the Docservice deployment pod. For example, a container that changes the owner of the PersistentVolume   | `[]`                                                                                      |
 | `converter.image.repository`                                | Converter container image repository*                                                                                                                                          | `onlyoffice/docs-converter-de`                                                            |
-| `converter.image.tag`                                       | Converter container image tag                                                                                                                                                  | `7.4.0-1`                                                                                 |
+| `converter.image.tag`                                       | Converter container image tag                                                                                                                                                  | `7.4.1-2`                                                                                 |
 | `converter.image.pullPolicy`                                | Converter container image pull policy                                                                                                                                          | `IfNotPresent`                                                                            |
 | `converter.resources.requests`                              | The requested resources for the Converter container                                                                                                                            | `{}`                                                                                      |
 | `converter.resources.limits`                                | The resources limits for the Converter container                                                                                                                               | `{}`                                                                                      |
@@ -478,9 +484,9 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `example.podAffinity`                                       | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Example Pod scheduling by nodes relative to other Pods | `{}`                                                              |
 | `example.nodeAffinity`                                      | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Example Pod scheduling by nodes                      | `{}`                                                                                      |
 | `example.image.repository`                                  | Example container image name                                                                                                                                                   | `onlyoffice/docs-example`                                                                 |
-| `example.image.tag`                                         | Example container image tag                                                                                                                                                    | `7.4.0-1`                                                                                 |
+| `example.image.tag`                                         | Example container image tag                                                                                                                                                    | `7.4.1-2`                                                                                 |
 | `example.image.pullPolicy`                                  | Example container image pull policy                                                                                                                                            | `IfNotPresent`                                                                            |
-| `example.dsUrl`                                             | Documentserver external address. It should be changed only if it is necessary to check the operation of the conversion in Example (e.g. http://\<documentserver-address\>/)    | `/`                                                                                       |
+| `example.dsUrl`                                             | ONLYOFFICE Docs external address. It should be changed only if it is necessary to check the operation of the conversion in Example (e.g. http://\<documentserver-address\>/)   | `/`                                                                                       |
 | `example.resources.requests`                                | The requested resources for the Example container                                                                                                                              | `{}`                                                                                      |
 | `example.resources.limits`                                  | The resources limits for the Example container                                                                                                                                 | `{}`                                                                                      |
 | `jwt.enabled`                                               | Specifies the enabling the JSON Web Token validation by the ONLYOFFICE Docs. Common for inbox and outbox requests                                                              | `true`                                                                                    |
@@ -498,9 +504,11 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `service.sessionAffinityConfig`                             | [Configuration](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout) for ONLYOFFICE Docs service Session Affinity. Used if the `service.sessionAffinity` is set | `{}`                                                                 |
 | `ingress.enabled`                                           | Enable the creation of an ingress for the ONLYOFFICE Docs                                                                                                                      | `false`                                                                                   |
 | `ingress.annotations`                                       | Map of annotations to add to the Ingress                                                                                                                                       | `kubernetes.io/ingress.class: nginx`, `nginx.ingress.kubernetes.io/proxy-body-size: 100m` |
+| `ingress.ingressClassName`                                  | Used to reference the IngressClass that should be used to implement this Ingress                                                                                               | `nginx`                                                                                   |
 | `ingress.host`                                              | Ingress hostname for the ONLYOFFICE Docs ingress                                                                                                                               | `""`                                                                                      |
 | `ingress.ssl.enabled`                                       | Enable ssl for the ONLYOFFICE Docs ingress                                                                                                                                     | `false`                                                                                   |
 | `ingress.ssl.secret`                                        | Secret name for ssl to mount into the Ingress                                                                                                                                  | `tls`                                                                                     |
+| `ingress.path`                                              | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
 | `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
 | `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
 | `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana                                 | `false`                                                                                   |
@@ -523,7 +531,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `privateCluster`                                            | Specify whether the k8s cluster is used in a private network without internet access                                                                                           | `false`                                                                                   |
 | `upgrade.job.enabled`                                       | Enable the execution of job pre-upgrade before upgrading ONLYOFFICE Docs                                                                                                       | `true`                                                                                    |
 | `upgrade.job.image.repository`                              | Job by upgrade image repository                                                                                                                                                | `onlyoffice/docs-utils`                                                                   |
-| `upgrade.job.image.tag`                                     | Job by upgrade image tag                                                                                                                                                       | `7.4.0-1`                                                                                 |
+| `upgrade.job.image.tag`                                     | Job by upgrade image tag                                                                                                                                                       | `7.4.1-2`                                                                                 |
 | `upgrade.job.image.pullPolicy`                              | Job by upgrade image pull policy                                                                                                                                               | `IfNotPresent`                                                                            |
 | `upgrade.job.resources.requests`                            | The requested resources for the job pre-upgrade container                                                                                                                      | `{}`                                                                                      |
 | `upgrade.job.resources.limits`                              | The resources limits for the job pre-upgrade container                                                                                                                         | `{}`                                                                                      |
@@ -534,7 +542,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `upgrade.existingConfigmap.dsStop`                          | The name of the existing ConfigMap that contains the ONLYOFFICE Docs upgrade script. If set, the four previous parameters are ignored. Must contain a key `stop.sh`            | `""`                                                                                      |
 | `rollback.job.enabled`                                      | Enable the execution of job pre-rollback before rolling back ONLYOFFICE Docs                                                                                                   | `true`                                                                                    |
 | `rollback.job.image.repository`                             | Job by rollback image repository                                                                                                                                               | `onlyoffice/docs-utils`                                                                   |
-| `rollback.job.image.tag`                                    | Job by rollback image tag                                                                                                                                                      | `7.4.0-1`                                                                                 |
+| `rollback.job.image.tag`                                    | Job by rollback image tag                                                                                                                                                      | `7.4.1-2`                                                                                 |
 | `rollback.job.image.pullPolicy`                             | Job by rollback image pull policy                                                                                                                                              | `IfNotPresent`                                                                            |
 | `rollback.job.resources.requests`                           | The requested resources for the job rollback container                                                                                                                         | `{}`                                                                                      |
 | `rollback.job.resources.limits`                             | The resources limits for the job rollback container                                                                                                                            | `{}`                                                                                      |
@@ -545,7 +553,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `rollback.existingConfigmap.dsStop`                         | The name of the existing ConfigMap that contains the ONLYOFFICE Docs rollback script. If set, the four previous parameters are ignored. Must contain a key `stop.sh`           | `""`                                                                                      |
 | `delete.job.enabled`                                        | Enable the execution of job pre-delete before deleting ONLYOFFICE Docs                                                                                                         | `true`                                                                                    |
 | `delete.job.image.repository`                               | Job by delete image repository                                                                                                                                                 | `onlyoffice/docs-utils`                                                                   |
-| `delete.job.image.tag`                                      | Job by delete image tag                                                                                                                                                        | `7.4.0-1`                                                                                 |
+| `delete.job.image.tag`                                      | Job by delete image tag                                                                                                                                                        | `7.4.1-2`                                                                                 |
 | `delete.job.image.pullPolicy`                               | Job by delete image pull policy                                                                                                                                                | `IfNotPresent`                                                                            |
 | `delete.job.resources.requests`                             | The requested resources for the job delete container                                                                                                                           | `{}`                                                                                      |
 | `delete.job.resources.limits`                               | The resources limits for the job delete container                                                                                                                              | `{}`                                                                                      |
@@ -554,7 +562,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `delete.existingConfigmap.dsStop`                           | The name of the existing ConfigMap that contains the ONLYOFFICE Docs delete script. If set, the two previous parameters are ignored. Must contain a key `stop.sh`              | `""`                                                                                      |
 | `install.job.enabled`                                       | Enable the execution of job pre-install before installing ONLYOFFICE Docs                                                                                                      | `true`                                                                                    |
 | `install.job.image.repository`                              | Job by pre-install ONLYOFFICE Docs image repository                                                                                                                            | `onlyoffice/docs-utils`                                                                   |
-| `install.job.image.tag`                                     | Job by pre-install ONLYOFFICE Docs image tag                                                                                                                                   | `7.4.0-1`                                                                                 |
+| `install.job.image.tag`                                     | Job by pre-install ONLYOFFICE Docs image tag                                                                                                                                   | `7.4.1-2`                                                                                 |
 | `install.job.image.pullPolicy`                              | Job by pre-install ONLYOFFICE Docs image pull policy                                                                                                                           | `IfNotPresent`                                                                            |
 | `install.job.resources.requests`                            | The requested resources for the job pre-install container                                                                                                                      | `{}`                                                                                      |
 | `install.job.resources.limits`                              | The resources limits for the job pre-install container                                                                                                                         | `{}`                                                                                      |
@@ -572,15 +580,15 @@ The `helm delete` command removes all the Kubernetes components associated with 
 
   If you use the community version, there may be problems with co-editing documents.
 
-  The default value of this parameter refers to the ONLYOFFICE Document Server Developer Edition. To learn more about this edition and compare it with other editions, please see the comparison table on [this page](https://github.com/ONLYOFFICE/DocumentServer#onlyoffice-document-server-editions).
+  The default value of this parameter refers to the ONLYOFFICE Document Server Developer Edition. To learn more about this edition and compare it with other editions, please see the comparison table on [this page](https://github.com/ONLYOFFICE/DocumentServer#onlyoffice-docs-editions).
 
-Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
+Specify each parameter using the `--set key=value[,key=value]` argument to helm install. For example,
 
 ```bash
 $ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 ```
 
-This command gives expose documentServer via HTTPS.
+This command gives expose ONLYOFFICE Docs via HTTPS.
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
@@ -613,16 +621,16 @@ If you want to use Grafana to visualize metrics, set `grafana.enabled` to `true`
 $ helm install documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.ingress.enabled=true
 ```
 
-### 5.3 Expose DocumentServer
+### 5.3 Expose ONLYOFFICE Docs
 
-#### 5.3.1 Expose DocumentServer via Service (HTTP Only)
+#### 5.3.1 Expose ONLYOFFICE Docs via Service (HTTP Only)
 
-*You should skip step[#5.3.1](#531-expose-documentserver-via-service-http-only) if you are going to expose DocumentServer via HTTPS*
+*You should skip step[#5.3.1](#531-expose-onlyoffice-docs-via-service-http-only) if you are going to expose ONLYOFFICE Docs via HTTPS*
 
-This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to DocumentServer.
+This type of exposure has the least overheads of performance, it creates a loadbalancer to get access to ONLYOFFICE Docs.
 Use this type of exposure if you use external TLS termination, and don't have another WEB application in the k8s cluster.
 
-To expose DocumentServer via service, set the `service.type` parameter to LoadBalancer:
+To expose ONLYOFFICE Docs via service, set the `service.type` parameter to LoadBalancer:
 
 ```bash
 $ helm install documentserver onlyoffice/docs --set service.type=LoadBalancer,service.port=80
@@ -646,7 +654,7 @@ $ kubectl get service documentserver -o jsonpath="{.status.loadBalancer.ingress[
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVICE-HOSTNAME/`.
 
 
-#### 5.3.2 Expose DocumentServer via Ingress
+#### 5.3.2 Expose ONLYOFFICE Docs via Ingress
 
 #### 5.3.2.1 Installing the Kubernetes Nginx Ingress Controller
 
@@ -664,18 +672,17 @@ $ helm install nginx-ingress -f https://raw.githubusercontent.com/ONLYOFFICE/Kub
 
 See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
 
-#### 5.3.2.2 Expose DocumentServer via HTTP
+#### 5.3.2.2 Expose ONLYOFFICE Docs via HTTP
 
-*You should skip step[5.3.2.2](#5322-expose-documentserver-via-http) if you are going to expose DocumentServer via HTTPS*
+*You should skip step[5.3.2.2](#5322-expose-onlyoffice-docs-via-http) if you are going to expose ONLYOFFICE Docs via HTTPS*
 
-This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to DocumentServer. 
+This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to ONLYOFFICE Docs. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
-To expose DocumentServer via ingress HTTP, set the `ingress.enabled` parameter to true:
+To expose ONLYOFFICE Docs via ingress HTTP, set the `ingress.enabled` parameter to true:
 
 ```bash
 $ helm install documentserver onlyoffice/docs --set ingress.enabled=true
-
 ```
 
 Run the following command to get the `documentserver` ingress IP:
@@ -694,9 +701,9 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
 
-#### 5.3.2.3 Expose DocumentServer via HTTPS
+#### 5.3.2.3 Expose ONLYOFFICE Docs via HTTPS
 
-This type of exposure allows you to enable internal TLS termination for DocumentServer.
+This type of exposure allows you to enable internal TLS termination for ONLYOFFICE Docs.
 
 Create the `tls` secret with an ssl certificate inside.
 
@@ -729,9 +736,9 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
-### 6. Scale DocumentServer (optional)
+### 6. Scale ONLYOFFICE Docs (optional)
 
-*This step is optional. You can skip step [6](#6-scale-documentserver-optional) entirely if you want to use default deployment settings.*
+*This step is optional. You can skip step [6](#6-scale-onlyoffice-docs-optional) entirely if you want to use default deployment settings.*
 
 #### 6.1 Horizontal Pod Autoscaling
 
@@ -762,7 +769,7 @@ To scale the `docservice` deployment, use the following command:
 $ kubectl scale -n default deployment docservice --replicas=POD_COUNT
 ```
 
-where `POD_COUNT` is а number of the `docservice` pods.
+where `POD_COUNT` is a number of the `docservice` pods.
 
 Do the same to scale the `converter` deployment:
 
@@ -777,17 +784,17 @@ It's necessary to set the parameters for updating. For example,
 ```bash
 $ helm upgrade documentserver onlyoffice/docs \
   --set docservice.image.tag=[version]
-  ```
-  
+```
+
   > **Note**: also need to specify the parameters that were specified during installation
-  
-  Or modify the values.yaml file and run the command:
-  
-  ```bash
-  $ helm upgrade documentserver -f values.yaml onlyoffice/docs
-  ```
-  
-Running the helm upgrade command runs a hook that shuts down the documentserver and cleans up the database. This is needed when updating the version of documentserver. The default hook execution time is 300s.
+
+Or modify the values.yaml file and run the command:
+
+```bash
+$ helm upgrade documentserver -f values.yaml onlyoffice/docs
+```
+
+Running the helm upgrade command runs a hook that shuts down the ONLYOFFICE Docs and cleans up the database. This is needed when updating the version of ONLYOFFICE Docs. The default hook execution time is 300s.
 The execution time can be changed using --timeout [time], for example
 
 ```bash
@@ -796,7 +803,7 @@ $ helm upgrade documentserver -f values.yaml onlyoffice/docs --timeout 15m
 
 Note: When upgrading ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
 
-If you want to update any parameter other than the version of the DocumentServer, then run the `helm upgrade` command without `hooks`, for example:
+If you want to update any parameter other than the version of the ONLYOFFICE Docs, then run the `helm upgrade` command without `hooks`, for example:
 
 ```bash
 $ helm upgrade documentserver onlyoffice/docs --set jwt.enabled=false --no-hooks
@@ -809,7 +816,7 @@ $ helm rollback documentserver
 ```
 
 Note: When rolling back ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
-  
+
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
 To perform the shutdown, run the following command:
@@ -873,7 +880,7 @@ To view the log of the Pod running as a result of the `helm test` command, run t
 $ kubectl logs -f test-ds -n <NAMESPACE>
 ```
 
-The DocumentServer availability check is considered a priority, so if it fails with an error, the test is considered to be failed.
+The ONLYOFFICE Docs availability check is considered a priority, so if it fails with an error, the test is considered to be failed.
 
 After this, you can delete the `test-ds` Pod by running the following command:
 
@@ -956,9 +963,9 @@ $ helm install grafana bitnami/grafana \
 #### 1.2.1 Installing ready-made Grafana dashboards
 
 To install ready-made Grafana dashboards, set the `grafana.enabled` and `grafana.dashboard.enabled` parameters to `true`.
-If DocumentServer is already installed you need to run the `helm upgrade documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.dashboard.enabled=true --no-hooks` command or `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the [values.yaml](values.yaml) file.
+If ONLYOFFICE Docs is already installed you need to run the `helm upgrade documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.dashboard.enabled=true --no-hooks` command or `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the [values.yaml](values.yaml) file.
 As a result, ready-made dashboards in the `JSON` format will be downloaded from the Grafana [website](https://grafana.com/grafana/dashboards),
-the necessary edits will be made to them and configmap will be created from them. A dashboard will also be added to visualize metrics coming from the DocumentServer (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
+the necessary edits will be made to them and configmap will be created from them. A dashboard will also be added to visualize metrics coming from the ONLYOFFICE Docs (it is assumed that step [#6](#6-deploy-statsd-exporter) has already been completed).
 
 #### 1.2.2 Installing Grafana
 
@@ -997,10 +1004,10 @@ After executing this command, the following dashboards will be imported into Gra
   - RabbitMQ-Overview
   - PostgreSQL Database
   - NGINX Ingress controller
-  - DocumentServer
+  - ONLYOFFICE Docs
   - Resource usage by Pods and Containers
 
-Note: You can see the description of the DocumentServer metrics that are visualized in Grafana [here](https://github.com/ONLYOFFICE/Kubernetes-Docs/wiki/Document-Server-Metrics).
+Note: You can see the description of the ONLYOFFICE Docs metrics that are visualized in Grafana [here](https://github.com/ONLYOFFICE/Kubernetes-Docs/wiki/Document-Server-Metrics).
 
 See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
 
@@ -1008,17 +1015,18 @@ See more details about installing Grafana via Helm [here](https://github.com/bit
 
 Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
 
-If DocumentServer was installed with the parameter `grafana.ingress.enabled` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://INGRESS-ADDRESS/grafana/`
+If ONLYOFFICE Docs was installed with the parameter `grafana.ingress.enabled` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://INGRESS-ADDRESS/grafana/`
 
-If Ingres was installed using a secure connection (step [#5.3.2.3](#5323-expose-documentserver-via-https)), then access to Grafana will be at: `https://your-domain-name/grafana/`
+If Ingres was installed using a secure connection (step [#5.3.2.3](#5323-expose-onlyoffice-docs-via-https)), then access to Grafana will be at: `https://your-domain-name/grafana/`
 
 ### 3. View gathered metrics in Grafana
 
 Go to the address `http(s)://your-domain-name/grafana/`
 
-Login - admin
+`Login - admin`
 
 To get the password, run the following command:
+
 ```
 $ kubectl get secret grafana-admin --namespace default -o jsonpath="{.data.GF_SECURITY_ADMIN_PASSWORD}" | base64 --decode
 ```
