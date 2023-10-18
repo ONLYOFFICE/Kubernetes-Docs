@@ -209,6 +209,7 @@ function k8s_litmus_install () {
 	    #kubectl apply -f https://hub.litmuschaos.io/api/chaos/1.13.7?file=charts/generic/experiments.yaml -n default
             tar -zxvf <(curl -sL https://github.com/litmuschaos/chaos-charts/archive/3.0.0.tar.gz)
 	    find chaos-charts-3.0.0 -name experiments.yaml | grep kubernetes | xargs kubectl apply -n default -f
+	    rm -r ./chaos-charts-3.0.0
 }
 
 function k8s_docs_status() {	    	    
