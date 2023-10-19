@@ -20,7 +20,7 @@ done
 
 K8S_STORAGE_CLASS="standard"
 NFS_PERSISTANCE_SIZE="10Gi"
-LITMUS_VERSION="3.0.0"
+LITMUS_VERSION="1.13.6"
 
 WORK_DIR=$(pwd)
 
@@ -206,9 +206,9 @@ function k8s_litmus_install () {
             kubectl get pods --namespace litmus
 	    
 	    echo "${COLOR_BLUE}🔨⎈ Install litmus experiments...${COLORE_RESET}"
-            tar -zxvf <(curl -sL https://github.com/litmuschaos/chaos-charts/archive/3.0.0.tar.gz)
-	    find chaos-charts-3.0.0 -name experiments.yaml | grep kubernetes | xargs kubectl apply -n default -f
-	    rm -r ./chaos-charts-3.0.0
+            tar -zxvf <(curl -sL https://github.com/litmuschaos/chaos-charts/archive/${LITMUS_VERSION}.tar.gz)
+	    kubectl apply -f ./chaos-charts-${LITMUS_VERSION}/charts/generic/experiments.yaml
+	    rm -r ./chaos-charts-${LITMUS_VERSION}
 }
 
 function k8s_docs_status() {	    	    
@@ -425,12 +425,12 @@ function main () {
    k8s_w8_workers
    k8s_deploy_deps
    k8s_wait_deps
-   if [ "${TARGET_BRANCH}" == "master" ] || [ "${TARGET_BRANCH}" == "main" ]; then
+   #if [ "${TARGET_BRANCH}" == "master" ] || [ "${TARGET_BRANCH}" == "main" ]; then
       k8s_all_tests
-   else
-      echo "${COLOR_YELLOW}ATTENTION: Target branch is not master, run helm install/upgrade/test only${COLOR_RESET}"
-      k8s_helm_test_only
-   fi
+   #else
+   #   echo "${COLOR_YELLOW}ATTENTION: Target branch is not master, run helm install/upgrade/test only${COLOR_RESET}"
+   #   k8s_helm_test_only
+   #fi
  }
 
 main
