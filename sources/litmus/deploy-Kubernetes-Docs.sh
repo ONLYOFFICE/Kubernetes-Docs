@@ -20,7 +20,7 @@ done
 
 K8S_STORAGE_CLASS="standard"
 NFS_PERSISTANCE_SIZE="10Gi"
-LITMUS_VERSION="1.13.8"
+LITMUS_VERSION="1.13.6"
 
 WORK_DIR=$(pwd)
 
@@ -206,7 +206,9 @@ function k8s_litmus_install () {
             kubectl get pods --namespace litmus
 	    
 	    echo "${COLOR_BLUE}🔨⎈ Install litmus experiments...${COLORE_RESET}"
-	    kubectl apply -f https://hub.litmuschaos.io/api/chaos/1.13.7?file=charts/generic/experiments.yaml -n default
+            tar -zxvf <(curl -sL https://github.com/litmuschaos/chaos-charts/archive/${LITMUS_VERSION}.tar.gz)
+	    kubectl apply -f ./chaos-charts-${LITMUS_VERSION}/charts/generic/experiments.yaml
+	    rm -r ./chaos-charts-${LITMUS_VERSION}
 }
 
 function k8s_docs_status() {	    	    
