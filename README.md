@@ -121,6 +121,7 @@ To install RabbitMQ to your cluster, run the following command:
 
 ```bash
 $ helm install rabbitmq bitnami/rabbitmq \
+  --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set metrics.enabled=false
 ```
 
@@ -135,6 +136,7 @@ To install Redis to your cluster, run the following command:
 ```bash
 $ helm install redis bitnami/redis \
   --set architecture=standalone \
+  --set master.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set metrics.enabled=false
 ```
 
@@ -153,6 +155,7 @@ To install PostgreSQL to your cluster, run the following command:
 ```
 $ helm install postgresql bitnami/postgresql \
   --set auth.database=postgres \
+  --set primary.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set primary.persistence.size=PERSISTENT_SIZE \
   --set metrics.enabled=false
 ```
@@ -167,6 +170,7 @@ To install MySQL to your cluster, run the following command:
 $ helm install mysql bitnami/mysql \
   --set auth.database=onlyoffice \
   --set auth.username=onlyoffice \
+  --set primary.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set primary.persistence.size=PERSISTENT_SIZE \
   --set metrics.enabled=false
 ```
