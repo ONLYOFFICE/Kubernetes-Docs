@@ -1,5 +1,11 @@
 # Change log
 
+## 3.4.1
+
+### Changes
+
+* Released [v7.5.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#751) of ONLYOFFICE Docs
+
 ## 3.4.0
 
 ### Changes

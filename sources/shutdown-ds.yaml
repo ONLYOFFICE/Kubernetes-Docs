@@ -13,7 +13,7 @@ spec:
           defaultMode: 0755
       containers:
         - name: shutdown-ds
-          image: onlyoffice/docs-utils:7.5.0-1
+          image: onlyoffice/docs-utils:7.5.1-1
           command: ["/bin/sh", "-c"]
           args: ["/scripts/stop.sh"]
           volumeMounts:
