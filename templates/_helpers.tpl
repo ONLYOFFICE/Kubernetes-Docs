@@ -107,6 +107,37 @@ Return Redis password
 {{- end -}}
 
 {{/*
+Get the info auth password secret
+*/}}
+{{- define "ds.info.secretName" -}}
+{{- if .Values.proxy.infoAllowedExistingSecret -}}
+    {{- printf "%s" (tpl .Values.proxy.infoAllowedExistingSecret $) -}}
+{{- else if .Values.proxy.infoAllowedPassword -}}
+    {{- printf "%s-info-auth" .Release.Name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for info auth
+*/}}
+{{- define "ds.info.createSecret" -}}
+{{- if and .Values.proxy.infoAllowedUser (not .Values.proxy.infoAllowedExistingSecret) -}}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return info auth password
+*/}}
+{{- define "ds.info.password" -}}
+{{- if not (empty .Values.proxy.infoAllowedPassword) }}
+    {{- .Values.proxy.infoAllowedPassword }}
+{{- else }}
+    {{- required "A info auth Password is required!" .Values.proxy.infoAllowedPassword }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Get the PVC name
 */}}
 {{- define "ds.pvc.name" -}}
