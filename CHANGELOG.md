@@ -1,5 +1,11 @@
 # Change log
 
+## 3.5.0
+
+### New Features
+
+* Added the ability to restrict access to the info page
+
 ## 3.4.1
 
 ### Changes
