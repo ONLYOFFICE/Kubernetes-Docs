@@ -532,6 +532,23 @@ proxy:
   ## - 10.244.0.79
   ## - 192.168.1.0/24
   infoAllowedIP: []
+  ## proxy.infoAllowedUser Defines user name for accessing the info page
+  ## If not set to, Nginx Basic Authentication will not be applied to access the info page
+  ## ref: https://nginx.org/en/docs/http/ngx_http_auth_basic_module.html
+  ## For more details, see here:
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#12-access-to-the-info-page-optional
+  infoAllowedUser: ""
+  ## proxy.infoAllowedSecretKeyName The name of the key that contains the info auth user password
+  ## Used if `proxy.infoAllowedUser` is set
+  infoAllowedSecretKeyName: info-auth-password
+  ## proxy.infoAllowedExistingSecret Name of existing secret to use for info auth password
+  ## Used if `proxy.infoAllowedUser` is set
+  ## Must contain the key specified in `proxy.infoAllowedSecretKeyName`
+  ## If set to, it takes priority over the `proxy.infoAllowedPassword`
+  infoAllowedExistingSecret: ""
+  ## proxy.infoAllowedPassword Defines user password for accessing the info page
+  ## Used if `proxy.infoAllowedUser` is set
+  infoAllowedPassword: "password"
   ## proxy.welcomePage.enabled Defines whether the welcome page will be displayed
   welcomePage:
     enabled: true

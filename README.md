@@ -46,6 +46,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [9. Update ONLYOFFICE Docs license (optional)](#9-update-onlyoffice-docs-license-optional)
   * [10. ONLYOFFICE Docs installation test (optional)](#10-onlyoffice-docs-installation-test-optional)
   * [11. Run Jobs in a private k8s cluster (optional)](#11-run-jobs-in-a-private-k8s-cluster-optional)
+  * [12. Access to the info page (optional)](#12-access-to-the-info-page-optional)
 - [Using Grafana to visualize metrics (optional)](#using-grafana-to-visualize-metrics-optional)
   * [1. Deploy Grafana](#1-deploy-grafana)
     + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
@@ -451,6 +452,10 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `proxy.workerConnections`                                   | Defines the nginx config [worker_connections](https://nginx.org/en/docs/ngx_core_module.html#worker_connections) directive                                                     | `4096`                                                                                    |
 | `proxy.secureLinkSecret`                                    | Defines secret for the nginx config directive [secure_link_md5](https://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5)                               | `verysecretstring`                                                                        |
 | `proxy.infoAllowedIP`                                       | Defines ip addresses for accessing the info page                                                                                                                               | `[]`                                                                                      |
+| `proxy.infoAllowedUser`                                     | Defines user name for accessing the info page. If not set to, Nginx [Basic Authentication](https://nginx.org/en/docs/http/ngx_http_auth_basic_module.html) will not be applied to access the info page. For more details, see [here](#12-access-to-the-info-page-optional) | `""` |
+| `proxy.infoAllowedPassword`                                 | Defines user password for accessing the info page. Used if `proxy.infoAllowedUser` is set                                                                                      | `password`                                                                                |
+| `proxy.infoAllowedSecretKeyName`                            | The name of the key that contains the info auth user password. Used if `proxy.infoAllowedUser` is set                                                                          | `info-auth-password`                                                                      |
+| `proxy.infoAllowedExistingSecret`                           | Name of existing secret to use for info auth password. Used if `proxy.infoAllowedUser` is set. Must contain the key specified in `proxy.infoAllowedSecretKeyName`. If set to, it takes priority over the `proxy.infoAllowedPassword` | `""`                                |
 | `proxy.welcomePage.enabled`                                 | Defines whether the welcome page will be displayed                                                                                                                             | `true`                                                                                    |
 | `proxy.image.repository`                                    | Docservice Proxy container image repository*                                                                                                                                   | `onlyoffice/docs-proxy-de`                                                                |
 | `proxy.image.tag`                                           | Docservice Proxy container image tag                                                                                                                                           | `7.5.1-1`                                                                                 |
@@ -939,6 +944,15 @@ Note: If you specified a different name for `ConfigMap` and for the file from wh
 Next, when executing the commands `helm install|upgrade|rollback|delete`, set the parameter `privateCluster=true`
 
   > **Note**: If it is possible to use a Web Proxy in your network to ensure the Pods containers have access to the Internet, then you can leave the parameter `privateCluster=false`, not manually create a configmaps with sql scripts and set the parameter `webProxy.enabled=true`, also setting the appropriate parameters for the Web Proxy.
+
+### 12. Access to the info page (optional)
+
+The access to `/info` page is limited by default.
+In order to allow the access to it, you need to specify the IP addresses or subnets (that will be Proxy container clients in this case) using `proxy.infoAllowedIP` parameter.
+Taking into consideration the specifics of Kubernetes net interaction it is possible to get the original IP of the user (being Proxy client) though it's not a standard scenario.
+Generally the Pods / Nodes / Load Balancer addresses will actually be the clients, so these addresses are to be used.
+In this case the access to the info page will be available to everyone.
+You can further limit the access to the `info` page using Nginx [Basic Authentication](https://nginx.org/en/docs/http/ngx_http_auth_basic_module.html) which you can turn on by setting `proxy.infoAllowedUser` parameter value and by setting the password using `proxy.infoAllowedPassword` parameter, alternatively you can use the existing secret with password by setting its name with `proxy.infoAllowedExistingSecret` parameter.
 
 ## Using Grafana to visualize metrics (optional)
 
