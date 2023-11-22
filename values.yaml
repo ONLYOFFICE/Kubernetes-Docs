@@ -87,7 +87,7 @@ connections:
   amqpPassword: ""
 ## Web Proxy parameters
 ## Used if your network has a web proxy
-## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
+## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
 webProxy:
   ## webProxy.enabled Specify whether a Web proxy is used in your network to access the Pods of k8s cluster to the Internet
   enabled: false
@@ -98,7 +98,7 @@ webProxy:
   ## webProxy.noProxy Patterns for IP addresses or k8s services name or domain names that shouldn’t use the Web Proxy
   noProxy: "localhost,127.0.0.1,docservice"
 ## privateCluster Specify whether the k8s cluster is used in a private network without internet access
-## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
+## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
 privateCluster: false
 ## namespaceOverride The name of the namespace in which Onlyoffice Docs will be deployed
 ## If not set, the name will be taken from .Release.Namespace
@@ -940,7 +940,7 @@ install:
     tblCreate:
       ## install.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
       ## Used if `privateCluster` is set to `true`
-      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## install.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
       ## Must be the same as the `key` name in `install.existingConfigmap.tblCreate.name`
@@ -981,7 +981,7 @@ upgrade:
     tblRemove:
       ## upgrade.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
       ## Used if `privateCluster` is set to `true`
-      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## upgrade.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
       ## Must be the same as the `key` name in `upgrade.existingConfigmap.tblRemove.name`
@@ -989,7 +989,7 @@ upgrade:
     tblCreate:
       ## upgrade.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
       ## Used if `privateCluster` is set to `true`
-      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## upgrade.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
       ## Must be the same as the `key` name in `upgrade.existingConfigmap.tblCreate.name`
@@ -1030,7 +1030,7 @@ rollback:
     tblRemove:
       ## rollback.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
       ## Used if `privateCluster` is set to `true`
-      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## rollback.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
       ## Must be the same as the `key` name in `rollback.existingConfigmap.tblRemove.name`
@@ -1038,7 +1038,7 @@ rollback:
     tblCreate:
       ## rollback.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
       ## Used if `privateCluster` is set to `true`
-      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## rollback.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
       ## Must be the same as the `key` name in `rollback.existingConfigmap.tblCreate.name`
@@ -1079,7 +1079,7 @@ delete:
     tblRemove:
       ## delete.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
       ## Used if `privateCluster` is set to `true`
-      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#10-run-jobs-in-a-private-k8s-cluster-optional
+      ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## delete.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
       ## Must be the same as the `key` name in `delete.existingConfigmap.tblRemove.name`
