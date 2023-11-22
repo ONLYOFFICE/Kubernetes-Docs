@@ -28,7 +28,7 @@ spec:
           defaultMode: 0755
       containers:
       - name: grafana-dashboard
-        image: onlyoffice/docs-utils:7.5.1-1
+        image: onlyoffice/docs-utils:7.5.1-2
         command: ["/bin/sh", "-c"]
         {{- if .Values.webProxy.enabled }}
         args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /scripts/get_dashboard.sh"]
