@@ -866,6 +866,13 @@ example:
     ##   memory: "128Mi"
     ##   cpu: "250m"
     limits: {}
+  ## Example config for overriding default values
+  extraConf:
+    ## example.extraConf.configMap The name of the ConfigMap containing the json file that override the default values
+    configMap: ""
+    ## example.extraConf.filename The name of the json file that contains custom values
+    ## Must be the same as the `key` name in `example.extraConf.ConfigMap`
+    filename: local.json
 
 ## Onlyoffice Docs ingress parameters
 ##
