@@ -38,6 +38,7 @@ data:
   LOG_PATTERN: {{ .Values.log.pattern | quote }}
   NGINX_ACCESS_LOG: {{ .Values.proxy.accessLog | quote }}
   NGINX_GZIP_PROXIED: {{ .Values.proxy.gzipProxied | quote }}
+  NGINX_CLIENT_MAX_BODY_SIZE: {{ .Values.proxy.clientMaxBodySize | quote }}
   NGINX_WORKER_CONNECTIONS: {{ .Values.proxy.workerConnections | quote }}
   SECURE_LINK_SECRET: {{ .Values.proxy.secureLinkSecret | quote }}
   {{- if .Values.example.enabled }}
