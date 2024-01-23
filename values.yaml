@@ -333,6 +333,18 @@ docservice:
   ## docservice.updateStrategy.type Docservice deployment update strategy type
   updateStrategy:
     type: Recreate
+  ## docservice.customPodAntiAffinity Prohibiting the scheduling of Docservice Pods relative to other Pods containing the specified labels on the same node
+  ## Example:
+  ## customPodAntiAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - converter
+  ##     topologyKey: kubernetes.io/hostname
+  customPodAntiAffinity: {}
   ## Pod affinity rules for Docservice Pods scheduling by nodes relative to other Pods
   ## Pod affinity allow you to constrain which nodes Docservice Pods can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -346,7 +358,6 @@ docservice:
   ##         values:
   ##         - store
   ##     topologyKey: topology.kubernetes.io/zone
-  ##
   podAffinity: {}
   ## Node affinity rules for Docservice Pods scheduling by nodes
   ## Node affinity allow you to constrain which nodes Docservice Pod can be scheduled on based on node labels
@@ -362,7 +373,6 @@ docservice:
   ##         values:
   ##         - name1
   ##         - name2
-  ##
   nodeAffinity: {}
   ## Horizontal Pod Autoscaling parameters
   ## Horizontal Pod Autoscaling is used for autoscaling of the Docservice deployment
@@ -651,6 +661,18 @@ converter:
       maxUnavailable: 25%
       ## converter.updateStrategy.rollingUpdate.maxSurge Maximum number of Converter Pods created over the desired number of Pods
       maxSurge: 25%
+  ## converter.customPodAntiAffinity Prohibiting the scheduling of Converter Pods relative to other Pods containing the specified labels on the same node
+  ## Example:
+  ## customPodAntiAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - docservice
+  ##     topologyKey: kubernetes.io/hostname
+  customPodAntiAffinity: {}
   ## Pod affinity rules for Converter Pods scheduling by nodes relative to other Pods
   ## Pod affinity allow you to constrain which nodes Converter Pod can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -666,7 +688,6 @@ converter:
   ##           values:
   ##           - database
   ##       topologyKey: kubernetes.io/hostname
-  ##
   podAffinity: {}
   ## Node affinity rules for Converter Pods scheduling by nodes
   ## Node affinity allow you to constrain which nodes Converter Pod can be scheduled on based on node labels
@@ -681,7 +702,6 @@ converter:
   ##         values:
   ##         - zone1
   ##         - zone2
-  ##
   nodeAffinity: {}
   ## Horizontal Pod Autoscaling parameters
   ## Horizontal Pod Autoscaling is used for autoscaling of the Converter deployment
@@ -792,6 +812,18 @@ example:
   ## example.updateStrategy.type Example StatefulSet update strategy type
   updateStrategy:
     type: RollingUpdate
+  ## example.customPodAntiAffinity Prohibiting the scheduling of Example Pod relative to other Pods containing the specified labels on the same node
+  ## Example:
+  ## customPodAntiAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - docservice
+  ##     topologyKey: kubernetes.io/hostname
+  customPodAntiAffinity: {}
   ## Pod affinity rules for Example Pod scheduling by nodes relative to other Pods
   ## Pod affinity allow you to constrain which nodes Example Pod can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -815,7 +847,6 @@ example:
   ##           values:
   ##           - database
   ##       topologyKey: kubernetes.io/hostname
-  ##
   podAffinity: {}
   ## Node affinity rules for Example Pod scheduling by nodes
   ## Node affinity allow you to constrain which nodes Example Pod can be scheduled on based on node labels
@@ -839,7 +870,6 @@ example:
   ##         values:
   ##         - zone1
   ##         - zone2
-  ##
   nodeAffinity: {}
   ## Example container image parameters
   image:
