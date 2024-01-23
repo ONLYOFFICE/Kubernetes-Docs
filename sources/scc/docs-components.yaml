@@ -1,20 +1,20 @@
+---
+apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
-apiVersion: v1
 metadata:
   name: scc-docs-components
 allowPrivilegedContainer: false
+users: []
+groups: []
 runAsUser:
-  type: MustRunAsRange
-  uidRangeMax: 101 
-  uidRangeMin: 101
-seLinuxContext:
   type: MustRunAs
+  uid: 101
 fsGroup:
   type: MustRunAs
-  ranges: 
+  ranges:
   - max: 101
     min: 101
 supplementalGroups:
   type: MustRunAs
-users: []
-groups: []
+seLinuxContext:
+  type: MustRunAs
