@@ -46,6 +46,15 @@ connections:
   ## ref: https://redis.io/commands/select/
   ## The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file
   redisDBNum: "0"
+  ## connections.redisClusterNodes List of nodes in the Redis cluster
+  ## There is no need to specify every node in the cluster, 3 should be enough
+  ## You can specify multiple values
+  ## It must be specified in the `host:port` format
+  ## Example:
+  ## redisClusterNodes:
+  ## - 10.244.0.79:6379
+  ## - 192.168.1.25:6379
+  redisClusterNodes: []
   ## connections.redisSentinelGroupName Name of a group of Redis instances composed of a master and one or more slaves
   ## Used if `connections.redisConnectorName` is set to `ioredis`
   redisSentinelGroupName: mymaster
