@@ -1,14 +1,13 @@
----
-apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
 metadata:
   name: scc-helm-components
 allowPrivilegedContainer: false
-users: []
-groups: []
 runAsUser:
   type: MustRunAs
   uid: 1001
+seLinuxContext:
+  type: MustRunAs
 fsGroup:
   type: MustRunAs
   ranges:
@@ -16,7 +15,7 @@ fsGroup:
     min: 1001
 supplementalGroups:
   type: MustRunAs
-seLinuxContext:
-  type: MustRunAs
+users: []
+groups: []
 seccompProfiles:
 - runtime/default

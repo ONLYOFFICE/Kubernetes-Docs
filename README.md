@@ -64,7 +64,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 
 ## Deploy prerequisites
 
-Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 1001`.
+Note: It may be required to apply `SecurityContextConstraints` when installing into OpenShift cluster as it adds permission to run containers by user with `ID = 1001`.
 
 To do this, run the following commands:
 ```
@@ -286,7 +286,7 @@ and then run the `helm upgrade documentserver onlyoffice/docs --set extraThemes.
 
 ## Deploy ONLYOFFICE Docs
 
-Note: When installing to an OpenShift cluster, you must apply the `SecurityContextConstraints` policy, which adds permission to run containers from a user whose `ID = 101`.
+Note: It may be required to apply `SecurityContextConstraints` when installing into OpenShift cluster as it adds permission to run containers by user with `ID = 101`.
 
 To do this, run the following commands:
 
