@@ -35,8 +35,10 @@ connections:
   ## If you need to connect to Redis Sentinel, set the value `ioredis`
   redisConnectorName: redis
   ## connections.redisHost The IP address or the name of the Redis host
+  ## Not used if values are set in `connections.redisClusterNodes`
   redisHost: redis-master
   ## connections.redisPort The Redis server port number
+  ## Not used if values are set in `connections.redisClusterNodes`
   redisPort: "6379"
   ## connections.redisUser The Redis user name
   ## ref: https://redis.io/docs/management/security/acl/
@@ -45,6 +47,7 @@ connections:
   ## connections.redisDBNum Number of the redis logical database to be selected
   ## ref: https://redis.io/commands/select/
   ## The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file
+  ## Not used if values are set in `connections.redisClusterNodes`
   redisDBNum: "0"
   ## connections.redisClusterNodes List of nodes in the Redis cluster
   ## There is no need to specify every node in the cluster, 3 should be enough
