@@ -18,6 +18,9 @@ data:
   REDIS_SERVER_PORT: {{ .Values.connections.redisPort | quote }}
   REDIS_SERVER_USER: {{ .Values.connections.redisUser }}
   REDIS_SERVER_DB_NUM: {{ .Values.connections.redisDBNum | quote }}
+  {{- if.Values.connections.redisClusterNodes }}
+  REDIS_CLUSTER_NODES: {{ join " " .Values.connections.redisClusterNodes }}
+  {{- end }}
   {{- if eq .Values.connections.redisConnectorName "ioredis" }}
   REDIS_SENTINEL_GROUP_NAME: {{ .Values.connections.redisSentinelGroupName }}
   {{- end }}
