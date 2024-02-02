@@ -12,6 +12,7 @@
 ### Changes
 
 * Updated the Security Context Constraints policy for OpenShift
+* Released [v8.0.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#800) of ONLYOFFICE Docs
 
 ## 3.5.0
 
