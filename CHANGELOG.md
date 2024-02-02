@@ -1,5 +1,18 @@
 # Change log
 
+## 4.0.0
+
+### New Features
+
+* Added the ability to connect to Redis Cluster 
+* Added the ability to set up custom `podAntiAffinity`
+* Added the ability to set up max size uploaded file
+* Added the ability to map config file to Example
+
+### Changes
+
+* Updated the Security Context Constraints policy for OpenShift
+
 ## 3.5.0
 
 ### New Features
