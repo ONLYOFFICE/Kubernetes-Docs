@@ -48,7 +48,7 @@ spec:
             # app: docservice
       affinity:
         podAntiAffinity:
-        {{- if eq .Values.podAntiAffinity.type "soft" }}
+          {{- if eq .Values.podAntiAffinity.type "soft" }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
               labelSelector:
@@ -59,7 +59,7 @@ spec:
                   - docservice
               topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
             weight: {{ .Values.podAntiAffinity.weight }}
-        {{- else if eq .Values.podAntiAffinity.type "hard" }}
+          {{- else if eq .Values.podAntiAffinity.type "hard" }}
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
@@ -68,7 +68,10 @@ spec:
                 values:
                 - docservice
             topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
-        {{- end }}
+          {{- end }}
+          {{- with .Values.docservice.customPodAntiAffinity }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
         {{- with .Values.docservice.podAffinity }}
         podAffinity:
           {{- toYaml . | nindent 10 }}

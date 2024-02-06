@@ -13,6 +13,10 @@ redisUser = os.environ.get('REDIS_SERVER_USER')
 redisPassword = os.environ.get('REDIS_SERVER_PWD')
 redisDBNum = os.environ.get('REDIS_SERVER_DB_NUM')
 redisConnectTimeout = 15
+if os.environ.get('REDIS_CLUSTER_NODES'):
+    redisClusterNodes = list(os.environ.get('REDIS_CLUSTER_NODES').split(" "))
+    redisClusterNode = redisClusterNodes[0].split(":")[0]
+    redisClusterPort = redisClusterNodes[0].split(":")[1]
 if redisConnectorName == 'ioredis':
     redisSentinelGroupName = os.environ.get('REDIS_SENTINEL_GROUP_NAME')
 
@@ -72,10 +76,33 @@ def get_redis_status():
         )
         rc.ping()
     except Exception as msg_redis:
-        logger_test_ds.error(f'Failed to check the availability of the Redis... {msg_redis}\n')
+        logger_test_ds.error(f'Failed to check the availability of the Redis Standalone... {msg_redis}\n')
         total_result['CheckRedis'] = 'Failed'
     else:
-        logger_test_ds.info('Successful connection to Redis')
+        logger_test_ds.info('Successful connection to Redis Standalone')
+        return rc.ping()
+
+
+def get_redis_cluster_status():
+    install_module('redis')
+    from redis.cluster import RedisCluster as Redis
+    from redis.cluster import ClusterNode
+    global rc
+    try:
+        nodes = [ClusterNode(redisClusterNode, redisClusterPort)]
+        rc = Redis(
+            startup_nodes=nodes,
+            username=redisUser,
+            password=redisPassword,
+            socket_connect_timeout=redisConnectTimeout,
+            retry_on_timeout=True
+        )
+        rc.ping()
+    except Exception as msg_redis:
+        logger_test_ds.error(f'Failed to check the availability of the Redis Cluster... {msg_redis}\n')
+        total_result['CheckRedis'] = 'Failed'
+    else:
+        logger_test_ds.info('Successful connection to Redis Cluster')
         return rc.ping()
 
 
@@ -98,10 +125,10 @@ def get_redis_sentinel_status():
         )
         rc.ping()
     except Exception as msg_redis:
-        logger_test_ds.error(f'Failed to check the availability of the Redis... {msg_redis}\n')
+        logger_test_ds.error(f'Failed to check the availability of the Redis Sentinel... {msg_redis}\n')
         total_result['CheckRedis'] = 'Failed'
     else:
-        logger_test_ds.info('Successful connection to Redis')
+        logger_test_ds.info('Successful connection to Redis Sentinel')
         return rc.ping()
 
 
@@ -122,8 +149,11 @@ def check_redis_key():
 
 def check_redis():
     logger_test_ds.info('Checking Redis availability...')
-    if redisConnectorName == 'redis':
+    if redisConnectorName == 'redis' and not os.environ.get('REDIS_CLUSTER_NODES'):
         if get_redis_status() is True:
+            check_redis_key()
+    elif redisConnectorName == 'redis' and os.environ.get('REDIS_CLUSTER_NODES'):
+        if get_redis_cluster_status() is True:
             check_redis_key()
     elif redisConnectorName == 'ioredis':
         if get_redis_sentinel_status() is True:

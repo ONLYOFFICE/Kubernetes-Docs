@@ -35,8 +35,10 @@ connections:
   ## If you need to connect to Redis Sentinel, set the value `ioredis`
   redisConnectorName: redis
   ## connections.redisHost The IP address or the name of the Redis host
+  ## Not used if values are set in `connections.redisClusterNodes`
   redisHost: redis-master
   ## connections.redisPort The Redis server port number
+  ## Not used if values are set in `connections.redisClusterNodes`
   redisPort: "6379"
   ## connections.redisUser The Redis user name
   ## ref: https://redis.io/docs/management/security/acl/
@@ -45,7 +47,17 @@ connections:
   ## connections.redisDBNum Number of the redis logical database to be selected
   ## ref: https://redis.io/commands/select/
   ## The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file
+  ## Not used if values are set in `connections.redisClusterNodes`
   redisDBNum: "0"
+  ## connections.redisClusterNodes List of nodes in the Redis cluster
+  ## There is no need to specify every node in the cluster, 3 should be enough
+  ## You can specify multiple values
+  ## It must be specified in the `host:port` format
+  ## Example:
+  ## redisClusterNodes:
+  ## - 10.244.0.79:6379
+  ## - 192.168.1.25:6379
+  redisClusterNodes: []
   ## connections.redisSentinelGroupName Name of a group of Redis instances composed of a master and one or more slaves
   ## Used if `connections.redisConnectorName` is set to `ioredis`
   redisSentinelGroupName: mymaster
@@ -333,6 +345,18 @@ docservice:
   ## docservice.updateStrategy.type Docservice deployment update strategy type
   updateStrategy:
     type: Recreate
+  ## docservice.customPodAntiAffinity Prohibiting the scheduling of Docservice Pods relative to other Pods containing the specified labels on the same node
+  ## Example:
+  ## customPodAntiAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - converter
+  ##     topologyKey: kubernetes.io/hostname
+  customPodAntiAffinity: {}
   ## Pod affinity rules for Docservice Pods scheduling by nodes relative to other Pods
   ## Pod affinity allow you to constrain which nodes Docservice Pods can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -346,7 +370,6 @@ docservice:
   ##         values:
   ##         - store
   ##     topologyKey: topology.kubernetes.io/zone
-  ##
   podAffinity: {}
   ## Node affinity rules for Docservice Pods scheduling by nodes
   ## Node affinity allow you to constrain which nodes Docservice Pod can be scheduled on based on node labels
@@ -362,7 +385,6 @@ docservice:
   ##         values:
   ##         - name1
   ##         - name2
-  ##
   nodeAffinity: {}
   ## Horizontal Pod Autoscaling parameters
   ## Horizontal Pod Autoscaling is used for autoscaling of the Docservice deployment
@@ -440,7 +462,7 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 7.5.1-2
+    tag: 8.0.0-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## docservice.containerPorts.http docservice container port
@@ -520,6 +542,9 @@ proxy:
   ## proxy.gzipProxied Defines the nginx config gzip_proxied directive
   ## ref: https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied
   gzipProxied: "off"
+  ## proxy.clientMaxBodySize Defines the nginx config client_max_body_size directive
+  ## ref: https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
+  clientMaxBodySize: "100m"
   ## proxy.workerConnections Defines the nginx config worker_connections directive
   ## ref: https://nginx.org/en/docs/ngx_core_module.html#worker_connections
   workerConnections: "4096"
@@ -558,7 +583,7 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 7.5.1-2
+    tag: 8.0.0-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## proxy.containerPorts.http proxy container port
@@ -648,6 +673,18 @@ converter:
       maxUnavailable: 25%
       ## converter.updateStrategy.rollingUpdate.maxSurge Maximum number of Converter Pods created over the desired number of Pods
       maxSurge: 25%
+  ## converter.customPodAntiAffinity Prohibiting the scheduling of Converter Pods relative to other Pods containing the specified labels on the same node
+  ## Example:
+  ## customPodAntiAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - docservice
+  ##     topologyKey: kubernetes.io/hostname
+  customPodAntiAffinity: {}
   ## Pod affinity rules for Converter Pods scheduling by nodes relative to other Pods
   ## Pod affinity allow you to constrain which nodes Converter Pod can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -663,7 +700,6 @@ converter:
   ##           values:
   ##           - database
   ##       topologyKey: kubernetes.io/hostname
-  ##
   podAffinity: {}
   ## Node affinity rules for Converter Pods scheduling by nodes
   ## Node affinity allow you to constrain which nodes Converter Pod can be scheduled on based on node labels
@@ -678,7 +714,6 @@ converter:
   ##         values:
   ##         - zone1
   ##         - zone2
-  ##
   nodeAffinity: {}
   ## Horizontal Pod Autoscaling parameters
   ## Horizontal Pod Autoscaling is used for autoscaling of the Converter deployment
@@ -754,7 +789,7 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 7.5.1-2
+    tag: 8.0.0-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## converter container resource requests and limits
@@ -789,6 +824,18 @@ example:
   ## example.updateStrategy.type Example StatefulSet update strategy type
   updateStrategy:
     type: RollingUpdate
+  ## example.customPodAntiAffinity Prohibiting the scheduling of Example Pod relative to other Pods containing the specified labels on the same node
+  ## Example:
+  ## customPodAntiAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - docservice
+  ##     topologyKey: kubernetes.io/hostname
+  customPodAntiAffinity: {}
   ## Pod affinity rules for Example Pod scheduling by nodes relative to other Pods
   ## Pod affinity allow you to constrain which nodes Example Pod can be scheduled on based on the labels of Pods already running on that node
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -812,7 +859,6 @@ example:
   ##           values:
   ##           - database
   ##       topologyKey: kubernetes.io/hostname
-  ##
   podAffinity: {}
   ## Node affinity rules for Example Pod scheduling by nodes
   ## Node affinity allow you to constrain which nodes Example Pod can be scheduled on based on node labels
@@ -836,14 +882,13 @@ example:
   ##         values:
   ##         - zone1
   ##         - zone2
-  ##
   nodeAffinity: {}
   ## Example container image parameters
   image:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 7.5.1-2
+    tag: 8.0.0-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## example.containerPorts.http example container port
@@ -863,6 +908,13 @@ example:
     ##   memory: "128Mi"
     ##   cpu: "250m"
     limits: {}
+  ## Example config for overriding default values
+  extraConf:
+    ## example.extraConf.configMap The name of the ConfigMap containing the json file that override the default values
+    configMap: ""
+    ## example.extraConf.filename The name of the json file that contains custom values
+    ## Must be the same as the `key` name in `example.extraConf.ConfigMap`
+    filename: local.json
 
 ## Onlyoffice Docs ingress parameters
 ##
@@ -919,7 +971,7 @@ install:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 7.5.1-2
+      tag: 8.0.0-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-install container resource requests and limits
@@ -960,7 +1012,7 @@ upgrade:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 7.5.1-2
+      tag: 8.0.0-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-upgrade container resource requests and limits
@@ -1009,7 +1061,7 @@ rollback:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 7.5.1-2
+      tag: 8.0.0-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-rollback container resource requests and limits
@@ -1058,7 +1110,7 @@ delete:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 7.5.1-2
+      tag: 8.0.0-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Job pre-delete container resource requests and limits
