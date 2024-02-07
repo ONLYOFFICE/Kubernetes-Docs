@@ -8,10 +8,9 @@ metadata:
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }} 
-  annotations:
-    {{- range $key, $value := .Values.ingress.annotations }}
-    {{ $key }}: {{ tpl $value $ }}
-    {{- end }}
+  {{- with .Values.ingress.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
     {{- if not (eq .Values.ingress.path "/") }}
     nginx.ingress.kubernetes.io/x-forwarded-prefix: {{ .Values.ingress.path }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
