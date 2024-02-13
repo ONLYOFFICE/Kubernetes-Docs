@@ -953,6 +953,8 @@ grafana:
   ## Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana
   ingress:
     enabled: false
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 100m
   ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
   ## Used if you set `grafana.enabled` to `true`
   dashboard:
