@@ -299,11 +299,9 @@ def check_mq():
 def check_dir_access():
     logger_test_ds.info('Checking the availability of shared storage...')
     try:
-        add_group = ['groupadd', '-g', '1005', 'ds']
-        add_user = ['useradd', '-g', 'ds', '-u', '101', 'ds']
-        dir_create = ['su', 'ds', '-c', 'mkdir /ds/test/App_Data/cache/files/testds']
-        dir_delete = ['su', 'ds', '-c', 'rm -rf /ds/test/App_Data/cache/files/testds']
-        all_cmd = [add_group, add_user, dir_create, dir_delete]
+        dir_create = ['mkdir', '/ds/test/App_Data/cache/files/testds']
+        dir_delete = ['rm', '-rf', '/ds/test/App_Data/cache/files/testds']
+        all_cmd = [dir_create, dir_delete]
         all_status = []
         for cmd in all_cmd:
             process = subprocess.Popen(cmd)
