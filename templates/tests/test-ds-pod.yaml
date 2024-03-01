@@ -28,7 +28,8 @@ spec:
   - name: {{ .Values.imagePullSecrets }}
   {{- end }}
   containers:
-  - image: python:3.11
+  - image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
+    imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
     name: test-ds
     resources: {{ toYaml .Values.tests.resources | nindent 6 }}
     env:
