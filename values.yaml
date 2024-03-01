@@ -1149,6 +1149,14 @@ tests:
   ## tests.enabled Enable the resources creation necessary for ONLYOFFICE Docs launch testing and connected dependencies availability testing
   ## These resources will be used when running the `helm test` command
   enabled: true
+  ## Test container image parameters
+  image:
+    ## tests.image.repository test container image name
+    repository: onlyoffice/docs-utils
+    ## tests.image.tag test container image tag
+    tag: 8.0.0-1
+    ## tests.image.pullPolicy test container image pull policy
+    pullPolicy: IfNotPresent
   ## test container resource requests and limits
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## tests.resources.requests The requested resources for the test container
