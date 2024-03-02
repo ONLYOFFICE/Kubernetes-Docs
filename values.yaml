@@ -1143,6 +1143,35 @@ delete:
     ## If set, the default configmap will not be created and the two previous parameters are ignored
     ## Must contain a key `stop.sh`
     dsStop: ""
+## Job by Grafana Dashboard has post-install and post-upgrade hooks and executes after any resources are created in Kubernetes
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He creates Config Maps containing Grafana dashboards
+## It is executed if `grafana.enabled` and `grafana.dashboard.enabled` are set to `true`
+grafanaDashboard:
+  job:
+    ## grafanaDashboard.job.enabled Enable the execution of job Grafana Dashboard after installing or upgrading ONLYOFFICE Docs
+    enabled: true
+    image:
+      ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
+      repository: onlyoffice/docs-utils
+      ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
+      tag: 8.0.0-1
+      ## grafanaDashboard.job.image.pullPolicy Job by Grafana Dashboard ONLYOFFICE Docs image pull policy
+      pullPolicy: IfNotPresent
+    ## Job Grafana Dashboard container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## grafanaDashboard.job.resources.requests The requested resources for the job Grafana Dashboard container
+    ## grafanaDashboard.job.resources.limits The resources limits for the job Grafana Dashboard container
+    resources:
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
+      requests: {}
+      ## limits:
+      ##   memory: "1Gi"
+      ##   cpu: "1000m"
+      limits: {}
 
 ## Onlyoffice Docs tests parameters
 tests:
