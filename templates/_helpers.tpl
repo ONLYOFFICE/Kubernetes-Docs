@@ -387,6 +387,18 @@ Get the ds labels
 {{- end -}}
 
 {{/*
+Get the ds annotations
+*/}}
+{{- define "ds.annotations.commonAnnotations" -}}
+{{- $annotations := toYaml .keyName }}
+{{- if contains "{{" $annotations }}
+    {{- tpl $annotations .context }}
+{{- else }}
+    {{- $annotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Get the ds Service Account name
 */}}
 {{- define "ds.serviceAccountName" -}}

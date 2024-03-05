@@ -11,10 +11,9 @@ metadata:
   annotations:
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "3"
-    {{- if .Values.serviceAccount.annotations }}
-    {{- range $key, $value := .Values.serviceAccount.annotations }}
-    {{ $key }}: {{ tpl $value $ }}
-    {{- end }}
+    {{- if or .Values.commonAnnotations .Values.serviceAccount.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.serviceAccount.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
     {{- end }}
 automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
 {{- end }}
