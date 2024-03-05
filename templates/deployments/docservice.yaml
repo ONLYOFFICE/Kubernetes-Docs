@@ -8,6 +8,10 @@ metadata:
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}
+  {{- if or .Values.commonAnnotations .Values.docservice.annotations }}
+  {{- $dictValue := default .Values.commonAnnotations .Values.docservice.annotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.docservice.autoscaling.enabled }}
   replicas: {{ .Values.docservice.replicas }}

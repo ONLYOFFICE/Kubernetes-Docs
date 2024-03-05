@@ -126,6 +126,14 @@ namespaceOverride: ""
 ##   app.kubernetes.io/instance: "{{ .Release.Name }}"
 ##   app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
 commonLabels: {}
+## commonAnnotations Defines annotations that will be additionally added to all the deployed resources
+## You can also use `tpl` as the value for the key
+## Some resources may override the values specified here with their own
+## Example:
+## commonAnnotations:
+##   "key1": "value1"
+##   "key2": "{{ value2 }}"
+commonAnnotations: {}
 ## Service account parameters
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 serviceAccount:
@@ -136,6 +144,8 @@ serviceAccount:
   ## If not set and `serviceAccount.create` is `false` the name will be "default"
   name: ""
   ## serviceAccount.annotations Map of annotations to add to the ServiceAccount
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
   annotations: {}
   ## serviceAccount.automountServiceAccountToken Enable auto mount of ServiceAccountToken on the serviceAccount created
   ## Used only if `serviceAccount.create` is `true`
@@ -146,6 +156,10 @@ persistence:
   ## persistence.existingClaim Name of an existing PVC to use
   ## If not specified, a PVC named "ds-files" will be created
   existingClaim: ""
+  ## persistence.annotations Defines annotations that will be additionally added to "ds-files" PVC
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
+  annotations: {}
   ## persistence.storageClass PVC Storage Class for Onlyoffice Docs data volume
   storageClass: "nfs"
   ## persistence.size PVC Storage Request for Onlyoffice Docs volume
@@ -211,6 +225,8 @@ service:
   ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/templates/services/documentserver.yaml
   existing: ""
   ## service.annotations Map of annotations to add to the ONLYOFFICE Docs service
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
   annotations: {}
   ## service.type ONLYOFFICE Docs service type
   type: ClusterIP
@@ -334,6 +350,10 @@ requestFilteringAgent:
 ## This block defines the parameters common to all the Pods of this deployment
 ##
 docservice:
+  ## docservice.annotations Defines annotations that will be additionally added to Docservice Deployment
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
+  annotations: {}
   ## docservice.podAnnotations Map of annotations to add to the Docservice deployment pods
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
@@ -393,6 +413,10 @@ docservice:
   autoscaling:
     ## docservice.autoscaling.enabled Enable Docservice deployment autoscaling
     enabled: false
+    ## docservice.autoscaling.annotations Defines annotations that will be additionally added to Docservice deployment HPA
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
     ## docservice.autoscaling.minReplicas Docservice deployment autoscaling minimum number of replicas
     minReplicas: 2
     ## docservice.autoscaling.maxReplicas Docservice deployment autoscaling maximum number of replicas
@@ -657,6 +681,10 @@ proxy:
 ## This block defines the parameters common to all the Pods of this deployment
 ##
 converter:
+  ## converter.annotations Defines annotations that will be additionally added to Converter Deployment
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
+  annotations: {}
   ## converter.podAnnotations Map of annotations to add to the Converter deployment pods
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
@@ -722,6 +750,10 @@ converter:
   autoscaling:
     ## converter.autoscaling.enabled Enable Converter deployment autoscaling
     enabled: false
+    ## converter.autoscaling.annotations Defines annotations that will be additionally added to Converter deployment HPA
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
     ## converter.autoscaling.minReplicas Converter deployment autoscaling minimum number of replicas
     minReplicas: 2
     ## converter.autoscaling.maxReplicas Converter deployment autoscaling maximum number of replicas
@@ -817,6 +849,10 @@ example:
   ## E.g.
   ## dsUrl: "http://<documentserver-address>/"
   dsUrl: "/"
+  ## example.annotations Defines annotations that will be additionally added to Example StatefulSet
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
+  annotations: {}
   ## example.podAnnotations Map of annotations to add to the Example pod
   podAnnotations:
     rollme: "{{ randAlphaNum 5 | quote }}"
@@ -922,6 +958,8 @@ ingress:
   ## ingress.enabled Enable the creation of an ingress for the ONLYOFFICE Docs
   enabled: false
   ## ingress.annotations Map of annotations to add to the Ingress
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 100m
   # ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
@@ -953,7 +991,9 @@ grafana:
   ## Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana
   ingress:
     enabled: false
-    ## ingress.annotations Map of annotations to add to grafana Ingress
+    ## grafana.ingress.annotations Map of annotations to add to grafana Ingress
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 100m
   ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
@@ -970,6 +1010,10 @@ install:
   job:
     ## install.job.enabled Enable the execution of job pre-install before installing ONLYOFFICE Docs
     enabled: true
+    ## install.job.annotations Defines annotations that will be additionally added to pre-install Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
     image:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
@@ -1011,6 +1055,10 @@ upgrade:
   job:
     ## upgrade.job.enabled Enable the execution of job pre-upgrade before upgrading ONLYOFFICE Docs
     enabled: true
+    ## upgrade.job.annotations Defines annotations that will be additionally added to pre-upgrade Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
     image:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
@@ -1060,6 +1108,10 @@ rollback:
   job:
     ## rollback.job.enabled Enable the execution of job pre-rollback before rolling back ONLYOFFICE Docs
     enabled: true
+    ## rollback.job.annotations Defines annotations that will be additionally added to pre-rollback Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
     image:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
@@ -1109,6 +1161,10 @@ delete:
   job:
     ## delete.job.enabled Enable the execution of job pre-delete before deleting ONLYOFFICE Docs
     enabled: true
+    ## delete.job.annotations Defines annotations that will be additionally added to pre-delete Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
     image:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
@@ -1149,8 +1205,10 @@ delete:
 ## It is executed if `grafana.enabled` and `grafana.dashboard.enabled` are set to `true`
 grafanaDashboard:
   job:
-    ## grafanaDashboard.job.enabled Enable the execution of job Grafana Dashboard after installing or upgrading ONLYOFFICE Docs
-    enabled: true
+    ## grafanaDashboard.job.annotations Defines annotations that will be additionally added to Grafana Dashboard Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
     image:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
@@ -1178,6 +1236,10 @@ tests:
   ## tests.enabled Enable the resources creation necessary for ONLYOFFICE Docs launch testing and connected dependencies availability testing
   ## These resources will be used when running the `helm test` command
   enabled: true
+  ## tests.annotations Defines annotations that will be additionally added to Test Pod
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
+  annotations: {}
   ## Test container image parameters
   image:
     ## tests.image.repository test container image name

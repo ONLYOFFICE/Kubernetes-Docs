@@ -12,6 +12,10 @@ metadata:
     "helm.sh/hook": pre-delete
     "helm.sh/hook-weight": "3"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if or .Values.commonAnnotations .Values.delete.job.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.delete.job.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   backoffLimit: 2
   template:

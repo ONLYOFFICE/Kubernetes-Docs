@@ -11,6 +11,9 @@ metadata:
   annotations:
     "helm.sh/hook": pre-rollback
     "helm.sh/hook-weight": "1"
+    {{- if .Values.commonAnnotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
 data:
   stop.sh: |-
     #!/bin/bash

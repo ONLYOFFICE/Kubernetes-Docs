@@ -8,6 +8,10 @@ metadata:
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
+  {{- if or .Values.commonAnnotations .Values.converter.autoscaling.annotations }}
+  {{- $dictValue := default .Values.commonAnnotations .Values.converter.autoscaling.annotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+  {{- end }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

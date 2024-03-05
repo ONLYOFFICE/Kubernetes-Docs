@@ -8,6 +8,9 @@ metadata:
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
 data:
   ds-example.conf: |-
     location /example/ {

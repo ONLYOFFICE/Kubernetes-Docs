@@ -7,9 +7,10 @@ metadata:
   {{- if .Values.commonLabels }}
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
-  {{- end }} 
-  {{- with .Values.ingress.annotations }}
-  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.commonAnnotations .Values.ingress.annotations }}
+  {{- $dictValue := default .Values.commonAnnotations .Values.ingress.annotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
   {{- end }}
     {{- if not (eq .Values.ingress.path "/") }}
     nginx.ingress.kubernetes.io/x-forwarded-prefix: {{ .Values.ingress.path }}

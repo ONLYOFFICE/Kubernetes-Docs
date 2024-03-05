@@ -12,6 +12,10 @@ metadata:
     "helm.sh/hook": pre-rollback
     "helm.sh/hook-weight": "3"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded,hook-failed
+    {{- if or .Values.commonAnnotations .Values.rollback.job.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.rollback.job.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   backoffLimit: 2
   template:
