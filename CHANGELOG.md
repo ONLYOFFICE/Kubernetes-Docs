@@ -9,6 +9,7 @@
 ### Changes
 
 * Changes were made when connecting S3 bucket as a cache
+* Changes in the image that is used in the `helm test` and edits in the executing script
 * Released [v8.0.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#801) of ONLYOFFICE Docs
 
 ### Fixes

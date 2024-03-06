@@ -85,7 +85,7 @@ $ helm repo update
 
 ### 2. Install Persistent Storage
 
-If you want to use [Amazon S3 as a cache](#11-connecting-amazon-s3-bucket-as-a-cache-to-onlyoffice-helm-docs), please skip this step.
+*If you want to use [Amazon S3 as a cache](#11-connecting-amazon-s3-bucket-as-a-cache-to-onlyoffice-helm-docs), please skip this step.*
 
 Install NFS Server Provisioner
 
