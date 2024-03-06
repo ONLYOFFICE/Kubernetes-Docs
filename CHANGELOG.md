@@ -1,5 +1,20 @@
 # Change log
 
+## 4.1.0
+
+### New Features
+
+* Added the ability set up annotations for all the deployed resources
+
+### Changes
+
+* Changes were made when connecting S3 bucket as a cache
+* Released [v8.0.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#801) of ONLYOFFICE Docs
+
+### Fixes
+
+* Fixed a bug when adding multiline annotations to Ingress
+
 ## 4.0.0
 
 ### New Features
