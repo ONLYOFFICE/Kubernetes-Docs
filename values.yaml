@@ -164,6 +164,10 @@ persistence:
   storageClass: "nfs"
   ## persistence.size PVC Storage Request for Onlyoffice Docs volume
   size: 8Gi
+  ## persistence.storageS3 Defines whether S3 will be used as cache storage
+  ## Set to `true` if you will use S3 as cache storage
+  ## If set to `true` then PVC "ds-files" will not be created
+  storageS3: false
 ## Configure a Security Context for a Pod
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 podSecurityContext:

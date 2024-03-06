@@ -1,4 +1,4 @@
-{{- if eq (include "ds.pvc.create" .) "true" }}
+{{- if and (not .Values.persistence.storageS3) (eq (include "ds.pvc.create" .) "true") }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
