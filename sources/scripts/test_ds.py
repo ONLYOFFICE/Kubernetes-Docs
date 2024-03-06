@@ -37,6 +37,8 @@ brokerUser = os.environ.get('AMQP_USER')
 brokerPassword = os.environ.get('AMQP_PWD')
 brokerVhost = os.environ.get('AMQP_VHOST')
 
+storageS3 = os.environ.get('STORAGE_S3')
+
 total_result = {}
 
 
@@ -354,7 +356,8 @@ logger_test_ds = logging.getLogger('test.ds')
 check_redis()
 check_db()
 check_mq()
-check_dir_access()
+if storageS3 == 'false':
+    check_dir_access()
 get_ds_status()
 total_status()
 
