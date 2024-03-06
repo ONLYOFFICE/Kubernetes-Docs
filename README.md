@@ -288,7 +288,7 @@ and then run the `helm upgrade documentserver onlyoffice/docs --set extraThemes.
 `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
 ### 11. Connecting Amazon S3 bucket as a cache to ONLYOFFICE Helm Docs
-In order to connect Amazon S3 bucket as a cache, you need to create a configuration file or edit the existing one in accordance with [this guide](https://helpcenter.onlyoffice.com/ru/installation/docs-connect-amazon.aspx) and change the value of the parameter `persistence.storageS3` to `true`. 
+In order to connect Amazon S3 bucket as a cache, you need to [create](#7-make-changes-to-node-config-configuration-files) a configuration file or edit the existing one in accordance with [this guide](https://helpcenter.onlyoffice.com/ru/installation/docs-connect-amazon.aspx) and change the value of the parameter `persistence.storageS3` to `true`. 
 
 ## Deploy ONLYOFFICE Docs
 
