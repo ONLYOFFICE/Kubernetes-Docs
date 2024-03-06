@@ -22,6 +22,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [10. Change interface themes](#10-change-interface-themes)
     + [10.1 Create a ConfigMap containing a json file](#101-create-a-configmap-containing-a-json-file)
     + [10.2 Specify parameters when installing ONLYOFFICE Docs](#102-specify-parameters-when-installing-onlyoffice-docs)
+  * [11. Connecting Amazon S3 bucket as a cache to ONLYOFFICE Helm Docs](#11-connecting-amazon-s3-bucket-as-a-cache-to-onlyoffice-helm-docs)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
     + [1.1 Create secret](#11-create-secret)
@@ -83,6 +84,8 @@ $ helm repo update
 ```
 
 ### 2. Install Persistent Storage
+
+If you want to use [Amazon S3 as a cache](#11-connecting-amazon-s3-bucket-as-a-cache-to-onlyoffice-helm-docs), please skip this step.
 
 Install NFS Server Provisioner
 
@@ -284,6 +287,9 @@ Note: If you need to add interface themes after the ONLYOFFICE Docs is already i
 and then run the `helm upgrade documentserver onlyoffice/docs --set extraThemes.configMap=custom-themes --set extraThemes.filename=custom-themes.json --no-hooks` command or
 `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
+### 11. Connecting Amazon S3 bucket as a cache to ONLYOFFICE Helm Docs
+In order to connect Amazon S3 bucket as a cache, you need to create a configuration file or edit the existing one in accordance with [this guide](https://helpcenter.onlyoffice.com/ru/installation/docs-connect-amazon.aspx) and change the value of the parameter `persistence.storageS3` to `true`. 
+
 ## Deploy ONLYOFFICE Docs
 
 Note: It may be required to apply `SecurityContextConstraints` policy when installing into OpenShift cluster, which adds permission to run containers from a user whose `ID = 101`.
@@ -394,6 +400,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `connections.amqpExistingSecret`                            | The name of existing secret to use for AMQP server passwords. Must contain the key specified in `connections.amqpSecretKeyName`                                                | `rabbitmq`                                                                                |
 | `persistence.existingClaim`                                 | Name of an existing PVC to use. If not specified, a PVC named "ds-files" will be created                                                                                       | `""`                                                                                      |
 | `persistence.annotations`                                   | Defines annotations that will be additionally added to "ds-files" PVC. If set to, it takes priority over the `commonAnnotations`                                               | `{}`                                                                                      |
+| `persistence.storageS3`                                     | Determines whether S3 will be used as cache storage. Set to true if you will use S3 as cache storage                                                                           | `false`                                                                                   |
 | `persistence.storageClass`                                  | PVC Storage Class for ONLYOFFICE Docs data volume                                                                                                                              | `nfs`                                                                                     |
 | `persistence.size`                                          | PVC Storage Request for ONLYOFFICE Docs volume                                                                                                                                 | `8Gi`                                                                                     |
 | `namespaceOverride`                                         | The name of the namespace in which Onlyoffice Docs will be deployed. If not set, the name will be taken from `.Release.Namespace`                                              | `""`                                                                                      |

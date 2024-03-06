@@ -160,6 +160,10 @@ persistence:
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
   annotations: {}
+  ## Determines whether S3 will be used as cache storage
+  ## Set to true if you will use S3 as cache storage
+  ## If set to true then PVC ds-files will not be created
+  storageS3: false
   ## persistence.storageClass PVC Storage Class for Onlyoffice Docs data volume
   storageClass: "nfs"
   ## persistence.size PVC Storage Request for Onlyoffice Docs volume

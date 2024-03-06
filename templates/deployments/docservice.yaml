@@ -95,9 +95,11 @@ spec:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       volumes:
+        {{- if not .Values.persistence.storageS3 }}
         - name: ds-files
           persistentVolumeClaim:
             claimName: {{ template "ds.pvc.name" . }}
+        {{- end }}
         - name: ds-license
           {{- if .Values.license.existingClaim }}
           persistentVolumeClaim:
@@ -161,8 +163,10 @@ spec:
           - configMapRef:
               name: documentserver
           volumeMounts:
+          {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
+          {{- end }}
           {{- if .Values.extraThemes.configMap }}
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
@@ -211,8 +215,10 @@ spec:
           - configMapRef:
               name: documentserver
           volumeMounts:
+          {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
+          {{- end }}
           - name: ds-license
             mountPath: /var/www/{{ .Values.product.name }}/Data
             {{- if not .Values.license.existingClaim }}
