@@ -9,7 +9,7 @@
 
 ### Changes
 
-* Changed the image in `helm test` to the one with already installed libraries
+* Using an already configured image for the `helm test` command
 * Released [v8.0.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#801) of ONLYOFFICE Docs
 
 ### Fixes
