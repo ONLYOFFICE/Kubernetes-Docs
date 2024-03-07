@@ -5,11 +5,11 @@
 ### New Features
 
 * Added the ability set up annotations for all the deployed resources
+* Added the ability to disable  `PVC` creation when using the S3 storage
 
 ### Changes
 
-* Changes were made when connecting S3 bucket as a cache
-* Changes in the image that is used in the `helm test` and edits in the executing script
+* Changed the image in `helm test` to the one with already installed libraries
 * Released [v8.0.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#801) of ONLYOFFICE Docs
 
 ### Fixes
