@@ -12,6 +12,9 @@ metadata:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if .Values.commonAnnotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
 data:
   stop.sh: |-
     #!/bin/bash
@@ -36,6 +39,7 @@ data:
         echo -e "\e[0;31m DB is not available \e[0m"
         exit 1
       fi
+      {{- if not .Values.persistence.storageS3 }}
       FILES_DIR=/var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files/
       ls $FILES_DIR > /dev/null
       if [ $? -ne 0 ]; then
@@ -53,6 +57,7 @@ data:
             ;;
         esac
       done
+      {{- end }}
       if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
         wget -O /scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }} \
           {{- if eq .Values.connections.dbType "postgres" }}

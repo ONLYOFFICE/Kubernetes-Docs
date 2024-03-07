@@ -12,11 +12,24 @@ metadata:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "5"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if or .Values.commonAnnotations .Values.grafanaDashboard.job.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.grafanaDashboard.job.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   backoffLimit: 2
   template:
     spec:
       serviceAccountName: dashboard-sa
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
+      {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
@@ -28,7 +41,9 @@ spec:
           defaultMode: 0755
       containers:
       - name: grafana-dashboard
-        image: onlyoffice/docs-utils:8.0.0-1
+        image: {{ .Values.grafanaDashboard.job.image.repository }}:{{ .Values.grafanaDashboard.job.image.tag }}
+        imagePullPolicy: {{ .Values.grafanaDashboard.job.image.pullPolicy }}
+        resources: {{- toYaml .Values.grafanaDashboard.job.resources | nindent 12 }}
         command: ["/bin/sh", "-c"]
         {{- if .Values.webProxy.enabled }}
         args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /scripts/get_dashboard.sh"]

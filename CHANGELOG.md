@@ -1,5 +1,21 @@
 # Change log
 
+## 4.1.0
+
+### New Features
+
+* Added the ability set up annotations for all the deployed resources
+* Added the ability to disable  `PVC` creation when using the S3 storage
+
+### Changes
+
+* Using an already configured image for the `helm test` command
+* Released [v8.0.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#801) of ONLYOFFICE Docs
+
+### Fixes
+
+* Fixed a bug when adding multiline annotations to Ingress
+
 ## 4.0.0
 
 ### New Features

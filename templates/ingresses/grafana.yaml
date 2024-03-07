@@ -8,11 +8,9 @@ metadata:
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
-  {{- if .Values.ingress.annotations }}
-  annotations:
-    {{- range $key, $value := .Values.ingress.annotations }}
-    {{ $key }}: {{ tpl $value $ }}
-    {{- end }}
+  {{- if or .Values.commonAnnotations .Values.grafana.ingress.annotations }}
+  {{- $dictValue := default .Values.commonAnnotations .Values.grafana.ingress.annotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.ingress.ingressClassName }}

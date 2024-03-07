@@ -1,4 +1,4 @@
-{{- if eq (include "ds.pvc.create" .) "true" }}
+{{- if and (not .Values.persistence.storageS3) (eq (include "ds.pvc.create" .) "true") }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -7,6 +7,10 @@ metadata:
   {{- if .Values.commonLabels }}
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.commonAnnotations .Values.persistence.annotations }}
+  {{- $dictValue := default .Values.commonAnnotations .Values.persistence.annotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   storageClassName: {{ .Values.persistence.storageClass }}

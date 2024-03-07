@@ -37,6 +37,8 @@ brokerUser = os.environ.get('AMQP_USER')
 brokerPassword = os.environ.get('AMQP_PWD')
 brokerVhost = os.environ.get('AMQP_VHOST')
 
+storageS3 = os.environ.get('STORAGE_S3')
+
 total_result = {}
 
 
@@ -51,17 +53,7 @@ def init_logger(name):
     logger.info('Running a script to test the availability of DocumentServer and dependencies\n')
 
 
-def install_module(package):
-    try:
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', package],
-                              stdout=subprocess.DEVNULL,
-                              stderr=subprocess.STDOUT)
-    except Exception as msg_install_module:
-        logger_test_ds.error(f'Error when trying to install the "{package}" package... {msg_install_module}\n')
-
-
 def get_redis_status():
-    install_module('redis')
     import redis
     global rc
     try:
@@ -84,7 +76,6 @@ def get_redis_status():
 
 
 def get_redis_cluster_status():
-    install_module('redis')
     from redis.cluster import RedisCluster as Redis
     from redis.cluster import ClusterNode
     global rc
@@ -107,7 +98,6 @@ def get_redis_cluster_status():
 
 
 def get_redis_sentinel_status():
-    install_module('redis')
     import redis
     from redis import Sentinel
     global rc
@@ -161,7 +151,6 @@ def check_redis():
 
 
 def check_db_postgresql(tbl_dict):
-    install_module('psycopg2')
     import psycopg2
     try:
         dbc = psycopg2.connect(
@@ -196,7 +185,6 @@ def check_db_postgresql(tbl_dict):
 
 
 def check_db_mysql(tbl_dict):
-    install_module('pymysql')
     import pymysql
     try:
         dbc = pymysql.connect(
@@ -240,7 +228,6 @@ def check_db():
 
 
 def check_mq_rabbitmq():
-    install_module('pika')
     import pika
     try:
         mqp = pika.URLParameters(f'{brokerProto}://{brokerUser}:{brokerPassword}@{brokerHost}:{brokerPort}{brokerVhost}')
@@ -303,8 +290,6 @@ def check_mq():
     if brokerType == 'rabbitmq':
         check_mq_rabbitmq()
     elif brokerType == 'activemq':
-        install_module('python-qpid-proton')
-        install_module('func_timeout')
         from func_timeout import func_timeout, FunctionTimedOut
         try:
             activemq_return_status = func_timeout(15, check_mq_activemq)
@@ -316,11 +301,9 @@ def check_mq():
 def check_dir_access():
     logger_test_ds.info('Checking the availability of shared storage...')
     try:
-        add_group = ['groupadd', '-g', '1005', 'ds']
-        add_user = ['useradd', '-g', 'ds', '-u', '101', 'ds']
-        dir_create = ['su', 'ds', '-c', 'mkdir /ds/test/App_Data/cache/files/testds']
-        dir_delete = ['su', 'ds', '-c', 'rm -rf /ds/test/App_Data/cache/files/testds']
-        all_cmd = [add_group, add_user, dir_create, dir_delete]
+        dir_create = ['mkdir', '/ds/test/App_Data/cache/files/testds']
+        dir_delete = ['rm', '-rf', '/ds/test/App_Data/cache/files/testds']
+        all_cmd = [dir_create, dir_delete]
         all_status = []
         for cmd in all_cmd:
             process = subprocess.Popen(cmd)
@@ -341,7 +324,6 @@ def check_dir_access():
 
 
 def get_ds_status():
-    install_module('requests')
     import requests
     from requests.adapters import HTTPAdapter
     logger_test_ds.info('Checking DocumentServer availability...')
@@ -374,7 +356,8 @@ logger_test_ds = logging.getLogger('test.ds')
 check_redis()
 check_db()
 check_mq()
-check_dir_access()
+if storageS3 == 'false':
+    check_dir_access()
 get_ds_status()
 total_status()
 

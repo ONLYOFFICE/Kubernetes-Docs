@@ -12,6 +12,10 @@ metadata:
     "helm.sh/hook": test
     "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": before-hook-creation
+    {{- if or .Values.commonAnnotations .Values.tests.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.tests.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   serviceAccountName: {{ include "ds.serviceAccountName" . }}
   {{- if .Values.podSecurityContext.enabled }}
@@ -28,7 +32,8 @@ spec:
   - name: {{ .Values.imagePullSecrets }}
   {{- end }}
   containers:
-  - image: python:3.11
+  - image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
+    imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
     name: test-ds
     resources: {{ toYaml .Values.tests.resources | nindent 6 }}
     env:
@@ -47,12 +52,16 @@ spec:
         secretKeyRef:
           name: {{ template "ds.redis.secretName" . }}
           key: {{ .Values.connections.redisSecretKeyName }}
+    - name: STORAGE_S3
+      value: {{ .Values.persistence.storageS3 | quote }}
     envFrom:
     - configMapRef:
         name: documentserver
     volumeMounts:
+    {{- if not .Values.persistence.storageS3 }}
     - name: ds-files
       mountPath: /ds/test/App_Data/cache/files
+    {{- end }}
     - name: test-ds
       mountPath: /scripts/test_ds.py
       subPath: test_ds.py
@@ -62,9 +71,11 @@ spec:
     command: ['python', '/scripts/test_ds.py']
     {{- end }}
   volumes:
+  {{- if not .Values.persistence.storageS3 }}
   - name: ds-files
     persistentVolumeClaim:
       claimName: {{ template "ds.pvc.name" . }}
+  {{- end }}
   - name: test-ds
     configMap:
       name: test-ds
