@@ -119,6 +119,9 @@ spec:
         - name: converter
           image: {{ .Values.converter.image.repository }}:{{ .Values.converter.image.tag }}
           imagePullPolicy: {{ .Values.converter.image.pullPolicy }}
+          {{- if .Values.converter.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.converter.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           resources: {{- toYaml .Values.converter.resources | nindent 12 }}
           env:
           - name: DB_PWD

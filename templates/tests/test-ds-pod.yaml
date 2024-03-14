@@ -32,9 +32,12 @@ spec:
   - name: {{ .Values.imagePullSecrets }}
   {{- end }}
   containers:
-  - image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
+  - name: test-ds
+    image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
     imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
-    name: test-ds
+    {{- if .Values.tests.containerSecurityContext.enabled }}
+    securityContext: {{- omit .Values.tests.containerSecurityContext "enabled" | toYaml | nindent 6 }}
+    {{- end }}
     resources: {{ toYaml .Values.tests.resources | nindent 6 }}
     env:
     - name: DB_PWD

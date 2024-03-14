@@ -73,6 +73,9 @@ spec:
       - name: example
         image: {{ .Values.example.image.repository }}:{{ .Values.example.image.tag }}
         imagePullPolicy: {{ .Values.example.image.pullPolicy }}
+        {{- if .Values.example.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.example.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
         ports:
         - containerPort: {{ .Values.example.containerPorts.http }}
           name: http

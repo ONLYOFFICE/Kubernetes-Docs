@@ -176,34 +176,24 @@ podSecurityContext:
   enabled: false
   ## Converter Deployment podSecurityContext parameters
   converter:
-    ## podSecurityContext.converter.runAsUser User ID for the Converter pods
-    runAsUser: 101
-    ## podSecurityContext.converter.runAsGroup  Group ID for the Converter pods
-    runAsGroup: 101
+    ## podSecurityContext.converter.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Converter Pod
+    fsGroup: 101
   ## Docservice Deployment podSecurityContext parameters
   docservice:
-    ## podSecurityContext.docservice.runAsUser User ID for the Docservice pods
-    runAsUser: 101
-    ## podSecurityContext.docservice.runAsGroup Group ID for the Docservice pods
-    runAsGroup: 101
+    ## podSecurityContext.docservice.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Docservice Pod
+    fsGroup: 101
   ## Jobs podSecurityContext parameters
   jobs:
-    ## podSecurityContext.jobs.runAsUser User ID for pods created by jobs
-    runAsUser: 101
-    ## podSecurityContext.jobs.runAsGroup Group ID for pods created by jobs
-    runAsGroup: 101
+    ## podSecurityContext.jobs.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in Pods created by Jobs
+    fsGroup: 101
   ## Example StatefulSet podSecurityContext parameters
   example:
-    ## podSecurityContext.example.runAsUser User ID for the Example pod
-    runAsUser: 1001
-    ## podSecurityContext.example.runAsGroup Group ID for the Example pod
-    runAsGroup: 1001
+    ## podSecurityContext.example.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Example Pod
+    fsGroup: 1001
   ## Tests Pod podSecurityContext parameters
   tests:
-    ## podSecurityContext.tests.runAsUser User ID for the Test pod
-    runAsUser: 0
-    ## podSecurityContext.tests.runAsGroup Group ID for the Test pod
-    runAsGroup: 0
+    ## podSecurityContext.tests.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Test Pod
+    fsGroup: 101
 ## Pod anti-affinity parameters
 ## Pod anti-affinity prohibits at all (required) or, if possible (preferred), placing a second pod with the same label on the same node
 podAntiAffinity:
@@ -493,6 +483,26 @@ docservice:
     tag: 8.0.1-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Docservice container
+  containerSecurityContext:
+    ## docservice.containerSecurityContext.enabled Enable security context for the Docservice container
+    enabled: false
+    ## docservice.containerSecurityContext.runAsUser User ID for the Docservice container
+    runAsUser: 101
+    ## docservice.containerSecurityContext.runAsGroup Group ID for the Docservice container
+    runAsGroup: 101
+    ## docservice.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## docservice.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## docservice.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Docservice container
+    seLinuxOptions: null
+    ## docservice.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Docservice container
+    seccompProfile:
+      type: RuntimeDefault
+    ## docservice.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
   ## docservice.containerPorts.http docservice container port
   containerPorts:
     http: 8000
@@ -614,6 +624,26 @@ proxy:
     tag: 8.0.1-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Proxy container
+  containerSecurityContext:
+    ## proxy.containerSecurityContext.enabled Enable security context for the Proxy container
+    enabled: false
+    ## proxy.containerSecurityContext.runAsUser User ID for the Proxy container
+    runAsUser: 101
+    ## proxy.containerSecurityContext.runAsGroup Group ID for the Proxy container
+    runAsGroup: 101
+    ## proxy.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## proxy.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## proxy.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Proxy container
+    seLinuxOptions: null
+    ## proxy.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Proxy container
+    seccompProfile:
+      type: RuntimeDefault
+    ## proxy.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
   ## proxy.containerPorts.http proxy container port
   containerPorts:
     http: 8888
@@ -828,6 +858,26 @@ converter:
     tag: 8.0.1-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Converter container
+  containerSecurityContext:
+    ## converter.containerSecurityContext.enabled Enable security context for the Converter container
+    enabled: false
+    ## converter.containerSecurityContext.runAsUser User ID for the Converter container
+    runAsUser: 101
+    ## converter.containerSecurityContext.runAsGroup Group ID for the Converter container
+    runAsGroup: 101
+    ## converter.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## converter.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## converter.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Converter container
+    seLinuxOptions: null
+    ## converter.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Converter container
+    seccompProfile:
+      type: RuntimeDefault
+    ## converter.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
   ## converter container resource requests and limits
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## converter.resources.requests The requested resources for the converter container
@@ -931,6 +981,26 @@ example:
     tag: 8.0.1-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Example container
+  containerSecurityContext:
+    ## example.containerSecurityContext.enabled Enable security context for the Example container
+    enabled: false
+    ## example.containerSecurityContext.runAsUser User ID for the Example container
+    runAsUser: 1001
+    ## example.containerSecurityContext.runAsGroup Group ID for the Example container
+    runAsGroup: 1001
+    ## example.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## example.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## example.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Example container
+    seLinuxOptions: null
+    ## example.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Example container
+    seccompProfile:
+      type: RuntimeDefault
+    ## example.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
   ## example.containerPorts.http example container port
   containerPorts:
     http: 3000
@@ -1025,6 +1095,26 @@ install:
       tag: 8.0.1-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the pre-install container
+    containerSecurityContext:
+      ## install.job.containerSecurityContext.enabled Enable security context for the pre-install container
+      enabled: false
+      ## install.job.containerSecurityContext.runAsUser User ID for the pre-install container
+      runAsUser: 101
+      ## install.job.containerSecurityContext.runAsGroup Group ID for the pre-install container
+      runAsGroup: 101
+      ## install.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## install.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## install.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the pre-install container
+      seLinuxOptions: null
+      ## install.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-install container
+      seccompProfile:
+        type: RuntimeDefault
+      ## install.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job pre-install container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## install.job.resources.requests The requested resources for the job pre-install container
@@ -1070,6 +1160,26 @@ upgrade:
       tag: 8.0.1-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the pre-upgrade container
+    containerSecurityContext:
+      ## upgrade.job.containerSecurityContext.enabled Enable security context for the pre-upgrade container
+      enabled: false
+      ## upgrade.job.containerSecurityContext.runAsUser User ID for the pre-upgrade container
+      runAsUser: 101
+      ## upgrade.job.containerSecurityContext.runAsGroup Group ID for the pre-upgrade container
+      runAsGroup: 101
+      ## upgrade.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## upgrade.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## upgrade.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the pre-upgrade container
+      seLinuxOptions: null
+      ## upgrade.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-upgrade container
+      seccompProfile:
+        type: RuntimeDefault
+      ## upgrade.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job pre-upgrade container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## upgrade.job.resources.requests The requested resources for the job pre-upgrade container
@@ -1123,6 +1233,26 @@ rollback:
       tag: 8.0.1-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the pre-rollback container
+    containerSecurityContext:
+      ## rollback.job.containerSecurityContext.enabled Enable security context for the pre-rollback container
+      enabled: false
+      ## rollback.job.containerSecurityContext.runAsUser User ID for the pre-rollback container
+      runAsUser: 101
+      ## rollback.job.containerSecurityContext.runAsGroup Group ID for the pre-rollback container
+      runAsGroup: 101
+      ## rollback.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## rollback.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## rollback.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the pre-rollback container
+      seLinuxOptions: null
+      ## rollback.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-rollback container
+      seccompProfile:
+        type: RuntimeDefault
+      ## rollback.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job pre-rollback container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## rollback.job.resources.requests The requested resources for the job pre-rollback container
@@ -1176,6 +1306,26 @@ delete:
       tag: 8.0.1-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the pre-delete container
+    containerSecurityContext:
+      ## delete.job.containerSecurityContext.enabled Enable security context for the pre-delete container
+      enabled: false
+      ## delete.job.containerSecurityContext.runAsUser User ID for the pre-delete container
+      runAsUser: 101
+      ## delete.job.containerSecurityContext.runAsGroup Group ID for the pre-delete container
+      runAsGroup: 101
+      ## delete.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## delete.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## delete.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the pre-delete container
+      seLinuxOptions: null
+      ## delete.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-delete container
+      seccompProfile:
+        type: RuntimeDefault
+      ## delete.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job pre-delete container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## delete.job.resources.requests The requested resources for the job pre-delete container
@@ -1220,6 +1370,26 @@ grafanaDashboard:
       tag: 8.0.1-1
       ## grafanaDashboard.job.image.pullPolicy Job by Grafana Dashboard ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the Grafana Dashboard container
+    containerSecurityContext:
+      ## grafanaDashboard.job.containerSecurityContext.enabled Enable security context for the Grafana Dashboard container
+      enabled: false
+      ## grafanaDashboard.job.containerSecurityContext.runAsUser User ID for the Grafana Dashboard container
+      runAsUser: 101
+      ## grafanaDashboard.job.containerSecurityContext.runAsGroup Group ID for the Grafana Dashboard container
+      runAsGroup: 101
+      ## grafanaDashboard.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## grafanaDashboard.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## grafanaDashboard.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Grafana Dashboard container
+      seLinuxOptions: null
+      ## grafanaDashboard.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Grafana Dashboard container
+      seccompProfile:
+        type: RuntimeDefault
+      ## grafanaDashboard.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job Grafana Dashboard container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## grafanaDashboard.job.resources.requests The requested resources for the job Grafana Dashboard container
@@ -1252,6 +1422,26 @@ tests:
     tag: 8.0.1-1
     ## tests.image.pullPolicy test container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Test container
+  containerSecurityContext:
+    ## tests.containerSecurityContext.enabled Enable security context for the Test container
+    enabled: false
+    ## tests.containerSecurityContext.runAsUser User ID for the Test container
+    runAsUser: 101
+    ## tests.containerSecurityContext.runAsGroup Group ID for the Test container
+    runAsGroup: 101
+    ## tests.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## tests.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## tests.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Test container
+    seLinuxOptions: null
+    ## tests.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Test container
+    seccompProfile:
+      type: RuntimeDefault
+    ## tests.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
   ## test container resource requests and limits
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## tests.resources.requests The requested resources for the test container

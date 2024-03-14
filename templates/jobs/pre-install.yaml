@@ -48,6 +48,9 @@ spec:
         - name: pre-install
           image: {{ .Values.install.job.image.repository }}:{{ .Values.install.job.image.tag }}
           imagePullPolicy: {{ .Values.install.job.image.pullPolicy }}
+          {{- if .Values.install.job.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.install.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           resources: {{- toYaml .Values.install.job.resources | nindent 12 }}
           env:
           - name: DB_PWD
