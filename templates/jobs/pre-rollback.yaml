@@ -56,6 +56,9 @@ spec:
         - name: pre-rollback
           image: {{ .Values.rollback.job.image.repository }}:{{ .Values.rollback.job.image.tag }}
           imagePullPolicy: {{ .Values.rollback.job.image.pullPolicy }}
+          {{- if .Values.rollback.job.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.rollback.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           resources: {{- toYaml .Values.rollback.job.resources | nindent 12 }}
           env:
           - name: DB_PWD

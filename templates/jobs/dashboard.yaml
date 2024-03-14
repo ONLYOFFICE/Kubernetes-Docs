@@ -43,7 +43,10 @@ spec:
       - name: grafana-dashboard
         image: {{ .Values.grafanaDashboard.job.image.repository }}:{{ .Values.grafanaDashboard.job.image.tag }}
         imagePullPolicy: {{ .Values.grafanaDashboard.job.image.pullPolicy }}
-        resources: {{- toYaml .Values.grafanaDashboard.job.resources | nindent 12 }}
+        {{- if .Values.grafanaDashboard.job.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.grafanaDashboard.job.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
+        resources: {{- toYaml .Values.grafanaDashboard.job.resources | nindent 10 }}
         command: ["/bin/sh", "-c"]
         {{- if .Values.webProxy.enabled }}
         args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /scripts/get_dashboard.sh"]

@@ -56,6 +56,9 @@ spec:
         - name: pre-upgrade
           image: {{ .Values.upgrade.job.image.repository }}:{{ .Values.upgrade.job.image.tag }}
           imagePullPolicy: {{ .Values.upgrade.job.image.pullPolicy }}
+          {{- if .Values.upgrade.job.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.upgrade.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           resources: {{- toYaml .Values.upgrade.job.resources | nindent 12 }}
           env:
           - name: DB_PWD

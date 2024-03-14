@@ -131,6 +131,9 @@ spec:
         - name: proxy
           image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
           imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
+          {{- if .Values.proxy.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.proxy.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.proxy.containerPorts.http }}
           {{- if .Values.proxy.startupProbe.enabled }}
@@ -181,6 +184,9 @@ spec:
         - name: docservice
           image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }}
           imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
+          {{- if .Values.docservice.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.docservice.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.docservice.containerPorts.http }}
           {{- if .Values.docservice.startupProbe.enabled }}
