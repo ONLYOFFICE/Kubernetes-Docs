@@ -1088,6 +1088,8 @@ install:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## install.job.podAnnotations Map of annotations to add to the pre-install Pod
+    podAnnotations: {}
     image:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
@@ -1153,6 +1155,8 @@ upgrade:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## upgrade.job.podAnnotations Map of annotations to add to the pre-upgrade Pod
+    podAnnotations: {}
     image:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
@@ -1226,6 +1230,8 @@ rollback:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## rollback.job.podAnnotations Map of annotations to add to the pre-rollback Pod
+    podAnnotations: {}
     image:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
@@ -1299,6 +1305,8 @@ delete:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## delete.job.podAnnotations Map of annotations to add to the pre-delete Pod
+    podAnnotations: {}
     image:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
@@ -1363,6 +1371,8 @@ grafanaDashboard:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## grafanaDashboard.job.podAnnotations Map of annotations to add to the Grafana Dashboard Pod
+    podAnnotations: {}
     image:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils

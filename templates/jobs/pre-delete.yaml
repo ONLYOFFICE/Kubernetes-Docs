@@ -4,10 +4,11 @@ kind: Job
 metadata:
   name: pre-delete
   namespace: {{ include "ds.namespace" . | quote }}
-  {{- if .Values.commonLabels }}
   labels:
+    app.kubernetes.io/component: delete
+    {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
-  {{- end }}
+    {{- end }}
   annotations:
     "helm.sh/hook": pre-delete
     "helm.sh/hook-weight": "3"
@@ -19,6 +20,15 @@ metadata:
 spec:
   backoffLimit: 2
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: delete
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.delete.job.podAnnotations }}
+      annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.delete.job.podAnnotations "context" $ ) | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ include "ds.serviceAccountName" . }}
       {{- if .Values.nodeSelector }}

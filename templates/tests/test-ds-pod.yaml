@@ -4,10 +4,11 @@ kind: Pod
 metadata:
   name: test-ds
   namespace: {{ include "ds.namespace" . | quote }}
-  {{- if .Values.commonLabels }}
   labels:
+    app.kubernetes.io/component: test-ds
+    {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
-  {{- end }}
+    {{- end }}
   annotations:
     "helm.sh/hook": test
     "helm.sh/hook-weight": "1"
