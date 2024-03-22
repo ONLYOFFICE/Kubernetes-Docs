@@ -495,8 +495,6 @@ docservice:
     runAsNonRoot: true
     ## docservice.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
     allowPrivilegeEscalation: false
-    ## docservice.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Docservice container
-    seLinuxOptions: null
     ## docservice.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Docservice container
     seccompProfile:
       type: RuntimeDefault
@@ -636,8 +634,6 @@ proxy:
     runAsNonRoot: true
     ## proxy.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
     allowPrivilegeEscalation: false
-    ## proxy.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Proxy container
-    seLinuxOptions: null
     ## proxy.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Proxy container
     seccompProfile:
       type: RuntimeDefault
@@ -870,8 +866,6 @@ converter:
     runAsNonRoot: true
     ## converter.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
     allowPrivilegeEscalation: false
-    ## converter.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Converter container
-    seLinuxOptions: null
     ## converter.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Converter container
     seccompProfile:
       type: RuntimeDefault
@@ -993,8 +987,6 @@ example:
     runAsNonRoot: true
     ## example.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
     allowPrivilegeEscalation: false
-    ## example.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Example container
-    seLinuxOptions: null
     ## example.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Example container
     seccompProfile:
       type: RuntimeDefault
@@ -1109,8 +1101,6 @@ install:
       runAsNonRoot: true
       ## install.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
       allowPrivilegeEscalation: false
-      ## install.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the pre-install container
-      seLinuxOptions: null
       ## install.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-install container
       seccompProfile:
         type: RuntimeDefault
@@ -1176,8 +1166,6 @@ upgrade:
       runAsNonRoot: true
       ## upgrade.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
       allowPrivilegeEscalation: false
-      ## upgrade.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the pre-upgrade container
-      seLinuxOptions: null
       ## upgrade.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-upgrade container
       seccompProfile:
         type: RuntimeDefault
@@ -1251,8 +1239,6 @@ rollback:
       runAsNonRoot: true
       ## rollback.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
       allowPrivilegeEscalation: false
-      ## rollback.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the pre-rollback container
-      seLinuxOptions: null
       ## rollback.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-rollback container
       seccompProfile:
         type: RuntimeDefault
@@ -1326,8 +1312,6 @@ delete:
       runAsNonRoot: true
       ## delete.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
       allowPrivilegeEscalation: false
-      ## delete.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the pre-delete container
-      seLinuxOptions: null
       ## delete.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-delete container
       seccompProfile:
         type: RuntimeDefault
@@ -1392,8 +1376,6 @@ grafanaDashboard:
       runAsNonRoot: true
       ## grafanaDashboard.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
       allowPrivilegeEscalation: false
-      ## grafanaDashboard.job.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Grafana Dashboard container
-      seLinuxOptions: null
       ## grafanaDashboard.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Grafana Dashboard container
       seccompProfile:
         type: RuntimeDefault
@@ -1444,8 +1426,6 @@ tests:
     runAsNonRoot: true
     ## tests.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
     allowPrivilegeEscalation: false
-    ## tests.containerSecurityContext.seLinuxOptions Defines SELinux labels for the Test container
-    seLinuxOptions: null
     ## tests.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Test container
     seccompProfile:
       type: RuntimeDefault
