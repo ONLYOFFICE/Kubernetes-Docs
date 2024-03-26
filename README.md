@@ -301,9 +301,7 @@ $ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/maste
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 
-Alternatively, you can use the `nonroot-v2` SecurityContextConstraints policy.
-
-To do this, set the following parameters when installing ONLYOFFICE Docs:
+Alternatively, you can use the `nonroot-v2` SecurityContextConstraints policy in commonAnnotations or deployment annotations fields:
 
 ```bash
 helm install documentserver onlyoffice/docs --set commonAnnotations."openshift\.io/required-scc"="nonroot-v2"
