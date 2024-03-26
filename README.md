@@ -307,10 +307,21 @@ Alternatively, you can use the `nonroot-v2` SecurityContextConstraints policy in
 helm install documentserver onlyoffice/docs --set commonAnnotations."openshift\.io/required-scc"="nonroot-v2"
 ```
 
-Also, you must set the `podSecurityContext.enabled` parameter to `true`:
+If required set `podSecurityContext.enabled` and `containerSecurityContext.enabled` to `true`:
 
-```
-$ helm install documentserver onlyoffice/docs --set podSecurityContext.enabled=true
+```bash
+$ helm install documentserver onlyoffice/docs \
+  --set podSecurityContext.enabled=true \
+  --set docservice.containerSecurityContext.enabled=true \
+  --set proxy.containerSecurityContext.enabled=true \
+  --set converter.containerSecurityContext.enabled=true \
+  --set example.containerSecurityContext.enabled=true \
+  --set upgrade.job.containerSecurityContext.enabled=true \
+  --set rollback.job.containerSecurityContext.enabled=true \
+  --set delete.job.containerSecurityContext.enabled=true \
+  --set install.job.containerSecurityContext.enabled=true \
+  --set grafanaDashboard.job.containerSecurityContext.enabled=true \
+  --set tests.containerSecurityContext.enabled=true
 ```
 
 ### 1. Deploy the ONLYOFFICE Docs license
