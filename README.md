@@ -73,7 +73,7 @@ $ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/maste
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
 
-Alternatively, you can specify allowed range of users and groups from the target namespace, see the parameters `runAsUser` and `fsGroup` while installing dependencies, such as RabbitMQ, Redis, PostgreSQL, etc.
+Alternatively, you can specify the allowed range of users and groups from the target namespace, see the parameters `runAsUser` and `fsGroup` while installing dependencies, such as RabbitMQ, Redis, PostgreSQL, etc.
 
 ### 1. Add Helm repositories
 
