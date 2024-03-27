@@ -303,7 +303,7 @@ $ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/maste
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 
-Alternatively, you can use the `nonroot-v2` `SecurityContextConstraints` policy in commonAnnotations or annotations for all resources describing the podTemplate, make sure that the user and serviceaccount has permission to use this scc, to check who can use `nonroot-v2` scc, run: `oc adm policy who-can use scc nonroot-v2`.
+Alternatively, you can apply the `nonroot-v2` `SecurityContextConstraints` (SCC) policy in the `commonAnnotations` or `annotations` for all resources that describe the podTemplate. Ensure that both the user and the service account have the necessary permissions to use this SCC. To verify who has permission to use the `nonroot-v2`, execute the following command: `oc adm policy who-can use scc nonroot-v2`
 
 ```bash
 helm install documentserver onlyoffice/docs --set commonAnnotations."openshift\.io/required-scc"="nonroot-v2"
