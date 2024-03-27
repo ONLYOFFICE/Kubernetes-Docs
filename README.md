@@ -73,6 +73,8 @@ $ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/maste
 $ oc adm policy add-scc-to-group scc-helm-components system:authenticated
 ```
 
+Alternatively, you can specify the allowed range of users and groups from the target namespace, see the parameters `runAsUser` and `fsGroup` while installing dependencies, such as RabbitMQ, Redis, PostgreSQL, etc.
+
 ### 1. Add Helm repositories
 
 ```bash
@@ -301,11 +303,13 @@ $ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/maste
 $ oc adm policy add-scc-to-group scc-docs-components system:authenticated
 ```
 
-Also, you must set the `podSecurityContext.enabled` parameter to `true`:
+Alternatively, you can apply the `nonroot-v2` `SecurityContextConstraints` (SCC) policy in the `commonAnnotations` or `annotations` for all resources that describe the podTemplate. Ensure that both the user and the service account have the necessary permissions to use this SCC. To verify who has permission to use the `nonroot-v2`, execute the following command: `oc adm policy who-can use scc nonroot-v2`
 
+```bash
+helm install documentserver onlyoffice/docs --set commonAnnotations."openshift\.io/required-scc"="nonroot-v2"
 ```
-$ helm install documentserver onlyoffice/docs --set podSecurityContext.enabled=true
-```
+
+If required set `podSecurityContext.enabled` and `<resources>.containerSecurityContext.enabled` to `true`
 
 ### 1. Deploy the ONLYOFFICE Docs license
 
