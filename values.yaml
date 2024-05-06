@@ -205,9 +205,11 @@ podAntiAffinity:
   ## podAntiAffinity.weight Priority when selecting node. It is in the range from 1 to 100. Used only when `podAntiAffinity.type=soft`
   weight: "100"
 ## nodeSelector Node labels for pods assignment
+## Each ONLYOFFICE Docs services can override the values specified here with its own
 ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
 nodeSelector: {}
 ## tolerations Tolerations for pods assignment
+## Each ONLYOFFICE Docs services can override the values specified here with its own
 ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 tolerations: []
 ## imagePullSecrets Container image registry secret name
@@ -400,6 +402,12 @@ docservice:
   ##         - name1
   ##         - name2
   nodeAffinity: {}
+  ## docservice.nodeSelector Node labels for Docservice Pods assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## docservice.tolerations Tolerations for Docservice Pods assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
   ## Horizontal Pod Autoscaling parameters
   ## Horizontal Pod Autoscaling is used for autoscaling of the Docservice deployment
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -773,6 +781,12 @@ converter:
   ##         - zone1
   ##         - zone2
   nodeAffinity: {}
+  ## converter.nodeSelector Node labels for Converter Pods assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## converter.tolerations Tolerations for Converter Pods assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
   ## Horizontal Pod Autoscaling parameters
   ## Horizontal Pod Autoscaling is used for autoscaling of the Converter deployment
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -967,6 +981,12 @@ example:
   ##         - zone1
   ##         - zone2
   nodeAffinity: {}
+  ## example.nodeSelector Node labels for Example Pods assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## example.tolerations Tolerations for Example Pods assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
   ## Example container image parameters
   image:
     ## example.image.repository example container image name
@@ -1082,6 +1102,12 @@ install:
     annotations: {}
     ## install.job.podAnnotations Map of annotations to add to the pre-install Pod
     podAnnotations: {}
+    ## install.job.nodeSelector Node labels for pre-install Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## install.job.tolerations Tolerations for pre-install Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
@@ -1147,6 +1173,12 @@ upgrade:
     annotations: {}
     ## upgrade.job.podAnnotations Map of annotations to add to the pre-upgrade Pod
     podAnnotations: {}
+    ## upgrade.job.nodeSelector Node labels for pre-upgrade Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## upgrade.job.tolerations Tolerations for pre-upgrade Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
@@ -1220,6 +1252,12 @@ rollback:
     annotations: {}
     ## rollback.job.podAnnotations Map of annotations to add to the pre-rollback Pod
     podAnnotations: {}
+    ## rollback.job.nodeSelector Node labels for pre-rollback Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## rollback.job.tolerations Tolerations for pre-rollback Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
@@ -1293,6 +1331,12 @@ delete:
     annotations: {}
     ## delete.job.podAnnotations Map of annotations to add to the pre-delete Pod
     podAnnotations: {}
+    ## delete.job.nodeSelector Node labels for pre-delete Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## delete.job.tolerations Tolerations for pre-delete Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
@@ -1357,6 +1401,12 @@ grafanaDashboard:
     annotations: {}
     ## grafanaDashboard.job.podAnnotations Map of annotations to add to the Grafana Dashboard Pod
     podAnnotations: {}
+    ## grafanaDashboard.job.nodeSelector Node labels for Grafana Dashboard Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## grafanaDashboard.job.tolerations Tolerations for Grafana Dashboard Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
@@ -1406,6 +1456,12 @@ tests:
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
   annotations: {}
+  ## tests.nodeSelector Node labels for Test Pod assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## tests.tolerations Tolerations for Test Pod assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
   ## Test container image parameters
   image:
     ## tests.image.repository test container image name
