@@ -22,11 +22,11 @@ spec:
   {{- if .Values.podSecurityContext.enabled }}
   securityContext: {{- toYaml .Values.podSecurityContext.tests | nindent 4 }}
   {{- end }}
-  {{- if .Values.nodeSelector }}
-  nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
+  {{- if or .Values.nodeSelector .Values.tests.nodeSelector }}
+  nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.tests.nodeSelector) | nindent 4 }}
   {{- end }}
-  {{- if .Values.tolerations }}
-  tolerations: {{ toYaml .Values.tolerations | nindent 4 }}
+  {{- if or .Values.tolerations .Values.tests.tolerations }}
+  tolerations: {{ toYaml (default .Values.tolerations .Values.tests.tolerations) | nindent 4 }}
   {{- end }}
   {{- if .Values.imagePullSecrets }}
   imagePullSecrets:

@@ -31,11 +31,11 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: dashboard-sa
-      {{- if .Values.nodeSelector }}
-      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- if or .Values.nodeSelector .Values.grafanaDashboard.job.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.grafanaDashboard.job.nodeSelector) | nindent 8 }}
       {{- end }}
-      {{- if .Values.tolerations }}
-      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- if or .Values.tolerations .Values.grafanaDashboard.job.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.grafanaDashboard.job.tolerations) | nindent 8 }}
       {{- end }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
