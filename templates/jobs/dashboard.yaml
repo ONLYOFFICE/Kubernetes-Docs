@@ -31,14 +31,29 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: dashboard-sa
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.grafanaDashboard.job.customPodAntiAffinity .Values.grafanaDashboard.job.podAffinity .Values.grafanaDashboard.job.nodeAffinity }}
+      affinity:
+        {{- with .Values.grafanaDashboard.job.customPodAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.grafanaDashboard.job.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.grafanaDashboard.job.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       {{- if or .Values.nodeSelector .Values.grafanaDashboard.job.nodeSelector }}
       nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.grafanaDashboard.job.nodeSelector) | nindent 8 }}
       {{- end }}
       {{- if or .Values.tolerations .Values.grafanaDashboard.job.tolerations }}
       tolerations: {{ toYaml (default .Values.tolerations .Values.grafanaDashboard.job.tolerations) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.podSecurityContext.enabled }}
-      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
       {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:

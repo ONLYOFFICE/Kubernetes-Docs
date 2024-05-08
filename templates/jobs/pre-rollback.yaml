@@ -31,14 +31,29 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "ds.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.rollback.job.customPodAntiAffinity .Values.rollback.job.podAffinity .Values.rollback.job.nodeAffinity }}
+      affinity:
+        {{- with .Values.rollback.job.customPodAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.rollback.job.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.rollback.job.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
       {{- if or .Values.nodeSelector .Values.rollback.job.nodeSelector }}
       nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.rollback.job.nodeSelector) | nindent 8 }}
       {{- end }}
       {{- if or .Values.tolerations .Values.rollback.job.tolerations }}
       tolerations: {{ toYaml (default .Values.tolerations .Values.rollback.job.tolerations) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.podSecurityContext.enabled }}
-      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
       {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
