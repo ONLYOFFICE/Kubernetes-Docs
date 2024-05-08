@@ -1102,6 +1102,16 @@ install:
     annotations: {}
     ## install.job.podAnnotations Map of annotations to add to the pre-install Pod
     podAnnotations: {}
+    ## install.job.customPodAntiAffinity Prohibiting the scheduling of pre-install Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for pre-install Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes pre-install Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for pre-install Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes pre-install Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
     ## install.job.nodeSelector Node labels for pre-install Job Pod assignment
     ## If set to, it takes priority over the `nodeSelector`
     nodeSelector: {}
@@ -1173,6 +1183,16 @@ upgrade:
     annotations: {}
     ## upgrade.job.podAnnotations Map of annotations to add to the pre-upgrade Pod
     podAnnotations: {}
+    ## upgrade.job.customPodAntiAffinity Prohibiting the scheduling of pre-upgrade Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for pre-upgrade Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes pre-upgrade Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for pre-upgrade Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes pre-upgrade Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
     ## upgrade.job.nodeSelector Node labels for pre-upgrade Job Pod assignment
     ## If set to, it takes priority over the `nodeSelector`
     nodeSelector: {}
@@ -1252,6 +1272,16 @@ rollback:
     annotations: {}
     ## rollback.job.podAnnotations Map of annotations to add to the pre-rollback Pod
     podAnnotations: {}
+    ## rollback.job.customPodAntiAffinity Prohibiting the scheduling of pre-rollback Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for pre-rollback Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes pre-rollback Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for pre-rollback Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes pre-rollback Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
     ## rollback.job.nodeSelector Node labels for pre-rollback Job Pod assignment
     ## If set to, it takes priority over the `nodeSelector`
     nodeSelector: {}
@@ -1331,6 +1361,16 @@ delete:
     annotations: {}
     ## delete.job.podAnnotations Map of annotations to add to the pre-delete Pod
     podAnnotations: {}
+    ## delete.job.customPodAntiAffinity Prohibiting the scheduling of pre-delete Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for pre-delete Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes pre-delete Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Rollback Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes pre-delete Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
     ## delete.job.nodeSelector Node labels for pre-delete Job Pod assignment
     ## If set to, it takes priority over the `nodeSelector`
     nodeSelector: {}
@@ -1401,6 +1441,16 @@ grafanaDashboard:
     annotations: {}
     ## grafanaDashboard.job.podAnnotations Map of annotations to add to the Grafana Dashboard Pod
     podAnnotations: {}
+    ## grafanaDashboard.job.customPodAntiAffinity Prohibiting the scheduling of Grafana Dashboard Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for Grafana Dashboard Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes Grafana Dashboard Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Grafana Dashboard Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes Grafana Dashboard Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
     ## grafanaDashboard.job.nodeSelector Node labels for Grafana Dashboard Job Pod assignment
     ## If set to, it takes priority over the `nodeSelector`
     nodeSelector: {}
@@ -1456,6 +1506,16 @@ tests:
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
   annotations: {}
+  ## tests.customPodAntiAffinity Prohibiting the scheduling of Test Pod relative to other Pods containing the specified labels on the same node
+  customPodAntiAffinity: {}
+  ## Pod affinity rules for Test Pod scheduling by nodes relative to other Pods
+  ## Pod affinity allow you to constrain which nodes Test Pod can be scheduled on based on the labels of Pods already running on that node
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAffinity: {}
+  ## Node affinity rules for Test Pod scheduling by nodes
+  ## Node affinity allow you to constrain which nodes Test Pod can be scheduled on based on node labels
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  nodeAffinity: {}
   ## tests.nodeSelector Node labels for Test Pod assignment
   ## If set to, it takes priority over the `nodeSelector`
   nodeSelector: {}
