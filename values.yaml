@@ -1429,7 +1429,7 @@ delete:
     ## If set, the default configmap will not be created and the two previous parameters are ignored
     ## Must contain a key `stop.sh`
     dsStop: ""
-## Job by Clear Cache has a post-upgrade hook executes after any resources are created in Kubernetes
+## Job by Clear Cache has a post-upgrade hook executes after any resources have been upgraded in Kubernetes
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
 ## He clears the Cache directory
 clearCache:
