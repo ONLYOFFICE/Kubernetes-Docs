@@ -68,3 +68,4 @@ data:
   {{- if .Values.requestFilteringAgent.denyIPAddressList }}
   DENY_IP_ADDRESS_LIST: {{ toJson .Values.requestFilteringAgent.denyIPAddressList | squote }}
   {{- end }}
+  STORAGE_SUBDIRECTORY_NAME: {{ .Values.docservice.image.tag }}

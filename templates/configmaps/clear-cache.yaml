@@ -1,0 +1,41 @@
+{{- if and (eq (include "ds.clearCache.createConfigMap" .) "true") .Values.clearCache.job.enabled (not .Values.persistence.storageS3) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clear-cache
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if .Values.commonAnnotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+data:
+  clearCache.sh: |-
+    #!/bin/bash
+    FILES_DIR=/var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files/
+    ls $FILES_DIR > /dev/null
+    if [ $? -ne 0 ]; then
+      echo -e "\e[0;31m Error accessing the $FILES_DIR directory \e[0m"
+      exit 1
+    fi
+    for ENTRY in `ls $FILES_DIR`; do
+      case $ENTRY in
+        errors)
+          ;;
+        forgotten)
+          ;;
+        {{ .Values.docservice.image.tag }})
+          ;;
+        *)
+          rm -rfv $FILES_DIR$ENTRY
+          ;;
+      esac
+    done
+    echo -e "\e[0;32m Clearing the cache folder is finished \e[0m"
+{{- end }}
