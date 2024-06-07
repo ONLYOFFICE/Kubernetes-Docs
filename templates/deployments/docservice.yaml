@@ -134,6 +134,9 @@ spec:
           {{- if .Values.proxy.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.proxy.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
+          {{- if .Values.proxy.lifecycleHooks }}
+          lifecycle: {{- toYaml .Values.proxy.lifecycleHooks | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.proxy.containerPorts.http }}
           {{- if .Values.proxy.startupProbe.enabled }}
@@ -186,6 +189,9 @@ spec:
           imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
           {{- if .Values.docservice.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.docservice.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.docservice.lifecycleHooks }}
+          lifecycle: {{- toYaml .Values.docservice.lifecycleHooks | nindent 12 }}
           {{- end }}
           ports:
             - containerPort: {{ .Values.docservice.containerPorts.http }}
