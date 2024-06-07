@@ -76,6 +76,9 @@ spec:
         {{- if .Values.example.containerSecurityContext.enabled }}
         securityContext: {{- omit .Values.example.containerSecurityContext "enabled" | toYaml | nindent 10 }}
         {{- end }}
+        {{- if .Values.example.lifecycleHooks }}
+        lifecycle: {{- toYaml .Values.example.lifecycleHooks | nindent 10 }}
+        {{- end }}
         ports:
         - containerPort: {{ .Values.example.containerPorts.http }}
           name: http

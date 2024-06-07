@@ -509,6 +509,16 @@ docservice:
     ## docservice.containerSecurityContext.capabilities Defines the privileges granted to the process
     capabilities:
       drop: ["ALL"]
+  ## docservice.lifecycleHooks Defines the Docservice container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
   ## docservice.containerPorts.http docservice container port
   containerPorts:
     http: 8000
@@ -648,6 +658,16 @@ proxy:
     ## proxy.containerSecurityContext.capabilities Defines the privileges granted to the process
     capabilities:
       drop: ["ALL"]
+  ## proxy.lifecycleHooks Defines the Proxy container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
   ## proxy.containerPorts.http proxy container port
   containerPorts:
     http: 8888
@@ -886,6 +906,16 @@ converter:
     ## converter.containerSecurityContext.capabilities Defines the privileges granted to the process
     capabilities:
       drop: ["ALL"]
+  ## converter.lifecycleHooks Defines the Converter container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
   ## converter container resource requests and limits
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## converter.resources.requests The requested resources for the converter container
@@ -1013,6 +1043,16 @@ example:
     ## example.containerSecurityContext.capabilities Defines the privileges granted to the process
     capabilities:
       drop: ["ALL"]
+  ## example.lifecycleHooks Defines the Example container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
   ## example.containerPorts.http example container port
   containerPorts:
     http: 3000
