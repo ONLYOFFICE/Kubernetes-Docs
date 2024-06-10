@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set chart version
         run: |
           wget https://download.onlyoffice.com/charts/4testing/index.yaml -P /tmp
