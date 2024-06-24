@@ -1,5 +1,21 @@
 # Change log
 
+## 4.2.0
+
+### New Features
+
+* Added the ability set up the `containerSecurityContext`
+* Added the ability to set up its own `nodeSelector` and `tolerations` for each service or define them globally
+* Added the ability to separate a subdirectory for storing cache (data) and service (errors and forgotten) files
+* Actions to clean the directory ".../cache/files/" are placed in a separate Job with a `post-upgrade` hook
+* Added the ability to set up container `lifecycle` hooks
+
+### Changes
+
+* Changed the default values for `podSecurityContext`
+* In `pre-upgrade` Job, the actions for cleaning the directory ".../cache/files/" have been removed
+* Released ONLYOFFICE Docs [v8.1.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#810)
+
 ## 4.1.0
 
 ### New Features
