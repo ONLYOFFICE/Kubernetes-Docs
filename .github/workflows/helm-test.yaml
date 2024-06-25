@@ -32,7 +32,7 @@ jobs:
       images-present: ${{ steps.selective-check.outputs.images-present }}
     steps:
       - name: Checkout chart
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: selective-check
         id: selective-check
         run: |

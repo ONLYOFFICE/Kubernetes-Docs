@@ -4,10 +4,11 @@ kind: Pod
 metadata:
   name: test-ds
   namespace: {{ include "ds.namespace" . | quote }}
-  {{- if .Values.commonLabels }}
   labels:
+    app.kubernetes.io/component: test-ds
+    {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
-  {{- end }}
+    {{- end }}
   annotations:
     "helm.sh/hook": test
     "helm.sh/hook-weight": "1"
@@ -21,20 +22,38 @@ spec:
   {{- if .Values.podSecurityContext.enabled }}
   securityContext: {{- toYaml .Values.podSecurityContext.tests | nindent 4 }}
   {{- end }}
-  {{- if .Values.nodeSelector }}
-  nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
+  {{- if or .Values.tests.customPodAntiAffinity .Values.tests.podAffinity .Values.tests.nodeAffinity }}
+  affinity:
+    {{- with .Values.tests.customPodAntiAffinity }}
+    podAntiAffinity:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.tests.podAffinity }}
+    podAffinity:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.tests.nodeAffinity }}
+    nodeAffinity:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
   {{- end }}
-  {{- if .Values.tolerations }}
-  tolerations: {{ toYaml .Values.tolerations | nindent 4 }}
+  {{- if or .Values.nodeSelector .Values.tests.nodeSelector }}
+  nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.tests.nodeSelector) | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.tolerations .Values.tests.tolerations }}
+  tolerations: {{ toYaml (default .Values.tolerations .Values.tests.tolerations) | nindent 4 }}
   {{- end }}
   {{- if .Values.imagePullSecrets }}
   imagePullSecrets:
   - name: {{ .Values.imagePullSecrets }}
   {{- end }}
   containers:
-  - image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
+  - name: test-ds
+    image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
     imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
-    name: test-ds
+    {{- if .Values.tests.containerSecurityContext.enabled }}
+    securityContext: {{- omit .Values.tests.containerSecurityContext "enabled" | toYaml | nindent 6 }}
+    {{- end }}
     resources: {{ toYaml .Values.tests.resources | nindent 6 }}
     env:
     - name: DB_PWD

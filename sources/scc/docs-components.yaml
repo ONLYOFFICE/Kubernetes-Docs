@@ -17,3 +17,5 @@ supplementalGroups:
   type: MustRunAs
 users: []
 groups: []
+seccompProfiles:
+- runtime/default

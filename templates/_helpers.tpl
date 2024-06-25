@@ -378,6 +378,26 @@ Return the configmap name of creating tables for install ds
 {{- end -}}
 
 {{/*
+Get the configmap name containing the ds clearCache script
+*/}}
+{{- define "ds.clearCache.configMapName" -}}
+{{- if .Values.clearCache.existingConfigmap.name -}}
+    {{- printf "%s" (tpl .Values.clearCache.existingConfigmap.name $) -}}
+{{- else }}
+    {{- printf "clear-cache" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a configmap object containing the ds clearCache script should be created
+*/}}
+{{- define "ds.clearCache.createConfigMap" -}}
+{{- if empty .Values.clearCache.existingConfigmap.name }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the ds labels
 */}}
 {{- define "ds.labels.commonLabels" -}}

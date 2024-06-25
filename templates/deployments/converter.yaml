@@ -77,11 +77,11 @@ spec:
         nodeAffinity:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-      {{- if .Values.nodeSelector }}
-      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- if or .Values.nodeSelector .Values.converter.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.converter.nodeSelector) | nindent 8 }}
       {{- end }}
-      {{- if .Values.tolerations }}
-      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- if or .Values.tolerations .Values.converter.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.converter.tolerations) | nindent 8 }}
       {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -119,6 +119,12 @@ spec:
         - name: converter
           image: {{ .Values.converter.image.repository }}:{{ .Values.converter.image.tag }}
           imagePullPolicy: {{ .Values.converter.image.pullPolicy }}
+          {{- if .Values.converter.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.converter.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.converter.lifecycleHooks }}
+          lifecycle: {{- toYaml .Values.converter.lifecycleHooks | nindent 12 }}
+          {{- end }}
           resources: {{- toYaml .Values.converter.resources | nindent 12 }}
           env:
           - name: DB_PWD

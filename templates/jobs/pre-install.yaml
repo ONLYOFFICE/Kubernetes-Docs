@@ -4,10 +4,11 @@ kind: Job
 metadata:
   name: pre-install
   namespace: {{ include "ds.namespace" . | quote }}
-  {{- if .Values.commonLabels }}
   labels:
+    app.kubernetes.io/component: install
+    {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
-  {{- end }}
+    {{- end }}
   annotations:
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "4"
@@ -19,16 +20,40 @@ metadata:
 spec:
   backoffLimit: 2
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: install
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.install.job.podAnnotations }}
+      annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.install.job.podAnnotations "context" $ ) | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ include "ds.serviceAccountName" . }}
-      {{- if .Values.nodeSelector }}
-      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
-      {{- end }}
-      {{- if .Values.tolerations }}
-      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
-      {{- end }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.install.job.customPodAntiAffinity .Values.install.job.podAffinity .Values.install.job.nodeAffinity }}
+      affinity:
+        {{- with .Values.install.job.customPodAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.install.job.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.install.job.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.nodeSelector .Values.install.job.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.install.job.nodeSelector) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.tolerations .Values.install.job.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.install.job.tolerations) | nindent 8 }}
       {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -48,6 +73,9 @@ spec:
         - name: pre-install
           image: {{ .Values.install.job.image.repository }}:{{ .Values.install.job.image.tag }}
           imagePullPolicy: {{ .Values.install.job.image.pullPolicy }}
+          {{- if .Values.install.job.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.install.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           resources: {{- toYaml .Values.install.job.resources | nindent 12 }}
           env:
           - name: DB_PWD

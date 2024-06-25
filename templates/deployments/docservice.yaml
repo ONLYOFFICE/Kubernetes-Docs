@@ -84,11 +84,11 @@ spec:
         nodeAffinity:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-      {{- if .Values.nodeSelector }}
-      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- if or .Values.nodeSelector .Values.docservice.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.docservice.nodeSelector) | nindent 8 }}
       {{- end }}
-      {{- if .Values.tolerations }}
-      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- if or .Values.tolerations .Values.docservice.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.docservice.tolerations) | nindent 8 }}
       {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -131,6 +131,12 @@ spec:
         - name: proxy
           image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
           imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
+          {{- if .Values.proxy.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.proxy.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.proxy.lifecycleHooks }}
+          lifecycle: {{- toYaml .Values.proxy.lifecycleHooks | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.proxy.containerPorts.http }}
           {{- if .Values.proxy.startupProbe.enabled }}
@@ -181,6 +187,12 @@ spec:
         - name: docservice
           image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }}
           imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
+          {{- if .Values.docservice.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.docservice.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.docservice.lifecycleHooks }}
+          lifecycle: {{- toYaml .Values.docservice.lifecycleHooks | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.docservice.containerPorts.http }}
           {{- if .Values.docservice.startupProbe.enabled }}

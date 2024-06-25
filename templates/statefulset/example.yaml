@@ -59,11 +59,11 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
       {{- end }}
-      {{- if .Values.nodeSelector }}
-      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      {{- if or .Values.nodeSelector .Values.example.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.example.nodeSelector) | nindent 8 }}
       {{- end }}
-      {{- if .Values.tolerations }}
-      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      {{- if or .Values.tolerations .Values.example.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.example.tolerations) | nindent 8 }}
       {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -73,6 +73,12 @@ spec:
       - name: example
         image: {{ .Values.example.image.repository }}:{{ .Values.example.image.tag }}
         imagePullPolicy: {{ .Values.example.image.pullPolicy }}
+        {{- if .Values.example.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.example.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
+        {{- if .Values.example.lifecycleHooks }}
+        lifecycle: {{- toYaml .Values.example.lifecycleHooks | nindent 10 }}
+        {{- end }}
         ports:
         - containerPort: {{ .Values.example.containerPorts.http }}
           name: http

@@ -176,34 +176,24 @@ podSecurityContext:
   enabled: false
   ## Converter Deployment podSecurityContext parameters
   converter:
-    ## podSecurityContext.converter.runAsUser User ID for the Converter pods
-    runAsUser: 101
-    ## podSecurityContext.converter.runAsGroup  Group ID for the Converter pods
-    runAsGroup: 101
+    ## podSecurityContext.converter.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Converter Pod
+    fsGroup: 101
   ## Docservice Deployment podSecurityContext parameters
   docservice:
-    ## podSecurityContext.docservice.runAsUser User ID for the Docservice pods
-    runAsUser: 101
-    ## podSecurityContext.docservice.runAsGroup Group ID for the Docservice pods
-    runAsGroup: 101
+    ## podSecurityContext.docservice.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Docservice Pod
+    fsGroup: 101
   ## Jobs podSecurityContext parameters
   jobs:
-    ## podSecurityContext.jobs.runAsUser User ID for pods created by jobs
-    runAsUser: 101
-    ## podSecurityContext.jobs.runAsGroup Group ID for pods created by jobs
-    runAsGroup: 101
+    ## podSecurityContext.jobs.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in Pods created by Jobs
+    fsGroup: 101
   ## Example StatefulSet podSecurityContext parameters
   example:
-    ## podSecurityContext.example.runAsUser User ID for the Example pod
-    runAsUser: 1001
-    ## podSecurityContext.example.runAsGroup Group ID for the Example pod
-    runAsGroup: 1001
+    ## podSecurityContext.example.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Example Pod
+    fsGroup: 1001
   ## Tests Pod podSecurityContext parameters
   tests:
-    ## podSecurityContext.tests.runAsUser User ID for the Test pod
-    runAsUser: 0
-    ## podSecurityContext.tests.runAsGroup Group ID for the Test pod
-    runAsGroup: 0
+    ## podSecurityContext.tests.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Test Pod
+    fsGroup: 101
 ## Pod anti-affinity parameters
 ## Pod anti-affinity prohibits at all (required) or, if possible (preferred), placing a second pod with the same label on the same node
 podAntiAffinity:
@@ -215,9 +205,11 @@ podAntiAffinity:
   ## podAntiAffinity.weight Priority when selecting node. It is in the range from 1 to 100. Used only when `podAntiAffinity.type=soft`
   weight: "100"
 ## nodeSelector Node labels for pods assignment
+## Each ONLYOFFICE Docs services can override the values specified here with its own
 ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
 nodeSelector: {}
 ## tolerations Tolerations for pods assignment
+## Each ONLYOFFICE Docs services can override the values specified here with its own
 ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 tolerations: []
 ## imagePullSecrets Container image registry secret name
@@ -410,6 +402,12 @@ docservice:
   ##         - name1
   ##         - name2
   nodeAffinity: {}
+  ## docservice.nodeSelector Node labels for Docservice Pods assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## docservice.tolerations Tolerations for Docservice Pods assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
   ## Horizontal Pod Autoscaling parameters
   ## Horizontal Pod Autoscaling is used for autoscaling of the Docservice deployment
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -490,9 +488,37 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 8.0.1-1
+    tag: 8.1.0-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Docservice container
+  containerSecurityContext:
+    ## docservice.containerSecurityContext.enabled Enable security context for the Docservice container
+    enabled: false
+    ## docservice.containerSecurityContext.runAsUser User ID for the Docservice container
+    runAsUser: 101
+    ## docservice.containerSecurityContext.runAsGroup Group ID for the Docservice container
+    runAsGroup: 101
+    ## docservice.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## docservice.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## docservice.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Docservice container
+    seccompProfile:
+      type: RuntimeDefault
+    ## docservice.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
+  ## docservice.lifecycleHooks Defines the Docservice container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
   ## docservice.containerPorts.http docservice container port
   containerPorts:
     http: 8000
@@ -611,9 +637,37 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 8.0.1-1
+    tag: 8.1.0-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Proxy container
+  containerSecurityContext:
+    ## proxy.containerSecurityContext.enabled Enable security context for the Proxy container
+    enabled: false
+    ## proxy.containerSecurityContext.runAsUser User ID for the Proxy container
+    runAsUser: 101
+    ## proxy.containerSecurityContext.runAsGroup Group ID for the Proxy container
+    runAsGroup: 101
+    ## proxy.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## proxy.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## proxy.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Proxy container
+    seccompProfile:
+      type: RuntimeDefault
+    ## proxy.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
+  ## proxy.lifecycleHooks Defines the Proxy container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
   ## proxy.containerPorts.http proxy container port
   containerPorts:
     http: 8888
@@ -747,6 +801,12 @@ converter:
   ##         - zone1
   ##         - zone2
   nodeAffinity: {}
+  ## converter.nodeSelector Node labels for Converter Pods assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## converter.tolerations Tolerations for Converter Pods assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
   ## Horizontal Pod Autoscaling parameters
   ## Horizontal Pod Autoscaling is used for autoscaling of the Converter deployment
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -825,9 +885,37 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 8.0.1-1
+    tag: 8.1.0-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Converter container
+  containerSecurityContext:
+    ## converter.containerSecurityContext.enabled Enable security context for the Converter container
+    enabled: false
+    ## converter.containerSecurityContext.runAsUser User ID for the Converter container
+    runAsUser: 101
+    ## converter.containerSecurityContext.runAsGroup Group ID for the Converter container
+    runAsGroup: 101
+    ## converter.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## converter.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## converter.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Converter container
+    seccompProfile:
+      type: RuntimeDefault
+    ## converter.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
+  ## converter.lifecycleHooks Defines the Converter container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
   ## converter container resource requests and limits
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## converter.resources.requests The requested resources for the converter container
@@ -923,14 +1011,48 @@ example:
   ##         - zone1
   ##         - zone2
   nodeAffinity: {}
+  ## example.nodeSelector Node labels for Example Pods assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## example.tolerations Tolerations for Example Pods assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
   ## Example container image parameters
   image:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 8.0.1-1
+    tag: 8.1.0-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Example container
+  containerSecurityContext:
+    ## example.containerSecurityContext.enabled Enable security context for the Example container
+    enabled: false
+    ## example.containerSecurityContext.runAsUser User ID for the Example container
+    runAsUser: 1001
+    ## example.containerSecurityContext.runAsGroup Group ID for the Example container
+    runAsGroup: 1001
+    ## example.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## example.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## example.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Example container
+    seccompProfile:
+      type: RuntimeDefault
+    ## example.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
+  ## example.lifecycleHooks Defines the Example container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
   ## example.containerPorts.http example container port
   containerPorts:
     http: 3000
@@ -1018,13 +1140,49 @@ install:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## install.job.podAnnotations Map of annotations to add to the pre-install Pod
+    podAnnotations: {}
+    ## install.job.customPodAntiAffinity Prohibiting the scheduling of pre-install Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for pre-install Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes pre-install Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for pre-install Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes pre-install Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## install.job.nodeSelector Node labels for pre-install Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## install.job.tolerations Tolerations for pre-install Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 8.0.1-1
+      tag: 8.1.0-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the pre-install container
+    containerSecurityContext:
+      ## install.job.containerSecurityContext.enabled Enable security context for the pre-install container
+      enabled: false
+      ## install.job.containerSecurityContext.runAsUser User ID for the pre-install container
+      runAsUser: 101
+      ## install.job.containerSecurityContext.runAsGroup Group ID for the pre-install container
+      runAsGroup: 101
+      ## install.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## install.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## install.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-install container
+      seccompProfile:
+        type: RuntimeDefault
+      ## install.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job pre-install container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## install.job.resources.requests The requested resources for the job pre-install container
@@ -1054,7 +1212,7 @@ install:
     initdb: ""
 ## Job by upgrade has a pre-upgrade hook and executes on an upgrade request before all of the release's resources have been upgraded
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
-## He stops the ONLYOFFICE Docs, clears the directory ".../cache/files/" and recreates the tables in the database `connections.dbName`
+## He stops the ONLYOFFICE Docs and recreates the tables in the database `connections.dbName`
 upgrade:
   job:
     ## upgrade.job.enabled Enable the execution of job pre-upgrade before upgrading ONLYOFFICE Docs
@@ -1063,13 +1221,49 @@ upgrade:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## upgrade.job.podAnnotations Map of annotations to add to the pre-upgrade Pod
+    podAnnotations: {}
+    ## upgrade.job.customPodAntiAffinity Prohibiting the scheduling of pre-upgrade Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for pre-upgrade Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes pre-upgrade Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for pre-upgrade Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes pre-upgrade Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## upgrade.job.nodeSelector Node labels for pre-upgrade Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## upgrade.job.tolerations Tolerations for pre-upgrade Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 8.0.1-1
+      tag: 8.1.0-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the pre-upgrade container
+    containerSecurityContext:
+      ## upgrade.job.containerSecurityContext.enabled Enable security context for the pre-upgrade container
+      enabled: false
+      ## upgrade.job.containerSecurityContext.runAsUser User ID for the pre-upgrade container
+      runAsUser: 101
+      ## upgrade.job.containerSecurityContext.runAsGroup Group ID for the pre-upgrade container
+      runAsGroup: 101
+      ## upgrade.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## upgrade.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## upgrade.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-upgrade container
+      seccompProfile:
+        type: RuntimeDefault
+      ## upgrade.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job pre-upgrade container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## upgrade.job.resources.requests The requested resources for the job pre-upgrade container
@@ -1116,13 +1310,49 @@ rollback:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## rollback.job.podAnnotations Map of annotations to add to the pre-rollback Pod
+    podAnnotations: {}
+    ## rollback.job.customPodAntiAffinity Prohibiting the scheduling of pre-rollback Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for pre-rollback Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes pre-rollback Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for pre-rollback Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes pre-rollback Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## rollback.job.nodeSelector Node labels for pre-rollback Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## rollback.job.tolerations Tolerations for pre-rollback Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 8.0.1-1
+      tag: 8.1.0-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the pre-rollback container
+    containerSecurityContext:
+      ## rollback.job.containerSecurityContext.enabled Enable security context for the pre-rollback container
+      enabled: false
+      ## rollback.job.containerSecurityContext.runAsUser User ID for the pre-rollback container
+      runAsUser: 101
+      ## rollback.job.containerSecurityContext.runAsGroup Group ID for the pre-rollback container
+      runAsGroup: 101
+      ## rollback.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## rollback.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## rollback.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-rollback container
+      seccompProfile:
+        type: RuntimeDefault
+      ## rollback.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job pre-rollback container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## rollback.job.resources.requests The requested resources for the job pre-rollback container
@@ -1169,13 +1399,49 @@ delete:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## delete.job.podAnnotations Map of annotations to add to the pre-delete Pod
+    podAnnotations: {}
+    ## delete.job.customPodAntiAffinity Prohibiting the scheduling of pre-delete Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for pre-delete Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes pre-delete Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Rollback Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes pre-delete Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## delete.job.nodeSelector Node labels for pre-delete Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## delete.job.tolerations Tolerations for pre-delete Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 8.0.1-1
+      tag: 8.1.0-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the pre-delete container
+    containerSecurityContext:
+      ## delete.job.containerSecurityContext.enabled Enable security context for the pre-delete container
+      enabled: false
+      ## delete.job.containerSecurityContext.runAsUser User ID for the pre-delete container
+      runAsUser: 101
+      ## delete.job.containerSecurityContext.runAsGroup Group ID for the pre-delete container
+      runAsGroup: 101
+      ## delete.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## delete.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## delete.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the pre-delete container
+      seccompProfile:
+        type: RuntimeDefault
+      ## delete.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job pre-delete container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## delete.job.resources.requests The requested resources for the job pre-delete container
@@ -1203,6 +1469,81 @@ delete:
     ## If set, the default configmap will not be created and the two previous parameters are ignored
     ## Must contain a key `stop.sh`
     dsStop: ""
+## Job by Clear Cache has a post-upgrade hook executes after any resources have been upgraded in Kubernetes
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He clears the Cache directory
+clearCache:
+  job:
+    ## clearCache.job.enabled Enable the execution of job Clear Cache after upgrading ONLYOFFICE Docs
+    enabled: true
+    ## clearCache.job.annotations Defines annotations that will be additionally added to Clear Cache Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
+    ## clearCache.job.podAnnotations Map of annotations to add to the Clear Cache Pod
+    podAnnotations: {}
+    ## clearCache.job.customPodAntiAffinity Prohibiting the scheduling of Clear Cache Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for Clear Cache Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes Clear Cache Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Clear Cache Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes Clear Cache Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## clearCache.job.nodeSelector Node labels for Clear Cache Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## clearCache.job.tolerations Tolerations for Clear Cache Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
+    image:
+      ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
+      repository: onlyoffice/docs-utils
+      ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
+      tag: 8.1.0-1
+      ## clearCache.job.image.pullPolicy Job by Clear Cache ONLYOFFICE Docs image pull policy
+      pullPolicy: IfNotPresent
+    ## Configure a Security Context for the Clear Cache container
+    containerSecurityContext:
+      ## clearCache.job.containerSecurityContext.enabled Enable security context for the Clear Cache container
+      enabled: false
+      ## clearCache.job.containerSecurityContext.runAsUser User ID for the Clear Cache container
+      runAsUser: 101
+      ## clearCache.job.containerSecurityContext.runAsGroup Group ID for the Clear Cache container
+      runAsGroup: 101
+      ## clearCache.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## clearCache.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## clearCache.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Clear Cache container
+      seccompProfile:
+        type: RuntimeDefault
+      ## clearCache.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
+    ## Job Clear Cache container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## clearCache.job.resources.requests The requested resources for the job Clear Cache container
+    ## clearCache.job.resources.limits The resources limits for the job Clear Cache container
+    resources:
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
+      requests: {}
+      ## limits:
+      ##   memory: "2Gi"
+      ##   cpu: "1000m"
+      limits: {}
+  existingConfigmap:
+    ## clearCache.existingConfigmap.name The name of the existing ConfigMap that contains the clears the Cache directory custom script
+    ## If set, the default configmap will not be created
+    name: ""
+    ## clearCache.existingConfigmap.keyName The name of the script containing instructions for clears the Cache directory
+    ## Must be the same as the `key` name in `clearCache.existingConfigmap.name` if a custom script is used
+    keyName: clearCache.sh
 ## Job by Grafana Dashboard has post-install and post-upgrade hooks and executes after any resources are created in Kubernetes
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
 ## He creates Config Maps containing Grafana dashboards
@@ -1213,13 +1554,49 @@ grafanaDashboard:
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
+    ## grafanaDashboard.job.podAnnotations Map of annotations to add to the Grafana Dashboard Pod
+    podAnnotations: {}
+    ## grafanaDashboard.job.customPodAntiAffinity Prohibiting the scheduling of Grafana Dashboard Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for Grafana Dashboard Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes Grafana Dashboard Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Grafana Dashboard Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes Grafana Dashboard Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## grafanaDashboard.job.nodeSelector Node labels for Grafana Dashboard Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## grafanaDashboard.job.tolerations Tolerations for Grafana Dashboard Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
     image:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
-      tag: 8.0.1-1
+      tag: 8.1.0-1
       ## grafanaDashboard.job.image.pullPolicy Job by Grafana Dashboard ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
+    ## Configure a Security Context for the Grafana Dashboard container
+    containerSecurityContext:
+      ## grafanaDashboard.job.containerSecurityContext.enabled Enable security context for the Grafana Dashboard container
+      enabled: false
+      ## grafanaDashboard.job.containerSecurityContext.runAsUser User ID for the Grafana Dashboard container
+      runAsUser: 101
+      ## grafanaDashboard.job.containerSecurityContext.runAsGroup Group ID for the Grafana Dashboard container
+      runAsGroup: 101
+      ## grafanaDashboard.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## grafanaDashboard.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## grafanaDashboard.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Grafana Dashboard container
+      seccompProfile:
+        type: RuntimeDefault
+      ## grafanaDashboard.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
     ## Job Grafana Dashboard container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## grafanaDashboard.job.resources.requests The requested resources for the job Grafana Dashboard container
@@ -1244,14 +1621,48 @@ tests:
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
   annotations: {}
+  ## tests.customPodAntiAffinity Prohibiting the scheduling of Test Pod relative to other Pods containing the specified labels on the same node
+  customPodAntiAffinity: {}
+  ## Pod affinity rules for Test Pod scheduling by nodes relative to other Pods
+  ## Pod affinity allow you to constrain which nodes Test Pod can be scheduled on based on the labels of Pods already running on that node
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAffinity: {}
+  ## Node affinity rules for Test Pod scheduling by nodes
+  ## Node affinity allow you to constrain which nodes Test Pod can be scheduled on based on node labels
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  nodeAffinity: {}
+  ## tests.nodeSelector Node labels for Test Pod assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## tests.tolerations Tolerations for Test Pod assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
   ## Test container image parameters
   image:
     ## tests.image.repository test container image name
     repository: onlyoffice/docs-utils
     ## tests.image.tag test container image tag
-    tag: 8.0.1-1
+    tag: 8.1.0-1
     ## tests.image.pullPolicy test container image pull policy
     pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Test container
+  containerSecurityContext:
+    ## tests.containerSecurityContext.enabled Enable security context for the Test container
+    enabled: false
+    ## tests.containerSecurityContext.runAsUser User ID for the Test container
+    runAsUser: 101
+    ## tests.containerSecurityContext.runAsGroup Group ID for the Test container
+    runAsGroup: 101
+    ## tests.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## tests.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## tests.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Test container
+    seccompProfile:
+      type: RuntimeDefault
+    ## tests.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
   ## test container resource requests and limits
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## tests.resources.requests The requested resources for the test container

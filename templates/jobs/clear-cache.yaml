@@ -1,0 +1,91 @@
+{{- if and .Values.clearCache.job.enabled (not .Values.persistence.storageS3) }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clear-cache
+  namespace: {{ include "ds.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: clear-cache
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if or .Values.commonAnnotations .Values.clearCache.job.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.clearCache.job.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: clear-cache
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.clearCache.job.podAnnotations }}
+      annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.clearCache.job.podAnnotations "context" $ ) | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "ds.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.clearCache.job.customPodAntiAffinity .Values.clearCache.job.podAffinity .Values.clearCache.job.nodeAffinity }}
+      affinity:
+        {{- with .Values.clearCache.job.customPodAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.clearCache.job.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.clearCache.job.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.nodeSelector .Values.clearCache.job.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.clearCache.job.nodeSelector) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.tolerations .Values.clearCache.job.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.clearCache.job.tolerations) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      volumes:
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: {{ template "ds.pvc.name" . }}
+        - name: clear-cache-scripts
+          configMap:
+            name: {{ template "ds.clearCache.configMapName" . }}
+            defaultMode: 0755
+      containers:
+        - name: clear-cache
+          image: {{ .Values.clearCache.job.image.repository }}:{{ .Values.clearCache.job.image.tag }}
+          imagePullPolicy: {{ .Values.clearCache.job.image.pullPolicy }}
+          {{- if .Values.clearCache.job.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.clearCache.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources: {{- toYaml .Values.clearCache.job.resources | nindent 12 }}
+          volumeMounts:
+          - name: ds-files
+            mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
+          - name: clear-cache-scripts
+            mountPath: /scripts/{{ .Values.clearCache.existingConfigmap.keyName }}
+            subPath: {{ .Values.clearCache.existingConfigmap.keyName }}
+          command: ["/bin/sh", "-c"]
+          {{- if .Values.webProxy.enabled }}
+          args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /scripts/{{ .Values.clearCache.existingConfigmap.keyName }}"]
+          {{- else }}
+          args: ["/scripts/{{ .Values.clearCache.existingConfigmap.keyName }}"]
+          {{- end }}
+      restartPolicy: Never
+{{- end }}
