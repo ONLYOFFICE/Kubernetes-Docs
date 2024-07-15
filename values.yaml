@@ -752,13 +752,7 @@ converter:
   ## Update strategy used to replace old Pods by new ones. Allowed values: `RollingUpdate` or `Recreate`
   ## converter.updateStrategy.type Docservice deployment update strategy type
   updateStrategy:
-    type: RollingUpdate
-    ## converter.updateStrategy.rollingUpdate Used only when `converter.updateStrategy.type=RollingUpdate`
-    rollingUpdate:
-      ## converter.updateStrategy.rollingUpdate.maxUnavailable Maximum number of Converter Pods unavailable during the update process
-      maxUnavailable: 25%
-      ## converter.updateStrategy.rollingUpdate.maxSurge Maximum number of Converter Pods created over the desired number of Pods
-      maxSurge: 25%
+    type: Recreate
   ## converter.customPodAntiAffinity Prohibiting the scheduling of Converter Pods relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
