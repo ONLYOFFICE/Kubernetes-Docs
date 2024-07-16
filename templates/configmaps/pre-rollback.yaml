@@ -33,6 +33,8 @@ data:
     if [ $? -ne 0 ]; then	
       echo -e "\e[0;31m DB is not available \e[0m"
       exit 1
+    else
+      echo -e "\e[0;32m Successful connection to the DB \e[0m"
     fi
     {{- if not .Values.persistence.storageS3 }}
     FILES_DIR=/var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files/
@@ -72,11 +74,13 @@ data:
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} \
+      --variable=ON_ERROR_STOP=ON \
       --file=/scripts/{{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
     PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
       --dbname={{ .Values.connections.dbName }} \
+      --variable=ON_ERROR_STOP=ON \
       --file=/scripts/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
     {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
     mysql -h {{ .Values.connections.dbHost }} \
@@ -90,5 +94,9 @@ data:
       -p$DB_PWD \
       {{ .Values.connections.dbName }} < /scripts/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
     {{- end }}
+    if [ $? -ne 0 ]; then
+      echo -e "\e[0;31m The DATABASE preparation scripts could not be executed \e[0m"
+      exit 1
+    fi
     echo work done
 {{- end }}
