@@ -1,5 +1,16 @@
 # Change log
 
+## 4.2.1
+
+### Changes
+
+* Changed the default value for `converter.updateStrategy.type` to `Recreate`
+* Released ONLYOFFICE Docs [v8.1.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#811)
+
+### Fixes
+
+* Fixed a bug related to cases when the installation/update continued with database tables recreation errors, an additional check of database availability is added in Jobs scripts
+
 ## 4.2.0
 
 ### New Features
