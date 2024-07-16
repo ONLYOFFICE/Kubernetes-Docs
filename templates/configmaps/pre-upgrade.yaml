@@ -38,6 +38,8 @@ data:
       if [ $? -ne 0 ]; then
         echo -e "\e[0;31m DB is not available \e[0m"
         exit 1
+      else
+        echo -e "\e[0;32m Successful connection to the DB \e[0m"
       fi
       if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
         wget -O /scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }} \
@@ -58,11 +60,13 @@ data:
         --port={{ .Values.connections.dbPort }} \
         --user={{ .Values.connections.dbUser }} \
         --dbname={{ .Values.connections.dbName }} \
+        --variable=ON_ERROR_STOP=ON \
         --file=/scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
       PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
         --port={{ .Values.connections.dbPort }} \
         --user={{ .Values.connections.dbUser }} \
         --dbname={{ .Values.connections.dbName }} \
+        --variable=ON_ERROR_STOP=ON \
         --file=/scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
       {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
       mysql -h {{ .Values.connections.dbHost }} \
@@ -76,6 +80,10 @@ data:
         -p$DB_PWD \
         {{ .Values.connections.dbName }} < /scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
       {{- end }}
+      if [ $? -ne 0 ]; then
+        echo -e "\e[0;31m The DATABASE preparation scripts could not be executed \e[0m"
+        exit 1
+      fi
       echo work done
     fi
 {{- end }}
