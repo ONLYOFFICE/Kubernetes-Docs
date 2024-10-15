@@ -111,6 +111,7 @@ spec:
           configMap:
             name: {{ .Values.extraThemes.configMap }}
         {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.converter.terminationGracePeriodSeconds }}
       {{- with .Values.converter.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}

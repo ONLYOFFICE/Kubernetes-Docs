@@ -468,6 +468,8 @@ docservice:
     ##       periodSeconds: 15
     ##     selectPolicy: Max
     behavior: {}
+  ## docservice.terminationGracePeriodSeconds The time to terminate gracefully during which the Docservice Pod will have the `Terminating` status
+  terminationGracePeriodSeconds: 30
   ## Docservice initContainers parameters
   ## Containers that run before docservice and proxy containers in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -860,6 +862,8 @@ converter:
     ##       periodSeconds: 15
     ##     selectPolicy: Max
     behavior: {}
+  ## converter.terminationGracePeriodSeconds The time to terminate gracefully during which the Converter Pod will have the `Terminating` status
+  terminationGracePeriodSeconds: 30
   ## Converter initContainers parameters
   ## Containers that run before converter container in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -1011,6 +1015,8 @@ example:
   ## example.tolerations Tolerations for Example Pods assignment
   ## If set to, it takes priority over the `tolerations`
   tolerations: []
+  ## example.terminationGracePeriodSeconds The time to terminate gracefully during which the Example Pod will have the `Terminating` status
+  terminationGracePeriodSeconds: 30
   ## Example container image parameters
   image:
     ## example.image.repository example container image name
