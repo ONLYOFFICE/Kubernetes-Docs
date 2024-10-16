@@ -1,5 +1,17 @@
 # Change log
 
+## 4.3.0
+
+### New Features
+
+* Added a signal control processing handler as the first process in Docs containers
+* Added the ability to set up the `terminationGracePeriodSeconds`
+* Added the ability to generate a hash that will be appended to the ONLYOFFICE Docs version in the request URLs
+
+### Changes
+
+* Released ONLYOFFICE Docs [v8.2.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#820)
+
 ## 4.2.2
 
 ### Changes
