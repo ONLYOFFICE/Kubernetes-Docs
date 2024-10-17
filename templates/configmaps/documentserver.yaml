@@ -11,6 +11,7 @@ metadata:
   annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
+  APPLICATION_NAME: {{ .Values.product.name }}
   DB_TYPE: {{ template "ds.db.type" . }}
   DB_USER: {{ .Values.connections.dbUser }}
   DB_HOST: {{ .Values.connections.dbHost }}

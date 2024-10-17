@@ -69,6 +69,7 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.example.terminationGracePeriodSeconds }}
       containers:
       - name: example
         image: {{ .Values.example.image.repository }}:{{ .Values.example.image.tag }}

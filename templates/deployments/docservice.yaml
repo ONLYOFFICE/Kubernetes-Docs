@@ -123,6 +123,7 @@ spec:
           configMap:
             name: ds-welcome-page
         {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.docservice.terminationGracePeriodSeconds }}
       {{- with .Values.docservice.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}
