@@ -107,6 +107,39 @@ Return Redis password
 {{- end -}}
 
 {{/*
+Get the Redis Sentinel password secret
+*/}}
+{{- define "ds.redis.sentinel.secretName" -}}
+{{- if or .Values.connections.redisSentinelPassword .Values.connections.redisSentinelNoPass -}}
+    {{- printf "%s-redis-sentinel" .Release.Name -}}
+{{- else if .Values.connections.redisSentinelExistingSecret -}}
+    {{- printf "%s" (tpl .Values.connections.redisSentinelExistingSecret $) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for Redis Sentinel
+*/}}
+{{- define "ds.redis.sentinel.createSecret" -}}
+{{- if or .Values.connections.redisSentinelPassword .Values.connections.redisSentinelNoPass (not .Values.connections.redisSentinelExistingSecret) -}}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return Redis Sentinel password
+*/}}
+{{- define "ds.redis.sentinel.password" -}}
+{{- if not (empty .Values.connections.redisSentinelPassword) }}
+    {{- .Values.connections.redisSentinelPassword }}
+{{- else if .Values.connections.redisSentinelNoPass }}
+    {{- printf "" }}
+{{- else }}
+    {{- required "A Redis Sentinel Password is required!" .Values.connections.redisSentinelPassword }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Get the info auth password secret
 */}}
 {{- define "ds.info.secretName" -}}

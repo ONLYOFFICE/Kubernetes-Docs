@@ -222,6 +222,13 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.redis.secretName" . }}
                 key: {{ .Values.connections.redisSecretKeyName }}
+          {{- if eq .Values.connections.redisConnectorName "ioredis" }}
+          - name: REDIS_SENTINEL_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.redis.sentinel.secretName" . }}
+                key: {{ .Values.connections.redisSentinelSecretKeyName }}
+          {{- end }}
           envFrom:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}
