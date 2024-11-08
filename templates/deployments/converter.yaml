@@ -150,6 +150,9 @@ spec:
                 name: {{ template "ds.redis.sentinel.secretName" . }}
                 key: {{ .Values.connections.redisSentinelSecretKeyName }}
           {{- end }}
+          {{- with .Values.converter.extraEnvVars }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
           envFrom:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}

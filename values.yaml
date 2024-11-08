@@ -601,6 +601,12 @@ docservice:
     ##   memory: "2Gi"
     ##   cpu: "1000m"
     limits: {}
+  ## docservice.extraEnvVars An array with extra env variables for the Docservice container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
 ## Parameters of the proxy container of the Docservice deployment
 ##
 proxy:
@@ -750,6 +756,12 @@ proxy:
     ##   memory: "2Gi"
     ##   cpu: "1000m"
     limits: {}
+  ## proxy.extraEnvVars An array with extra env variables for the Proxy container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
 
 ## Onlyoffice Docs Converter Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
@@ -942,6 +954,12 @@ converter:
     ##   memory: "2Gi"
     ##   cpu: "1000m"
     limits: {}
+  ## converter.extraEnvVars An array with extra env variables for the Converter container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
 
 ## Onlyoffice Docs Example StatefulSet parameters
 ##
@@ -1084,6 +1102,12 @@ example:
     ##   memory: "128Mi"
     ##   cpu: "250m"
     limits: {}
+  ## example.extraEnvVars An array with extra env variables for the Example container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
   ## Example config for overriding default values
   extraConf:
     ## example.extraConf.configMap The name of the ConfigMap containing the json file that override the default values

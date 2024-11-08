@@ -150,7 +150,7 @@ spec:
           livenessProbe: {{- omit .Values.proxy.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
-          {{- if or .Values.proxy.infoAllowedIP .Values.proxy.infoAllowedUser }}
+          {{- if or .Values.proxy.infoAllowedIP .Values.proxy.infoAllowedUser .Values.proxy.extraEnvVars }}
           env:
           {{- if .Values.proxy.infoAllowedIP }}
           - name: INFO_ALLOWED_IP
@@ -164,6 +164,9 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.info.secretName" . }}
                 key: {{ .Values.proxy.infoAllowedSecretKeyName }}
+          {{- end }}
+          {{- with .Values.proxy.extraEnvVars }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
           {{- end }}
           envFrom:
@@ -228,6 +231,9 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.redis.sentinel.secretName" . }}
                 key: {{ .Values.connections.redisSentinelSecretKeyName }}
+          {{- end }}
+          {{- with .Values.docservice.extraEnvVars }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
           envFrom:
           - secretRef:
