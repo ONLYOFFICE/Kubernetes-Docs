@@ -153,8 +153,12 @@ spec:
           livenessProbe: {{- omit .Values.proxy.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
-          {{- if or .Values.proxy.infoAllowedIP .Values.proxy.infoAllowedUser .Values.proxy.extraEnvVars }}
+          {{- if or .Values.proxy.infoAllowedIP .Values.proxy.infoAllowedUser .Values.proxy.extraEnvVars .Values.proxy.logFormat }}
           env:
+          {{- if .Values.proxy.logFormat }}
+          - name: NGINX_LOG_FORMAT
+            value: {{ join "' '" .Values.proxy.logFormat }}
+          {{- end }}
           {{- if .Values.proxy.infoAllowedIP }}
           - name: INFO_ALLOWED_IP
             value: {{ join " " .Values.proxy.infoAllowedIP }}
