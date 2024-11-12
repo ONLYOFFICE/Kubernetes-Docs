@@ -123,6 +123,9 @@ spec:
           configMap:
             name: ds-welcome-page
         {{- end }}
+        {{- with .Values.docservice.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       terminationGracePeriodSeconds: {{ .Values.docservice.terminationGracePeriodSeconds }}
       {{- with .Values.docservice.initContainers }}
       initContainers:
@@ -186,6 +189,9 @@ spec:
           - name: ds-welcome-page
             mountPath: /etc/nginx/includes/ds-example.conf
             subPath: ds-example.conf
+          {{- end }}
+          {{- with .Values.proxy.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
 
         - name: docservice
@@ -259,4 +265,7 @@ spec:
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
             subPath: {{ .Values.extraThemes.filename }}
+          {{- end }}
+          {{- with .Values.docservice.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}

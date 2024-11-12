@@ -95,16 +95,26 @@ spec:
             name: {{ template "ds.jwt.secretName" . }}
         - configMapRef:
             name: example
-        {{- if .Values.example.extraConf.configMap }}
+        {{- if or .Values.example.extraConf.configMap .Values.example.extraVolumeMounts }}
         volumeMounts:
+          {{- if .Values.example.extraConf.configMap }}
           - name: example-custom-file
             mountPath: /etc/{{ .Values.product.name }}/documentserver-example/{{ .Values.example.extraConf.filename }}
             subPath: {{ .Values.example.extraConf.filename }}
+          {{- end }}
+          {{- with .Values.example.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
         {{- end }}
-      {{- if .Values.example.extraConf.configMap }}
+      {{- if or .Values.example.extraConf.configMap .Values.example.extraVolumes }}
       volumes:
+        {{- if .Values.example.extraConf.configMap }}
         - name: example-custom-file
           configMap:
             name: {{ .Values.example.extraConf.configMap }}
+        {{- end }}
+        {{- with .Values.example.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
 {{- end }}

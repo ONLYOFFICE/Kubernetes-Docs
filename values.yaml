@@ -496,6 +496,13 @@ docservice:
   ##     - name: ds-files
   ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
   initContainers: []
+  ## docservice.extraVolumes An array with extra volumes for the docservice Pod
+  ## Example:
+  ## extraVolumes:
+  ##   - name: my-volume
+  ##     configMap:
+  ##       name: my-cm
+  extraVolumes: []
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:
@@ -607,6 +614,13 @@ docservice:
   ##   - name: my_env
   ##     value: "my_value"
   extraEnvVars: []
+  ## docservice.extraVolumeMounts An array with extra volume mounts for the Docservice container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
 ## Parameters of the proxy container of the Docservice deployment
 ##
 proxy:
@@ -762,6 +776,13 @@ proxy:
   ##   - name: my_env
   ##     value: "my_value"
   extraEnvVars: []
+  ## proxy.extraVolumeMounts An array with extra volume mounts for the Proxy container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
 
 ## Onlyoffice Docs Converter Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
@@ -902,6 +923,13 @@ converter:
   ##     - name: ds-files
   ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
   initContainers: []
+  ## converter.extraVolumes An array with extra volumes for the Converter Pod
+  ## Example:
+  ## extraVolumes:
+  ##   - name: my-volume
+  ##     configMap:
+  ##       name: my-cm
+  extraVolumes: []
   ## Converter container image parameters
   image:
     ## converter.image.repository converter container image repository
@@ -960,6 +988,13 @@ converter:
   ##   - name: my_env
   ##     value: "my_value"
   extraEnvVars: []
+  ## converter.extraVolumeMounts An array with extra volume mounts for the Converter container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
 
 ## Onlyoffice Docs Example StatefulSet parameters
 ##
@@ -1049,6 +1084,13 @@ example:
   tolerations: []
   ## example.terminationGracePeriodSeconds The time to terminate gracefully during which the Example Pod will have the `Terminating` status
   terminationGracePeriodSeconds: 30
+  ## example.extraVolumes An array with extra volumes for the Example Pod
+  ## Example:
+  ## extraVolumes:
+  ##   - name: my-volume
+  ##     configMap:
+  ##       name: my-cm
+  extraVolumes: []
   ## Example container image parameters
   image:
     ## example.image.repository example container image name
@@ -1115,6 +1157,13 @@ example:
     ## example.extraConf.filename The name of the json file that contains custom values
     ## Must be the same as the `key` name in `example.extraConf.ConfigMap`
     filename: local.json
+  ## example.extraVolumeMounts An array with extra volume mounts for the Example container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
 
 ## Onlyoffice Docs ingress parameters
 ##
