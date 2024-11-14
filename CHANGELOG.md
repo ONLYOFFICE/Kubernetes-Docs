@@ -1,5 +1,18 @@
 # Change log
 
+## 4.4.0
+
+### New Features
+
+* Added the ability to connect to Redis Sentinel nodes with a password
+* Added the ability to set additional custom env variables for containers
+* Added the ability to add additional custom volumes for containers
+* Added the ability to set up Nginx log format in the Proxy container
+
+### Changes
+
+* Released ONLYOFFICE Docs [v8.2.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#821)
+
 ## 4.3.0
 
 ### New Features
