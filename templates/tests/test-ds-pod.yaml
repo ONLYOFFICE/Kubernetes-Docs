@@ -71,6 +71,13 @@ spec:
         secretKeyRef:
           name: {{ template "ds.redis.secretName" . }}
           key: {{ .Values.connections.redisSecretKeyName }}
+    {{- if eq .Values.connections.redisConnectorName "ioredis" }}
+    - name: REDIS_SENTINEL_PWD
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "ds.redis.sentinel.secretName" . }}
+          key: {{ .Values.connections.redisSentinelSecretKeyName }}
+    {{- end }}
     - name: STORAGE_S3
       value: {{ .Values.persistence.storageS3 | quote }}
     envFrom:
@@ -84,11 +91,7 @@ spec:
     - name: test-ds
       mountPath: /scripts/test_ds.py
       subPath: test_ds.py
-    {{- if .Values.webProxy.enabled }}
-    command: ['http_proxy={{ .Values.webProxy.http }}', 'https_proxy={{ .Values.webProxy.https }}', 'no_proxy={{ .Values.webProxy.noProxy }}', 'python', '/scripts/test_ds.py']
-    {{- else }}
     command: ['python', '/scripts/test_ds.py']
-    {{- end }}
   volumes:
   {{- if not .Values.persistence.storageS3 }}
   - name: ds-files

@@ -58,10 +58,7 @@ connections:
   ## - 10.244.0.79:6379
   ## - 192.168.1.25:6379
   redisClusterNodes: []
-  ## connections.redisSentinelGroupName Name of a group of Redis instances composed of a master and one or more slaves
-  ## Used if `connections.redisConnectorName` is set to `ioredis`
-  redisSentinelGroupName: mymaster
-  ## connections.redisExistingSecret Name of existing secret to use for Redis passwords
+  ## connections.redisExistingSecret Name of existing secret to use for Redis password
   ## Must contain the key specified in `connections.redisSecretKeyName`
   ## The password from this secret overrides the value for the password set in the `options` object in `local.json` if you add custom configuration file
   redisExistingSecret: redis
@@ -75,6 +72,23 @@ connections:
   ## connections.redisNoPass Defines whether to use a Redis auth without a password
   ## If the connection to Redis server does not require a password, set the value to `true`
   redisNoPass: false
+  ## connections.redisSentinelGroupName Name of a group of Redis instances composed of a master and one or more slaves
+  ## Used if `connections.redisConnectorName` is set to `ioredis`
+  redisSentinelGroupName: mymaster
+  ## connections.redisSentinelExistingSecret Name of existing secret to use for Redis Sentinel password
+  ## Must contain the key specified in `connections.redisSentinelSecretKeyName`
+  ## The password from this secret overrides the value for the password set in the `iooptions` object in `local.json` if you add custom configuration file
+  redisSentinelExistingSecret: ""
+  ## connections.redisSentinelSecretKeyName The name of the key that contains the Redis Sentinel user password
+  ## If you set a password in `redisSentinelPassword`, a secret will be automatically created, the key name of which will be the value set here
+  redisSentinelSecretKeyName: sentinel-password
+  ## connections.redisSentinelPassword The password set for the Redis Sentinel account
+  ## If set to, it takes priority over the `connections.redisSentinelExistingSecret`
+  ## The value in this parameter overrides the value set in the `iooptions` object in `local.json` if you add custom configuration file
+  redisSentinelPassword: ""
+  ## connections.redisSentinelNoPass Defines whether to use a Redis Sentinel auth without a password
+  ## If the connection to Redis Sentinel does not require a password, set the value to `true`
+  redisSentinelNoPass: true
   ## connections.amqpType Defines the AMQP server type
   ## Possible values are `rabbitmq` or `activemq`
   amqpType: rabbitmq
@@ -482,6 +496,13 @@ docservice:
   ##     - name: ds-files
   ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
   initContainers: []
+  ## docservice.extraVolumes An array with extra volumes for the docservice Pod
+  ## Example:
+  ## extraVolumes:
+  ##   - name: my-volume
+  ##     configMap:
+  ##       name: my-cm
+  extraVolumes: []
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:
@@ -490,7 +511,7 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 8.2.0-1
+    tag: 8.2.1-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Docservice container
@@ -587,6 +608,19 @@ docservice:
     ##   memory: "2Gi"
     ##   cpu: "1000m"
     limits: {}
+  ## docservice.extraEnvVars An array with extra env variables for the Docservice container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
+  ## docservice.extraVolumeMounts An array with extra volume mounts for the Docservice container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
 ## Parameters of the proxy container of the Docservice deployment
 ##
 proxy:
@@ -595,6 +629,14 @@ proxy:
   ## Example:
   ## accessLog: "main"
   accessLog: "off"
+  ## proxy.logFormat Defines the format of log entries using text and various variables
+  ## ref: https://nginx.org/en/docs/http/ngx_http_log_module.html#log_format
+  ## Example:
+  ## logFormat:
+  ## - '$remote_addr - $remote_user [$time_local] "$request" '
+  ## - '$status $body_bytes_sent "$http_referer" '
+  ## - '"$http_user_agent" "$http_x_forwarded_for" $request_time'
+  logFormat: []
   ## proxy.gzipProxied Defines the nginx config gzip_proxied directive
   ## ref: https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied
   gzipProxied: "off"
@@ -639,7 +681,7 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 8.2.0-1
+    tag: 8.2.1-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Proxy container
@@ -736,6 +778,19 @@ proxy:
     ##   memory: "2Gi"
     ##   cpu: "1000m"
     limits: {}
+  ## proxy.extraEnvVars An array with extra env variables for the Proxy container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
+  ## proxy.extraVolumeMounts An array with extra volume mounts for the Proxy container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
 
 ## Onlyoffice Docs Converter Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
@@ -876,6 +931,13 @@ converter:
   ##     - name: ds-files
   ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
   initContainers: []
+  ## converter.extraVolumes An array with extra volumes for the Converter Pod
+  ## Example:
+  ## extraVolumes:
+  ##   - name: my-volume
+  ##     configMap:
+  ##       name: my-cm
+  extraVolumes: []
   ## Converter container image parameters
   image:
     ## converter.image.repository converter container image repository
@@ -883,7 +945,7 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 8.2.0-1
+    tag: 8.2.1-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Converter container
@@ -928,6 +990,19 @@ converter:
     ##   memory: "2Gi"
     ##   cpu: "1000m"
     limits: {}
+  ## converter.extraEnvVars An array with extra env variables for the Converter container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
+  ## converter.extraVolumeMounts An array with extra volume mounts for the Converter container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
 
 ## Onlyoffice Docs Example StatefulSet parameters
 ##
@@ -1017,12 +1092,19 @@ example:
   tolerations: []
   ## example.terminationGracePeriodSeconds The time to terminate gracefully during which the Example Pod will have the `Terminating` status
   terminationGracePeriodSeconds: 30
+  ## example.extraVolumes An array with extra volumes for the Example Pod
+  ## Example:
+  ## extraVolumes:
+  ##   - name: my-volume
+  ##     configMap:
+  ##       name: my-cm
+  extraVolumes: []
   ## Example container image parameters
   image:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 8.2.0-2
+    tag: 8.2.1-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Example container
@@ -1070,6 +1152,12 @@ example:
     ##   memory: "128Mi"
     ##   cpu: "250m"
     limits: {}
+  ## example.extraEnvVars An array with extra env variables for the Example container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
   ## Example config for overriding default values
   extraConf:
     ## example.extraConf.configMap The name of the ConfigMap containing the json file that override the default values
@@ -1077,6 +1165,13 @@ example:
     ## example.extraConf.filename The name of the json file that contains custom values
     ## Must be the same as the `key` name in `example.extraConf.ConfigMap`
     filename: local.json
+  ## example.extraVolumeMounts An array with extra volume mounts for the Example container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
 
 ## Onlyoffice Docs ingress parameters
 ##
@@ -1162,7 +1257,7 @@ install:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 8.2.0-1
+      tag: 8.2.1-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-install container
@@ -1243,7 +1338,7 @@ upgrade:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 8.2.0-1
+      tag: 8.2.1-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-upgrade container
@@ -1332,7 +1427,7 @@ rollback:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 8.2.0-1
+      tag: 8.2.1-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-rollback container
@@ -1421,7 +1516,7 @@ delete:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 8.2.0-1
+      tag: 8.2.1-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-delete container
@@ -1502,7 +1597,7 @@ clearCache:
       ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
-      tag: 8.2.0-1
+      tag: 8.2.1-1
       ## clearCache.job.image.pullPolicy Job by Clear Cache ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Clear Cache container
@@ -1576,7 +1671,7 @@ grafanaDashboard:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
-      tag: 8.2.0-1
+      tag: 8.2.1-1
       ## grafanaDashboard.job.image.pullPolicy Job by Grafana Dashboard ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Grafana Dashboard container
@@ -1642,7 +1737,7 @@ tests:
     ## tests.image.repository test container image name
     repository: onlyoffice/docs-utils
     ## tests.image.tag test container image tag
-    tag: 8.2.0-1
+    tag: 8.2.1-1
     ## tests.image.pullPolicy test container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Test container

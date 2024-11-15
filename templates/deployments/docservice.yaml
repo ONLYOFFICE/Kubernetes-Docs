@@ -123,6 +123,9 @@ spec:
           configMap:
             name: ds-welcome-page
         {{- end }}
+        {{- with .Values.docservice.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       terminationGracePeriodSeconds: {{ .Values.docservice.terminationGracePeriodSeconds }}
       {{- with .Values.docservice.initContainers }}
       initContainers:
@@ -150,8 +153,12 @@ spec:
           livenessProbe: {{- omit .Values.proxy.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
-          {{- if or .Values.proxy.infoAllowedIP .Values.proxy.infoAllowedUser }}
+          {{- if or .Values.proxy.infoAllowedIP .Values.proxy.infoAllowedUser .Values.proxy.extraEnvVars .Values.proxy.logFormat }}
           env:
+          {{- if .Values.proxy.logFormat }}
+          - name: NGINX_LOG_FORMAT
+            value: {{ join "' '" .Values.proxy.logFormat }}
+          {{- end }}
           {{- if .Values.proxy.infoAllowedIP }}
           - name: INFO_ALLOWED_IP
             value: {{ join " " .Values.proxy.infoAllowedIP }}
@@ -164,6 +171,9 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.info.secretName" . }}
                 key: {{ .Values.proxy.infoAllowedSecretKeyName }}
+          {{- end }}
+          {{- with .Values.proxy.extraEnvVars }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
           {{- end }}
           envFrom:
@@ -183,6 +193,9 @@ spec:
           - name: ds-welcome-page
             mountPath: /etc/nginx/includes/ds-example.conf
             subPath: ds-example.conf
+          {{- end }}
+          {{- with .Values.proxy.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
 
         - name: docservice
@@ -222,6 +235,16 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.redis.secretName" . }}
                 key: {{ .Values.connections.redisSecretKeyName }}
+          {{- if eq .Values.connections.redisConnectorName "ioredis" }}
+          - name: REDIS_SENTINEL_PWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "ds.redis.sentinel.secretName" . }}
+                key: {{ .Values.connections.redisSentinelSecretKeyName }}
+          {{- end }}
+          {{- with .Values.docservice.extraEnvVars }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
           envFrom:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}
@@ -246,4 +269,7 @@ spec:
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
             subPath: {{ .Values.extraThemes.filename }}
+          {{- end }}
+          {{- with .Values.docservice.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
