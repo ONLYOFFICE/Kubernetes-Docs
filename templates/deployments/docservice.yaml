@@ -133,7 +133,11 @@ spec:
       {{- end }}
       containers:
         - name: proxy
+          {{- if .Values.global }}
+          image: {{ include "ds.imageRepository" (list . .Values.proxy.image.repository) }}:{{ .Values.proxy.image.tag }}
+          {{- else }}
           image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
+          {{- end }}
           imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
           {{- if .Values.proxy.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.proxy.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -199,7 +203,11 @@ spec:
           {{- end }}
 
         - name: docservice
-          image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }}
+          {{- if .Values.global }}
+          image: {{ include "ds.imageRepository" (list . .Values.docservice.image.repository) }}:{{ .Values.docservice.image.tag }}
+          {{- else }}
+          image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }
+          {{- end }}
           imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
           {{- if .Values.docservice.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.docservice.containerSecurityContext "enabled" | toYaml | nindent 12 }}

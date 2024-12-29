@@ -507,3 +507,39 @@ Get ds url for example
     {{- printf "%s" (tpl .Values.example.dsUrl $) -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get the Docs image repository
+*/}}
+{{- define "ds.imageRepository" -}}
+{{- $context := index . 0 -}}
+{{- $repo := index . 1 -}}
+{{- $installationType := $context.Values.global.installationType -}}
+{{- $repoProductName := $context.Values.product.name -}}
+{{- if and $installationType (eq $repoProductName "onlyoffice" ) (contains (printf "%s/" $repoProductName) $repo) -}}
+    {{- if (eq $installationType "DEVELOPER" ) -}}
+        {{- $installationType = "-de" -}}
+    {{- else if (eq $installationType "ENTERPRISE" ) -}}
+        {{- $installationType = "-ee" -}}
+    {{- else if (eq $installationType "COMMUNITY" ) -}}
+        {{- $installationType = "" -}}
+    {{- end -}}
+    {{- if and $installationType (not (contains "-de" $repo)) (not (contains "-ee" $repo)) -}}
+        {{- printf "%s%s" $repo $installationType -}}
+    {{- else if and $installationType (contains "-de" $repo) -}}
+        {{- $repo | replace "-de" $installationType -}}
+    {{- else if and $installationType (contains "-ee" $repo) -}}
+        {{- $repo | replace "-ee" $installationType -}}
+    {{- else if not $installationType -}}
+        {{- if contains "-de" $repo -}}
+            {{- trimSuffix "-de" $repo -}}
+        {{- else if contains "-ee" $repo -}}
+            {{- trimSuffix "-ee" $repo -}}
+        {{- else -}}
+            {{- $repo -}}
+        {{- end -}}
+    {{- end -}}
+{{- else -}}
+    {{- $repo -}}
+{{- end -}}
+{{- end -}}
