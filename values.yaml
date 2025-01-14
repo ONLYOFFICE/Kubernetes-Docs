@@ -126,6 +126,10 @@ webProxy:
 ## privateCluster Specify whether the k8s cluster is used in a private network without internet access
 ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
 privateCluster: false
+## commonNameSuffix The name that will be added to the name of all created resources as a suffix
+## Example:
+## commonNameSuffix: "{{ .Chart.Name }}"
+commonNameSuffix: ""
 ## namespaceOverride The name of the namespace in which Onlyoffice Docs will be deployed
 ## If not set, the name will be taken from .Release.Namespace
 namespaceOverride: ""

@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: dashboard-binding
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "dashboard-binding") }}
   namespace: {{ include "ds.grafana.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
@@ -17,10 +17,10 @@ metadata:
     {{- end }}
 subjects:
 - kind: ServiceAccount
-  name: dashboard-sa
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "dashboard-sa") }}
   namespace: {{ include "ds.grafana.namespace" . | quote }}
 roleRef:
   kind: Role
-  name: dashboard-role
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "dashboard-role") }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}

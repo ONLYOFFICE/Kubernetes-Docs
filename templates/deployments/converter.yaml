@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: converter
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}
   namespace: {{ include "ds.namespace" . | quote }}
   labels:
-    app: converter
+    app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}
@@ -18,7 +18,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app: converter
+      app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}
       {{- if .Values.commonLabels }}
       {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
       {{- end }}
@@ -28,7 +28,7 @@ spec:
   template:
     metadata:
       labels:
-        app: converter
+        app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}
         {{- if .Values.commonLabels }}
         {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
         {{- end }}
@@ -53,7 +53,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - converter
+                  - {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}
               topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
             weight: {{ .Values.podAntiAffinity.weight }}
           {{- else if eq .Values.podAntiAffinity.type "hard" }}
@@ -63,7 +63,7 @@ spec:
               - key: app
                 operator: In
                 values:
-                - converter
+                - {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}
             topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
           {{- end }}
           {{- with .Values.converter.customPodAntiAffinity }}
@@ -164,7 +164,7 @@ spec:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}
           - configMapRef:
-              name: documentserver
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files

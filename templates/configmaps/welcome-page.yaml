@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ds-welcome-page
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "ds-welcome-page") }}
   namespace: {{ include "ds.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:

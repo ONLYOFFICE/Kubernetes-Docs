@@ -2,10 +2,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pre-delete
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "pre-delete") }}
   namespace: {{ include "ds.namespace" . | quote }}
   labels:
-    app.kubernetes.io/component: delete
+    app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "delete") }}
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}
@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: delete
+        app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "delete") }}
         {{- if .Values.commonLabels }}
         {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
         {{- end }}

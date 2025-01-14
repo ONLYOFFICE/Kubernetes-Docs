@@ -2,10 +2,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: grafana-dashboard
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "grafana-dashboard") }}
   namespace: {{ include "ds.grafana.namespace" . | quote }}
   labels:
-    app.kubernetes.io/component: grafana-dashboard
+    app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "grafana-dashboard") }}
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}
@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: grafana-dashboard
+        app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "grafana-dashboard") }}
         {{- if .Values.commonLabels }}
         {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
         {{- end }}
@@ -30,7 +30,7 @@ spec:
       annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.grafanaDashboard.job.podAnnotations "context" $ ) | nindent 8 }}
       {{- end }}
     spec:
-      serviceAccountName: dashboard-sa
+      serviceAccountName: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "dashboard-sa") }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
       {{- end }}
@@ -62,7 +62,7 @@ spec:
       volumes:
       - name: grafana-dashboard
         configMap:
-          name: grafana-dashboard
+          name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "grafana-dashboard") }}
           defaultMode: 0755
       containers:
       - name: grafana-dashboard

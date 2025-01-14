@@ -16,7 +16,7 @@ Get the DB password secret
 */}}
 {{- define "ds.db.secretName" -}}
 {{- if .Values.connections.dbPassword -}}
-    {{- printf "%s-db" .Release.Name -}}
+    {{- printf "%s-%s" .Release.Name (include "ds.resources.name" (list . .Values.commonNameSuffix "db")) -}}
 {{- else if .Values.connections.dbExistingSecret -}}
     {{- printf "%s" (tpl .Values.connections.dbExistingSecret $) -}}
 {{- end -}}
@@ -47,7 +47,7 @@ Get the RabbitMQ password secret
 */}}
 {{- define "ds.rabbitmq.secretName" -}}
 {{- if .Values.connections.amqpPassword -}}
-    {{- printf "%s-rabbitmq" .Release.Name -}}
+    {{- printf "%s-%s" .Release.Name (include "ds.resources.name" (list . .Values.commonNameSuffix "rabbitmq")) -}}
 {{- else if .Values.connections.amqpExistingSecret -}}
     {{- printf "%s" (tpl .Values.connections.amqpExistingSecret $) -}}
 {{- end -}}
@@ -78,7 +78,7 @@ Get the Redis password secret
 */}}
 {{- define "ds.redis.secretName" -}}
 {{- if or .Values.connections.redisPassword .Values.connections.redisNoPass -}}
-    {{- printf "%s-redis" .Release.Name -}}
+    {{- printf "%s-%s" .Release.Name (include "ds.resources.name" (list . .Values.commonNameSuffix "redis")) -}}
 {{- else if .Values.connections.redisExistingSecret -}}
     {{- printf "%s" (tpl .Values.connections.redisExistingSecret $) -}}
 {{- end -}}
@@ -111,7 +111,7 @@ Get the Redis Sentinel password secret
 */}}
 {{- define "ds.redis.sentinel.secretName" -}}
 {{- if or .Values.connections.redisSentinelPassword .Values.connections.redisSentinelNoPass -}}
-    {{- printf "%s-redis-sentinel" .Release.Name -}}
+    {{- printf "%s-%s" .Release.Name (include "ds.resources.name" (list . .Values.commonNameSuffix "redis-sentinel")) -}}
 {{- else if .Values.connections.redisSentinelExistingSecret -}}
     {{- printf "%s" (tpl .Values.connections.redisSentinelExistingSecret $) -}}
 {{- end -}}
@@ -146,7 +146,7 @@ Get the info auth password secret
 {{- if .Values.proxy.infoAllowedExistingSecret -}}
     {{- printf "%s" (tpl .Values.proxy.infoAllowedExistingSecret $) -}}
 {{- else if .Values.proxy.infoAllowedPassword -}}
-    {{- printf "%s-info-auth" .Release.Name -}}
+    {{- printf "%s-%s" .Release.Name (include "ds.resources.name" (list . .Values.commonNameSuffix "info-auth")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -177,7 +177,7 @@ Get the PVC name
 {{- if .Values.persistence.existingClaim -}}
     {{- printf "%s" (tpl .Values.persistence.existingClaim $) -}}
 {{- else }}
-    {{- printf "ds-files" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "ds-files")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -197,7 +197,7 @@ Get the license name
 {{- if .Values.license.existingSecret -}}
     {{- printf "%s" (tpl .Values.license.existingSecret $) -}}
 {{- else }}
-    {{- printf "license" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "license")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -217,7 +217,7 @@ Get the jwt name
 {{- if .Values.jwt.existingSecret -}}
     {{- printf "%s" (tpl .Values.jwt.existingSecret $) -}}
 {{- else }}
-    {{- printf "jwt" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "jwt")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -237,7 +237,7 @@ Get the service name for ds
 {{- if .Values.service.existing -}}
     {{- printf "%s" (tpl .Values.service.existing $) -}}
 {{- else }}
-    {{- printf "documentserver" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -271,7 +271,7 @@ Get the configmap name containing the ds upgrade script
 {{- if .Values.upgrade.existingConfigmap.dsStop -}}
     {{- printf "%s" (tpl .Values.upgrade.existingConfigmap.dsStop $) -}}
 {{- else }}
-    {{- printf "pre-upgrade" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "pre-upgrade")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -313,7 +313,7 @@ Get the configmap name containing the ds rollback script
 {{- if .Values.rollback.existingConfigmap.dsStop -}}
     {{- printf "%s" (tpl .Values.rollback.existingConfigmap.dsStop $) -}}
 {{- else }}
-    {{- printf "pre-rollback" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "pre-rollback")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -355,7 +355,7 @@ Get the configmap name containing the ds delete script
 {{- if .Values.delete.existingConfigmap.dsStop -}}
     {{- printf "%s" (tpl .Values.delete.existingConfigmap.dsStop $) -}}
 {{- else }}
-    {{- printf "pre-delete" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "pre-delete")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -386,7 +386,7 @@ Get the configmap name containing the initdb script
 {{- if .Values.install.existingConfigmap.initdb -}}
     {{- printf "%s" (tpl .Values.install.existingConfigmap.initdb $) -}}
 {{- else }}
-    {{- printf "pre-install" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "pre-install")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -417,7 +417,7 @@ Get the configmap name containing the ds clearCache script
 {{- if .Values.clearCache.existingConfigmap.name -}}
     {{- printf "%s" (tpl .Values.clearCache.existingConfigmap.name $) -}}
 {{- else }}
-    {{- printf "clear-cache" -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "clear-cache")) -}}
 {{- end -}}
 {{- end -}}
 
@@ -456,9 +456,23 @@ Get the ds Service Account name
 */}}
 {{- define "ds.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default .Release.Name .Values.serviceAccount.name }}
+    {{ default (printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix .Release.Name))) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the ds Resource name
+*/}}
+{{- define "ds.resources.name" -}}
+{{- $context := index . 0 -}}
+{{- $suffixName := index . 1 -}}
+{{- $resourceName := index . 2 -}}
+{{- if $suffixName -}}
+    {{- printf "%s-%s" $resourceName (tpl $suffixName $context) -}}
+{{- else -}}
+    {{- printf "%s" $resourceName -}}
 {{- end -}}
 {{- end -}}
 

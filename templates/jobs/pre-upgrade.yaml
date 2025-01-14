@@ -2,10 +2,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pre-upgrade
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "pre-upgrade") }}
   namespace: {{ include "ds.namespace" . | quote }}
   labels:
-    app.kubernetes.io/component: upgrade
+    app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "upgrade") }}
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}
@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: upgrade
+        app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "upgrade") }}
         {{- if .Values.commonLabels }}
         {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
         {{- end }}

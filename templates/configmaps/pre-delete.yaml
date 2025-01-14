@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: pre-delete
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "pre-delete") }}
   namespace: {{ include "ds.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
@@ -18,7 +18,7 @@ metadata:
 data:
   stop.sh: |-
     #!/bin/bash
-    curl -v http://docservice:8000/internal/cluster/inactive -X PUT -s
+    curl -v http://{{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}:8000/internal/cluster/inactive -X PUT -s
     {{- if eq .Values.connections.dbType "postgres" }}
     PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
       --port={{ .Values.connections.dbPort }} \

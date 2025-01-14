@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: grafana
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "grafana") }}
   namespace: {{ include "ds.grafana.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
