@@ -95,6 +95,11 @@ spec:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       volumes:
+        {{- if .Values.pluginsMigration.job.enabled }}
+        - name: plugins-migration
+          persistentVolumeClaim:
+            claimName: plugins
+        {{- end }}
         {{- if not .Values.persistence.storageS3 }}
         - name: ds-files
           persistentVolumeClaim:
@@ -184,6 +189,10 @@ spec:
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
+          {{- if .Values.pluginsMigration.job.enabled }}
+          - name: plugins-migration
+            mountPath: /var/www/onlyoffice/documentserver/sdkjs-plugins/
+          {{- end }}
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
@@ -259,6 +268,10 @@ spec:
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
+          {{- if .Values.pluginsMigration.job.enabled }}
+          - name: plugins-migration
+            mountPath: /var/www/onlyoffice/documentserver/sdkjs-plugins/
+          {{- end }}
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files

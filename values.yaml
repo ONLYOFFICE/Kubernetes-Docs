@@ -492,21 +492,23 @@ docservice:
   ## Containers that run before docservice and proxy containers in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## Example:
-  ## initContainers:
-  ##   - name: change-volume-owner
-  ##     image: busybox:latest
-  ##     command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
-  ##     volumeMounts:
-  ##     - name: ds-files
-  ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
-  initContainers: []
+  initContainers:
+    - name: deploy-custom-plugin
+      image: busybox:latest
+      command: ['sh', '-c', 'tar -zxvf /var/www/onlyoffice/custom-plugins/jitsi.tar.gz -C /var/www/onlyoffice/documentserver/sdkjs-plugins/']
+      volumeMounts:
+      - name: jitsi-volume
+        mountPath: /var/www/onlyoffice/custom-plugins
+      - name: plugins-migration
+        mountPath: /var/www/onlyoffice/documentserver/sdkjs-plugins/
+  # initContainers: []
   ## docservice.extraVolumes An array with extra volumes for the docservice Pod
   ## Example:
-  ## extraVolumes:
-  ##   - name: my-volume
-  ##     configMap:
-  ##       name: my-cm
-  extraVolumes: []
+  extraVolumes:
+    - name: jitsi-volume
+      configMap:
+        name: jitsi
+  # extraVolumes: []
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:
@@ -1708,6 +1710,74 @@ grafanaDashboard:
       requests: {}
       ## limits:
       ##   memory: "1Gi"
+      ##   cpu: "1000m"
+      limits: {}
+## Job by Plugins Migration has a post-upgrade hook executes after any resources have been upgraded in Kubernetes
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He clears the Cache directory
+pluginsMigration:
+  job:
+    ## pluginsMigration.job.enabled Enable the execution of job Plugins Migration after upgrading ONLYOFFICE Docs
+    enabled: true
+    ## pluginsMigration.job.annotations Defines annotations that will be additionally added to Plugins Migration Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
+    ## pluginsMigration.job.podAnnotations Map of annotations to add to the Plugins Migration Pod
+    podAnnotations: {}
+    ## pluginsMigration.job.customPodAntiAffinity Prohibiting the scheduling of Plugins Migration Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for Plugins Migration Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes Plugins Migration Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Plugins Migration Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes Plugins Migration Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## pluginsMigration.job.nodeSelector Node labels for Plugins Migration Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## pluginsMigration.job.tolerations Tolerations for Plugins Migration Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
+    image:
+      ## pluginsMigration.job.image.repository Job by Plugins Migration ONLYOFFICE Docs image repository
+      repository: onlyoffice/docs-proxy-de
+      ## pluginsMigration.job.image.tag Job by Plugins Migration ONLYOFFICE Docs image tag
+      tag: 8.2.2-1
+      ## pluginsMigration.job.image.pullPolicy Job by Plugins Migration ONLYOFFICE Docs image pull policy
+      pullPolicy: IfNotPresent
+    ## Configure a Security Context for the Plugins Migration container
+    containerSecurityContext:
+      ## pluginsMigration.job.containerSecurityContext.enabled Enable security context for the Plugins Migration container
+      enabled: false
+      ## pluginsMigration.job.containerSecurityContext.runAsUser User ID for the Plugins Migration container
+      runAsUser: 101
+      ## pluginsMigration.job.containerSecurityContext.runAsGroup Group ID for the Plugins Migration container
+      runAsGroup: 101
+      ## pluginsMigration.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## pluginsMigration.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## pluginsMigration.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Plugins Migration container
+      seccompProfile:
+        type: RuntimeDefault
+      ## pluginsMigration.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
+    ## Job Plugins Migration container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## pluginsMigration.job.resources.requests The requested resources for the job Plugins Migration container
+    ## pluginsMigration.job.resources.limits The resources limits for the job Plugins Migration container
+    resources:
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
+      requests: {}
+      ## limits:
+      ##   memory: "2Gi"
       ##   cpu: "1000m"
       limits: {}
 

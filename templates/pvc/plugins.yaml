@@ -1,0 +1,26 @@
+{{- if and (not .Values.persistence.storageS3) (.Values.pluginsMigration.job.enabled) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plugins
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  annotations: 
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "2"
+    {{- if or .Values.commonAnnotations .Values.persistence.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.persistence.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  storageClassName: {{ .Values.persistence.storageClass }}
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+{{- end }}
