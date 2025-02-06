@@ -1,0 +1,86 @@
+{{- if and .Values.wopi.enabled .Values.wopi.keys.generation .Values.wopiKeysDeletion.job.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-keys-del") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-keys-del") }}
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if or .Values.commonAnnotations .Values.wopiKeysDeletion.job.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.wopiKeysDeletion.job.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-keys-del") }}
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.wopiKeysDeletion.job.podAnnotations }}
+      annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.wopiKeysDeletion.job.podAnnotations "context" $ ) | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-sa") }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.wopiKeysDeletion.job.customPodAntiAffinity .Values.wopiKeysDeletion.job.podAffinity .Values.wopiKeysDeletion.job.nodeAffinity }}
+      affinity:
+        {{- with .Values.wopiKeysDeletion.job.customPodAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.wopiKeysDeletion.job.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.wopiKeysDeletion.job.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.nodeSelector .Values.wopiKeysDeletion.job.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.wopiKeysDeletion.job.nodeSelector) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.tolerations .Values.wopiKeysDeletion.job.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.wopiKeysDeletion.job.tolerations) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      volumes:
+      - name: wopi-keys-del
+        configMap:
+          name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-keys-del") }}
+          defaultMode: 0755
+      containers:
+      - name: wopi-keys
+        image: {{ .Values.wopiKeysDeletion.job.image.repository }}:{{ .Values.wopiKeysDeletion.job.image.tag }}
+        imagePullPolicy: {{ .Values.wopiKeysDeletion.job.image.pullPolicy }}
+        {{- if .Values.wopiKeysDeletion.job.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.wopiKeysDeletion.job.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
+        resources: {{- toYaml .Values.wopiKeysDeletion.job.resources | nindent 10 }}
+        env:
+        - name: WOPI_SECRET_NAME
+          value: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys") }}
+        - name: WOPI_OLD_SECRET_NAME
+          value: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys-old") }}
+        command: ['python', '/scripts/wopi_keys_del.py']
+        volumeMounts:
+        - name: wopi-keys-del
+          mountPath: /scripts/wopi_keys_del.py
+          subPath: wopi_keys_del.py
+      restartPolicy: Never
+{{- end }}

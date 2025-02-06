@@ -1,0 +1,20 @@
+{{- if and .Values.wopi.enabled .Values.wopi.keys.generation }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-keys") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if .Values.commonAnnotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+data:
+{{ (.Files.Glob "sources/scripts/wopi_keys_gen.py").AsConfig | indent 2 }}
+{{- end }}

@@ -277,10 +277,24 @@ log:
   ## log.pattern Defines the log pattern if `log.type=pattern`
   ## ref: https://github.com/log4js-node/log4js-node/blob/master/docs/layouts.md#pattern-format
   pattern: "[%d] [%p] [%X{DOCID}] [%X{USERID}] %c - %.10000m"
-## wopi.enabled Defines if `WOPI` is enabled
-## If the parameter is enabled, then caching attributes for the mounted directory (`PVC`) should be disabled for the client
+## Onlyoffice Docs `WOPI` parameters
 wopi:
+  ## wopi.enabled Defines if `WOPI` is enabled
+  ## If the parameter is enabled, then caching attributes for the mounted directory (`PVC`) should be disabled for the client
   enabled: false
+  keys:
+    ## wopi.keys.generation Defines whether to generate API keys
+    ## Used if you set `wopi.enabled` to `true`
+    generation: true
+    ## wopi.keys.newKeysExistingSecret Name of existing secret containing the WOPI keys
+    ## Must contain the keys `WOPI_PRIVATE_KEY`, `WOPI_PUBLIC_KEY`, `WOPI_MODULUS_KEY` and `WOPI_EXPONENT_KEY`
+    ## If not set, new keys will be generated and a secret will be created from them
+    newKeysExistingSecret: ""
+    ## wopi.keys.oldKeysExistingSecret Name of existing secret containing the old WOPI keys
+    ## Must contain the keys `WOPI_PRIVATE_KEY_OLD`, `WOPI_PUBLIC_KEY_OLD`, `WOPI_MODULUS_KEY_OLD` and `WOPI_EXPONENT_KEY_OLD`
+    ## If not set, new keys will be generated and a secret will be created from them
+    oldKeysExistingSecret: ""
+    ## If not set to `wopi.keys.newKeysExistingSecret` and `wopi.keys.oldKeysExistingSecret`, then secrets with the same keys will be created
 ## Onlyoffice Docs metrics parameters
 ## StatsD is used as an intermediate metric collector
 metrics:
@@ -299,7 +313,9 @@ jwt:
   enabled: true
   ## jwt.secret Defines the secret key to validate the JSON Web Token in the request to the ONLYOFFICE Docs
   ## Common for inbox and outbox requests
-  secret: "MYSECRET"
+  ## If the value is empty, a random one will be generated, which will be used later in the upgrade
+  ## If a value is set, it will be used
+  secret: ""
   ## jwt.header Defines the http header that will be used to send the JSON Web Token
   ## Common for inbox and outbox requests
   header: "Authorization"
@@ -652,7 +668,9 @@ proxy:
   workerConnections: "4096"
   ## proxy.secureLinkSecret Defines secret for the nginx config directive secure_link_md5
   ## ref: https://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-  secureLinkSecret: verysecretstring
+  ## If the value is empty, a random one will be generated, which will be used later in the upgrade
+  ## If a value is set, it will be used
+  secureLinkSecret: ""
   ## proxy.infoAllowedIP Defines ip addresses for accessing the info page
   ## Example:
   ## infoAllowedIP:
@@ -675,7 +693,9 @@ proxy:
   infoAllowedExistingSecret: ""
   ## proxy.infoAllowedPassword Defines user password for accessing the info page
   ## Used if `proxy.infoAllowedUser` is set
-  infoAllowedPassword: "password"
+  ## If the value is empty, a random one will be generated, which will be used later in the upgrade
+  ## If a value is set, it will be used
+  infoAllowedPassword: ""
   ## proxy.welcomePage.enabled Defines whether the welcome page will be displayed
   welcomePage:
     enabled: true
@@ -1700,6 +1720,142 @@ grafanaDashboard:
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     ## grafanaDashboard.job.resources.requests The requested resources for the job Grafana Dashboard container
     ## grafanaDashboard.job.resources.limits The resources limits for the job Grafana Dashboard container
+    resources:
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
+      requests: {}
+      ## limits:
+      ##   memory: "1Gi"
+      ##   cpu: "1000m"
+      limits: {}
+## Job by Wopi Keys Generation has pre-install and pre-upgrade hooks and executes before any resources are created in Kubernetes
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He generates WOPI keys and creates a secret from them
+## It is executed if `wopi.enabled` and `wopi.keys.generation` are set to `true`
+wopiKeysGeneration:
+  job:
+    ## wopiKeysGeneration.job.annotations Defines annotations that will be additionally added to Wopi Keys Generation Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
+    ## wopiKeysGeneration.job.podAnnotations Map of annotations to add to the Wopi Keys Generation Pod
+    podAnnotations: {}
+    ## wopiKeysGeneration.job.customPodAntiAffinity Prohibiting the scheduling of Wopi Keys Generation Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for Wopi Keys Generation Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes Wopi Keys Generation Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Wopi Keys Generation Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes Wopi Keys Generation Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## wopiKeysGeneration.job.nodeSelector Node labels for Wopi Keys Generation Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## wopiKeysGeneration.job.tolerations Tolerations for Wopi Keys Generation Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
+    image:
+      ## wopiKeysGeneration.job.image.repository Job by Wopi Keys Generation ONLYOFFICE Docs image repository
+      repository: onlyoffice/docs-utils
+      ## wopiKeysGeneration.job.image.tag Job by Wopi Keys Generation ONLYOFFICE Docs image tag
+      tag: 8.2.2-1
+      ## wopiKeysGeneration.job.image.pullPolicy Job by Wopi Keys Generation ONLYOFFICE Docs image pull policy
+      pullPolicy: IfNotPresent
+    ## Configure a Security Context for the Wopi Keys Generation container
+    containerSecurityContext:
+      ## wopiKeysGeneration.job.containerSecurityContext.enabled Enable security context for the Wopi Keys Generation container
+      enabled: false
+      ## wopiKeysGeneration.job.containerSecurityContext.runAsUser User ID for the Wopi Keys Generation container
+      runAsUser: 101
+      ## wopiKeysGeneration.job.containerSecurityContext.runAsGroup Group ID for the Wopi Keys Generation container
+      runAsGroup: 101
+      ## wopiKeysGeneration.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## wopiKeysGeneration.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## wopiKeysGeneration.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Wopi Keys Generation container
+      seccompProfile:
+        type: RuntimeDefault
+      ## wopiKeysGeneration.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
+    ## Job Wopi Keys Generation container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## wopiKeysGeneration.job.resources.requests The requested resources for the job Wopi Keys Generation container
+    ## wopiKeysGeneration.job.resources.limits The resources limits for the job Wopi Keys Generation container
+    resources:
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
+      requests: {}
+      ## limits:
+      ##   memory: "1Gi"
+      ##   cpu: "1000m"
+      limits: {}
+## Job by Wopi Keys Deletion has a pre-delete hook and executes on a deletion request before all of the release's resources have been deleted
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He removes the WOPI secrets generated automatically
+## It is executed if `wopi.enabled`, `wopi.keys.generation` and `wopiKeysDeletion.job.enabled` are set to `true`
+wopiKeysDeletion:
+  job:
+    ## wopiKeysDeletion.job.enabled Enable the execution of Wopi Keys Deletion job before deleting ONLYOFFICE Docs
+    enabled: true
+    ## wopiKeysDeletion.job.annotations Defines annotations that will be additionally added to Wopi Keys Deletion Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
+    ## wopiKeysDeletion.job.podAnnotations Map of annotations to add to the Wopi Keys Deletion Pod
+    podAnnotations: {}
+    ## wopiKeysDeletion.job.customPodAntiAffinity Prohibiting the scheduling of Wopi Keys Deletion Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for Wopi Keys Deletion Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes Wopi Keys Deletion Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Wopi Keys Deletion Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes Wopi Keys Deletion Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## wopiKeysDeletion.job.nodeSelector Node labels for Wopi Keys Deletion Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## wopiKeysDeletion.job.tolerations Tolerations for Wopi Keys Deletion Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
+    image:
+      ## wopiKeysDeletion.job.image.repository Job by Wopi Keys Deletion ONLYOFFICE Docs image repository
+      repository: onlyoffice/docs-utils
+      ## wopiKeysDeletion.job.image.tag Job by Wopi Keys Deletion ONLYOFFICE Docs image tag
+      tag: 8.2.2-1
+      ## wopiKeysDeletion.job.image.pullPolicy Job by Wopi Keys Deletion ONLYOFFICE Docs image pull policy
+      pullPolicy: IfNotPresent
+    ## Configure a Security Context for the Wopi Keys Deletion container
+    containerSecurityContext:
+      ## wopiKeysDeletion.job.containerSecurityContext.enabled Enable security context for the Wopi Keys Deletion container
+      enabled: false
+      ## wopiKeysDeletion.job.containerSecurityContext.runAsUser User ID for the Wopi Keys Deletion container
+      runAsUser: 101
+      ## wopiKeysDeletion.job.containerSecurityContext.runAsGroup Group ID for the Wopi Keys Deletion container
+      runAsGroup: 101
+      ## wopiKeysDeletion.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## wopiKeysDeletion.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## wopiKeysDeletion.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Wopi Keys Deletion container
+      seccompProfile:
+        type: RuntimeDefault
+      ## wopiKeysDeletion.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
+    ## Job Wopi Keys Deletion container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## wopiKeysDeletion.job.resources.requests The requested resources for the job Wopi Keys Deletion container
+    ## wopiKeysDeletion.job.resources.limits The resources limits for the job Wopi Keys Deletion container
     resources:
       ## Example:
       ## requests:

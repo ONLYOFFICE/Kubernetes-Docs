@@ -145,7 +145,7 @@ Get the info auth password secret
 {{- define "ds.info.secretName" -}}
 {{- if .Values.proxy.infoAllowedExistingSecret -}}
     {{- printf "%s" (tpl .Values.proxy.infoAllowedExistingSecret $) -}}
-{{- else if .Values.proxy.infoAllowedPassword -}}
+{{- else if .Values.proxy.infoAllowedUser -}}
     {{- printf "%s-%s" .Release.Name (include "ds.resources.name" (list . .Values.commonNameSuffix "info-auth")) -}}
 {{- end -}}
 {{- end -}}
@@ -157,17 +157,6 @@ Return true if a secret object should be created for info auth
 {{- if and .Values.proxy.infoAllowedUser (not .Values.proxy.infoAllowedExistingSecret) -}}
     {{- true -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Return info auth password
-*/}}
-{{- define "ds.info.password" -}}
-{{- if not (empty .Values.proxy.infoAllowedPassword) }}
-    {{- .Values.proxy.infoAllowedPassword }}
-{{- else }}
-    {{- required "A info auth Password is required!" .Values.proxy.infoAllowedPassword }}
-{{- end }}
 {{- end -}}
 
 {{/*
@@ -555,5 +544,26 @@ Get the Docs image repository
     {{- end -}}
 {{- else -}}
     {{- $repo -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the Secret value
+*/}}
+{{- define "ds.secrets.lookup" -}}
+{{- $context := index . 0 -}}
+{{- $existValue := index . 1 -}}
+{{- $getSecretName := index . 2 -}}
+{{- $getSecretKey := index . 3 -}}
+{{- if not $existValue }}
+    {{- $secret_lookup := (lookup "v1" "Secret" $context.Release.Namespace $getSecretName).data }}
+    {{- $getSecretValue := (get $secret_lookup $getSecretKey) | b64dec }}
+    {{- if $getSecretValue -}}
+        {{- printf "%s" $getSecretValue -}}
+    {{- else -}}
+        {{- printf "%s" (randAlpha 16) -}}
+    {{- end -}}
+{{- else -}}
+    {{- printf "%s" $existValue -}}
 {{- end -}}
 {{- end -}}

@@ -163,6 +163,26 @@ spec:
           envFrom:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}
+          - secretRef:
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "link-secret") }}
+          {{- if .Values.wopi.enabled }}
+          {{- if or .Values.wopi.keys.generation .Values.wopi.keys.newKeysExistingSecret }}
+          - secretRef:
+              {{- if .Values.wopi.keys.newKeysExistingSecret }}
+              name: {{ tpl .Values.wopi.keys.newKeysExistingSecret $ }}
+              {{- else }}
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys") }}
+              {{- end }}
+          {{- end }}
+          {{- if or .Values.wopi.keys.generation .Values.wopi.keys.oldKeysExistingSecret }}
+          - secretRef:
+              {{- if .Values.wopi.keys.oldKeysExistingSecret }}
+              name: {{ tpl .Values.wopi.keys.oldKeysExistingSecret $ }}
+              {{- else }}
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys-old") }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
