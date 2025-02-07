@@ -4,7 +4,7 @@
 
 ### New Features
 
-* Added the ability to automatically generate WOPI keys during installation or updates, or to use existing ones
+* Added the ability to automatically generate WOPI keys during installation or upgrades, or to use existing ones
 * Added the ability to modify the names of created resources by appending a specified suffix
 
 ### Changes
