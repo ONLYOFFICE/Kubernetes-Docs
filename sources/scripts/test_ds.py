@@ -4,8 +4,6 @@ import subprocess
 import time
 import logging
 
-url = 'http://docservice:8000/healthcheck'
-
 redisConnectorName = os.environ.get('REDIS_CONNECTOR_NAME')
 redisHost = os.environ.get('REDIS_SERVER_HOST')
 redisPort = os.environ.get('REDIS_SERVER_PORT')
@@ -39,6 +37,9 @@ brokerPassword = os.environ.get('AMQP_PWD')
 brokerVhost = os.environ.get('AMQP_VHOST')
 
 storageS3 = os.environ.get('STORAGE_S3')
+
+dsAddress = os.environ.get('DS_ADDRESS')
+url = f'http://{dsAddress}:8000/healthcheck'
 
 total_result = {}
 

@@ -1,5 +1,17 @@
 # Change log
 
+## 4.5.0
+
+### New Features
+
+* Added the ability to automatically generate WOPI keys during installation or upgrades, or to use existing ones
+* Added the ability to modify the names of created resources by appending a specified suffix
+
+### Changes
+
+* The values of the parameters `jwt.secret`, `proxy.secureLinkSecret`, and `proxy.infoAllowedPassword` have been replaced with empty values instead of default ones, with the option to either generate random values or use the provided value
+* Released ONLYOFFICE Docs [v8.3.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#830)
+
 ## 4.4.1
 
 ### Changes

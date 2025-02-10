@@ -13,7 +13,7 @@ Example was marked for installation.
 You can test ONLYOFFICE Docs availability and access to connected dependencies using Helm test:
     $ helm test {{ .Release.Name }} --namespace={{ .Release.Namespace }}
   To view the log of the Pod, run the following command:
-    $ kubectl logs -f test-ds --namespace={{ .Release.Namespace }}
+    $ kubectl logs -f {{ include "ds.resources.name" (list . .Values.commonNameSuffix "test-ds") }} --namespace={{ .Release.Namespace }}
   Note: This testing is for informational purposes only and cannot guarantee 100% availability results
 
 {{- end }}

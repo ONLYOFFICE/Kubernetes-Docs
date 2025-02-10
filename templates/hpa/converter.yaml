@@ -2,7 +2,7 @@
 apiVersion: {{ .Capabilities.APIVersions.Has "autoscaling/v2" | ternary "autoscaling/v2" "autoscaling/v2beta2" }}
 kind: HorizontalPodAutoscaler
 metadata:
-  name: converter-hpa
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter-hpa") }}
   namespace: {{ include "ds.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
@@ -16,7 +16,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: converter
+    name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}
   minReplicas: {{ .Values.converter.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.converter.autoscaling.maxReplicas }}
   metrics:

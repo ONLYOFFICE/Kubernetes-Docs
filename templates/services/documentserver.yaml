@@ -2,7 +2,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: documentserver
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
   namespace: {{ include "ds.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
@@ -14,7 +14,7 @@ metadata:
   {{- end }}
 spec:
   selector:
-    app: docservice
+    app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}

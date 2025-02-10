@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: docservice
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
   namespace: {{ include "ds.namespace" . | quote }}
   labels:
-    app: docservice
+    app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}
@@ -18,7 +18,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app: docservice
+      app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
       {{- if .Values.commonLabels }}
       {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
       {{- end }}
@@ -28,7 +28,7 @@ spec:
   template:
     metadata:
       labels:
-        app: docservice
+        app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
         {{- if .Values.commonLabels }}
         {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
         {{- end }}
@@ -60,7 +60,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - docservice
+                  - {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
               topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
             weight: {{ .Values.podAntiAffinity.weight }}
           {{- else if eq .Values.podAntiAffinity.type "hard" }}
@@ -70,7 +70,7 @@ spec:
               - key: app
                 operator: In
                 values:
-                - docservice
+                - {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
             topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
           {{- end }}
           {{- with .Values.docservice.customPodAntiAffinity }}
@@ -121,7 +121,7 @@ spec:
         {{- if not .Values.proxy.welcomePage.enabled }}
         - name: ds-welcome-page
           configMap:
-            name: ds-welcome-page
+            name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "ds-welcome-page") }}
         {{- end }}
         {{- with .Values.docservice.extraVolumes }}
         {{- toYaml . | nindent 8 }}
@@ -133,7 +133,11 @@ spec:
       {{- end }}
       containers:
         - name: proxy
+          {{- if .Values.global }}
+          image: {{ include "ds.imageRepository" (list . .Values.proxy.image.repository) }}:{{ .Values.proxy.image.tag }}
+          {{- else }}
           image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
+          {{- end }}
           imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
           {{- if .Values.proxy.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.proxy.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -177,8 +181,10 @@ spec:
           {{- end }}
           {{- end }}
           envFrom:
+          - secretRef:
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "link-secret") }}
           - configMapRef:
-              name: documentserver
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
@@ -199,7 +205,11 @@ spec:
           {{- end }}
 
         - name: docservice
+          {{- if .Values.global }}
+          image: {{ include "ds.imageRepository" (list . .Values.docservice.image.repository) }}:{{ .Values.docservice.image.tag }}
+          {{- else }}
           image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }}
+          {{- end }}
           imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
           {{- if .Values.docservice.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.docservice.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -248,8 +258,28 @@ spec:
           envFrom:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}
+          - secretRef:
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "link-secret") }}
+          {{- if .Values.wopi.enabled }}
+          {{- if or .Values.wopi.keys.generation .Values.wopi.keys.newKeysExistingSecret }}
+          - secretRef:
+              {{- if .Values.wopi.keys.newKeysExistingSecret }}
+              name: {{ tpl .Values.wopi.keys.newKeysExistingSecret $ }}
+              {{- else }}
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys") }}
+              {{- end }}
+          {{- end }}
+          {{- if or .Values.wopi.keys.generation .Values.wopi.keys.oldKeysExistingSecret }}
+          - secretRef:
+              {{- if .Values.wopi.keys.oldKeysExistingSecret }}
+              name: {{ tpl .Values.wopi.keys.oldKeysExistingSecret $ }}
+              {{- else }}
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys-old") }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
           - configMapRef:
-              name: documentserver
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files

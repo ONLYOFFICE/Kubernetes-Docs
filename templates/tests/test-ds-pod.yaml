@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: test-ds
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "test-ds") }}
   namespace: {{ include "ds.namespace" . | quote }}
   labels:
     app.kubernetes.io/component: test-ds
@@ -80,9 +80,11 @@ spec:
     {{- end }}
     - name: STORAGE_S3
       value: {{ .Values.persistence.storageS3 | quote }}
+    - name: DS_ADDRESS
+      value: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
     envFrom:
     - configMapRef:
-        name: documentserver
+        name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
     volumeMounts:
     {{- if not .Values.persistence.storageS3 }}
     - name: ds-files
@@ -100,7 +102,7 @@ spec:
   {{- end }}
   - name: test-ds
     configMap:
-      name: test-ds
+      name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "test-ds") }}
       defaultMode: 0755
   restartPolicy: Never
 {{- end }}

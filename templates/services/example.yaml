@@ -2,10 +2,10 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: example
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "example") }}
   namespace: {{ include "ds.namespace" . | quote }}
   labels:
-    app: example
+    app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "example") }}
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}
@@ -19,7 +19,7 @@ spec:
     port: {{ .Values.example.containerPorts.http }}
     targetPort: {{ .Values.example.containerPorts.http }}
   selector:
-    statefulset.kubernetes.io/pod-name: example-0
+    statefulset.kubernetes.io/pod-name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "example") }}-0
     {{- if .Values.commonLabels }}
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
     {{- end }}

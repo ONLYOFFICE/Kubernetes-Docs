@@ -1,19 +1,20 @@
-{{- if and .Values.grafana.enabled .Values.grafana.dashboard.enabled }}
+{{- if and .Values.wopi.enabled .Values.wopi.keys.generation .Values.wopiKeysDeletion.job.enabled }}
 apiVersion: v1
-kind: ServiceAccount
+kind: ConfigMap
 metadata:
-  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "dashboard-sa") }}
-  namespace: {{ include "ds.grafana.namespace" . | quote }}
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-keys-del") }}
+  namespace: {{ include "ds.namespace" . | quote }}
   {{- if .Values.commonLabels }}
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "1"
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "4"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
     {{- if .Values.commonAnnotations }}
     {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
-automountServiceAccountToken: true
+data:
+{{ (.Files.Glob "sources/scripts/wopi_keys_del.py").AsConfig | indent 2 }}
 {{- end }}
