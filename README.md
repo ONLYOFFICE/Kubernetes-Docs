@@ -347,7 +347,7 @@ $ helm install documentserver onlyoffice/docs
 
 The command deploys ONLYOFFICE Docs on the Kubernetes cluster in the default configuration. The [Parameters](#4-parameters) section lists the parameters that can be configured during installation.
 
-Note: When installing ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When installing ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#11-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 ### 3. Uninstall ONLYOFFICE Docs
 
@@ -364,7 +364,7 @@ The default hook execution time is 300s. The execution time can be changed using
 $ helm delete documentserver --timeout 25m
 ```
 
-Note: When deleting ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When deleting ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#11-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 If you want to delete the ONLYOFFICE Docs without any preparatory actions, run the following command:
 
@@ -967,7 +967,7 @@ The execution time can be changed using --timeout [time], for example
 $ helm upgrade documentserver -f values.yaml onlyoffice/docs --timeout 15m
 ```
 
-Note: When upgrading ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When upgrading ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#11-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 If you want to update any parameter other than the version of the ONLYOFFICE Docs, then run the `helm upgrade` command without `hooks`, for example:
 
@@ -981,7 +981,7 @@ To rollback updates, run the following command:
 $ helm rollback documentserver
 ```
 
-Note: When rolling back ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#10-run-jobs-in-a-private-k8s-cluster-optional) below.
+Note: When rolling back ONLYOFFICE Docs in a private k8s cluster behind a Web proxy or with no internet access, see the [notes](#11-run-jobs-in-a-private-k8s-cluster-optional) below.
 
 ### 8. Shutdown ONLYOFFICE Docs (optional)
 
