@@ -30,18 +30,31 @@ data:
       -p$DB_PWD \
       -e "show databases;" > /dev/null
     {{- end }}
-    if [ $? -ne 0 ]; then	
+    {{- if or (eq .Values.connections.dbType "postgres") (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
+    if [ $? -ne 0 ]; then
       echo -e "\e[0;31m DB is not available \e[0m"
       exit 1
     else
       echo -e "\e[0;32m Successful connection to the database \e[0m"
     fi
+    {{- end }}
+    {{- if (eq .Values.connections.dbType "oracle") }}
+    ORACLE_TEST_CONNECT=$(echo "SELECT * FROM v\$version;" | sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} | grep "Connected" | wc -l)
+    if [ "${ORACLE_TEST_CONNECT}" -ne '0' ]; then
+      echo -e "\e[0;32m Successful connection to the database \e[0m"
+    else
+      echo -e "\e[0;31m DB is not available \e[0m"
+      exit 1
+    fi
+    {{- end }}
     if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
       wget -O /scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }} \
         {{- if eq .Values.connections.dbType "postgres" }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/createdb.sql
         {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mysql/createdb.sql
+        {{- else if (eq .Values.connections.dbType "oracle") }}
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/oracle/createdb.sql
         {{- end }}
     fi
     {{- if eq .Values.connections.dbType "postgres" }}
@@ -57,6 +70,8 @@ data:
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
       {{ .Values.connections.dbName }} < /scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
+    {{- else if (eq .Values.connections.dbType "oracle") }}
+    sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
     {{- end }}
     if [ $? -ne 0 ]; then
       echo -e "\e[0;31m The DATABASE initialization script could not be executed \e[0m"

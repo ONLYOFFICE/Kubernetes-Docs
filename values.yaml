@@ -11,7 +11,7 @@ product:
 ## Connection parameters to external services
 connections:
   ## connections.dbType The database type
-  ## Possible values are `postgres`, `mariadb` or `mysql`
+  ## Possible values are `postgres`, `mariadb`, `mysql`, `oracle`, `mssql` or `dameng`
   dbType: postgres
   ## connections.dbHost The IP address or the name of the Database host
   dbHost: postgresql
