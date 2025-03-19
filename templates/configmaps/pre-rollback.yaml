@@ -29,8 +29,13 @@ data:
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
       -e "show databases;" > /dev/null
+    {{- else if eq .Values.connections.dbType "mssql" }}
+    /opt/mssql-tools18/bin/sqlcmd -S {{ .Values.connections.dbHost }},{{ .Values.connections.dbPort }} \
+      -U {{ .Values.connections.dbUser }} \
+      -P $DB_PWD \
+      -d {{ .Values.connections.dbName }} -C -Q "SELECT 1" > /dev/null
     {{- end }}
-    {{- if or (eq .Values.connections.dbType "postgres") (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
+    {{- if or (eq .Values.connections.dbType "postgres") (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") (eq .Values.connections.dbType "mssql") }}
     if [ $? -ne 0 ]; then
       echo -e "\e[0;31m DB is not available \e[0m"
       exit 1
@@ -72,6 +77,8 @@ data:
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/removetbl.sql
         {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mysql/removetbl.sql
+        {{- else if (eq .Values.connections.dbType "mssql") }}
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mssql/removetbl.sql
         {{- else if (eq .Values.connections.dbType "oracle") }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/oracle/removetbl.sql
         {{- end }}
@@ -80,6 +87,8 @@ data:
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/createdb.sql
         {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mysql/createdb.sql
+        {{- else if (eq .Values.connections.dbType "mssql") }}
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mssql/createdb.sql
         {{- else if (eq .Values.connections.dbType "oracle") }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/oracle/createdb.sql
         {{- end }}
@@ -108,6 +117,15 @@ data:
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
       {{ .Values.connections.dbName }} < /scripts/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
+    {{- else if (eq .Values.connections.dbType "mssql") }}
+    /opt/mssql-tools18/bin/sqlcmd -S {{ .Values.connections.dbHost }},{{ .Values.connections.dbPort }} \
+      -U {{ .Values.connections.dbUser }} \
+      -P $DB_PWD \
+      -d {{ .Values.connections.dbName }} -C < /scripts/{{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
+    /opt/mssql-tools18/bin/sqlcmd -S {{ .Values.connections.dbHost }},{{ .Values.connections.dbPort }} \
+      -U {{ .Values.connections.dbUser }} \
+      -P $DB_PWD \
+      -d {{ .Values.connections.dbName }} -C < /scripts/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
     {{- else if (eq .Values.connections.dbType "oracle") }}
     sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/{{ .Values.rollback.existingConfigmap.tblRemove.keyName }}
     sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/{{ .Values.rollback.existingConfigmap.tblCreate.keyName }}
