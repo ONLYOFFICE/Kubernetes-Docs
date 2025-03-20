@@ -1,5 +1,15 @@
 # Change log
 
+## 4.6.0
+
+### New Features
+
+* Added the ability to connect to Oracle and MS SQL Server databases
+
+### Changes
+
+* Released ONLYOFFICE Docs [v8.3.2](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#832)
+
 ## 4.5.1
 
 ### Changes
