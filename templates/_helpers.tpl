@@ -3,7 +3,7 @@ Check the DB type
 */}}
 {{- define "ds.db.type" -}}
 {{- $dbType := .Values.connections.dbType -}}
-{{- $possibleTypes := list "postgres" "mysql" "mariadb" -}}
+{{- $possibleTypes := list "postgres" "mysql" "mariadb" "oracle" "mssql" "dameng" -}}
 {{- if has $dbType $possibleTypes }}
     {{- $dbType -}}
 {{- else -}}

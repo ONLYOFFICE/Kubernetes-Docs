@@ -30,13 +30,29 @@ data:
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
       -e "show databases;" > /dev/null
+    {{- else if eq .Values.connections.dbType "mssql" }}
+    /opt/mssql-tools18/bin/sqlcmd -S {{ .Values.connections.dbHost }},{{ .Values.connections.dbPort }} \
+      -U {{ .Values.connections.dbUser }} \
+      -P $DB_PWD \
+      -d {{ .Values.connections.dbName }} -C -Q "SELECT 1" > /dev/null
     {{- end }}
-    if [ $? -ne 0 ]; then	
+    {{- if or (eq .Values.connections.dbType "postgres") (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") (eq .Values.connections.dbType "mssql") }}
+    if [ $? -ne 0 ]; then
       echo -e "\e[0;31m DB is not available \e[0m"
       exit 1
     else
-      echo -e "\e[0;32m Successful connection to the DB \e[0m"
+      echo -e "\e[0;32m Successful connection to the database \e[0m"
     fi
+    {{- end }}
+    {{- if (eq .Values.connections.dbType "oracle") }}
+    ORACLE_TEST_CONNECT=$(echo "SELECT * FROM v\$version;" | sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} | grep "Connected" | wc -l)
+    if [ "${ORACLE_TEST_CONNECT}" -ne '0' ]; then
+      echo -e "\e[0;32m Successful connection to the database \e[0m"
+    else
+      echo -e "\e[0;31m DB is not available \e[0m"
+      exit 1
+    fi
+    {{- end }}
     {{- if not .Values.persistence.storageS3 }}
     FILES_DIR=/var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files/
     ls $FILES_DIR > /dev/null
@@ -62,6 +78,10 @@ data:
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/removetbl.sql
         {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mysql/removetbl.sql
+        {{- else if (eq .Values.connections.dbType "mssql") }}
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mssql/removetbl.sql
+        {{- else if (eq .Values.connections.dbType "oracle") }}
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/oracle/removetbl.sql
         {{- end }}
     fi
     {{- if eq .Values.connections.dbType "postgres" }}
@@ -77,6 +97,13 @@ data:
       -u {{ .Values.connections.dbUser }} \
       -p$DB_PWD \
       {{ .Values.connections.dbName }} < /scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+    {{- else if (eq .Values.connections.dbType "mssql") }}
+    /opt/mssql-tools18/bin/sqlcmd -S {{ .Values.connections.dbHost }},{{ .Values.connections.dbPort }} \
+      -U {{ .Values.connections.dbUser }} \
+      -P $DB_PWD \
+      -d {{ .Values.connections.dbName }} -C < /scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+    {{- else if (eq .Values.connections.dbType "oracle") }}
+    sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
     {{- end }}
     if [ $? -ne 0 ]; then
       echo -e "\e[0;31m The DATABASE cleanup script could not be executed. Skipping... \e[0m"
