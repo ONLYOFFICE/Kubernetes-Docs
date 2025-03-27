@@ -45,8 +45,12 @@ data:
     fi
     {{- end }}
     {{- if (eq .Values.connections.dbType "oracle") }}
-    ORACLE_TEST_CONNECT=$(echo "SELECT * FROM v\$version;" | sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} | grep "Connected" | wc -l)
-    if [ "${ORACLE_TEST_CONNECT}" -ne '0' ]; then
+    DB_TEST_CONNECT=$(echo "SELECT * FROM v\$version;" | sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} | grep "Connected" | wc -l)
+    {{- else if (eq .Values.connections.dbType "dameng") }}
+    DB_TEST_CONNECT=$(echo "SELECT * FROM v\$version;" | disql {{ .Values.connections.dbUser }}/$DB_PWD@{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }} | grep "Server" | wc -l)
+    {{- end }}
+    {{- if or (eq .Values.connections.dbType "oracle") (eq .Values.connections.dbType "dameng") }}
+    if [ "${DB_TEST_CONNECT}" -ne '0' ]; then
       echo -e "\e[0;32m Successful connection to the database \e[0m"
     else
       echo -e "\e[0;31m DB is not available \e[0m"
@@ -82,6 +86,8 @@ data:
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mssql/removetbl.sql
         {{- else if (eq .Values.connections.dbType "oracle") }}
         https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/oracle/removetbl.sql
+        {{- else if (eq .Values.connections.dbType "dameng") }}
+        https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/dameng/removetbl.sql
         {{- end }}
     fi
     {{- if eq .Values.connections.dbType "postgres" }}
@@ -104,6 +110,8 @@ data:
       -d {{ .Values.connections.dbName }} -C < /scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
     {{- else if (eq .Values.connections.dbType "oracle") }}
     sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
+    {{- else if (eq .Values.connections.dbType "dameng") }}
+    disql {{ .Values.connections.dbUser }}/$DB_PWD@{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }} \`/scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
     {{- end }}
     if [ $? -ne 0 ]; then
       echo -e "\e[0;31m The DATABASE cleanup script could not be executed. Skipping... \e[0m"
