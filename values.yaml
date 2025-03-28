@@ -504,6 +504,14 @@ docservice:
     behavior: {}
   ## docservice.terminationGracePeriodSeconds The time to terminate gracefully during which the Docservice Pod will have the `Terminating` status
   terminationGracePeriodSeconds: 30
+  ## docservice.hostAliases Adds additional entries to the hosts file in the Docservice and Proxy containers
+  ## ref: https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+  ## Example:
+  ## hostAliases:
+  ## - ip: "192.168.2.5"
+  ##   hostnames:
+  ##   - "foo.local"
+  hostAliases: []
   ## Docservice initContainers parameters
   ## Containers that run before docservice and proxy containers in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -943,6 +951,14 @@ converter:
     behavior: {}
   ## converter.terminationGracePeriodSeconds The time to terminate gracefully during which the Converter Pod will have the `Terminating` status
   terminationGracePeriodSeconds: 30
+  ## converter.hostAliases Adds additional entries to the hosts file in the Converter container
+  ## ref: https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+  ## Example:
+  ## hostAliases:
+  ## - ip: "192.168.2.5"
+  ##   hostnames:
+  ##   - "foo.local"
+  hostAliases: []
   ## Converter initContainers parameters
   ## Containers that run before converter container in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -1116,6 +1132,14 @@ example:
   tolerations: []
   ## example.terminationGracePeriodSeconds The time to terminate gracefully during which the Example Pod will have the `Terminating` status
   terminationGracePeriodSeconds: 30
+  ## example.hostAliases Adds additional entries to the hosts file in the Example container
+  ## ref: https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+  ## Example:
+  ## hostAliases:
+  ## - ip: "192.168.2.5"
+  ##   hostnames:
+  ##   - "foo.local"
+  hostAliases: []
   ## example.extraVolumes An array with extra volumes for the Example Pod
   ## Example:
   ## extraVolumes:
