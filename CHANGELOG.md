@@ -1,5 +1,16 @@
 # Change log
 
+## 4.7.0
+
+### New Features
+
+* Added the ability to connect to Dameng databases
+* Added the ability to set up the `hostAliases`
+
+### Changes
+
+* Released ONLYOFFICE Docs [v8.3.3](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#833)
+
 ## 4.6.0
 
 ### New Features
