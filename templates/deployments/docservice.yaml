@@ -127,6 +127,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.docservice.terminationGracePeriodSeconds }}
+      {{- if .Values.docservice.hostAliases }}
+      hostAliases: {{- toYaml .Values.docservice.hostAliases | nindent 8 }}
+      {{- end }}
       {{- with .Values.docservice.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}

@@ -70,6 +70,9 @@ spec:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.example.terminationGracePeriodSeconds }}
+      {{- if .Values.example.hostAliases }}
+      hostAliases: {{- toYaml .Values.example.hostAliases | nindent 8 }}
+      {{- end }}
       containers:
       - name: example
         image: {{ .Values.example.image.repository }}:{{ .Values.example.image.tag }}

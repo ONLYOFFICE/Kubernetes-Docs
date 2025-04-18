@@ -115,6 +115,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.converter.terminationGracePeriodSeconds }}
+      {{- if .Values.converter.hostAliases }}
+      hostAliases: {{- toYaml .Values.converter.hostAliases | nindent 8 }}
+      {{- end }}
       {{- with .Values.converter.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}
