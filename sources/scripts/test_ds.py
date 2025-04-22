@@ -18,6 +18,10 @@ if os.environ.get('REDIS_CLUSTER_NODES'):
     redisClusterPort = redisClusterNodes[0].split(":")[1]
 if redisConnectorName == 'ioredis':
     redisSentinelGroupName = os.environ.get('REDIS_SENTINEL_GROUP_NAME')
+    if os.environ.get('REDIS_SENTINEL_NODES'):
+        redisSentinelNodes = list(os.environ.get('REDIS_SENTINEL_NODES').split(" "))
+        redisSentinelNode = redisSentinelNodes[0].split(":")[0]
+        redisSentinelPort = redisSentinelNodes[0].split(":")[1]
 
 dbType = os.environ.get('DB_TYPE')
 dbHost = os.environ.get('DB_HOST')
@@ -104,7 +108,7 @@ def get_redis_sentinel_status():
     from redis import Sentinel
     global rc
     try:
-        sentinel = Sentinel([(redisHost, redisPort)], socket_timeout=redisConnectTimeout, sentinel_kwargs={'password': redisSentinelPassword})
+        sentinel = Sentinel([(redisSentinelNode, redisSentinelPort)], socket_timeout=redisConnectTimeout, sentinel_kwargs={'password': redisSentinelPassword})
         master_host, master_port = sentinel.discover_master(redisSentinelGroupName)
         rc = redis.Redis(
             host=master_host,
