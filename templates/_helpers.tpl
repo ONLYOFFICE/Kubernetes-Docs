@@ -160,6 +160,26 @@ Return true if a secret object should be created for info auth
 {{- end -}}
 
 {{/*
+Get the secure link secret name
+*/}}
+{{- define "ds.secureLinkSecret.secretName" -}}
+{{- if .Values.proxy.secureLinkExistingSecret -}}
+    {{- printf "%s" (tpl .Values.proxy.secureLinkExistingSecret $) -}}
+{{- else -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "link-secret")) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for secure link
+*/}}
+{{- define "ds.secureLinkSecret.createSecret" -}}
+{{- if empty .Values.proxy.secureLinkExistingSecret }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the PVC name
 */}}
 {{- define "ds.pvc.name" -}}

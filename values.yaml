@@ -689,6 +689,9 @@ proxy:
   ## If the value is empty, a random one will be generated, which will be used later in the upgrade
   ## If a value is set, it will be used
   secureLinkSecret: ""
+  ## proxy.secureLinkExistingSecret Name of existing secret to use for secure_link
+  ## If set to, it takes priority over the `proxy.secureLinkSecret`
+  secureLinkExistingSecret: ""
   ## proxy.infoAllowedIP Defines ip addresses for accessing the info page
   ## Example:
   ## infoAllowedIP:
