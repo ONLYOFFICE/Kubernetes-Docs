@@ -745,11 +745,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `tests.resources.limits`                                    | The resources limits for the test container                                                                                                                                    | `{}`                                                                                      |
 
 * *Note: The prefix `-de` is specified in the value of the image repository, which means solution type. Possible options:
-  - Nothing is specified. For the open-source community version
   - `-de`. For commercial Developer Edition
   - `-ee`. For commercial Enterprise Edition
-
-  If you use the community version, there may be problems with co-editing documents.
 
   The default value of this parameter refers to the ONLYOFFICE Document Server Developer Edition. To learn more about this edition and compare it with other editions, please see the comparison table on [this page](https://github.com/ONLYOFFICE/DocumentServer#onlyoffice-docs-editions).
 

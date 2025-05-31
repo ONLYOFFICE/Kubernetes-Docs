@@ -544,8 +544,6 @@ Get the Docs image repository
         {{- $installationType = "-de" -}}
     {{- else if (eq $installationType "ENTERPRISE" ) -}}
         {{- $installationType = "-ee" -}}
-    {{- else if (eq $installationType "COMMUNITY" ) -}}
-        {{- $installationType = "" -}}
     {{- end -}}
     {{- if and $installationType (not (contains "-de" $repo)) (not (contains "-ee" $repo)) -}}
         {{- printf "%s%s" $repo $installationType -}}
