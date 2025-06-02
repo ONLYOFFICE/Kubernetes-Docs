@@ -47,6 +47,10 @@ spec:
   imagePullSecrets:
   - name: {{ .Values.imagePullSecrets }}
   {{- end }}
+  {{- with .Values.tests.initContainers }}
+  initContainers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   containers:
   - name: test-ds
     image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}

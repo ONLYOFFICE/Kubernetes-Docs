@@ -69,6 +69,10 @@ spec:
           configMap:
             name: {{ template "ds.install.configmap.tblCreate.name" . }}
         {{- end }}
+      {{- with .Values.install.job.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: pre-install
           image: {{ .Values.install.job.image.repository }}:{{ .Values.install.job.image.tag }}

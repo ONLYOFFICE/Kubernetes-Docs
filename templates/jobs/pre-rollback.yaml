@@ -77,6 +77,10 @@ spec:
           configMap:
             name: {{ template "ds.rollback.configmap.tblCreate.name" . }}
         {{- end }}
+      {{- with .Values.rollback.job.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: pre-rollback
           image: {{ .Values.rollback.job.image.repository }}:{{ .Values.rollback.job.image.tag }}

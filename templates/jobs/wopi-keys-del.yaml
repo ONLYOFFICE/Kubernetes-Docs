@@ -64,6 +64,10 @@ spec:
         configMap:
           name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-keys-del") }}
           defaultMode: 0755
+      {{- with .Values.wopiKeysDeletion.job.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: wopi-keys
         image: {{ .Values.wopiKeysDeletion.job.image.repository }}:{{ .Values.wopiKeysDeletion.job.image.tag }}

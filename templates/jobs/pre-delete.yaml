@@ -74,6 +74,10 @@ spec:
           configMap:
             name: {{ template "ds.delete.configmap.tblRemove.name" . }}
         {{- end }}
+      {{- with .Values.delete.job.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: pre-delete
           image: {{ .Values.delete.job.image.repository }}:{{ .Values.delete.job.image.tag }}

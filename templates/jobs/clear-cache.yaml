@@ -67,6 +67,10 @@ spec:
           configMap:
             name: {{ template "ds.clearCache.configMapName" . }}
             defaultMode: 0755
+      {{- with .Values.clearCache.job.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: clear-cache
           image: {{ .Values.clearCache.job.image.repository }}:{{ .Values.clearCache.job.image.tag }}
