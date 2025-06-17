@@ -62,7 +62,7 @@ spec:
       volumes:
         - name: ds-files
           persistentVolumeClaim:
-            claimName: {{ template "ds.pvc.name" . }}
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.existingClaim "ds-files") }}
         - name: clear-cache-scripts
           configMap:
             name: {{ template "ds.clearCache.configMapName" . }}
