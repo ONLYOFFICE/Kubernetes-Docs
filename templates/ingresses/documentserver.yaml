@@ -8,13 +8,31 @@ metadata:
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
-  {{- if or .Values.commonAnnotations .Values.ingress.annotations }}
-  {{- $dictValue := default .Values.commonAnnotations .Values.ingress.annotations }}
-  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
-  {{- end }}
-    {{- if not (eq .Values.ingress.path "/") }}
-    nginx.ingress.kubernetes.io/x-forwarded-prefix: {{ .Values.ingress.path }}
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  annotations:
+    {{- if or .Values.commonAnnotations .Values.ingress.annotations }}
+      {{- $dictValue := default .Values.commonAnnotations .Values.ingress.annotations }}
+      {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if and (eq .Values.ingress.path "/") (regexMatch ".*nginx.*" .Values.ingress.ingressClassName) }}
+      nginx.ingress.kubernetes.io/proxy-body-size: 100m
+      nginx.org/client-max-body-size: 100m
+    {{- end }}
+    {{- if and (not (eq .Values.ingress.path "/")) (regexMatch ".*nginx.*" .Values.ingress.ingressClassName) }}
+      nginx.ingress.kubernetes.io/proxy-body-size: 100m
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/x-forwarded-prefix: "{{ template "ds.ingress.annotations.path" . }}"
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.org/client-max-body-size: 100m
+      nginx.org/websocket-services: "{{ template "ds.svc.name" . }}"
+      nginx.org/rewrites: "serviceName={{ template "ds.svc.name" . }} rewrite=/"
+      nginx.org/proxy-set-headers: |
+        X-Forwarded-Prefix: {{ template "ds.ingress.annotations.path" . }},
+        X-Scheme
+    {{- else if and (not (eq .Values.ingress.path "/")) (regexMatch "(?i).*haproxy.*" .Values.ingress.ingressClassName) }}
+      haproxy.org/backend-config-snippet: |
+        acl existing-x-forwarded-host req.hdr(X-Forwarded-Host) -m found
+        http-request add-header X-Forwarded-Prefix {{ template "ds.ingress.annotations.path" . }} unless existing-x-forwarded-host
+        http-request replace-path {{ template "ds.ingress.annotations.path" . }}[/]?(.*) /\1
     {{- end }}
 spec:
   {{- if .Values.ingress.ingressClassName }}
@@ -35,7 +53,7 @@ spec:
     http:
       paths:
       - path: {{ template "ds.ingress.path" . }}
-        pathType: Prefix
+        pathType: {{ .Values.ingress.pathType }}
         backend:
           service:
             name: {{ template "ds.svc.name" . }}

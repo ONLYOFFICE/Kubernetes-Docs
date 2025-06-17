@@ -587,6 +587,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `ingress.ssl.enabled`                                       | Enable ssl for the ONLYOFFICE Docs ingress                                                                                                                                     | `false`                                                                                   |
 | `ingress.ssl.secret`                                        | Secret name for ssl to mount into the Ingress                                                                                                                                  | `tls`                                                                                     |
 | `ingress.path`                                              | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
+| `ingress.pathType`                                          | Specifies the path type for the ONLYOFFICE Docs ingress resource. Allowed values are `Exact`, `Prefix` or `ImplementationSpecific`                                             | `ImplementationSpecific`                                                                  |
 | `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
 | `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
 | `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana                                 | `false`                                                                                   |
@@ -913,6 +914,21 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 Associate the `documentserver` ingress IP or hostname with your domain name through your DNS provider.
 
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
+
+### 5.3.2.4 Expose ONLYOFFICE Docs on a virtual path
+This type of exposure allows you to expose ONLYOFFICE Docs on a virtual path, for example, `http://your-domain-name/docs`.
+To expose ONLYOFFICE Docs via ingress on a virtual path, set the `ingress.enabled`, `ingress.host` and `ingress.path` parameters.
+
+```bash
+$ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress.host=your-domain-name,ingress.path=/docs
+```
+
+The list of supported ingress controllers for virtual path configuration:
+* [Ingress NGINX by Kubernetes](https://github.com/kubernetes/ingress-nginx)
+* [NGINX Ingress by NGINX](https://github.com/nginx/kubernetes-ingress/)
+* [HAProxy Ingress by HAProxy](https://github.com/haproxytech/kubernetes-ingress/)
+
+For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pattern `(/|$)(.*)` to the `ingress.path`, for example, `/docs` becomes `/docs(/|$)(.*)`.
 
 ### 6. Scale ONLYOFFICE Docs (optional)
 

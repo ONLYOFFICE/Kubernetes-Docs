@@ -511,12 +511,41 @@ Get the ds Grafana Namespace
 
 {{/*
 Get the ds virtual path
+/                   -> /
+/path               -> /path/
+/path/              -> /path/
+/path/path          -> /path/path/
+/path/path/         -> /path/path/
+/path(/|$)(.*)      -> /path(/|$)(.*)
+/path/path(/|$)(.*) -> /path/path(/|$)(.*)
 */}}
 {{- define "ds.ingress.path" -}}
-{{- if eq .Values.ingress.path "/" -}}
-    {{- printf "/" -}}
-{{- else }}
-    {{- printf "%s(/|$)(.*)" .Values.ingress.path -}}
+{{- if hasSuffix "/" .Values.ingress.path -}}
+    {{- printf "%s" .Values.ingress.path -}}
+{{- else if hasSuffix "(/|$)(.*)" .Values.ingress.path -}}
+    {{- printf "%s" .Values.ingress.path -}}
+{{- else -}}
+    {{- printf "%s/" .Values.ingress.path -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the ds virtual path for ingress annotations
+/                   -> /
+/path               -> /path
+/path/              -> /path
+/path/path          -> /path/path
+/path/path/         -> /path/path
+/path(/|$)(.*)      -> /path
+/path/path(/|$)(.*) -> /path/path
+*/}}
+{{- define "ds.ingress.annotations.path" -}}
+{{- if hasSuffix "/" .Values.ingress.path -}}
+    {{- trimSuffix "/" .Values.ingress.path -}}
+{{- else if hasSuffix "(/|$)(.*)" .Values.ingress.path -}}
+    {{- trimSuffix "(/|$)(.*)" .Values.ingress.path -}}
+{{- else -}}
+    {{- printf "%s" .Values.ingress.path -}}
 {{- end -}}
 {{- end -}}
 
@@ -524,10 +553,12 @@ Get the ds virtual path
 Get ds url for example
 */}}
 {{- define "ds.example.dsUrl" -}}
-{{- if and (ne .Values.ingress.path "/") (eq .Values.example.dsUrl "/") -}}
-    {{- printf "%s/" (tpl .Values.ingress.path $) -}}
-{{- else }}
-    {{- printf "%s" (tpl .Values.example.dsUrl $) -}}
+{{- if eq .Values.example.dsUrl "/" -}}
+    {{- printf "%s/" (include "ds.ingress.annotations.path" .) -}}
+{{- else if hasSuffix "/" .Values.example.dsUrl -}}
+    {{- printf "%s" .Values.example.dsUrl -}}
+{{- else -}}
+    {{- printf "%s/" .Values.example.dsUrl -}}
 {{- end -}}
 {{- end -}}
 
