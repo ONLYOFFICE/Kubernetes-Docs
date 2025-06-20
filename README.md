@@ -39,6 +39,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
     + [5.3.2.2 Expose ONLYOFFICE Docs via HTTP](#5322-expose-onlyoffice-docs-via-http)
     + [5.3.2.3 Expose ONLYOFFICE Docs via HTTPS](#5323-expose-onlyoffice-docs-via-https)
+    + [5.3.2.4 Expose ONLYOFFICE Docs on a virtual path](#5324-expose-onlyoffice-docs-on-a-virtual-path)
+    + [5.3.3 Expose ONLYOFFICE Docs via route in OpenShift](#533-expose-onlyoffice-docs-via-route-in-openshift)
   * [6. Scale ONLYOFFICE Docs (optional)](#6-scale-onlyoffice-docs-optional) 
       + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
       + [6.2 Manual scaling](#62-manual-scaling) 
@@ -592,6 +594,11 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `ingress.ssl.secret`                                        | Secret name for ssl to mount into the Ingress                                                                                                                                  | `tls`                                                                                     |
 | `ingress.path`                                              | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
 | `ingress.pathType`                                          | Specifies the path type for the ONLYOFFICE Docs ingress resource. Allowed values are `Exact`, `Prefix` or `ImplementationSpecific`                                             | `ImplementationSpecific`                                                                  |
+| `openshift.route.enabled`                                   | Enable the creation of an OpenShift Route for the ONLYOFFICE Docs                                                                                                              | `false`                                                                                   |
+| `openshift.route.annotations`                               | Map of annotations to add to the OpenShift Route. If set to, it takes priority over the `commonAnnotations`                                                                    | `{}`                                                                                      |
+| `openshift.route.host`                                      | OpenShift Route hostname for the ONLYOFFICE Docs route                                                                                                                         | `""`                                                                                      |
+| `openshift.route.path`                                      | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
+| `openshift.route.wildcardPolicy`                            | The policy for handling wildcard subdomains in the OpenShift Route. Allowed values are `None`, `Subdomain`                                                                     | `None`                                                                                    |
 | `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
 | `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
 | `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana                                 | `false`                                                                                   |
@@ -933,6 +940,16 @@ The list of supported ingress controllers for virtual path configuration:
 * [HAProxy Ingress by HAProxy](https://github.com/haproxytech/kubernetes-ingress/)
 
 For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pattern `(/|$)(.*)` to the `ingress.path`, for example, `/docs` becomes `/docs(/|$)(.*)`.
+
+### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
+This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift.
+To expose ONLYOFFICE Docs via route, use these parameters: `openshift.route.enabled`, `openshift.route.host`, `openshift.route.path`.
+
+```bash
+$ helm install documentserver onlyoffice/docs --set openshift.route.enabled=true,openshift.route.host=your-domain-name,openshift.route.path=/docs
+```
+
+For tls termination, manually add certificates to the route via OpenShift web console.
 
 ### 6. Scale ONLYOFFICE Docs (optional)
 

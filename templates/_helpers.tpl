@@ -513,7 +513,7 @@ Get the ds Grafana Namespace
 {{- end -}}
 
 {{/*
-Get the ds virtual path
+Get the ds virtual path with trailing slash
 /                   -> /
 /path               -> /path/
 /path/              -> /path/
@@ -522,18 +522,19 @@ Get the ds virtual path
 /path(/|$)(.*)      -> /path(/|$)(.*)
 /path/path(/|$)(.*) -> /path/path(/|$)(.*)
 */}}
-{{- define "ds.ingress.path" -}}
-{{- if hasSuffix "/" .Values.ingress.path -}}
-    {{- printf "%s" .Values.ingress.path -}}
-{{- else if hasSuffix "(/|$)(.*)" .Values.ingress.path -}}
-    {{- printf "%s" .Values.ingress.path -}}
+{{- define "ds.path.withTrailingSlash" -}}
+{{- $pathValue := . -}}
+{{- if hasSuffix "/" $pathValue -}}
+    {{- printf "%s" $pathValue -}}
+{{- else if hasSuffix "(/|$)(.*)" $pathValue -}}
+    {{- printf "%s" $pathValue -}}
 {{- else -}}
-    {{- printf "%s/" .Values.ingress.path -}}
+    {{- printf "%s/" $pathValue -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Get the ds virtual path for ingress annotations
+Get the ds virtual path without trailing slash
 /                   -> /
 /path               -> /path
 /path/              -> /path
@@ -542,27 +543,29 @@ Get the ds virtual path for ingress annotations
 /path(/|$)(.*)      -> /path
 /path/path(/|$)(.*) -> /path/path
 */}}
-{{- define "ds.ingress.annotations.path" -}}
-{{- if hasSuffix "/" .Values.ingress.path -}}
-    {{- trimSuffix "/" .Values.ingress.path -}}
-{{- else if hasSuffix "(/|$)(.*)" .Values.ingress.path -}}
-    {{- trimSuffix "(/|$)(.*)" .Values.ingress.path -}}
-{{- else -}}
-    {{- printf "%s" .Values.ingress.path -}}
+{{- define "ds.path.withoutTrailingSlash" -}}
+{{- $pathValue := . -}}
+{{- if hasSuffix "(/|$)(.*)" $pathValue -}}
+    {{- $pathValue = trimSuffix "(/|$)(.*)" $pathValue -}}
 {{- end -}}
+{{- trimSuffix "/" $pathValue | default "/" -}}
 {{- end -}}
 
 {{/*
 Get ds url for example
 */}}
 {{- define "ds.example.dsUrl" -}}
-{{- if eq .Values.example.dsUrl "/" -}}
-    {{- printf "%s/" (include "ds.ingress.annotations.path" .) -}}
-{{- else if hasSuffix "/" .Values.example.dsUrl -}}
-    {{- printf "%s" .Values.example.dsUrl -}}
-{{- else -}}
-    {{- printf "%s/" .Values.example.dsUrl -}}
+{{- $pathInput := .Values.example.dsUrl -}}
+{{- if eq $pathInput "/" -}}
+  {{- if .Values.ingress.enabled -}}
+    {{- $pathInput = .Values.ingress.path -}}
+  {{- else if .Values.openshift.route.enabled -}}
+    {{- $pathInput = .Values.openshift.route.path -}}
+  {{- else -}}
+    {{- $pathInput = "/" -}}
+  {{- end -}}
 {{- end -}}
+{{- include "ds.path.withTrailingSlash" $pathInput -}}
 {{- end -}}
 
 {{/*

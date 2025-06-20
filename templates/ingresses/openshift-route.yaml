@@ -1,0 +1,41 @@
+{{- if .Values.openshift.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+      {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.openshift.route.annotations }}
+      {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.openshift.route.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if not (eq .Values.openshift.route.path "/") }}
+    haproxy.router.openshift.io/rewrite-target: /
+    {{- end }}
+spec:
+  host: {{ .Values.openshift.route.host }}
+  path: {{ include "ds.path.withoutTrailingSlash" .Values.openshift.route.path }}
+  wildcardPolicy: {{ .Values.openshift.route.wildcardPolicy }}
+  to:
+    kind: Service
+    name: {{ include "ds.svc.name" . }}
+    weight: 100
+  port:
+    targetPort: {{ .Values.service.port }}
+  {{- if not (eq .Values.openshift.route.path "/") }}
+  httpHeaders:
+    actions:
+      request:
+        - name: X-Forwarded-Prefix
+          action:
+            type: Set
+            set:
+              value: {{ include "ds.path.withoutTrailingSlash" .Values.openshift.route.path }}
+  {{- end }}
+{{- end -}}

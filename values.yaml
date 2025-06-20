@@ -1260,8 +1260,12 @@ ingress:
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
   annotations:
-  # ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
-  # ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    ## Use the annotation below if your NGINX Ingress controller by nginx.org
+    ## ref: https://github.com/nginx/kubernetes-ingress/
+    ## nginx.org/client-max-body-size: 100m
+  ## ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
   ingressClassName: nginx
   ssl:
     ## ingress.ssl.enabled Enable TLS for the ONLYOFFICE Docs ingress
@@ -1272,12 +1276,32 @@ ingress:
   ## ingress.host Ingress hostname for the ONLYOFFICE Docs
   host: ""
   ## ingress.path Specifies the path where ONLYOFFICE Docs will be available
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#5324-expose-onlyoffice-docs-on-a-virtual-path
   ## Example:
+  ## For NGINX Ingress controller by Kubernetes
+  ## path: "/ds(/|$)(.*)"
+  ## For other Ingress controllers
   ## path: "/ds"
   path: "/"
   ## ingress.pathType Specifies the path type for the ONLYOFFICE Docs ingress resource
   ## Allowed values: `Exact`, `Prefix` or `ImplementationSpecific`
   pathType: ImplementationSpecific
+
+## Onlyoffice Docs Openshift parameters
+##
+openshift:
+  route:
+    ## openshift.route.enabled Enable the creation of an OpenShift Route for ONLYOFFICE Docs
+    enabled: false
+    ## openshift.route.annotations Map of annotations to add to the OpenShift Route
+    ## If set, these are merged with commonAnnotations, with route.annotations taking precedence.
+    annotations: {}
+    ## openshift.route.host The hostname for the ONLYOFFICE Docs OpenShift Route resource
+    host: ""
+    ## openshift.route.path The path for the ONLYOFFICE Docs OpenShift Route resource
+    path: "/"
+    ## openshift.route.wildcardPolicy Defines how wildcards are handled for the Route host (e.g., None, Subdomain)
+    wildcardPolicy: None
 
 ## Grafana parameters
 ## See more details about installing Grafana here:
