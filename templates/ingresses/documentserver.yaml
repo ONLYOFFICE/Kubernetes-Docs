@@ -13,16 +13,17 @@ metadata:
       {{- $dictValue := default .Values.commonAnnotations .Values.ingress.annotations }}
       {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if and (not (eq .Values.ingress.path "/")) (regexMatch ".*nginx.*" .Values.ingress.ingressClassName) }}
+    {{- if and (not (eq .Values.ingress.path "/")) (eq "ingress-nginx" .Values.ingress.controllerName) }}
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/x-forwarded-prefix: "{{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    {{- else if and (not (eq .Values.ingress.path "/")) (eq "nginx-ingress" .Values.ingress.controllerName) }}
     nginx.org/websocket-services: "{{ include "ds.svc.name" . }}"
     nginx.org/rewrites: "serviceName={{ include "ds.svc.name" . }} rewrite=/"
     nginx.org/proxy-set-headers: |
       X-Forwarded-Prefix: {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }},
       X-Scheme
-    {{- else if and (not (eq .Values.ingress.path "/")) (regexMatch "(?i).*haproxy.*" .Values.ingress.ingressClassName) }}
+    {{- else if and (not (eq .Values.ingress.path "/")) (eq "haproxytech" .Values.ingress.controllerName) }}
     haproxy.org/backend-config-snippet: |
       acl existing-x-forwarded-host req.hdr(X-Forwarded-Host) -m found
       http-request add-header X-Forwarded-Prefix {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }} unless existing-x-forwarded-host

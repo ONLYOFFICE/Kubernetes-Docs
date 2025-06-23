@@ -1267,6 +1267,15 @@ ingress:
   ## ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
   ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
   ingressClassName: nginx
+  ## ingress.controllerName Used to distinguish between controllers with the same IngressClassName but from different vendors
+  ## Allowed values: `ingress-nginx`, `nginx-ingress`, `haproxytech`
+  ## Use `ingress-nginx` for the NGINX Ingress controller by Kubernetes
+  ## ref: https://github.com/kubernetes/ingress-nginx
+  ## Use `nginx-ingress` for the NGINX Ingress controller by nginx.org
+  ## ref: https://github.com/nginx/kubernetes-ingress
+  ## Use `haproxytech` for the HAProxy Ingress controller
+  ## ref: https://github.com/haproxytech/kubernetes-ingress
+  controllerName: ingress-nginx
   ssl:
     ## ingress.ssl.enabled Enable TLS for the ONLYOFFICE Docs ingress
     enabled: false
