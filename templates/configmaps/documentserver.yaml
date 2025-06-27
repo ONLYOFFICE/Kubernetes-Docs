@@ -27,6 +27,9 @@ data:
   {{- end }}
   {{- if eq .Values.connections.redisConnectorName "ioredis" }}
   REDIS_SENTINEL_GROUP_NAME: {{ .Values.connections.redisSentinelGroupName }}
+  {{- if.Values.connections.redisSentinelNodes }}
+  REDIS_SENTINEL_NODES: {{ join " " .Values.connections.redisSentinelNodes }}
+  {{- end }}
   {{- end }}
   AMQP_TYPE: {{ .Values.connections.amqpType }}
   AMQP_PORT: {{ .Values.connections.amqpPort | quote }}
@@ -47,7 +50,6 @@ data:
   NGINX_GZIP_PROXIED: {{ .Values.proxy.gzipProxied | quote }}
   NGINX_CLIENT_MAX_BODY_SIZE: {{ .Values.proxy.clientMaxBodySize | quote }}
   NGINX_WORKER_CONNECTIONS: {{ .Values.proxy.workerConnections | quote }}
-  SECURE_LINK_SECRET: {{ .Values.proxy.secureLinkSecret | quote }}
   {{- if .Values.example.enabled }}
   EXAMPLE_HOST_PORT: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "example") }}:3000
   {{- end }}

@@ -11,7 +11,7 @@ product:
 ## Connection parameters to external services
 connections:
   ## connections.dbType The database type
-  ## Possible values are `postgres`, `mariadb` or `mysql`
+  ## Possible values are `postgres`, `mariadb`, `mysql`, `oracle`, `mssql` or `dameng`
   dbType: postgres
   ## connections.dbHost The IP address or the name of the Database host
   dbHost: postgresql
@@ -35,10 +35,10 @@ connections:
   ## If you need to connect to Redis Sentinel, set the value `ioredis`
   redisConnectorName: redis
   ## connections.redisHost The IP address or the name of the Redis host
-  ## Not used if values are set in `connections.redisClusterNodes`
+  ## Not used if the values are set in `connections.redisClusterNodes` and `connections.redisSentinelNodes`
   redisHost: redis-master
   ## connections.redisPort The Redis server port number
-  ## Not used if values are set in `connections.redisClusterNodes`
+  ## Not used if the values are set in `connections.redisClusterNodes` and `connections.redisSentinelNodes`
   redisPort: "6379"
   ## connections.redisUser The Redis user name
   ## ref: https://redis.io/docs/management/security/acl/
@@ -72,6 +72,16 @@ connections:
   ## connections.redisNoPass Defines whether to use a Redis auth without a password
   ## If the connection to Redis server does not require a password, set the value to `true`
   redisNoPass: false
+  ## connections.redisSentinelNodes: List of Redis Sentinel Nodes
+  ## There is no need to specify every node, 3 should be enough
+  ## You can specify multiple values
+  ## It must be specified in the `host:port` format
+  ## Used if `connections.redisConnectorName` is set to `ioredis`
+  ## Example:
+  ## redisSentinelNodes:
+  ## - 10.244.0.79:26379
+  ## - 192.168.1.25:26379
+  redisSentinelNodes: []
   ## connections.redisSentinelGroupName Name of a group of Redis instances composed of a master and one or more slaves
   ## Used if `connections.redisConnectorName` is set to `ioredis`
   redisSentinelGroupName: mymaster
@@ -171,14 +181,14 @@ serviceAccount:
   automountServiceAccountToken: true
 ## Persistence parameters
 persistence:
-  ## persistence.existingClaim Name of an existing PVC to use
+  ## persistence.existingClaim The name of the existing PVC to use for Onlyoffice Docs data
   ## If not specified, a PVC named "ds-files" will be created
   existingClaim: ""
   ## persistence.annotations Defines annotations that will be additionally added to "ds-files" PVC
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
   annotations: {}
-  ## persistence.storageClass PVC Storage Class for Onlyoffice Docs data volume
+  ## persistence.storageClass PVC Storage Class for Onlyoffice Docs data and runtime config volumes
   storageClass: "nfs"
   ## persistence.size PVC Storage Request for Onlyoffice Docs volume
   size: 8Gi
@@ -186,6 +196,19 @@ persistence:
   ## Set to `true` if you will use S3 as cache storage
   ## If set to `true` then PVC "ds-files" will not be created
   storageS3: false
+  ## Persistence parameters for storing runtime config. Used if `persistence.runtimeConfig.enabled` is set to true
+  runtimeConfig:
+    ## persistence.runtimeConfig.enabled Defines whether to use PVC and whether to mount it in containers
+    enabled: true
+    ## persistence.runtimeConfig.existingClaim The name of the existing PVC used to store the runtime config
+    ## If not specified, a PVC named "ds-runtime-config" will be created
+    existingClaim: ""
+    ## persistence.runtimeConfig.annotations Defines annotations that will be additionally added to "ds-runtime-config" PVC
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
+    ## persistence.runtimeConfig.size PVC Storage Request for runtime config volume
+    size: 1Gi
 ## Configure a Security Context for a Pod
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 podSecurityContext:
@@ -277,10 +300,24 @@ log:
   ## log.pattern Defines the log pattern if `log.type=pattern`
   ## ref: https://github.com/log4js-node/log4js-node/blob/master/docs/layouts.md#pattern-format
   pattern: "[%d] [%p] [%X{DOCID}] [%X{USERID}] %c - %.10000m"
-## wopi.enabled Defines if `WOPI` is enabled
-## If the parameter is enabled, then caching attributes for the mounted directory (`PVC`) should be disabled for the client
+## Onlyoffice Docs `WOPI` parameters
 wopi:
+  ## wopi.enabled Defines if `WOPI` is enabled
+  ## If the parameter is enabled, then caching attributes for the mounted directory (`PVC`) should be disabled for the client
   enabled: false
+  keys:
+    ## wopi.keys.generation Defines whether to generate API keys
+    ## Used if you set `wopi.enabled` to `true`
+    generation: true
+    ## wopi.keys.newKeysExistingSecret Name of existing secret containing the WOPI keys
+    ## Must contain the keys `WOPI_PRIVATE_KEY`, `WOPI_PUBLIC_KEY`, `WOPI_MODULUS_KEY` and `WOPI_EXPONENT_KEY`
+    ## If not set, new keys will be generated and a secret will be created from them
+    newKeysExistingSecret: ""
+    ## wopi.keys.oldKeysExistingSecret Name of existing secret containing the old WOPI keys
+    ## Must contain the keys `WOPI_PRIVATE_KEY_OLD`, `WOPI_PUBLIC_KEY_OLD`, `WOPI_MODULUS_KEY_OLD` and `WOPI_EXPONENT_KEY_OLD`
+    ## If not set, new keys will be generated and a secret will be created from them
+    oldKeysExistingSecret: ""
+    ## If not set to `wopi.keys.newKeysExistingSecret` and `wopi.keys.oldKeysExistingSecret`, then secrets with the same keys will be created
 ## Onlyoffice Docs metrics parameters
 ## StatsD is used as an intermediate metric collector
 metrics:
@@ -299,7 +336,9 @@ jwt:
   enabled: true
   ## jwt.secret Defines the secret key to validate the JSON Web Token in the request to the ONLYOFFICE Docs
   ## Common for inbox and outbox requests
-  secret: "MYSECRET"
+  ## If the value is empty, a random one will be generated, which will be used later in the upgrade
+  ## If a value is set, it will be used
+  secret: ""
   ## jwt.header Defines the http header that will be used to send the JSON Web Token
   ## Common for inbox and outbox requests
   header: "Authorization"
@@ -488,6 +527,14 @@ docservice:
     behavior: {}
   ## docservice.terminationGracePeriodSeconds The time to terminate gracefully during which the Docservice Pod will have the `Terminating` status
   terminationGracePeriodSeconds: 30
+  ## docservice.hostAliases Adds additional entries to the hosts file in the Docservice and Proxy containers
+  ## ref: https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+  ## Example:
+  ## hostAliases:
+  ## - ip: "192.168.2.5"
+  ##   hostnames:
+  ##   - "foo.local"
+  hostAliases: []
   ## Docservice initContainers parameters
   ## Containers that run before docservice and proxy containers in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -517,7 +564,7 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 8.2.2-1
+    tag: 9.0.2-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Docservice container
@@ -654,7 +701,12 @@ proxy:
   workerConnections: "4096"
   ## proxy.secureLinkSecret Defines secret for the nginx config directive secure_link_md5
   ## ref: https://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-  secureLinkSecret: verysecretstring
+  ## If the value is empty, a random one will be generated, which will be used later in the upgrade
+  ## If a value is set, it will be used
+  secureLinkSecret: ""
+  ## proxy.secureLinkExistingSecret Name of existing secret to use for secure_link
+  ## If set to, it takes priority over the `proxy.secureLinkSecret`
+  secureLinkExistingSecret: ""
   ## proxy.infoAllowedIP Defines ip addresses for accessing the info page
   ## Example:
   ## infoAllowedIP:
@@ -677,7 +729,9 @@ proxy:
   infoAllowedExistingSecret: ""
   ## proxy.infoAllowedPassword Defines user password for accessing the info page
   ## Used if `proxy.infoAllowedUser` is set
-  infoAllowedPassword: "password"
+  ## If the value is empty, a random one will be generated, which will be used later in the upgrade
+  ## If a value is set, it will be used
+  infoAllowedPassword: ""
   ## proxy.welcomePage.enabled Defines whether the welcome page will be displayed
   welcomePage:
     enabled: true
@@ -687,7 +741,7 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 8.2.2-1
+    tag: 9.0.2-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Proxy container
@@ -925,6 +979,14 @@ converter:
     behavior: {}
   ## converter.terminationGracePeriodSeconds The time to terminate gracefully during which the Converter Pod will have the `Terminating` status
   terminationGracePeriodSeconds: 30
+  ## converter.hostAliases Adds additional entries to the hosts file in the Converter container
+  ## ref: https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+  ## Example:
+  ## hostAliases:
+  ## - ip: "192.168.2.5"
+  ##   hostnames:
+  ##   - "foo.local"
+  hostAliases: []
   ## Converter initContainers parameters
   ## Containers that run before converter container in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -951,7 +1013,7 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 8.2.2-1
+    tag: 9.0.2-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Converter container
@@ -1098,6 +1160,18 @@ example:
   tolerations: []
   ## example.terminationGracePeriodSeconds The time to terminate gracefully during which the Example Pod will have the `Terminating` status
   terminationGracePeriodSeconds: 30
+  ## example.hostAliases Adds additional entries to the hosts file in the Example container
+  ## ref: https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+  ## Example:
+  ## hostAliases:
+  ## - ip: "192.168.2.5"
+  ##   hostnames:
+  ##   - "foo.local"
+  hostAliases: []
+  ## Example initContainers parameters
+  ## example.initContainers Containers that run before Example container in a Pod
+  ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
   ## example.extraVolumes An array with extra volumes for the Example Pod
   ## Example:
   ## extraVolumes:
@@ -1110,7 +1184,7 @@ example:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 8.2.2-1
+    tag: 9.0.2-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Example container
@@ -1189,9 +1263,21 @@ ingress:
   ## You can also use `tpl` as the value for the key
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 100m
-  # ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
-  # ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
+    ## Use the annotation below if your NGINX Ingress controller by nginx.org
+    ## ref: https://github.com/nginx/kubernetes-ingress/
+    ## nginx.org/client-max-body-size: 100m
+  ## ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
   ingressClassName: nginx
+  ## ingress.controllerName Used to distinguish between controllers with the same IngressClassName but from different vendors
+  ## Allowed values: `ingress-nginx`, `nginx-ingress`, `haproxytech`
+  ## Use `ingress-nginx` for the NGINX Ingress controller by Kubernetes
+  ## ref: https://github.com/kubernetes/ingress-nginx
+  ## Use `nginx-ingress` for the NGINX Ingress controller by nginx.org
+  ## ref: https://github.com/nginx/kubernetes-ingress
+  ## Use `haproxytech` for the HAProxy Ingress controller
+  ## ref: https://github.com/haproxytech/kubernetes-ingress
+  controllerName: ingress-nginx
   ssl:
     ## ingress.ssl.enabled Enable TLS for the ONLYOFFICE Docs ingress
     enabled: false
@@ -1201,9 +1287,32 @@ ingress:
   ## ingress.host Ingress hostname for the ONLYOFFICE Docs
   host: ""
   ## ingress.path Specifies the path where ONLYOFFICE Docs will be available
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#5324-expose-onlyoffice-docs-on-a-virtual-path
   ## Example:
+  ## For NGINX Ingress controller by Kubernetes
+  ## path: "/ds(/|$)(.*)"
+  ## For other Ingress controllers
   ## path: "/ds"
   path: "/"
+  ## ingress.pathType Specifies the path type for the ONLYOFFICE Docs ingress resource
+  ## Allowed values: `Exact`, `Prefix` or `ImplementationSpecific`
+  pathType: ImplementationSpecific
+
+## Onlyoffice Docs Openshift parameters
+##
+openshift:
+  route:
+    ## openshift.route.enabled Enable the creation of an OpenShift Route for ONLYOFFICE Docs
+    enabled: false
+    ## openshift.route.annotations Map of annotations to add to the OpenShift Route
+    ## If set, these are merged with commonAnnotations, with route.annotations taking precedence.
+    annotations: {}
+    ## openshift.route.host The hostname for the ONLYOFFICE Docs OpenShift Route resource
+    host: ""
+    ## openshift.route.path The path for the ONLYOFFICE Docs OpenShift Route resource
+    path: "/"
+    ## openshift.route.wildcardPolicy Defines how wildcards are handled for the Route host (e.g., None, Subdomain)
+    wildcardPolicy: None
 
 ## Grafana parameters
 ## See more details about installing Grafana here:
@@ -1259,11 +1368,15 @@ install:
     ## install.job.tolerations Tolerations for pre-install Job Pod assignment
     ## If set to, it takes priority over the `tolerations`
     tolerations: []
+    ## pre-install Job initContainers parameters
+    ## install.job.initContainers Containers that run before pre-install container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
     image:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 8.2.2-1
+      tag: 9.0.2-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-install container
@@ -1340,11 +1453,15 @@ upgrade:
     ## upgrade.job.tolerations Tolerations for pre-upgrade Job Pod assignment
     ## If set to, it takes priority over the `tolerations`
     tolerations: []
+    ## pre-upgrade Job initContainers parameters
+    ## upgrade.job.initContainers Containers that run before pre-upgrade container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
     image:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 8.2.2-1
+      tag: 9.0.2-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-upgrade container
@@ -1429,11 +1546,15 @@ rollback:
     ## rollback.job.tolerations Tolerations for pre-rollback Job Pod assignment
     ## If set to, it takes priority over the `tolerations`
     tolerations: []
+    ## pre-rollback Job initContainers parameters
+    ## rollback.job.initContainers Containers that run before pre-rollback container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
     image:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 8.2.2-1
+      tag: 9.0.2-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-rollback container
@@ -1518,11 +1639,15 @@ delete:
     ## delete.job.tolerations Tolerations for pre-delete Job Pod assignment
     ## If set to, it takes priority over the `tolerations`
     tolerations: []
+    ## pre-delete Job initContainers parameters
+    ## delete.job.initContainers Containers that run before pre-delete container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
     image:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 8.2.2-1
+      tag: 9.0.2-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-delete container
@@ -1599,11 +1724,15 @@ clearCache:
     ## clearCache.job.tolerations Tolerations for Clear Cache Job Pod assignment
     ## If set to, it takes priority over the `tolerations`
     tolerations: []
+    ## Clear Cache initContainers parameters
+    ## clearCache.job.initContainers Containers that run before Clear Cache container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
     image:
       ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
-      tag: 8.2.2-1
+      tag: 9.0.2-1
       ## clearCache.job.image.pullPolicy Job by Clear Cache ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Clear Cache container
@@ -1673,11 +1802,15 @@ grafanaDashboard:
     ## grafanaDashboard.job.tolerations Tolerations for Grafana Dashboard Job Pod assignment
     ## If set to, it takes priority over the `tolerations`
     tolerations: []
+    ## Grafana Dashboard initContainers parameters
+    ## rafanaDashboard.job.initContainers Containers that run before Grafana Dashboard container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
     image:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
-      tag: 8.2.2-1
+      tag: 9.0.2-1
       ## grafanaDashboard.job.image.pullPolicy Job by Grafana Dashboard ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Grafana Dashboard container
@@ -1712,64 +1845,67 @@ grafanaDashboard:
       ##   memory: "1Gi"
       ##   cpu: "1000m"
       limits: {}
-## Job by Plugins Migration has a post-upgrade hook executes after any resources have been upgraded in Kubernetes
+## Job by Wopi Keys Generation has pre-install and pre-upgrade hooks and executes before any resources are created in Kubernetes
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
-## He clears the Cache directory
-pluginsMigration:
+## He generates WOPI keys and creates a secret from them
+## It is executed if `wopi.enabled` and `wopi.keys.generation` are set to `true`
+wopiKeysGeneration:
   job:
-    ## pluginsMigration.job.enabled Enable the execution of job Plugins Migration after upgrading ONLYOFFICE Docs
-    enabled: true
-    ## pluginsMigration.job.annotations Defines annotations that will be additionally added to Plugins Migration Job
+    ## wopiKeysGeneration.job.annotations Defines annotations that will be additionally added to Wopi Keys Generation Job
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
     annotations: {}
-    ## pluginsMigration.job.podAnnotations Map of annotations to add to the Plugins Migration Pod
+    ## wopiKeysGeneration.job.podAnnotations Map of annotations to add to the Wopi Keys Generation Pod
     podAnnotations: {}
-    ## pluginsMigration.job.customPodAntiAffinity Prohibiting the scheduling of Plugins Migration Job Pod relative to other Pods containing the specified labels on the same node
+    ## wopiKeysGeneration.job.customPodAntiAffinity Prohibiting the scheduling of Wopi Keys Generation Job Pod relative to other Pods containing the specified labels on the same node
     customPodAntiAffinity: {}
-    ## Pod affinity rules for Plugins Migration Job Pod scheduling by nodes relative to other Pods
-    ## Pod affinity allow you to constrain which nodes Plugins Migration Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## Pod affinity rules for Wopi Keys Generation Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes Wopi Keys Generation Job Pod can be scheduled on based on the labels of Pods already running on that node
     ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
     podAffinity: {}
-    ## Node affinity rules for Plugins Migration Job Pod scheduling by nodes
-    ## Node affinity allow you to constrain which nodes Plugins Migration Job Pod can be scheduled on based on node labels
+    ## Node affinity rules for Wopi Keys Generation Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes Wopi Keys Generation Job Pod can be scheduled on based on node labels
     ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
     nodeAffinity: {}
-    ## pluginsMigration.job.nodeSelector Node labels for Plugins Migration Job Pod assignment
+    ## wopiKeysGeneration.job.nodeSelector Node labels for Wopi Keys Generation Job Pod assignment
     ## If set to, it takes priority over the `nodeSelector`
     nodeSelector: {}
-    ## pluginsMigration.job.tolerations Tolerations for Plugins Migration Job Pod assignment
+    ## wopiKeysGeneration.job.tolerations Tolerations for Wopi Keys Generation Job Pod assignment
     ## If set to, it takes priority over the `tolerations`
     tolerations: []
+    ## Wopi Keys Generation Job initContainers parameters
+    ## wopiKeysGeneration.job.initContainers Containers that run before Wopi Keys Generation container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
     image:
-      ## pluginsMigration.job.image.repository Job by Plugins Migration ONLYOFFICE Docs image repository
-      repository: onlyoffice/docs-proxy-de
-      ## pluginsMigration.job.image.tag Job by Plugins Migration ONLYOFFICE Docs image tag
-      tag: 8.2.2-1
-      ## pluginsMigration.job.image.pullPolicy Job by Plugins Migration ONLYOFFICE Docs image pull policy
+      ## wopiKeysGeneration.job.image.repository Job by Wopi Keys Generation ONLYOFFICE Docs image repository
+      repository: onlyoffice/docs-utils
+      ## wopiKeysGeneration.job.image.tag Job by Wopi Keys Generation ONLYOFFICE Docs image tag
+      tag: 9.0.2-1
+      ## wopiKeysGeneration.job.image.pullPolicy Job by Wopi Keys Generation ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
-    ## Configure a Security Context for the Plugins Migration container
+    ## Configure a Security Context for the Wopi Keys Generation container
     containerSecurityContext:
-      ## pluginsMigration.job.containerSecurityContext.enabled Enable security context for the Plugins Migration container
+      ## wopiKeysGeneration.job.containerSecurityContext.enabled Enable security context for the Wopi Keys Generation container
       enabled: false
-      ## pluginsMigration.job.containerSecurityContext.runAsUser User ID for the Plugins Migration container
+      ## wopiKeysGeneration.job.containerSecurityContext.runAsUser User ID for the Wopi Keys Generation container
       runAsUser: 101
-      ## pluginsMigration.job.containerSecurityContext.runAsGroup Group ID for the Plugins Migration container
+      ## wopiKeysGeneration.job.containerSecurityContext.runAsGroup Group ID for the Wopi Keys Generation container
       runAsGroup: 101
-      ## pluginsMigration.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      ## wopiKeysGeneration.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
       runAsNonRoot: true
-      ## pluginsMigration.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      ## wopiKeysGeneration.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
       allowPrivilegeEscalation: false
-      ## pluginsMigration.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Plugins Migration container
+      ## wopiKeysGeneration.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Wopi Keys Generation container
       seccompProfile:
         type: RuntimeDefault
-      ## pluginsMigration.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      ## wopiKeysGeneration.job.containerSecurityContext.capabilities Defines the privileges granted to the process
       capabilities:
         drop: ["ALL"]
-    ## Job Plugins Migration container resource requests and limits
+    ## Job Wopi Keys Generation container resource requests and limits
     ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-    ## pluginsMigration.job.resources.requests The requested resources for the job Plugins Migration container
-    ## pluginsMigration.job.resources.limits The resources limits for the job Plugins Migration container
+    ## wopiKeysGeneration.job.resources.requests The requested resources for the job Wopi Keys Generation container
+    ## wopiKeysGeneration.job.resources.limits The resources limits for the job Wopi Keys Generation container
     resources:
       ## Example:
       ## requests:
@@ -1777,7 +1913,80 @@ pluginsMigration:
       ##   cpu: "200m"
       requests: {}
       ## limits:
-      ##   memory: "2Gi"
+      ##   memory: "1Gi"
+      ##   cpu: "1000m"
+      limits: {}
+## Job by Wopi Keys Deletion has a pre-delete hook and executes on a deletion request before all of the release's resources have been deleted
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He removes the WOPI secrets generated automatically
+## It is executed if `wopi.enabled`, `wopi.keys.generation` and `wopiKeysDeletion.job.enabled` are set to `true`
+wopiKeysDeletion:
+  job:
+    ## wopiKeysDeletion.job.enabled Enable the execution of Wopi Keys Deletion job before deleting ONLYOFFICE Docs
+    enabled: true
+    ## wopiKeysDeletion.job.annotations Defines annotations that will be additionally added to Wopi Keys Deletion Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
+    ## wopiKeysDeletion.job.podAnnotations Map of annotations to add to the Wopi Keys Deletion Pod
+    podAnnotations: {}
+    ## wopiKeysDeletion.job.customPodAntiAffinity Prohibiting the scheduling of Wopi Keys Deletion Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for Wopi Keys Deletion Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes Wopi Keys Deletion Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for Wopi Keys Deletion Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes Wopi Keys Deletion Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## wopiKeysDeletion.job.nodeSelector Node labels for Wopi Keys Deletion Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## wopiKeysDeletion.job.tolerations Tolerations for Wopi Keys Deletion Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
+    ## Wopi Keys Deletion Job initContainers parameters
+    ## wopiKeysDeletion.job.initContainers Containers that run before Wopi Keys Deletion container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
+    image:
+      ## wopiKeysDeletion.job.image.repository Job by Wopi Keys Deletion ONLYOFFICE Docs image repository
+      repository: onlyoffice/docs-utils
+      ## wopiKeysDeletion.job.image.tag Job by Wopi Keys Deletion ONLYOFFICE Docs image tag
+      tag: 9.0.2-1
+      ## wopiKeysDeletion.job.image.pullPolicy Job by Wopi Keys Deletion ONLYOFFICE Docs image pull policy
+      pullPolicy: IfNotPresent
+    ## Configure a Security Context for the Wopi Keys Deletion container
+    containerSecurityContext:
+      ## wopiKeysDeletion.job.containerSecurityContext.enabled Enable security context for the Wopi Keys Deletion container
+      enabled: false
+      ## wopiKeysDeletion.job.containerSecurityContext.runAsUser User ID for the Wopi Keys Deletion container
+      runAsUser: 101
+      ## wopiKeysDeletion.job.containerSecurityContext.runAsGroup Group ID for the Wopi Keys Deletion container
+      runAsGroup: 101
+      ## wopiKeysDeletion.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## wopiKeysDeletion.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## wopiKeysDeletion.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Wopi Keys Deletion container
+      seccompProfile:
+        type: RuntimeDefault
+      ## wopiKeysDeletion.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
+    ## Job Wopi Keys Deletion container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## wopiKeysDeletion.job.resources.requests The requested resources for the job Wopi Keys Deletion container
+    ## wopiKeysDeletion.job.resources.limits The resources limits for the job Wopi Keys Deletion container
+    resources:
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
+      requests: {}
+      ## limits:
+      ##   memory: "1Gi"
       ##   cpu: "1000m"
       limits: {}
 
@@ -1806,12 +2015,16 @@ tests:
   ## tests.tolerations Tolerations for Test Pod assignment
   ## If set to, it takes priority over the `tolerations`
   tolerations: []
+  ## Test initContainers parameters
+  ## test.initContainers Containers that run before Test container in a Pod
+  ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
   ## Test container image parameters
   image:
     ## tests.image.repository test container image name
     repository: onlyoffice/docs-utils
     ## tests.image.tag test container image tag
-    tag: 8.2.2-1
+    tag: 9.0.2-1
     ## tests.image.pullPolicy test container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Test container

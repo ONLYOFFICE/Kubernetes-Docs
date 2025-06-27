@@ -47,6 +47,10 @@ spec:
   imagePullSecrets:
   - name: {{ .Values.imagePullSecrets }}
   {{- end }}
+  {{- with .Values.tests.initContainers }}
+  initContainers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   containers:
   - name: test-ds
     image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
@@ -98,7 +102,7 @@ spec:
   {{- if not .Values.persistence.storageS3 }}
   - name: ds-files
     persistentVolumeClaim:
-      claimName: {{ template "ds.pvc.name" . }}
+      claimName: {{ include "ds.pvc.name" (list . .Values.persistence.existingClaim "ds-files") }}
   {{- end }}
   - name: test-ds
     configMap:

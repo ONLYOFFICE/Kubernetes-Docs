@@ -1,5 +1,59 @@
 # Change log
 
+## 5.0.0
+
+### New Features
+
+* Added the ability to connect to multiple Redis Sentinel nodes
+* Added the creation of a PVC to store a shared runtime config. You can specify an existing PVC
+* Added the ability to specify an existing Secret for Proxy `secure_link`
+* Added support for Ingress [NGINX Ingress by NGINX](https://github.com/nginx/kubernetes-ingress/) and [HAProxy](https://github.com/haproxytech/kubernetes-ingress/) for virtual path connection
+* Added the ability to connect via Openshift route
+
+### Changes
+
+* Released ONLYOFFICE Docs [v9.0.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#900)
+* The connection configuration via the virtual path has been [changed](https://github.com/ONLYOFFICE/Kubernetes-Docs#5324-expose-onlyoffice-docs-on-a-virtual-path)
+
+## 4.7.0
+
+### New Features
+
+* Added the ability to connect to Dameng databases
+* Added the ability to set up the `hostAliases`
+
+### Changes
+
+* Released ONLYOFFICE Docs [v8.3.3](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#833)
+
+## 4.6.0
+
+### New Features
+
+* Added the ability to connect to Oracle and MS SQL Server databases
+
+### Changes
+
+* Released ONLYOFFICE Docs [v8.3.2](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#832)
+
+## 4.5.1
+
+### Changes
+
+* Released ONLYOFFICE Docs [v8.3.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#831)
+
+## 4.5.0
+
+### New Features
+
+* Added the ability to automatically generate WOPI keys during installation or upgrades, or to use existing ones
+* Added the ability to modify the names of created resources by appending a specified suffix
+
+### Changes
+
+* The values of the parameters `jwt.secret`, `proxy.secureLinkSecret`, and `proxy.infoAllowedPassword` have been replaced with empty values instead of default ones, with the option to either generate random values or use the provided value
+* Released ONLYOFFICE Docs [v8.3.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#830)
+
 ## 4.4.1
 
 ### Changes

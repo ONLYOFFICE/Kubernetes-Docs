@@ -3,7 +3,7 @@ Check the DB type
 */}}
 {{- define "ds.db.type" -}}
 {{- $dbType := .Values.connections.dbType -}}
-{{- $possibleTypes := list "postgres" "mysql" "mariadb" -}}
+{{- $possibleTypes := list "postgres" "mysql" "mariadb" "oracle" "mssql" "dameng" -}}
 {{- if has $dbType $possibleTypes }}
     {{- $dbType -}}
 {{- else -}}
@@ -145,7 +145,7 @@ Get the info auth password secret
 {{- define "ds.info.secretName" -}}
 {{- if .Values.proxy.infoAllowedExistingSecret -}}
     {{- printf "%s" (tpl .Values.proxy.infoAllowedExistingSecret $) -}}
-{{- else if .Values.proxy.infoAllowedPassword -}}
+{{- else if .Values.proxy.infoAllowedUser -}}
     {{- printf "%s-%s" .Release.Name (include "ds.resources.name" (list . .Values.commonNameSuffix "info-auth")) -}}
 {{- end -}}
 {{- end -}}
@@ -160,24 +160,36 @@ Return true if a secret object should be created for info auth
 {{- end -}}
 
 {{/*
-Return info auth password
+Get the secure link secret name
 */}}
-{{- define "ds.info.password" -}}
-{{- if not (empty .Values.proxy.infoAllowedPassword) }}
-    {{- .Values.proxy.infoAllowedPassword }}
-{{- else }}
-    {{- required "A info auth Password is required!" .Values.proxy.infoAllowedPassword }}
-{{- end }}
+{{- define "ds.secureLinkSecret.secretName" -}}
+{{- if .Values.proxy.secureLinkExistingSecret -}}
+    {{- printf "%s" (tpl .Values.proxy.secureLinkExistingSecret $) -}}
+{{- else -}}
+    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "link-secret")) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created for secure link
+*/}}
+{{- define "ds.secureLinkSecret.createSecret" -}}
+{{- if empty .Values.proxy.secureLinkExistingSecret }}
+    {{- true -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
 Get the PVC name
 */}}
 {{- define "ds.pvc.name" -}}
-{{- if .Values.persistence.existingClaim -}}
-    {{- printf "%s" (tpl .Values.persistence.existingClaim $) -}}
+{{- $context := index . 0 -}}
+{{- $pvcExistingClaim := index . 1 -}}
+{{- $pvcName := index . 2 -}}
+{{- if $pvcExistingClaim -}}
+    {{- printf "%s" (tpl $pvcExistingClaim $context) -}}
 {{- else }}
-    {{- printf "%s" (include "ds.resources.name" (list . .Values.commonNameSuffix "ds-files")) -}}
+    {{- printf "%s" (include "ds.resources.name" (list $context $context.Values.commonNameSuffix $pvcName)) -}}
 {{- end -}}
 {{- end -}}
 
@@ -185,7 +197,7 @@ Get the PVC name
 Return true if a pvc object should be created
 */}}
 {{- define "ds.pvc.create" -}}
-{{- if empty .Values.persistence.existingClaim }}
+{{- if empty . }}
     {{- true -}}
 {{- end -}}
 {{- end -}}
@@ -501,25 +513,59 @@ Get the ds Grafana Namespace
 {{- end -}}
 
 {{/*
-Get the ds virtual path
+Get the ds virtual path with trailing slash
+/                   -> /
+/path               -> /path/
+/path/              -> /path/
+/path/path          -> /path/path/
+/path/path/         -> /path/path/
+/path(/|$)(.*)      -> /path(/|$)(.*)
+/path/path(/|$)(.*) -> /path/path(/|$)(.*)
 */}}
-{{- define "ds.ingress.path" -}}
-{{- if eq .Values.ingress.path "/" -}}
-    {{- printf "/" -}}
-{{- else }}
-    {{- printf "%s(/|$)(.*)" .Values.ingress.path -}}
+{{- define "ds.path.withTrailingSlash" -}}
+{{- $pathValue := . -}}
+{{- if hasSuffix "/" $pathValue -}}
+    {{- printf "%s" $pathValue -}}
+{{- else if hasSuffix "(/|$)(.*)" $pathValue -}}
+    {{- printf "%s" $pathValue -}}
+{{- else -}}
+    {{- printf "%s/" $pathValue -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Get the ds virtual path without trailing slash
+/                   -> /
+/path               -> /path
+/path/              -> /path
+/path/path          -> /path/path
+/path/path/         -> /path/path
+/path(/|$)(.*)      -> /path
+/path/path(/|$)(.*) -> /path/path
+*/}}
+{{- define "ds.path.withoutTrailingSlash" -}}
+{{- $pathValue := . -}}
+{{- if hasSuffix "(/|$)(.*)" $pathValue -}}
+    {{- $pathValue = trimSuffix "(/|$)(.*)" $pathValue -}}
+{{- end -}}
+{{- trimSuffix "/" $pathValue | default "/" -}}
 {{- end -}}
 
 {{/*
 Get ds url for example
 */}}
 {{- define "ds.example.dsUrl" -}}
-{{- if and (ne .Values.ingress.path "/") (eq .Values.example.dsUrl "/") -}}
-    {{- printf "%s/" (tpl .Values.ingress.path $) -}}
-{{- else }}
-    {{- printf "%s" (tpl .Values.example.dsUrl $) -}}
+{{- $pathInput := .Values.example.dsUrl -}}
+{{- if eq $pathInput "/" -}}
+  {{- if .Values.ingress.enabled -}}
+    {{- $pathInput = .Values.ingress.path -}}
+  {{- else if .Values.openshift.route.enabled -}}
+    {{- $pathInput = .Values.openshift.route.path -}}
+  {{- else -}}
+    {{- $pathInput = "/" -}}
+  {{- end -}}
 {{- end -}}
+{{- include "ds.path.withTrailingSlash" $pathInput -}}
 {{- end -}}
 
 {{/*
@@ -535,8 +581,6 @@ Get the Docs image repository
         {{- $installationType = "-de" -}}
     {{- else if (eq $installationType "ENTERPRISE" ) -}}
         {{- $installationType = "-ee" -}}
-    {{- else if (eq $installationType "COMMUNITY" ) -}}
-        {{- $installationType = "" -}}
     {{- end -}}
     {{- if and $installationType (not (contains "-de" $repo)) (not (contains "-ee" $repo)) -}}
         {{- printf "%s%s" $repo $installationType -}}
@@ -555,5 +599,26 @@ Get the Docs image repository
     {{- end -}}
 {{- else -}}
     {{- $repo -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the Secret value
+*/}}
+{{- define "ds.secrets.lookup" -}}
+{{- $context := index . 0 -}}
+{{- $existValue := index . 1 -}}
+{{- $getSecretName := index . 2 -}}
+{{- $getSecretKey := index . 3 -}}
+{{- if not $existValue }}
+    {{- $secret_lookup := (lookup "v1" "Secret" $context.Release.Namespace $getSecretName).data }}
+    {{- $getSecretValue := (get $secret_lookup $getSecretKey) | b64dec }}
+    {{- if $getSecretValue -}}
+        {{- printf "%s" $getSecretValue -}}
+    {{- else -}}
+        {{- printf "%s" (randAlpha 16) -}}
+    {{- end -}}
+{{- else -}}
+    {{- printf "%s" $existValue -}}
 {{- end -}}
 {{- end -}}

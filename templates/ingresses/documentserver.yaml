@@ -8,13 +8,26 @@ metadata:
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
-  {{- if or .Values.commonAnnotations .Values.ingress.annotations }}
-  {{- $dictValue := default .Values.commonAnnotations .Values.ingress.annotations }}
-  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
-  {{- end }}
-    {{- if not (eq .Values.ingress.path "/") }}
-    nginx.ingress.kubernetes.io/x-forwarded-prefix: {{ .Values.ingress.path }}
+  annotations:
+    {{- if or .Values.commonAnnotations .Values.ingress.annotations }}
+      {{- $dictValue := default .Values.commonAnnotations .Values.ingress.annotations }}
+      {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if and (not (eq .Values.ingress.path "/")) (eq "ingress-nginx" .Values.ingress.controllerName) }}
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/x-forwarded-prefix: "{{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    {{- else if and (not (eq .Values.ingress.path "/")) (eq "nginx-ingress" .Values.ingress.controllerName) }}
+    nginx.org/websocket-services: "{{ include "ds.svc.name" . }}"
+    nginx.org/rewrites: "serviceName={{ include "ds.svc.name" . }} rewrite=/"
+    nginx.org/proxy-set-headers: |
+      X-Forwarded-Prefix: {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }},
+      X-Scheme
+    {{- else if and (not (eq .Values.ingress.path "/")) (eq "haproxytech" .Values.ingress.controllerName) }}
+    haproxy.org/backend-config-snippet: |
+      acl existing-x-forwarded-host req.hdr(X-Forwarded-Host) -m found
+      http-request add-header X-Forwarded-Prefix {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }} unless existing-x-forwarded-host
+      http-request replace-path {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}[/]?(.*) /\1
     {{- end }}
 spec:
   {{- if .Values.ingress.ingressClassName }}
@@ -34,11 +47,11 @@ spec:
   {{- end }}
     http:
       paths:
-      - path: {{ template "ds.ingress.path" . }}
-        pathType: Prefix
+      - path: {{ include "ds.path.withTrailingSlash" .Values.ingress.path }}
+        pathType: {{ .Values.ingress.pathType }}
         backend:
           service:
-            name: {{ template "ds.svc.name" . }}
+            name: {{ include "ds.svc.name" . }}
             port:
               number: {{ .Values.service.port }}
 {{- end }}

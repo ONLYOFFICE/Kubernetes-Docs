@@ -103,7 +103,12 @@ spec:
         {{- if not .Values.persistence.storageS3 }}
         - name: ds-files
           persistentVolumeClaim:
-            claimName: {{ template "ds.pvc.name" . }}
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.existingClaim "ds-files") }}
+        {{- end }}
+        {{- if .Values.persistence.runtimeConfig.enabled }}
+        - name: ds-runtime-config
+          persistentVolumeClaim:
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.runtimeConfig.existingClaim "ds-runtime-config") }}
         {{- end }}
         - name: ds-license
           {{- if .Values.license.existingClaim }}
@@ -132,6 +137,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.docservice.terminationGracePeriodSeconds }}
+      {{- if .Values.docservice.hostAliases }}
+      hostAliases: {{- toYaml .Values.docservice.hostAliases | nindent 8 }}
+      {{- end }}
       {{- with .Values.docservice.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}
@@ -186,6 +194,8 @@ spec:
           {{- end }}
           {{- end }}
           envFrom:
+          - secretRef:
+              name: {{ template "ds.secureLinkSecret.secretName" . }}
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
@@ -265,6 +275,26 @@ spec:
           envFrom:
           - secretRef:
               name: {{ template "ds.jwt.secretName" . }}
+          - secretRef:
+              name: {{ template "ds.secureLinkSecret.secretName" . }}
+          {{- if .Values.wopi.enabled }}
+          {{- if or .Values.wopi.keys.generation .Values.wopi.keys.newKeysExistingSecret }}
+          - secretRef:
+              {{- if .Values.wopi.keys.newKeysExistingSecret }}
+              name: {{ tpl .Values.wopi.keys.newKeysExistingSecret $ }}
+              {{- else }}
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys") }}
+              {{- end }}
+          {{- end }}
+          {{- if or .Values.wopi.keys.generation .Values.wopi.keys.oldKeysExistingSecret }}
+          - secretRef:
+              {{- if .Values.wopi.keys.oldKeysExistingSecret }}
+              name: {{ tpl .Values.wopi.keys.oldKeysExistingSecret $ }}
+              {{- else }}
+              name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys-old") }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
@@ -275,6 +305,10 @@ spec:
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
+          {{- end }}
+          {{- if .Values.persistence.runtimeConfig.enabled }}
+          - name: ds-runtime-config
+            mountPath: /var/www/{{ .Values.product.name }}/config
           {{- end }}
           - name: ds-license
             mountPath: /var/www/{{ .Values.product.name }}/Data
