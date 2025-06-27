@@ -63,7 +63,7 @@ spec:
         {{- if not .Values.persistence.storageS3 }}
         - name: ds-files
           persistentVolumeClaim:
-            claimName: {{ template "ds.pvc.name" . }}
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.existingClaim "ds-files") }}
         {{- end }}
         - name: stop-scripts
           configMap:
@@ -77,6 +77,10 @@ spec:
           configMap:
             name: {{ template "ds.rollback.configmap.tblCreate.name" . }}
         {{- end }}
+      {{- with .Values.rollback.job.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: pre-rollback
           image: {{ .Values.rollback.job.image.repository }}:{{ .Values.rollback.job.image.tag }}

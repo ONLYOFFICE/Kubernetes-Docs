@@ -64,6 +64,10 @@ spec:
         configMap:
           name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "wopi-keys") }}
           defaultMode: 0755
+      {{- with .Values.wopiKeysGeneration.job.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: wopi-keys
         image: {{ .Values.wopiKeysGeneration.job.image.repository }}:{{ .Values.wopiKeysGeneration.job.image.tag }}

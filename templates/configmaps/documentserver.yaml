@@ -27,6 +27,9 @@ data:
   {{- end }}
   {{- if eq .Values.connections.redisConnectorName "ioredis" }}
   REDIS_SENTINEL_GROUP_NAME: {{ .Values.connections.redisSentinelGroupName }}
+  {{- if.Values.connections.redisSentinelNodes }}
+  REDIS_SENTINEL_NODES: {{ join " " .Values.connections.redisSentinelNodes }}
+  {{- end }}
   {{- end }}
   AMQP_TYPE: {{ .Values.connections.amqpType }}
   AMQP_PORT: {{ .Values.connections.amqpPort | quote }}

@@ -1,5 +1,20 @@
 # Change log
 
+## 5.0.0
+
+### New Features
+
+* Added the ability to connect to multiple Redis Sentinel nodes
+* Added the creation of a PVC to store a shared runtime config. You can specify an existing PVC
+* Added the ability to specify an existing Secret for Proxy `secure_link`
+* Added support for Ingress [NGINX Ingress by NGINX](https://github.com/nginx/kubernetes-ingress/) and [HAProxy](https://github.com/haproxytech/kubernetes-ingress/) for virtual path connection
+* Added the ability to connect via Openshift route
+
+### Changes
+
+* Released ONLYOFFICE Docs [v9.0.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#900)
+* The connection configuration via the virtual path has been [changed](https://github.com/ONLYOFFICE/Kubernetes-Docs#5324-expose-onlyoffice-docs-on-a-virtual-path)
+
 ## 4.7.0
 
 ### New Features
