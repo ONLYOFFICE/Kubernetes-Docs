@@ -539,23 +539,21 @@ docservice:
   ## Containers that run before docservice and proxy containers in a Pod
   ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## Example:
-  initContainers:
-    - name: deploy-custom-plugin
-      image: busybox:latest
-      command: ['sh', '-c', 'tar -zxvf /var/www/onlyoffice/custom-plugins/jitsi.tar.gz -C /var/www/onlyoffice/documentserver/sdkjs-plugins/']
-      volumeMounts:
-      - name: jitsi-volume
-        mountPath: /var/www/onlyoffice/custom-plugins
-      - name: plugins-migration
-        mountPath: /var/www/onlyoffice/documentserver/sdkjs-plugins/
-  # initContainers: []
+  ## initContainers:
+  ##   - name: change-volume-owner
+  ##     image: busybox:latest
+  ##     command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
+  ##     volumeMounts:
+  ##     - name: ds-files
+  ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+  initContainers: []
   ## docservice.extraVolumes An array with extra volumes for the docservice Pod
   ## Example:
-  extraVolumes:
-    - name: jitsi-volume
-      configMap:
-        name: jitsi
-  # extraVolumes: []
+  ## extraVolumes:
+  ##   - name: my-volume
+  ##     configMap:
+  ##       name: my-cm
+  extraVolumes: []
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:
