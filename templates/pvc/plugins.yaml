@@ -1,4 +1,4 @@
-{{- if and (not .Values.persistence.storageS3) (.Values.pluginsMigration.job.enabled) }}
+{{- if and (not .Values.persistence.storageS3) .Values.docservice.plugins }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,8 +9,6 @@ metadata:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
   annotations: 
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "2"
     {{- if or .Values.commonAnnotations .Values.persistence.annotations }}
     {{- $dictValue := default .Values.commonAnnotations .Values.persistence.annotations }}
     {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}

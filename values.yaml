@@ -554,6 +554,8 @@ docservice:
   ##     configMap:
   ##       name: my-cm
   extraVolumes: []
+  ## docservice.plugins An array with additional plugins for the Docservice deployment
+  plugins: []
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:

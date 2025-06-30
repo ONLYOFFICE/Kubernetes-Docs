@@ -95,11 +95,6 @@ spec:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       volumes:
-        {{- if .Values.pluginsMigration.job.enabled }}
-        - name: plugins-migration
-          persistentVolumeClaim:
-            claimName: plugins
-        {{- end }}
         {{- if not .Values.persistence.storageS3 }}
         - name: ds-files
           persistentVolumeClaim:
@@ -133,6 +128,14 @@ spec:
           configMap:
             name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "ds-welcome-page") }}
         {{- end }}
+        {{- range .Values.docservice.plugins}}
+        - name: {{ . }}-archive
+          configMap:
+            name: {{ . }}
+        {{- end }}
+        - name: plugins
+          persistentVolumeClaim:
+            claimName: plugins
         {{- with .Values.docservice.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -140,9 +143,30 @@ spec:
       {{- if .Values.docservice.hostAliases }}
       hostAliases: {{- toYaml .Values.docservice.hostAliases | nindent 8 }}
       {{- end }}
-      {{- with .Values.docservice.initContainers }}
+      {{- if or .Values.docservice.initContainers .Values.docservice.plugins }}
       initContainers:
-        {{- toYaml . | nindent 8 }}
+      {{- with .Values.docservice.initContainers }}
+      {{ toYaml . | nindent 2 }}
+      {{- end }}
+
+      {{- if .Values.docservice.plugins }}
+      {{- range .Values.docservice.plugins }}
+        - name: unpack-{{ . }}
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Unpacking {{ . }}.tar.gz..." && \
+              mkdir -p /plugins/plugin-{{ . }} && \
+              tar -xzf /{{ . }}-archive/{{ . }}.tar.gz -C /plugins
+          volumeMounts:
+            - name: plugins
+              mountPath: /plugins
+            - name: {{ . }}-archive
+              mountPath: /{{ . }}-archive
+      {{- end }}
+      {{- end }}
       {{- end }}
       containers:
         - name: proxy
@@ -199,10 +223,6 @@ spec:
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
-          {{- if .Values.pluginsMigration.job.enabled }}
-          - name: plugins-migration
-            mountPath: /var/www/onlyoffice/documentserver/sdkjs-plugins/
-          {{- end }}
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
@@ -216,6 +236,11 @@ spec:
           - name: ds-welcome-page
             mountPath: /etc/nginx/includes/ds-example.conf
             subPath: ds-example.conf
+          {{- end }}
+          {{- range .Values.docservice.plugins }}
+          - name: plugins
+            mountPath: /var/www/onlyoffice/documentserver/sdkjs-plugins/plugin-{{ . }}
+            subPath: plugin-{{ . }}
           {{- end }}
           {{- with .Values.proxy.extraVolumeMounts }}
           {{- toYaml . | nindent 10 }}
@@ -298,10 +323,6 @@ spec:
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
-          {{- if .Values.pluginsMigration.job.enabled }}
-          - name: plugins-migration
-            mountPath: /var/www/onlyoffice/documentserver/sdkjs-plugins/
-          {{- end }}
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
@@ -324,6 +345,11 @@ spec:
           - name: custom-themes
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/web-apps/apps/common/main/resources/themes/{{ .Values.extraThemes.filename }}
             subPath: {{ .Values.extraThemes.filename }}
+          {{- end }}
+          {{- range .Values.docservice.plugins }}
+          - name: plugins
+            mountPath: /var/www/onlyoffice/documentserver/sdkjs-plugins/plugin-{{ . }}
+            subPath: plugin-{{ . }}
           {{- end }}
           {{- with .Values.docservice.extraVolumeMounts }}
           {{- toYaml . | nindent 10 }}
