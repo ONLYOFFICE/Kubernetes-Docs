@@ -28,6 +28,8 @@ metadata:
       acl existing-x-forwarded-host req.hdr(X-Forwarded-Host) -m found
       http-request add-header X-Forwarded-Prefix {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }} unless existing-x-forwarded-host
       http-request replace-path {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}[/]?(.*) /\1
+    {{- else if and (not (eq .Values.ingress.path "/")) (eq "kong" .Values.ingress.controllerName) }}
+    konghq.com/strip-path: "true"
     {{- end }}
 spec:
   {{- if .Values.ingress.ingressClassName }}
