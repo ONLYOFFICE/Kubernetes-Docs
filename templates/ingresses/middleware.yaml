@@ -1,0 +1,15 @@
+{{- if and .Values.ingress.enabled (eq .Values.ingress.controllerName "traefik") }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+spec:
+  stripPrefix:
+    prefixes:
+      - {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}
+{{- end }}

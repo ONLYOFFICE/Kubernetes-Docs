@@ -30,6 +30,8 @@ metadata:
       http-request replace-path {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}[/]?(.*) /\1
     {{- else if and (not (eq .Values.ingress.path "/")) (eq "kong" .Values.ingress.controllerName) }}
     konghq.com/strip-path: "true"
+    {{- else if and (not (eq .Values.ingress.path "/")) (eq "traefik" .Values.ingress.controllerName) }}
+    traefik.ingress.kubernetes.io/router.middlewares: "documentserver@kubernetescrd"
     {{- end }}
 spec:
   {{- if .Values.ingress.ingressClassName }}
