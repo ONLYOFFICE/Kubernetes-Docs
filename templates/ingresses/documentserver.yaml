@@ -30,21 +30,29 @@ metadata:
       http-request replace-path {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}[/]?(.*) /\1
     {{- end }}
 spec:
+  {{- $context := . }}
   {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- end }}
   {{- if .Values.ingress.ssl.enabled }}
   tls: 
   - hosts:
+    {{- if not .Values.ingress.tenants }}
     - {{ .Values.ingress.host }}
+    {{- else }}
+    {{- range .Values.ingress.tenants }}
+    - {{ . }}
+    {{- end }}
+    {{- end }}
     secretName: {{ .Values.ingress.ssl.secret }}
   {{- end }}
   rules:
-  {{- if .Values.ingress.host }}
-  - host: {{ .Values.ingress.host }}
-  {{- else }}
+  {{- if and (not .Values.ingress.host) (not .Values.ingress.tenants) }}
   - host:
+  {{- else if and .Values.ingress.host (not .Values.ingress.tenants) }}
+  - host: {{ .Values.ingress.host }}
   {{- end }}
+  {{- if not .Values.ingress.tenants }}
     http:
       paths:
       - path: {{ include "ds.path.withTrailingSlash" .Values.ingress.path }}
@@ -54,4 +62,19 @@ spec:
             name: {{ include "ds.svc.name" . }}
             port:
               number: {{ .Values.service.port }}
+  {{- end }}
+  {{- if .Values.ingress.tenants }}
+  {{- range .Values.ingress.tenants }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: {{ include "ds.path.withTrailingSlash" $context.Values.ingress.path }}
+        pathType: {{ $context.Values.ingress.pathType }}
+        backend:
+          service:
+            name: {{ include "ds.svc.name" $context }}
+            port:
+              number: {{ $context.Values.service.port }}
+  {{- end }}
+  {{- end }}
 {{- end }}

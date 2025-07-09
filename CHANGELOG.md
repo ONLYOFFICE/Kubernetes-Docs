@@ -1,5 +1,11 @@
 # Change log
 
+## 5.1.0
+
+### New Features
+
+* Added the ability to specify multiple hostname for Ingress
+
 ## 5.0.0
 
 ### New Features

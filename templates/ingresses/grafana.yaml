@@ -13,28 +13,51 @@ metadata:
   annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
+  {{- $context := . }}
   {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- end }}
   {{- if .Values.ingress.ssl.enabled }}
   tls:
   - hosts:
+    {{- if not .Values.ingress.tenants }}
     - {{ .Values.ingress.host }}
+    {{- else }}
+    {{- range .Values.ingress.tenants }}
+    - {{ . }}
+    {{- end }}
+    {{- end }}
     secretName: {{ .Values.ingress.ssl.secret }}
   {{- end }}
   rules:
-  {{- if .Values.ingress.host }}
-  - host: {{ .Values.ingress.host }}
-  {{- else }}
+  {{- if and (not .Values.ingress.host) (not .Values.ingress.tenants) }}
   - host:
+  {{- else if and .Values.ingress.host (not .Values.ingress.tenants) }}
+  - host: {{ .Values.ingress.host }}
   {{- end }}
+  {{- if not .Values.ingress.tenants }}
     http:
       paths:
       - path: /grafana/
-        pathType: Prefix
+        pathType: {{ .Values.ingress.pathType }}
         backend:
           service:
             name: grafana
             port:
               number: 80
+  {{- end }}
+  {{- if .Values.ingress.tenants }}
+  {{- range .Values.ingress.tenants }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: /grafana/
+        pathType: {{ $context.Values.ingress.pathType }}
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 80
+  {{- end }}
+  {{- end }}
 {{- end }}
