@@ -19,10 +19,11 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [7.2 Specify parameters when installing ONLYOFFICE Docs](#72-specify-parameters-when-installing-onlyoffice-docs)
   * [8. Add custom Fonts](#8-add-custom-fonts)
   * [9. Add Plugins](#9-add-plugins)
-  * [10. Change interface themes](#10-change-interface-themes)
-    + [10.1 Create a ConfigMap containing a json file](#101-create-a-configmap-containing-a-json-file)
-    + [10.2 Specify parameters when installing ONLYOFFICE Docs](#102-specify-parameters-when-installing-onlyoffice-docs)
-  * [11. Connecting Amazon S3 bucket as a cache to ONLYOFFICE Helm Docs](#11-connecting-amazon-s3-bucket-as-a-cache-to-onlyoffice-helm-docs)
+  * [10. Add custom dictionaries](#10-add-custom-dictionaries)
+  * [11. Change interface themes](#11-change-interface-themes)
+    + [11.1 Create a ConfigMap containing a json file](#111-create-a-configmap-containing-a-json-file)
+    + [11.2 Specify parameters when installing ONLYOFFICE Docs](#112-specify-parameters-when-installing-onlyoffice-docs)
+  * [12. Connecting Amazon S3 bucket as a cache to ONLYOFFICE Helm Docs](#12-connecting-amazon-s3-bucket-as-a-cache-to-onlyoffice-helm-docs)
 - [Deploy ONLYOFFICE Docs](#deploy-onlyoffice-docs)
   * [1. Deploy the ONLYOFFICE Docs license](#1-deploy-the-onlyoffice-docs-license)
     + [1.1 Create secret](#11-create-secret)
@@ -89,7 +90,7 @@ $ helm repo update
 
 ### 2. Install Persistent Storage
 
-*If you want to use [Amazon S3 as a cache](#11-connecting-amazon-s3-bucket-as-a-cache-to-onlyoffice-helm-docs), please skip this step.*
+*If you want to use [Amazon S3 as a cache](#12-connecting-amazon-s3-bucket-as-a-cache-to-onlyoffice-helm-docs), please skip this step.*
 
 Install NFS Server Provisioner
 
@@ -268,11 +269,18 @@ Then specify your images when installing the ONLYOFFICE Docs.
 In order to add plugins to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
 Then specify your images when installing the ONLYOFFICE Docs.
 
-### 10. Change interface themes
+### 10. Add custom dictionaries
 
-*This step is optional. You can skip step [#10](#10-change-interface-themes) entirely if you don't need to change the interface themes*
+*This step is optional. You can skip step [#10](#10-add-custom-dictionaries) entirely if you don't need to add your dictionaries*
 
-#### 10.1 Create a ConfigMap containing a json file
+In order to add your custom dictionaries to images, you need to rebuild the images. Refer to the relevant steps in [this](https://github.com/ONLYOFFICE/Docker-Docs#building-onlyoffice-docs) manual.
+Then specify your images when installing the ONLYOFFICE Docs.
+
+### 11. Change interface themes
+
+*This step is optional. You can skip step [#11](#11-change-interface-themes) entirely if you don't need to change the interface themes*
+
+#### 11.1 Create a ConfigMap containing a json file
 
 To create a ConfigMap with a json file that contains the interface themes, you need to run the following command:
 
@@ -283,15 +291,15 @@ $ kubectl create configmap custom-themes \
 
 Note: Instead of `custom-themes` and `custom-themes.json` you can use any other names.
 
-#### 10.2 Specify parameters when installing ONLYOFFICE Docs
+#### 11.2 Specify parameters when installing ONLYOFFICE Docs
 
 When installing ONLYOFFICE Docs, specify the `extraThemes.configMap=custom-themes` and `extraThemes.filename=custom-themes.json` parameters.
 
-Note: If you need to add interface themes after the ONLYOFFICE Docs is already installed, you need to execute step [10.1](#101-create-a-configmap-containing-a-json-file)
+Note: If you need to add interface themes after the ONLYOFFICE Docs is already installed, you need to execute step [11.1](#111-create-a-configmap-containing-a-json-file)
 and then run the `helm upgrade documentserver onlyoffice/docs --set extraThemes.configMap=custom-themes --set extraThemes.filename=custom-themes.json --no-hooks` command or
 `helm upgrade documentserver -f ./values.yaml onlyoffice/docs --no-hooks` if the parameters are specified in the `values.yaml` file.
 
-### 11. Connecting Amazon S3 bucket as a cache to ONLYOFFICE Helm Docs
+### 12. Connecting Amazon S3 bucket as a cache to ONLYOFFICE Helm Docs
 In order to connect Amazon S3 bucket as a cache, you need to [create](#7-make-changes-to-node-config-configuration-files) a configuration file or edit the existing one in accordance with [this guide](https://helpcenter.onlyoffice.com/ru/installation/docs-connect-amazon.aspx) and change the value of the parameter `persistence.storageS3` to `true`. 
 
 ## Deploy ONLYOFFICE Docs
