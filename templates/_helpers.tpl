@@ -552,20 +552,36 @@ Get the ds virtual path without trailing slash
 {{- end -}}
 
 {{/*
+Get ds url
+*/}}
+{{- define "ds.dsUrl" -}}
+{{- if not (hasSuffix "/" .) -}}
+  {{- printf "%s/" . -}}
+{{- else }}
+  {{- printf "%s" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get ds url for example
 */}}
 {{- define "ds.example.dsUrl" -}}
-{{- $pathInput := .Values.example.dsUrl -}}
+{{- $pathInput := (tpl .Values.example.dsUrl $) -}}
 {{- if eq $pathInput "/" -}}
   {{- if .Values.ingress.enabled -}}
     {{- $pathInput = .Values.ingress.path -}}
   {{- else if .Values.openshift.route.enabled -}}
     {{- $pathInput = .Values.openshift.route.path -}}
-  {{- else -}}
-    {{- $pathInput = "/" -}}
   {{- end -}}
+  {{- if hasSuffix "(/|$)(.*)" $pathInput -}}
+    {{- $pathInput = trimSuffix "(/|$)(.*)" $pathInput -}}
+    {{- include "ds.dsUrl" $pathInput -}}
+  {{- else }}
+    {{- include "ds.dsUrl" $pathInput -}}
+  {{- end -}}
+{{- else }}
+  {{- include "ds.dsUrl" $pathInput -}}
 {{- end -}}
-{{- include "ds.path.withTrailingSlash" $pathInput -}}
 {{- end -}}
 
 {{/*
