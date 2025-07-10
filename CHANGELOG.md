@@ -6,6 +6,11 @@
 
 * Added the ability to specify multiple hostname for Ingress
 * Added the ability to set up the certificate request in Let's Encrypt
+* Added the ability to use custom user dictionaries
+
+### Changes
+
+* Released ONLYOFFICE Docs [v9.0.3](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#903)
 
 ## 5.0.0
 
@@ -19,7 +24,7 @@
 
 ### Changes
 
-* Released ONLYOFFICE Docs [v9.0.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#900)
+* Released ONLYOFFICE Docs [v9.0.2](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#902)
 * The connection configuration via the virtual path has been [changed](https://github.com/ONLYOFFICE/Kubernetes-Docs#5324-expose-onlyoffice-docs-on-a-virtual-path)
 
 ## 4.7.0
