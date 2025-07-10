@@ -40,7 +40,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
     + [5.3.2.2 Expose ONLYOFFICE Docs via HTTP](#5322-expose-onlyoffice-docs-via-http)
     + [5.3.2.3 Expose ONLYOFFICE Docs via HTTPS](#5323-expose-onlyoffice-docs-via-https)
-    + [5.3.2.4 Expose ONLYOFFICE Docs on a virtual path](#5324-expose-onlyoffice-docs-on-a-virtual-path)
+    + [5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5324-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
+    + [5.3.2.5 Expose ONLYOFFICE Docs on a virtual path](#5325-expose-onlyoffice-docs-on-a-virtual-path)
     + [5.3.3 Expose ONLYOFFICE Docs via route in OpenShift](#533-expose-onlyoffice-docs-via-route-in-openshift)
   * [6. Scale ONLYOFFICE Docs (optional)](#6-scale-onlyoffice-docs-optional) 
       + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
@@ -599,11 +600,16 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `ingress.ingressClassName`                                  | Used to reference the IngressClass that should be used to implement this Ingress                                                                                               | `nginx`                                                                                   |
 | `ingress.controllerName`                                    | Used to distinguish between controllers with the same IngressClassName but from different vendors                                                                              | `ingress-nginx`                                                                           |
 | `ingress.host`                                              | Ingress hostname for the ONLYOFFICE Docs ingress                                                                                                                               | `""`                                                                                      |
-| `ingress.tenants`                                           | Ingress hostnames if you need to use more than one name. For example, for multitenancy. If set to, it takes priority over the `ingress.host`. If `ingress.tls.enabled` is set to `true`, it is assumed that the certificate for all specified domains is kept secret by `ingress.tls.secretName` | `[]` |
+| `ingress.tenants`                                           | Ingress hostnames if you need to use more than one name. For example, for multitenancy. If set to, it takes priority over the `ingress.host`. If `ingress.ssl.enabled` is set to `true`, it is assumed that the certificate for all specified domains is kept secret by `ingress.tls.secretName` | `[]` |
 | `ingress.ssl.enabled`                                       | Enable ssl for the ONLYOFFICE Docs ingress                                                                                                                                     | `false`                                                                                   |
 | `ingress.ssl.secret`                                        | Secret name for ssl to mount into the Ingress                                                                                                                                  | `tls`                                                                                     |
 | `ingress.path`                                              | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
 | `ingress.pathType`                                          | Specifies the path type for the ONLYOFFICE Docs ingress resource. Allowed values are `Exact`, `Prefix` or `ImplementationSpecific`                                             | `ImplementationSpecific`                                                                  |
+| `ingress.letsencrypt.enabled`                               | Enabling certificate request creation in Let's Encrypt. Used if `ingress.enabled` is set to `true`                                                                             | `false`                                                                                   |
+| `ingress.letsencrypt.clusterIssuerName`                     | ClusterIssuer Name                                                                                                                                                             | `letsencrypt-prod`                                                                        |
+| `ingress.letsencrypt.email`                                 | Your email address used for ACME registration                                                                                                                                  | `""`                                                                                      |
+| `ingress.letsencrypt.server`                                | The address of the Let's Encrypt server to which requests for certificates will be sent                                                                                        | `https://acme-v02.api.letsencrypt.org/directory`                                          |
+| `ingress.letsencrypt.secretName`                            | Name of a secret used to store the ACME account private key                                                                                                                    | `letsencrypt-prod-private-key`                                                            |
 | `openshift.route.enabled`                                   | Enable the creation of an OpenShift Route for the ONLYOFFICE Docs                                                                                                              | `false`                                                                                   |
 | `openshift.route.annotations`                               | Map of annotations to add to the OpenShift Route. If set to, it takes priority over the `commonAnnotations`                                                                    | `{}`                                                                                      |
 | `openshift.route.host`                                      | OpenShift Route hostname for the ONLYOFFICE Docs route                                                                                                                         | `""`                                                                                      |
@@ -936,7 +942,23 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
-### 5.3.2.4 Expose ONLYOFFICE Docs on a virtual path
+#### 5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate
+- Add Helm repositories:
+  ```bash
+  $ helm repo add jetstack https://charts.jetstack.io
+  $ helm repo update
+  ```
+- Installing cert-manager
+  ```bash
+  $ helm install cert-manager --version v1.17.4 jetstack/cert-manager \
+    --namespace cert-manager \
+    --create-namespace \
+    --set crds.enabled=true \
+    --set crds.keep=false
+  ```
+Next, perform the installation or upgrade by setting the `ingress.enabled`, `ingress.ssl.enabled` and `ingress.letsencrypt.enabled` parameters to `true`. Also set your own values in the parameters `ingress.letsencrypt.email`, `ingress.host` or `ingress.tenants`(for example, `--set "ingress.tenants={tenant1.example.com,tenant2.example.com}"`) if you want to use multiple domain names.
+
+#### 5.3.2.5 Expose ONLYOFFICE Docs on a virtual path
 This type of exposure allows you to expose ONLYOFFICE Docs on a virtual path, for example, `http://your-domain-name/docs`.
 To expose ONLYOFFICE Docs via ingress on a virtual path, set the `ingress.enabled`, `ingress.host` and `ingress.path` parameters.
 

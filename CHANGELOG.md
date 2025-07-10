@@ -5,6 +5,7 @@
 ### New Features
 
 * Added the ability to specify multiple hostname for Ingress
+* Added the ability to set up the certificate request in Let's Encrypt
 
 ## 5.0.0
 

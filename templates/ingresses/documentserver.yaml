@@ -13,6 +13,9 @@ metadata:
       {{- $dictValue := default .Values.commonAnnotations .Values.ingress.annotations }}
       {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
     {{- end }}
+    {{- if .Values.ingress.letsencrypt.enabled }}
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    {{- end }}
     {{- if and (not (eq .Values.ingress.path "/")) (eq "ingress-nginx" .Values.ingress.controllerName) }}
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/x-forwarded-prefix: "{{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}"
