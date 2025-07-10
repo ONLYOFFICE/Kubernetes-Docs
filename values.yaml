@@ -1287,10 +1287,10 @@ ingress:
   ## ingress.tenants Ingress hostnames if you need to use more than one name
   ## For example, for multitenancy
   ## If set to, it takes priority over the `ingress.host`
-  ## If `ingress.tls.enabled` is set to `true`, it is assumed that the certificate for all specified domains is kept secret by `ingress.tls.secretName`
+  ## If `ingress.ssl.enabled` is set to `true`, it is assumed that the certificate for all specified domains is kept secret by `ingress.ssl.secret`
   tenants: []
   ## ingress.path Specifies the path where ONLYOFFICE Docs will be available
-  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#5324-expose-onlyoffice-docs-on-a-virtual-path
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#5325-expose-onlyoffice-docs-on-a-virtual-path
   ## Example:
   ## For NGINX Ingress controller by Kubernetes
   ## path: "/ds(/|$)(.*)"
