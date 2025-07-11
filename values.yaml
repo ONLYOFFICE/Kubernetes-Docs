@@ -562,7 +562,7 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 9.0.2-1
+    tag: 9.0.3-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Docservice container
@@ -739,7 +739,7 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 9.0.2-1
+    tag: 9.0.3-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Proxy container
@@ -1011,7 +1011,7 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 9.0.2-1
+    tag: 9.0.3-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Converter container
@@ -1182,7 +1182,7 @@ example:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 9.0.2-1
+    tag: 9.0.3-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Example container
@@ -1284,8 +1284,13 @@ ingress:
     secret: tls
   ## ingress.host Ingress hostname for the ONLYOFFICE Docs
   host: ""
+  ## ingress.tenants Ingress hostnames if you need to use more than one name
+  ## For example, for multitenancy
+  ## If set to, it takes priority over the `ingress.host`
+  ## If `ingress.ssl.enabled` is set to `true`, it is assumed that the certificate for all specified domains is kept secret by `ingress.ssl.secret`
+  tenants: []
   ## ingress.path Specifies the path where ONLYOFFICE Docs will be available
-  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#5324-expose-onlyoffice-docs-on-a-virtual-path
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#5325-expose-onlyoffice-docs-on-a-virtual-path
   ## Example:
   ## For NGINX Ingress controller by Kubernetes
   ## path: "/ds(/|$)(.*)"
@@ -1295,6 +1300,18 @@ ingress:
   ## ingress.pathType Specifies the path type for the ONLYOFFICE Docs ingress resource
   ## Allowed values: `Exact`, `Prefix` or `ImplementationSpecific`
   pathType: ImplementationSpecific
+  letsencrypt:
+    ## ingress.letsencrypt.enabled Enabling certificate request creation in Let's Encrypt
+    ## Used if `ingress.enabled` is set to `true`
+    enabled: false
+    ## ingress.letsencrypt.clusterIssuerName ClusterIssuer Name
+    clusterIssuerName: "letsencrypt-prod"
+    ## ingress.letsencrypt.email Your email address used for ACME registration
+    email: ""
+    ## ingress.letsencrypt.server The address of the Let's Encrypt server to which requests for certificates will be sent
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    ## ingress.letsencrypt.secretName Name of a secret used to store the ACME account private key
+    secretName: "letsencrypt-prod-private-key"
 
 ## Onlyoffice Docs Openshift parameters
 ##
@@ -1374,7 +1391,7 @@ install:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 9.0.2-1
+      tag: 9.0.3-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-install container
@@ -1459,7 +1476,7 @@ upgrade:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 9.0.2-1
+      tag: 9.0.3-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-upgrade container
@@ -1552,7 +1569,7 @@ rollback:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 9.0.2-1
+      tag: 9.0.3-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-rollback container
@@ -1645,7 +1662,7 @@ delete:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 9.0.2-1
+      tag: 9.0.3-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-delete container
@@ -1730,7 +1747,7 @@ clearCache:
       ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
-      tag: 9.0.2-1
+      tag: 9.0.3-1
       ## clearCache.job.image.pullPolicy Job by Clear Cache ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Clear Cache container
@@ -1808,7 +1825,7 @@ grafanaDashboard:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
-      tag: 9.0.2-1
+      tag: 9.0.3-1
       ## grafanaDashboard.job.image.pullPolicy Job by Grafana Dashboard ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Grafana Dashboard container
@@ -1879,7 +1896,7 @@ wopiKeysGeneration:
       ## wopiKeysGeneration.job.image.repository Job by Wopi Keys Generation ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysGeneration.job.image.tag Job by Wopi Keys Generation ONLYOFFICE Docs image tag
-      tag: 9.0.2-1
+      tag: 9.0.3-1
       ## wopiKeysGeneration.job.image.pullPolicy Job by Wopi Keys Generation ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Wopi Keys Generation container
@@ -1952,7 +1969,7 @@ wopiKeysDeletion:
       ## wopiKeysDeletion.job.image.repository Job by Wopi Keys Deletion ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysDeletion.job.image.tag Job by Wopi Keys Deletion ONLYOFFICE Docs image tag
-      tag: 9.0.2-1
+      tag: 9.0.3-1
       ## wopiKeysDeletion.job.image.pullPolicy Job by Wopi Keys Deletion ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Wopi Keys Deletion container
@@ -2022,7 +2039,7 @@ tests:
     ## tests.image.repository test container image name
     repository: onlyoffice/docs-utils
     ## tests.image.tag test container image tag
-    tag: 9.0.2-1
+    tag: 9.0.3-1
     ## tests.image.pullPolicy test container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Test container

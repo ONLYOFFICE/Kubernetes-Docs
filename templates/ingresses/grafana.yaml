@@ -8,33 +8,60 @@ metadata:
   labels:
     {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
   {{- end }}
-  {{- if or .Values.commonAnnotations .Values.grafana.ingress.annotations }}
-  {{- $dictValue := default .Values.commonAnnotations .Values.grafana.ingress.annotations }}
-  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
-  {{- end }}
+  annotations:
+    {{- if or .Values.commonAnnotations .Values.grafana.ingress.annotations }}
+      {{- $dictValue := default .Values.commonAnnotations .Values.grafana.ingress.annotations }}
+      {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.ingress.letsencrypt.enabled }}
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    {{- end }}
 spec:
+  {{- $context := . }}
   {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- end }}
   {{- if .Values.ingress.ssl.enabled }}
   tls:
   - hosts:
+    {{- if not .Values.ingress.tenants }}
     - {{ .Values.ingress.host }}
+    {{- else }}
+    {{- range .Values.ingress.tenants }}
+    - {{ . }}
+    {{- end }}
+    {{- end }}
     secretName: {{ .Values.ingress.ssl.secret }}
   {{- end }}
   rules:
-  {{- if .Values.ingress.host }}
-  - host: {{ .Values.ingress.host }}
-  {{- else }}
+  {{- if and (not .Values.ingress.host) (not .Values.ingress.tenants) }}
   - host:
+  {{- else if and .Values.ingress.host (not .Values.ingress.tenants) }}
+  - host: {{ .Values.ingress.host }}
   {{- end }}
+  {{- if not .Values.ingress.tenants }}
     http:
       paths:
       - path: /grafana/
-        pathType: Prefix
+        pathType: {{ .Values.ingress.pathType }}
         backend:
           service:
             name: grafana
             port:
               number: 80
+  {{- end }}
+  {{- if .Values.ingress.tenants }}
+  {{- range .Values.ingress.tenants }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: /grafana/
+        pathType: {{ $context.Values.ingress.pathType }}
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 80
+  {{- end }}
+  {{- end }}
 {{- end }}
