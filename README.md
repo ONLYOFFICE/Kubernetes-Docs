@@ -939,6 +939,9 @@ The list of supported ingress controllers for virtual path configuration:
 * [Ingress NGINX by Kubernetes](https://github.com/kubernetes/ingress-nginx)
 * [NGINX Ingress by NGINX](https://github.com/nginx/kubernetes-ingress/)
 * [HAProxy Ingress by HAProxy](https://github.com/haproxytech/kubernetes-ingress/)
+* [Kong Ingress by Kong](https://github.com/Kong/kubernetes-ingress-controller/)
+* [Traefik Ingress by Traefik](https://github.com/traefik/traefik/)
+* [APISIX Ingress by Apache](https://github.com/apache/apisix-ingress-controller/)
 
 For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pattern `(/|$)(.*)` to the `ingress.path`, for example, `/docs` becomes `/docs(/|$)(.*)`.
 
