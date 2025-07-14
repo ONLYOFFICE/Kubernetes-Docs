@@ -32,6 +32,11 @@ metadata:
     konghq.com/strip-path: "true"
     {{- else if and (not (eq .Values.ingress.path "/")) (eq "traefik" .Values.ingress.controllerName) }}
     traefik.ingress.kubernetes.io/router.middlewares: "documentserver@kubernetescrd"
+    {{- else if and (not (eq .Values.ingress.path "/")) (eq "apisix" .Values.ingress.controllerName) }}
+    k8s.apisix.apache.org/enable-websocket: "true"
+    k8s.apisix.apache.org/use-regex: "true"
+    k8s.apisix.apache.org/rewrite-target-regex: "{{ include "ds.path.withTrailingSlash" .Values.ingress.path }}(.*)"
+    k8s.apisix.apache.org/rewrite-target-regex-template: "/$1"
     {{- end }}
 spec:
   {{- if .Values.ingress.ingressClassName }}
