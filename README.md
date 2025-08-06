@@ -1095,6 +1095,8 @@ $ kubectl delete pod converter-*** docservice-*** -n <NAMESPACE>
 
 ### 9. Update ONLYOFFICE Docs license (optional)
 
+After the release v5.1.1, you can update the license by simply recreating the secret with the new license, without deleting or rebooting pods. The documentserver is now able to dynamically reread the license file after replacing it. For example:
+
 In order to update the license, you need to perform the following steps:
  - Place the license.lic file containing the new key in some directory
  - Run the following commands:
@@ -1104,6 +1106,10 @@ $ kubectl create secret generic [SECRET_LICENSE_NAME] --from-file=path/to/licens
 ```
 
 - Where `SECRET_LICENSE_NAME` is the name of an existing secret with a license
+
+Thats all, the documentserver will reread the new license itself.
+
+**[DEPRECATED METHOD]**
 
  - Restart `docservice` and `converter` pods. For example, using the following command:
 ```bash
