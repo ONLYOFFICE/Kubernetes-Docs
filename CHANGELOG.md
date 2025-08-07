@@ -1,5 +1,11 @@
 # Change log
 
+## 5.1.1
+
+### Changes
+
+* Released ONLYOFFICE Docs [v9.0.4](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#904)
+
 ## 5.1.0
 
 ### New Features
