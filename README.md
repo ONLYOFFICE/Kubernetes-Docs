@@ -130,8 +130,12 @@ Note: If you want to enable `WOPI`, please set the parameter `wopi.enabled=true`
 To install RabbitMQ to your cluster, run the following command:
 
 ```bash
-$ helm install rabbitmq bitnami/rabbitmq \
+$ helm install rabbitmq --version 16.0.14 bitnami/rabbitmq \
   --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
+  --set resourcesPreset=none \
+  --set image.repository=bitnamilegacy/rabbitmq \
+  --set image.tag=4.1.3-debian-12-r1 \
+  --set global.security.allowInsecureImages=true \
   --set metrics.enabled=false
 ```
 
@@ -144,13 +148,17 @@ See more details about installing RabbitMQ via Helm [here](https://github.com/bi
 To install Redis to your cluster, run the following command:
 
 ```bash
-$ helm install redis bitnami/redis \
+$ helm install redis --version 22.0.7 bitnami/redis \
   --set architecture=standalone \
   --set master.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
+  --set master.resourcesPreset=none \
+  --set global.security.allowInsecureImages=true \
+  --set image.repository=bitnamilegacy/redis \
+  --set image.tag=8.2.1-debian-12-r0 \
   --set metrics.enabled=false
 ```
 
-Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gathered by Prometheus.
+Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/redis-exporter` and `metrics.image.tag=1.76.0-debian-12-r0`.
 
 See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/redis).
 
@@ -163,12 +171,18 @@ As a database server, you can use PostgreSQL, MySQL or MariaDB
 To install PostgreSQL to your cluster, run the following command:
 
 ```
-$ helm install postgresql bitnami/postgresql \
+$ helm install postgresql --version 16.7.27 bitnami/postgresql \
   --set auth.database=postgres \
   --set primary.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set primary.persistence.size=PERSISTENT_SIZE \
+  --set primary.resourcesPreset=none \
+  --set image.repository=bitnamilegacy/postgresql \
+  --set global.security.allowInsecureImages=true \
+  --set image.tag=17.6.0-debian-12-r2 \
   --set metrics.enabled=false
 ```
+
+Note: Set the `metrics.enabled=true` to enable exposing Database metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/postgres-exporter` and `metrics.image.tag=0.17.1-debian-12-r16`.
 
 See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/postgresql#postgresql).
 
@@ -177,11 +191,15 @@ See more details about installing PostgreSQL via Helm [here](https://github.com/
 To install MySQL to your cluster, run the following command:
 
 ```
-$ helm install mysql bitnami/mysql \
+$ helm install mysql --version 14.0.3 bitnami/mysql \
   --set auth.database=onlyoffice \
   --set auth.username=onlyoffice \
   --set primary.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
   --set primary.persistence.size=PERSISTENT_SIZE \
+  --set primary.resourcesPreset=none \
+  --set image.repository=bitnamilegacy/mysql \
+  --set global.security.allowInsecureImages=true \
+  --set image.tag=9.4.0-debian-12-r1 \
   --set metrics.enabled=false
 ```
 
@@ -191,7 +209,7 @@ Here `PERSISTENT_SIZE` is a size for the Database persistent volume. For example
 
 It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
 
-Note: Set the `metrics.enabled=true` to enable exposing Database metrics to be gathered by Prometheus.
+Note: Set the `metrics.enabled=true` to enable exposing Database metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/mysqld-exporter` and `metrics.image.tag=0.17.2-debian-12-r16`.
 
 ### 6. Deploy StatsD exporter
 
@@ -1216,11 +1234,15 @@ Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been
 To install Grafana to your cluster, run the following command:
 
 ```bash
-$ helm install grafana bitnami/grafana \
+$ helm install grafana --version 12.1.8 bitnami/grafana \
   --set service.ports.grafana=80 \
   --set config.useGrafanaIniFile=true \
   --set config.grafanaIniConfigMap=grafana-ini \
-  --set datasources.secretName=grafana-datasource
+  --set datasources.secretName=grafana-datasource \
+  --set resourcesPreset=none \
+  --set image.repository=bitnamilegacy/grafana \
+  --set image.tag=12.1.1-debian-12-r1 \
+  --set global.security.allowInsecureImages=true
 ```
 
 #### 1.2 Deploy Grafana with the installation of ready-made dashboards
@@ -1237,11 +1259,15 @@ the necessary edits will be made to them and configmap will be created from them
 To install Grafana to your cluster, run the following command:
 
 ```bash
-$ helm install grafana bitnami/grafana \
+$ helm install grafana --version 12.1.8 bitnami/grafana \
   --set service.ports.grafana=80 \
   --set config.useGrafanaIniFile=true \
   --set config.grafanaIniConfigMap=grafana-ini \
   --set datasources.secretName=grafana-datasource \
+  --set resourcesPreset=none \
+  --set image.repository=bitnamilegacy/grafana \
+  --set image.tag=12.1.1-debian-12-r1 \
+  --set global.security.allowInsecureImages=true \
   --set dashboardsProvider.enabled=true \
   --set dashboardsConfigMaps[0].configMapName=dashboard-node-exporter \
   --set dashboardsConfigMaps[0].fileName=dashboard-node-exporter.json \
