@@ -43,6 +43,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5324-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
     + [5.3.2.5 Expose ONLYOFFICE Docs on a virtual path](#5325-expose-onlyoffice-docs-on-a-virtual-path)
     + [5.3.3 Expose ONLYOFFICE Docs via route in OpenShift](#533-expose-onlyoffice-docs-via-route-in-openshift)
+  * [5.4 Admin Panel deployment (optional)](#54-admin-panel-deployment-optional)
   * [6. Scale ONLYOFFICE Docs (optional)](#6-scale-onlyoffice-docs-optional) 
       + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
       + [6.2 Manual scaling](#62-manual-scaling) 
@@ -576,6 +577,28 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `converter.autoscaling.targetMemory.utilizationPercentage`  | Converter deployment autoscaling target memory percentage                                                                                                                      | `70`                                                                                      |
 | `converter.autoscaling.customMetricsType`                   | Custom, additional or external autoscaling metrics for the Converter deployment                                                                                                | `[]`                                                                                      |
 | `converter.autoscaling.behavior`                            | Configuring Converter deployment scaling behavior policies for the `scaleDown` and `scaleUp` fields                                                                            | `{}`                                                                                      |
+| `adminpanel.enabled`                                        | Enables Admin panel installation                                                                                                                                                 | `false`                                                                                 |
+| `adminpanel.annotations`                                    | Defines annotations that will be additionally added to Admin panel Deployment. If set to, it takes priority over the `commonAnnotations`                                         | `{}`                                                                                    |
+| `adminpanel.podAnnotations`                                 | Map of annotations to add to the Admin panel deployment pods                                                                                                                     | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                               |
+| `adminpanel.updateStrategy.type`                            | Admin panel StatefulSet update strategy type                                                                                                                                     | `RollingUpdate`                                                                         |
+| `adminpanel.customPodAntiAffinity`                          | Prohibiting the scheduling of Admin panel Pods relative to other Pods containing the specified labels on the same node                                                           | `{}`                                                                                    |
+| `adminpanel.podAffinity`                                    | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Admin panel Pods scheduling by nodes relative to other Pods | `{}`                                                         |
+| `adminpanel.nodeAffinity`                                   | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Admin panel Pods scheduling by nodes                   | `{}`                                                                                    |
+| `adminpanel.nodeSelector`                                   | Node labels for Admin panel Pods assignment. If set to, it takes priority over the `nodeSelector`                                                                                | `{}`                                                                                    |
+| `adminpanel.tolerations`                                    | Tolerations for Admin panel Pods assignment. If set to, it takes priority over the `tolerations`                                                                                 | `[]`                                                                                    |
+| `adminpanel.terminationGracePeriodSeconds`                  | The time to terminate gracefully during which the Admin panel Pod will have the `Terminating` status                                                                             | `30`                                                                                    |
+| `adminpanel.hostAliases`                                    | Adds [additional entries](https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/) to the hosts file in the Admin panel container                                | `[]`                                                                                    |
+| `adminpanel.initContainers`                                 | Defines containers that run before Admin panel container in the Admin panel deployment pod. For example, a container that changes the owner of the PersistentVolume              | `[]`                                                                                    |
+| `adminpanel.image.repository`                               | Admin panel container image repository*                                                                                                                                          | `onlyoffice/docs-adminpanel-de`                                                         |
+| `adminpanel.image.tag`                                      | Admin panel container image tag                                                                                                                                                  | `9.0.4-1`                                                                               |
+| `adminpanel.image.pullPolicy`                               | Admin panel container image pull policy                                                                                                                                          | `IfNotPresent`                                                                          |
+| `adminpanel.containerSecurityContext.enabled`               | Enable security context for the Admin panel container                                                                                                                            | `false`                                                                                 |
+| `adminpanel.lifecycleHooks`                                 | Defines the Admin panel [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                     |
+| `adminpanel.resources.requests`                             | The requested resources for the Admin panel container                                                                                                                            | `{}`                                                                                    |
+| `adminpanel.resources.limits`                               | The resources limits for the Admin panel container                                                                                                                               | `{}`                                                                                    |
+| `adminpanel.extraEnvVars`                                   | An array with extra env variables for the Admin panel container                                                                                                                  | `[]`                                                                                    |
+| `adminpanel.extraVolumes`                                   | An array with extra volumes for the Admin panel Pod                                                                                                                              | `[]`                                                                                    |
+| `adminpanel.extraVolumeMounts`                              | An array with extra volume mounts for the Admin panel container                                                                                                                  | `[]`                                                                                    |
 | `example.enabled`                                           | Enables the installation of Example                                                                                                                                            | `false`                                                                                   |
 | `example.annotations`                                       | Defines annotations that will be additionally added to Example StatefulSet. If set to, it takes priority over the `commonAnnotations`                                          | `{}`                                                                                      |
 | `example.podAnnotations`                                    | Map of annotations to add to the example pod                                                                                                                                   | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
@@ -991,7 +1014,7 @@ The list of supported ingress controllers for virtual path configuration:
 
 For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pattern `(/|$)(.*)` to the `ingress.path`, for example, `/docs` becomes `/docs(/|$)(.*)`.
 
-### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
+#### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
 This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift.
 To expose ONLYOFFICE Docs via route, use these parameters: `openshift.route.enabled`, `openshift.route.host`, `openshift.route.path`.
 
@@ -1000,6 +1023,16 @@ $ helm install documentserver onlyoffice/docs --set openshift.route.enabled=true
 ```
 
 For tls termination, manually add certificates to the route via OpenShift web console.
+
+### 5.4 Admin Panel deployment (optional)
+
+To deploy the Admin Panel, set the `adminpanel.enabled` parameter to true:
+
+```bash
+$ helm install documentserver onlyoffice/docs --set adminpanel.enabled=true
+```
+
+For first authorization, use the secret value `Bootstrap code`. You can find it by opening the adminpanel Pod log. The `Bootstrap code` is valid for 1 hour.
 
 ### 6. Scale ONLYOFFICE Docs (optional)
 

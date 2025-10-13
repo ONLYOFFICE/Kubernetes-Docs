@@ -1,0 +1,184 @@
+{{- if .Values.adminpanel.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  labels:
+    app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.commonAnnotations .Values.adminpanel.annotations }}
+  {{- $dictValue := default .Values.commonAnnotations .Values.adminpanel.annotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
+      {{- if .Values.commonLabels }}
+      {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
+      {{- end }}
+  serviceName: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
+  replicas: 1
+  {{- if .Values.adminpanel.updateStrategy }}
+  updateStrategy: {{- toYaml .Values.adminpanel.updateStrategy | nindent 4 }}
+  {{- end }}
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.adminpanel.podAnnotations }}
+      annotations:
+        {{- range $key, $value := .Values.adminpanel.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ }}
+        {{- end }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "ds.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.adminpanel | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.adminpanel.customPodAntiAffinity .Values.adminpanel.podAffinity .Values.adminpanel.nodeAffinity }}
+      affinity:
+        {{- with .Values.adminpanel.customPodAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.adminpanel.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.adminpanel.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.nodeSelector .Values.adminpanel.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.adminpanel.nodeSelector) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.tolerations .Values.adminpanel.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.adminpanel.tolerations) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.adminpanel.terminationGracePeriodSeconds }}
+      {{- if .Values.adminpanel.hostAliases }}
+      hostAliases: {{- toYaml .Values.adminpanel.hostAliases | nindent 8 }}
+      {{- end }}
+      {{- with .Values.adminpanel.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: adminpanel
+        image: {{ .Values.adminpanel.image.repository }}:{{ .Values.adminpanel.image.tag }}
+        imagePullPolicy: {{ .Values.adminpanel.image.pullPolicy }}
+        {{- if .Values.adminpanel.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.adminpanel.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
+        {{- if .Values.adminpanel.lifecycleHooks }}
+        lifecycle: {{- toYaml .Values.adminpanel.lifecycleHooks | nindent 10 }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.adminpanel.containerPorts.http }}
+          name: http
+        resources: {{ toYaml .Values.adminpanel.resources | nindent 10 }}
+        env:
+        - name: REDIS_SERVER_PWD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "ds.redis.secretName" . }}
+              key: {{ .Values.connections.redisSecretKeyName }}
+        {{- if eq .Values.connections.redisConnectorName "ioredis" }}
+        - name: REDIS_SENTINEL_PWD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "ds.redis.sentinel.secretName" . }}
+              key: {{ .Values.connections.redisSentinelSecretKeyName }}
+        {{- end }}
+        {{- with .Values.adminpanel.extraEnvVars }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ template "ds.jwt.secretName" . }}
+        - secretRef:
+            name: {{ template "ds.secureLinkSecret.secretName" . }}
+        {{- if .Values.wopi.enabled }}
+        {{- if or .Values.wopi.keys.generation .Values.wopi.keys.newKeysExistingSecret }}
+        - secretRef:
+            {{- if .Values.wopi.keys.newKeysExistingSecret }}
+            name: {{ tpl .Values.wopi.keys.newKeysExistingSecret $ }}
+            {{- else }}
+            name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys") }}
+            {{- end }}
+        {{- end }}
+        {{- if or .Values.wopi.keys.generation .Values.wopi.keys.oldKeysExistingSecret }}
+        - secretRef:
+            {{- if .Values.wopi.keys.oldKeysExistingSecret }}
+            name: {{ tpl .Values.wopi.keys.oldKeysExistingSecret $ }}
+            {{- else }}
+            name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys-old") }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+        - configMapRef:
+            name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+        volumeMounts:
+          {{- if not .Values.persistence.storageS3 }}
+          - name: ds-files
+            mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
+          {{- end }}
+          {{- if .Values.persistence.runtimeConfig.enabled }}
+          - name: ds-runtime-config
+            mountPath: /var/www/{{ .Values.product.name }}/config
+          {{- end }}
+          - name: ds-license
+            mountPath: /var/www/{{ .Values.product.name }}/Data
+            {{- if not .Values.license.existingClaim }}
+            readOnly: true
+            {{- end }}
+          {{- if .Values.extraConf.configMap }}
+          - name: custom-file
+            mountPath: /etc/{{ .Values.product.name }}/documentserver/{{ .Values.extraConf.filename }}
+            subPath: {{ .Values.extraConf.filename }}
+          {{- end }}
+          {{- with .Values.adminpanel.extraVolumeMounts }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+      volumes:
+        {{- if not .Values.persistence.storageS3 }}
+        - name: ds-files
+          persistentVolumeClaim:
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.existingClaim "ds-files") }}
+        {{- end }}
+        {{- if .Values.persistence.runtimeConfig.enabled }}
+        - name: ds-runtime-config
+          persistentVolumeClaim:
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.runtimeConfig.existingClaim "ds-runtime-config") }}
+        {{- end }}
+        - name: ds-license
+          {{- if .Values.license.existingClaim }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.license.existingClaim }}
+          {{- else }}
+          secret:
+            secretName: {{ template "ds.license.secretName" . }}
+          {{- end }}
+        {{- if .Values.extraConf.configMap }}
+        - name: custom-file
+          configMap:
+            name: {{ .Values.extraConf.configMap }}
+        {{- end }}
+        {{- with .Values.adminpanel.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

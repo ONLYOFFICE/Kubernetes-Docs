@@ -53,6 +53,9 @@ data:
   {{- if .Values.example.enabled }}
   EXAMPLE_HOST_PORT: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "example") }}:3000
   {{- end }}
+  {{- if .Values.adminpanel.enabled }}
+  ADMINPANEL_HOST_PORT: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}:9000
+  {{- end }}
   WOPI_ENABLED: {{ .Values.wopi.enabled | quote }}
   {{- if .Values.webProxy.enabled }}
   http_proxy: {{ .Values.webProxy.http | quote }}
