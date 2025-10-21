@@ -1,5 +1,16 @@
 # Change log
 
+## 5.2.0
+
+### New Features
+
+* Added Admin panel service
+* Added the ability to connect Oracle Thick Mode
+
+### Changes
+
+* Released ONLYOFFICE Docs [v9.1.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#910)
+
 ## 5.1.1
 
 ### Changes

@@ -1,0 +1,27 @@
+{{- if .Values.adminpanel.enabled }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  labels:
+    app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: {{ .Values.adminpanel.containerPorts.http }}
+    targetPort: {{ .Values.adminpanel.containerPorts.http }}
+  selector:
+    statefulset.kubernetes.io/pod-name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}-0
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
+  type: ClusterIP
+{{- end }}

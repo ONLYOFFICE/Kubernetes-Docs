@@ -4,6 +4,6 @@ description: Helm chart for installing ONLYOFFICE Docs in Kubernetes
 
 type: application
 
-version: 5.1.1
+version: 5.2.0
 
-appVersion: 9.0.4
+appVersion: 9.1.0

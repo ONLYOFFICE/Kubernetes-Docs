@@ -8,6 +8,14 @@ Example was marked for installation.
 
 {{- end }}
 
+{{- if .Values.adminpanel.enabled }}
+
+Admin Panel was marked for installation.
+  For authorization, use the secret value "Bootstrap code". You can get it by running the command:
+    $ kubectl logs -f {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}-0 --namespace={{ .Release.Namespace }}
+
+{{- end }}
+
 {{- if .Values.tests.enabled }}
 
 You can test ONLYOFFICE Docs availability and access to connected dependencies using Helm test:

@@ -223,6 +223,9 @@ podSecurityContext:
   docservice:
     ## podSecurityContext.docservice.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Docservice Pod
     fsGroup: 101
+  adminpanel:
+    ## podSecurityContext.adminpanel.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Admin panel Pod
+    fsGroup: 101
   ## Jobs podSecurityContext parameters
   jobs:
     ## podSecurityContext.jobs.fsGroup Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in Pods created by Jobs
@@ -562,7 +565,7 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 9.0.4-1
+    tag: 9.1.0-1
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Docservice container
@@ -739,7 +742,7 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 9.0.4-1
+    tag: 9.1.0-1
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Proxy container
@@ -1011,7 +1014,7 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 9.0.4-1
+    tag: 9.1.0-1
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Converter container
@@ -1063,6 +1066,168 @@ converter:
   ##     value: "my_value"
   extraEnvVars: []
   ## converter.extraVolumeMounts An array with extra volume mounts for the Converter container
+  ## Example:
+  ## extraVolumeMounts:
+  ##   - name: my-volume
+  ##     mountPath: /my_dir/my_cm.txt
+  ##     subPath: my_cm.txt
+  extraVolumeMounts: []
+
+## Onlyoffice Docs Adminpanel StatefulSet parameters
+##
+adminpanel:
+  ## adminpanel.enabled Enables Adminpanel installation
+  enabled: false
+  ## adminpanel.annotations Defines annotations that will be additionally added to Adminpanel Deployment
+  ## If set to, it takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
+  annotations: {}
+  ## adminpanel.podAnnotations Map of annotations to add to the Adminpanel deployment pod
+  podAnnotations:
+    rollme: "{{ randAlphaNum 5 | quote }}"
+  ## Update strategy used to replace old Pods by new ones. Allowed values: `RollingUpdate` or `OnDelete`
+  ## adminpanel.updateStrategy.type Adminpanel StatefulSet update strategy type
+  updateStrategy:
+    type: RollingUpdate
+  ## adminpanel.customPodAntiAffinity Prohibiting the scheduling of Adminpanel Pod relative to other Pods containing the specified labels on the same node
+  ## Example:
+  ## customPodAntiAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##   - labelSelector:
+  ##       matchExpressions:
+  ##       - key: app
+  ##         operator: In
+  ##         values:
+  ##         - docservice
+  ##     topologyKey: kubernetes.io/hostname
+  customPodAntiAffinity: {}
+  ## Pod affinity rules for Adminpanel Pod scheduling by nodes relative to other Pods
+  ## Pod affinity allow you to constrain which nodes Adminpanel Pod can be scheduled on based on the labels of Pods already running on that node
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Example:
+  ## podAffinity:
+  ##   preferredDuringSchedulingIgnoredDuringExecution:
+  ##   - weight: 100
+  ##     podAffinityTerm:
+  ##       labelSelector:
+  ##         matchExpressions:
+  ##         - key: app
+  ##           operator: NotIn
+  ##           values:
+  ##           - database
+  ##       topologyKey: kubernetes.io/hostname
+  podAffinity: {}
+  ## Node affinity rules for Adminpanel Pod scheduling by nodes
+  ## Node affinity allow you to constrain which nodes Adminpanel Pod can be scheduled on based on node labels
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ## Example:
+  ## nodeAffinity:
+  ##   requiredDuringSchedulingIgnoredDuringExecution:
+  ##     nodeSelectorTerms:
+  ##     - matchExpressions:
+  ##       - key: topology.kubernetes.io/zone
+  ##         operator: In
+  ##         values:
+  ##         - zone1
+  ##         - zone2
+  nodeAffinity: {}
+  ## adminpanel.nodeSelector Node labels for Adminpanel Pod assignment
+  ## If set to, it takes priority over the `nodeSelector`
+  nodeSelector: {}
+  ## adminpanel.tolerations Tolerations for Adminpanel Pod assignment
+  ## If set to, it takes priority over the `tolerations`
+  tolerations: []
+  ## adminpanel.terminationGracePeriodSeconds The time to terminate gracefully during which the Adminpanel Pod will have the `Terminating` status
+  terminationGracePeriodSeconds: 30
+  ## adminpanel.hostAliases Adds additional entries to the hosts file in the Adminpanel container
+  ## ref: https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+  ## Example:
+  ## hostAliases:
+  ## - ip: "192.168.2.5"
+  ##   hostnames:
+  ##   - "foo.local"
+  hostAliases: []
+  ## Adminpanel initContainers parameters
+  ## Containers that run before adminpanel container in a Pod
+  ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## Example:
+  ## initContainers:
+  ##   - name: change-volume-owner
+  ##     image: busybox:latest
+  ##     command: ['chown', '-R', '101:101', '/var/lib/onlyoffice/documentserver/App_Data/cache/files']
+  ##     volumeMounts:
+  ##     - name: ds-files
+  ##       mountPath: /var/lib/onlyoffice/documentserver/App_Data/cache/files
+  initContainers: []
+  ## adminpanel.extraVolumes An array with extra volumes for the Adminpanel Pod
+  ## Example:
+  ## extraVolumes:
+  ##   - name: my-volume
+  ##     configMap:
+  ##       name: my-cm
+  extraVolumes: []
+  ## Adminpanel container image parameters
+  image:
+    ## adminpanel.image.repository adminpanel container image repository
+    ## For more information, see after the Parameters table
+    ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
+    repository: onlyoffice/docs-adminpanel-de
+    ## adminpanel.image.tag adminpanel container image tag
+    tag: 9.1.0-1
+    ## adminpanel.image.pullPolicy adminpanel container image pull policy
+    pullPolicy: IfNotPresent
+  ## Configure a Security Context for the Adminpanel container
+  containerSecurityContext:
+    ## adminpanel.containerSecurityContext.enabled Enable security context for the Adminpanel container
+    enabled: false
+    ## adminpanel.containerSecurityContext.runAsUser User ID for the Adminpanel container
+    runAsUser: 101
+    ## adminpanel.containerSecurityContext.runAsGroup Group ID for the Adminpanel container
+    runAsGroup: 101
+    ## adminpanel.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+    runAsNonRoot: true
+    ## adminpanel.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+    allowPrivilegeEscalation: false
+    ## adminpanel.containerSecurityContext.seccompProfile Defines the Seccomp profile for the Adminpanel container
+    seccompProfile:
+      type: RuntimeDefault
+    ## adminpanel.containerSecurityContext.capabilities Defines the privileges granted to the process
+    capabilities:
+      drop: ["ALL"]
+  ## adminpanel.lifecycleHooks Defines the Adminpanel container lifecycle hooks
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  ## It is used to trigger events to run at certain points in a container's lifecycle
+  ## There are two hooks that are exposed: `PostStart` and `PreStop`
+  ## Example:
+  ## lifecycleHooks:
+  ##   preStop:
+  ##     exec:
+  ##       command: ["/bin/sh", "-c", "sleep 25"]
+  lifecycleHooks: {}
+  ## adminpanel.containerPorts.http Adminpanel container port
+  containerPorts:
+    http: 9000
+  ## adminpanel container resource requests and limits
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  ## adminpanel.resources.requests The requested resources for the adminpanel container
+  ## adminpanel.resources.limits The resources limits for the adminpanel container
+  resources:
+    ## Example:
+    ## requests:
+    ##   memory: "256Mi"
+    ##   cpu: "200m"
+    requests: {}
+    ## limits:
+    ##   memory: "2Gi"
+    ##   cpu: "1000m"
+    limits: {}
+  ## adminpanel.extraEnvVars An array with extra env variables for the Adminpanel container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: my_env
+  ##     value: "my_value"
+  extraEnvVars: []
+  ## adminpanel.extraVolumeMounts An array with extra volume mounts for the Adminpanel container
   ## Example:
   ## extraVolumeMounts:
   ##   - name: my-volume
@@ -1182,7 +1347,7 @@ example:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 9.0.4-1
+    tag: 9.1.0-1
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Example container
@@ -1391,7 +1556,7 @@ install:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 9.0.4-1
+      tag: 9.1.0-1
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-install container
@@ -1476,7 +1641,7 @@ upgrade:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 9.0.4-1
+      tag: 9.1.0-1
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-upgrade container
@@ -1569,7 +1734,7 @@ rollback:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 9.0.4-1
+      tag: 9.1.0-1
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-rollback container
@@ -1662,7 +1827,7 @@ delete:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 9.0.4-1
+      tag: 9.1.0-1
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-delete container
@@ -1747,7 +1912,7 @@ clearCache:
       ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
-      tag: 9.0.4-1
+      tag: 9.1.0-1
       ## clearCache.job.image.pullPolicy Job by Clear Cache ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Clear Cache container
@@ -1825,7 +1990,7 @@ grafanaDashboard:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
-      tag: 9.0.4-1
+      tag: 9.1.0-1
       ## grafanaDashboard.job.image.pullPolicy Job by Grafana Dashboard ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Grafana Dashboard container
@@ -1896,7 +2061,7 @@ wopiKeysGeneration:
       ## wopiKeysGeneration.job.image.repository Job by Wopi Keys Generation ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysGeneration.job.image.tag Job by Wopi Keys Generation ONLYOFFICE Docs image tag
-      tag: 9.0.4-1
+      tag: 9.1.0-1
       ## wopiKeysGeneration.job.image.pullPolicy Job by Wopi Keys Generation ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Wopi Keys Generation container
@@ -1969,7 +2134,7 @@ wopiKeysDeletion:
       ## wopiKeysDeletion.job.image.repository Job by Wopi Keys Deletion ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysDeletion.job.image.tag Job by Wopi Keys Deletion ONLYOFFICE Docs image tag
-      tag: 9.0.4-1
+      tag: 9.1.0-1
       ## wopiKeysDeletion.job.image.pullPolicy Job by Wopi Keys Deletion ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Wopi Keys Deletion container
@@ -2039,7 +2204,7 @@ tests:
     ## tests.image.repository test container image name
     repository: onlyoffice/docs-utils
     ## tests.image.tag test container image tag
-    tag: 9.0.4-1
+    tag: 9.1.0-1
     ## tests.image.pullPolicy test container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Test container
