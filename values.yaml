@@ -310,7 +310,6 @@ wopi:
   enabled: false
   keys:
     ## wopi.keys.generation Defines whether to generate API keys
-    ## Used if you set `wopi.enabled` to `true`
     generation: true
     ## wopi.keys.newKeysExistingSecret Name of existing secret containing the WOPI keys
     ## Must contain the keys `WOPI_PRIVATE_KEY`, `WOPI_PUBLIC_KEY`, `WOPI_MODULUS_KEY` and `WOPI_EXPONENT_KEY`
@@ -2028,7 +2027,7 @@ grafanaDashboard:
 ## Job by Wopi Keys Generation has pre-install and pre-upgrade hooks and executes before any resources are created in Kubernetes
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
 ## He generates WOPI keys and creates a secret from them
-## It is executed if `wopi.enabled` and `wopi.keys.generation` are set to `true`
+## It is executed if the `wopi.keys.generation` is set to `true`
 wopiKeysGeneration:
   job:
     ## wopiKeysGeneration.job.annotations Defines annotations that will be additionally added to Wopi Keys Generation Job
@@ -2099,7 +2098,7 @@ wopiKeysGeneration:
 ## Job by Wopi Keys Deletion has a pre-delete hook and executes on a deletion request before all of the release's resources have been deleted
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
 ## He removes the WOPI secrets generated automatically
-## It is executed if `wopi.enabled`, `wopi.keys.generation` and `wopiKeysDeletion.job.enabled` are set to `true`
+## It is executed if `wopi.keys.generation` and `wopiKeysDeletion.job.enabled` are set to `true`
 wopiKeysDeletion:
   job:
     ## wopiKeysDeletion.job.enabled Enable the execution of Wopi Keys Deletion job before deleting ONLYOFFICE Docs

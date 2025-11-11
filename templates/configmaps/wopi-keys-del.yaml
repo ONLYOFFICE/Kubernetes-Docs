@@ -1,4 +1,4 @@
-{{- if and .Values.wopi.enabled .Values.wopi.keys.generation .Values.wopiKeysDeletion.job.enabled }}
+{{- if and .Values.wopi.keys.generation .Values.wopiKeysDeletion.job.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
