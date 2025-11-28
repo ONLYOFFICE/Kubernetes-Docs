@@ -3,6 +3,7 @@
 This repository contains a set of files to deploy ONLYOFFICE Docs into a Kubernetes cluster or OpenShift cluster.
 
 ## Contents
+- [Requirements](#requirements)
 - [Introduction](#introduction)
 - [Deploy prerequisites](#deploy-prerequisites)
   * [1. Add Helm repositories](#1-add-helm-repositories)
@@ -60,11 +61,20 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [2 Access to Grafana via Ingress](#2-access-to-grafana-via-ingress)
   * [3. View gathered metrics in Grafana](#3-view-gathered-metrics-in-grafana)
 
+## Requirements
+
+- Kubernetes version no lower than 1.19+ or OpenShift version no lower than 3.11+
+- A minimum of two worker nodes is required for the Kubernetes cluster
+- Resources for the cluster hosts: 4 CPU \ 8 GB RAM min
+- Kubectl is installed on the cluster management host
+- Helm v3.15+ is installed on the cluster management host
+
 ## Introduction
 
 - You must have a Kubernetes or OpenShift cluster installed. Please, checkout [the reference](https://kubernetes.io/docs/setup/) to set up Kubernetes. Please, checkout [the reference](https://docs.openshift.com/container-platform/4.7/installing/index.html) to setup OpenShift.
+- Although installation is possible using the Kubernetes cluster version 1.19+, we recommend [using at least one of three latest minor release versions](https://kubernetes.io/releases/).
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
-- You should install Helm v3.7+. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
+- You should install Helm v3.15+. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
 - If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. 
 - If the installation of components external to ‘Docs’ is performed from Helm Chart in an OpenShift cluster, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
 
