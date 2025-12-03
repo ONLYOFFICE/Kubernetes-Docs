@@ -1,4 +1,4 @@
-{{- if and .Values.wopi.enabled .Values.wopi.keys.generation }}
+{{- if .Values.wopi.keys.generation }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

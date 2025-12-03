@@ -112,7 +112,6 @@ spec:
             name: {{ template "ds.jwt.secretName" . }}
         - secretRef:
             name: {{ template "ds.secureLinkSecret.secretName" . }}
-        {{- if .Values.wopi.enabled }}
         {{- if or .Values.wopi.keys.generation .Values.wopi.keys.newKeysExistingSecret }}
         - secretRef:
             {{- if .Values.wopi.keys.newKeysExistingSecret }}
@@ -128,7 +127,6 @@ spec:
             {{- else }}
             name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docs-wopi-keys-old") }}
             {{- end }}
-        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}

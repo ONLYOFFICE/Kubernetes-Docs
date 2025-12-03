@@ -1,5 +1,15 @@
 # Change log
 
+## 5.3.0
+
+### Changes
+
+* Released ONLYOFFICE Docs [v9.2.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#920)
+
+### Fixes
+
+* Fixed the lack of WOPI keys when enabling WOPI in the Admin panel
+
 ## 5.2.0
 
 ### New Features

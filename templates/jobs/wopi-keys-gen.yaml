@@ -1,4 +1,4 @@
-{{- if and .Values.wopi.enabled .Values.wopi.keys.generation }}
+{{- if .Values.wopi.keys.generation }}
 apiVersion: batch/v1
 kind: Job
 metadata:
