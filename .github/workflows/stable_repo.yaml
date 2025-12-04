@@ -39,5 +39,8 @@ jobs:
           mkdir s3dir
           aws s3 cp ${{ secrets.AWS_BUCKET_URL }}/charts/stable/ ./s3dir  --recursive
           aws s3 cp ./s3dir ${{ secrets.AWS_BUCKET_URL }}/charts/stable --acl public-read --recursive
-      - name: Invalidate CLOUDFRONT cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths "/charts/stable/*"
+      - name: Purge CDN77
+        run: |
+          curl -X POST https://api.cdn77.com/v3/cdn/${{ secrets.CDN77_RESOURCE_ID }}/job/purge/paths \
+            -H 'Authorization: Bearer ${{ secrets.CDN77_TOKEN }}' \
+            -d '{"paths": ["/charts/stable/*"]}'
