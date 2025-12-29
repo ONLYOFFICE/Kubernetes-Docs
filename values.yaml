@@ -1243,7 +1243,7 @@ example:
   ## It should be changed only if it is necessary to check the operation of the conversion in Example
   ## E.g.
   ## dsUrl: "http://<documentserver-address>/"
-  dsUrl: "/"
+  dsUrl: "https://editor.beemchat.com/example"
   ## example.annotations Defines annotations that will be additionally added to Example StatefulSet
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
