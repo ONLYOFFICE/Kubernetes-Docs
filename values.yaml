@@ -209,6 +209,26 @@ persistence:
     annotations: {}
     ## persistence.runtimeConfig.size PVC Storage Request for runtime config volume
     size: 1Gi
+  ## Persistence parameters for storing custom resources. It is used if `customFonts.build` or `customDictionaries.build` or `customPlugins.build` is set to `true`
+  customResources:
+    ## persistence.customResources.enabled Defines whether to use PVC and whether to mount it in a container in the Job `custom-resources`
+    ## The use of this PVC can be disabled if you only use `customPlugins.marketplace.enabled=false` or `customPlugins.defaultPlugins.list` or `customPlugins.defaultPlugins.enabled=false`
+    ## For more details, see here:
+    ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+    enabled: true
+    ## persistence.customResources.existingClaim The name of the existing PVC used to store the custom resources
+    existingClaim: "docs-custom-resources"
+  ## Persistence parameters for sharing generated files after adding custom resources. It is created and used if `customFonts.build` or `customDictionaries.build` or `customPlugins.build` is set to `true`
+  buffer:
+    ## persistence.buffer.existingClaim The name of the existing PVC used to share generated files
+    ## If not specified, a PVC named "ds-buffer" will be created only during installation ("helm.sh/hook": pre-install)
+    existingClaim: ""
+    ## persistence.buffer.annotations Defines annotations that will be additionally added to "ds-buffer" PVC
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
+    ## persistence.buffer.size PVC Storage Request for generated files volume
+    size: 5Gi
 ## Configure a Security Context for a Pod
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 podSecurityContext:
@@ -395,11 +415,64 @@ requestFilteringAgent:
   ## - 10.244.0.79
   ## - 192.168.1.25
   allowIPAddressList: []
-  ## requestFilteringAgent.denyIPAddressList Defines the list of IP addresses allowed to connect
+  ## requestFilteringAgent.denyIPAddressList Defines the list of IP addresses that are denied access
   ## Example:
   ## denyIPAddressList:
   ## - 10.244.0.80
   denyIPAddressList: []
+## customFonts.build Enables the addition of custom Fonts
+## When set to `true`, the Job `customResources` will be executed
+## Fonts should be added to the "custom-k8s" subdirectory of the `persistence.customResources` PVC root
+## For more details, see here:
+## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+customFonts:
+  build: false
+customDictionaries:
+  ## customDictionaries.build Enables the addition of custom Dictionaries
+  ## When set to `true`, the Job `customResources` will be executed
+  ## For more details, see here:
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+  build: false
+  ## customDictionaries.dictionarieNames Defines a list of subdirectories with the names of additional dictionaries
+  ## The names must match the names of the directories added to the root of the `persistence.customResources` PVC
+  ## It is executed if the `customDictionaries.build` is set to `true`
+  ## Example:
+  ## dictionarieNames:
+  ## - en_US
+  ## - eu_ES
+  ## - fr_CA
+  dictionarieNames: []
+customPlugins:
+  ## customPlugins.build Enables the addition of custom Plugins
+  ## When set to `true`, the Job `customResources` will be executed
+  ## For more details, see here:
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+  build: false
+  ## customPlugins.pluginNames Defines a list of subdirectories with the names of additional plugins
+  ## The names must match the names of the directories added to the root of the `persistence.customResources` PVC
+  ## It is executed if the `customPlugins.build` is set to `true`
+  ## Example:
+  ## pluginNames:
+  ## - plugin-jitsi
+  pluginNames: []
+  marketplace:
+    ## customPlugins.marketplace.enabled Defines whether the "Plugin Manager" will be added to the server and to the `Plugins` menu
+    ## It is executed if the `customPlugins.build` is set to `true`
+    enabled: true
+  defaultPlugins:
+    ## customPlugins.defaultPlugins.enabled Defines whether "plugins" will be installed on the server and in the `Plugins` menu
+    ## It is executed if the `customPlugins.build` is set to `true`
+    enabled: true
+    ## customPlugins.defaultPlugins.list Defines which "plugins" from the default list will be installed on the server and in the `Plugins` menu
+    ## It is executed if the `customPlugins.build` is set to `true`
+    ## Example:
+    ## emptyPluginsDir:
+    ## - ai
+    ## - photoeditor
+    list: []
+  ## customPlugins.emptyPluginsDir Defines whether a directory with plugins in containers will contain files, including service files
+  ## If set to `true`, an empty volume with the `emptyDir` type will be mapped
+  emptyPluginsDir: false
 
 ## Onlyoffice Docs Docservice Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
@@ -610,7 +683,7 @@ docservice:
       ## docservice.startupProbe.httpGet.port Checking the port for startupProbe
       port: 8000
     ## docservice.startupProbe.failureThreshold Failure threshold for startupProbe
-    failureThreshold: 30
+    failureThreshold: 60
     ## docservice.startupProbe.periodSeconds Period seconds for startupProbe
     periodSeconds: 10
   ## The parameters below for readiness probes are used only when `docservice.readinessProbe.enabled=true`
@@ -787,7 +860,7 @@ proxy:
       ## proxy.startupProbe.httpGet.port Checking the port for startupProbe
       port: 8888
     ## proxy.startupProbe.failureThreshold Failure threshold for startupProbe
-    failureThreshold: 30
+    failureThreshold: 60
     ## proxy.startupProbe.periodSeconds Period seconds for startupProbe
     periodSeconds: 10
   ## The parameters below for readiness probes are used only when `proxy.readinessProbe.enabled=true`
@@ -2166,6 +2239,78 @@ wopiKeysDeletion:
       requests: {}
       ## limits:
       ##   memory: "1Gi"
+      ##   cpu: "1000m"
+      limits: {}
+## Job by customResources has pre-install and pre-upgrade hooks and executes before any resources are created in Kubernetes
+## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
+## He creates custom resources. It is executed if `customFonts.build` or `customDictionaries.build` or `customPlugins.build` is set to `true`
+## For more details, see here:
+## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+customResources:
+  job:
+    ## customResources.job.annotations Defines annotations that will be additionally added to custom-resources Job
+    ## If set to, it takes priority over the `commonAnnotations`
+    ## You can also use `tpl` as the value for the key
+    annotations: {}
+    ## customResources.job.podAnnotations Map of annotations to add to the custom-resources Pod
+    podAnnotations: {}
+    ## customResources.job.customPodAntiAffinity Prohibiting the scheduling of custom-resources Job Pod relative to other Pods containing the specified labels on the same node
+    customPodAntiAffinity: {}
+    ## Pod affinity rules for custom-resources Job Pod scheduling by nodes relative to other Pods
+    ## Pod affinity allow you to constrain which nodes custom-resources Job Pod can be scheduled on based on the labels of Pods already running on that node
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    podAffinity: {}
+    ## Node affinity rules for custom-resources Job Pod scheduling by nodes
+    ## Node affinity allow you to constrain which nodes custom-resources Job Pod can be scheduled on based on node labels
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    nodeAffinity: {}
+    ## customResources.job.nodeSelector Node labels for custom-resources Job Pod assignment
+    ## If set to, it takes priority over the `nodeSelector`
+    nodeSelector: {}
+    ## customResources.job.tolerations Tolerations for custom-resources Job Pod assignment
+    ## If set to, it takes priority over the `tolerations`
+    tolerations: []
+    ## custom-resources Job initContainers parameters
+    ## customResources.job.initContainers Containers that run before custom-resources container in a Pod
+    ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    initContainers: []
+    image:
+      ## customResources.job.image.repository Job by custom-resources ONLYOFFICE Docs image repository
+      repository: onlyoffice/docs-utils
+      ## customResources.job.image.tag Job by custom-resources ONLYOFFICE Docs image tag
+      tag: 9.2.1-1
+      ## customResources.job.image.pullPolicy Job by custom-resources ONLYOFFICE Docs image pull policy
+      pullPolicy: IfNotPresent
+    ## Configure a Security Context for the custom-resources container
+    containerSecurityContext:
+      ## customResources.job.containerSecurityContext.enabled Enable security context for the custom-resources container
+      enabled: false
+      ## customResources.job.containerSecurityContext.runAsUser User ID for the custom-resources container
+      runAsUser: 101
+      ## customResources.job.containerSecurityContext.runAsGroup Group ID for the custom-resources container
+      runAsGroup: 101
+      ## customResources.job.containerSecurityContext.runAsNonRoot Require that the container will run with a user with UID other than 0
+      runAsNonRoot: true
+      ## customResources.job.containerSecurityContext.allowPrivilegeEscalation Controls whether a process can gain more privileges than its parent process
+      allowPrivilegeEscalation: false
+      ## customResources.job.containerSecurityContext.seccompProfile Defines the Seccomp profile for the custom-resources container
+      seccompProfile:
+        type: RuntimeDefault
+      ## customResources.job.containerSecurityContext.capabilities Defines the privileges granted to the process
+      capabilities:
+        drop: ["ALL"]
+    ## Job custom-resources container resource requests and limits
+    ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    ## customResources.job.resources.requests The requested resources for the job custom-resources container
+    ## customResources.job.resources.limits The resources limits for the job custom-resources container
+    resources:
+      ## Example:
+      ## requests:
+      ##   memory: "256Mi"
+      ##   cpu: "200m"
+      requests: {}
+      ## limits:
+      ##   memory: "2Gi"
       ##   cpu: "1000m"
       limits: {}
 

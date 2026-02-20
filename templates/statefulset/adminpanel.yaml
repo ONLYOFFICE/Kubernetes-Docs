@@ -91,6 +91,8 @@ spec:
         - containerPort: {{ .Values.adminpanel.containerPorts.http }}
           name: http
         resources: {{ toYaml .Values.adminpanel.resources | nindent 10 }}
+        args:
+        - adminpanel
         env:
         - name: REDIS_SERVER_PWD
           valueFrom:

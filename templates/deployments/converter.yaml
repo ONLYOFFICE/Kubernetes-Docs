@@ -88,6 +88,27 @@ spec:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       volumes:
+        {{- if or .Values.customFonts.build .Values.customDictionaries.build }}
+        - name: buffer
+          persistentVolumeClaim:
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.buffer.existingClaim "ds-buffer") }}
+        {{- end }}
+        {{- if .Values.customFonts.build }}
+        - name: fonts
+          emptyDir: {}
+        - name: images
+          emptyDir: {}
+        - name: themes
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.customDictionaries.build }}
+        - name: dictionaries
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.customPlugins.emptyPluginsDir }}
+        - name: plugin
+          emptyDir: {}
+        {{- end }}
         {{- if not .Values.persistence.storageS3 }}
         - name: ds-files
           persistentVolumeClaim:
@@ -142,6 +163,14 @@ spec:
           lifecycle: {{- toYaml .Values.converter.lifecycleHooks | nindent 12 }}
           {{- end }}
           resources: {{- toYaml .Values.converter.resources | nindent 12 }}
+          args:
+          - converter
+          {{- if .Values.customFonts.build }}
+          - -f
+          {{- end }}
+          {{- if .Values.customDictionaries.build }}
+          - -d
+          {{- end }}
           env:
           - name: DB_PWD
             valueFrom:
@@ -192,6 +221,27 @@ spec:
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
+          {{- if or .Values.customFonts.build .Values.customDictionaries.build }}
+          - name: buffer
+            mountPath: /var/lib/{{ .Values.product.name }}/documentserver/buffer
+            readOnly: true
+          {{- end }}
+          {{- if .Values.customFonts.build }}
+          - name: images
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs/common/Images
+          - name: themes
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs/slide/themes
+          - name: fonts
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/fonts
+          {{- end }}
+          {{- if .Values.customDictionaries.build }}
+          - name: dictionaries
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/dictionaries
+          {{- end }}
+          {{- if .Values.customPlugins.emptyPluginsDir }}
+          - name: plugin
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs-plugins
+          {{- end }}
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
