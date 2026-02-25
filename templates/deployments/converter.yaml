@@ -19,8 +19,8 @@ spec:
   selector:
     matchLabels:
       app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}
-      {{- if .Values.commonLabels }}
-      {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
+      {{- if or .Values.commonLabels .Values.commonMatchLabels }}
+      {{- include "ds.labels.matchLabels" . | trim | nindent 6 }}
       {{- end }}
   {{- if .Values.converter.updateStrategy }}
   strategy: {{- toYaml .Values.converter.updateStrategy | nindent 4 }}

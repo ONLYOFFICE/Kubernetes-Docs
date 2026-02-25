@@ -17,8 +17,8 @@ spec:
   selector:
     matchLabels:
       app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
-      {{- if .Values.commonLabels }}
-      {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
+      {{- if or .Values.commonLabels .Values.commonMatchLabels }}
+      {{- include "ds.labels.matchLabels" . | trim | nindent 6 }}
       {{- end }}
   serviceName: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "adminpanel") }}
   replicas: 1

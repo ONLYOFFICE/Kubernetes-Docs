@@ -143,8 +143,12 @@ commonNameSuffix: ""
 ## namespaceOverride The name of the namespace in which Onlyoffice Docs will be deployed
 ## If not set, the name will be taken from .Release.Namespace
 namespaceOverride: ""
-## commonLabels Defines labels that will be additionally added to all the deployed resources
-## You can also use `tpl` as the value for the key
+## commonLabels Defines labels that will be additionally added to all the deployed resources.
+## Supports dynamic values via `tpl` (e.g. app version, chart name).
+## Note: dynamic or frequently changing labels must not be used in selector.matchLabels,
+## as Kubernetes does not allow updating selectors after the initial deployment.
+## If you use dynamic values here, define stable immutable labels in commonMatchLabels
+## to be used in selectors instead.
 ## ref: https://helm.sh/docs/chart_best_practices/labels/
 ## Example:
 ## commonLabels:
@@ -154,6 +158,16 @@ namespaceOverride: ""
 ##   app.kubernetes.io/instance: "{{ .Release.Name }}"
 ##   app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
 commonLabels: {}
+## commonMatchLabels Defines stable labels that will be used in selector.matchLabels for all the deployed resources.
+## These labels should never change after the initial deployment, as Kubernetes does not allow updating selectors.
+## If not set, commonLabels will be used as a fallback.
+## You can also use `tpl` as the value for the key
+## ref: https://helm.sh/docs/chart_best_practices/labels/
+## Example:
+## commonMatchLabels:
+##   app.kubernetes.io/name: "{{ .Chart.Name }}"
+##   app.kubernetes.io/instance: "{{ .Release.Name }}"
+commonMatchLabels: {}
 ## commonAnnotations Defines annotations that will be additionally added to all the deployed resources
 ## You can also use `tpl` as the value for the key
 ## Some resources may override the values specified here with their own
