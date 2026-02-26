@@ -74,7 +74,7 @@ data:
   {{- if .Values.requestFilteringAgent.denyIPAddressList }}
   DENY_IP_ADDRESS_LIST: {{ toJson .Values.requestFilteringAgent.denyIPAddressList | squote }}
   {{- end }}
-  STORAGE_SUBDIRECTORY_NAME: {{ .Values.images.tag }}
+  STORAGE_SUBDIRECTORY_NAME: {{ default .Values.images.tag .Values.docservice.image.tag }}
   {{- if or .Values.customFonts.build .Values.customDictionaries.build .Values.customPlugins.build }}
   DS_VERSION_HASH: {{ printf "%s" (now | date "2006.01.02-1504") | sha256sum | trunc 32 }}
   {{- end }}
