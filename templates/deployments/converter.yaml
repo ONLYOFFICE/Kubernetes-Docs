@@ -151,9 +151,9 @@ spec:
       containers:
         - name: converter
           {{- if .Values.global }}
-          image: {{ include "ds.imageRepository" (list . .Values.converter.image.repository) }}:{{ .Values.converter.image.tag }}
+          image: {{ include "ds.imageRepository" (list . .Values.converter.image.repository) }}:{{ default .Values.images.tag .Values.converter.image.tag }}
           {{- else }}
-          image: {{ .Values.converter.image.repository }}:{{ .Values.converter.image.tag }}
+          image: {{ .Values.converter.image.repository }}:{{ default .Values.images.tag .Values.converter.image.tag }}
           {{- end }}
           imagePullPolicy: {{ .Values.converter.image.pullPolicy }}
           {{- if .Values.converter.containerSecurityContext.enabled }}

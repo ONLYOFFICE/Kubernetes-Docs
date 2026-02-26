@@ -83,7 +83,7 @@ spec:
       {{- end }}
       containers:
         - name: pre-rollback
-          image: {{ .Values.rollback.job.image.repository }}:{{ .Values.rollback.job.image.tag }}
+          image: {{ .Values.rollback.job.image.repository }}:{{ default .Values.images.tag .Values.rollback.job.image.tag }}
           imagePullPolicy: {{ .Values.rollback.job.image.pullPolicy }}
           {{- if .Values.rollback.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.rollback.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}

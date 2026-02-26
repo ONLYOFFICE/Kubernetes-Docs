@@ -53,7 +53,7 @@ spec:
   {{- end }}
   containers:
   - name: test-ds
-    image: {{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
+    image: {{ .Values.tests.image.repository }}:{{ default .Values.images.tag .Values.tests.image.tag }}
     imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
     {{- if .Values.tests.containerSecurityContext.enabled }}
     securityContext: {{- omit .Values.tests.containerSecurityContext "enabled" | toYaml | nindent 6 }}

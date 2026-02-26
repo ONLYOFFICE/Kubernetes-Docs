@@ -487,6 +487,10 @@ customPlugins:
   ## customPlugins.emptyPluginsDir Defines whether a directory with plugins in containers will contain files, including service files
   ## If set to `true`, an empty volume with the `emptyDir` type will be mapped
   emptyPluginsDir: false
+## Global image parameters for all Onlyoffice Docs services and jobs
+images:
+  ## images.tag Global image tag for all Onlyoffice Docs services and jobs
+  tag: 9.3.0-1
 
 ## Onlyoffice Docs Docservice Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
@@ -651,7 +655,8 @@ docservice:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
-    tag: 9.2.1-1
+    ## If set to, it takes priority over the `images.tag`
+    tag: ""
     ## docservice.image.pullPolicy docservice container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Docservice container
@@ -828,7 +833,8 @@ proxy:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
-    tag: 9.2.1-1
+    ## If set to, it takes priority over the `images.tag`
+    tag: ""
     ## proxy.image.pullPolicy proxy container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Proxy container
@@ -1100,7 +1106,8 @@ converter:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
-    tag: 9.2.1-1
+    ## If set to, it takes priority over the `images.tag`
+    tag: ""
     ## converter.image.pullPolicy converter container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Converter container
@@ -1259,7 +1266,8 @@ adminpanel:
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
     repository: onlyoffice/docs-adminpanel-de
     ## adminpanel.image.tag adminpanel container image tag
-    tag: 9.2.1-1
+    ## If set to, it takes priority over the `images.tag`
+    tag: ""
     ## adminpanel.image.pullPolicy adminpanel container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Adminpanel container
@@ -1433,7 +1441,8 @@ example:
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
-    tag: 9.2.1-1
+    ## If set to, it takes priority over the `images.tag`
+    tag: ""
     ## example.image.pullPolicy example container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Example container
@@ -1642,7 +1651,8 @@ install:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## install.job.image.pullPolicy Job by pre-install ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-install container
@@ -1727,7 +1737,8 @@ upgrade:
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## upgrade.job.image.pullPolicy Job by upgrade image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-upgrade container
@@ -1820,7 +1831,8 @@ rollback:
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## rollback.job.image.pullPolicy Job by rollback image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-rollback container
@@ -1913,7 +1925,8 @@ delete:
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## delete.job.image.pullPolicy Job by delete image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the pre-delete container
@@ -1998,7 +2011,8 @@ clearCache:
       ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## clearCache.job.image.pullPolicy Job by Clear Cache ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Clear Cache container
@@ -2076,7 +2090,8 @@ grafanaDashboard:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## grafanaDashboard.job.image.pullPolicy Job by Grafana Dashboard ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Grafana Dashboard container
@@ -2147,7 +2162,8 @@ wopiKeysGeneration:
       ## wopiKeysGeneration.job.image.repository Job by Wopi Keys Generation ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysGeneration.job.image.tag Job by Wopi Keys Generation ONLYOFFICE Docs image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## wopiKeysGeneration.job.image.pullPolicy Job by Wopi Keys Generation ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Wopi Keys Generation container
@@ -2220,7 +2236,8 @@ wopiKeysDeletion:
       ## wopiKeysDeletion.job.image.repository Job by Wopi Keys Deletion ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysDeletion.job.image.tag Job by Wopi Keys Deletion ONLYOFFICE Docs image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## wopiKeysDeletion.job.image.pullPolicy Job by Wopi Keys Deletion ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the Wopi Keys Deletion container
@@ -2292,7 +2309,8 @@ customResources:
       ## customResources.job.image.repository Job by custom-resources ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## customResources.job.image.tag Job by custom-resources ONLYOFFICE Docs image tag
-      tag: 9.2.1-1
+      ## If set to, it takes priority over the `images.tag`
+      tag: ""
       ## customResources.job.image.pullPolicy Job by custom-resources ONLYOFFICE Docs image pull policy
       pullPolicy: IfNotPresent
     ## Configure a Security Context for the custom-resources container
@@ -2362,7 +2380,8 @@ tests:
     ## tests.image.repository test container image name
     repository: onlyoffice/docs-utils
     ## tests.image.tag test container image tag
-    tag: 9.2.1-1
+    ## If set to, it takes priority over the `images.tag`
+    tag: ""
     ## tests.image.pullPolicy test container image pull policy
     pullPolicy: IfNotPresent
   ## Configure a Security Context for the Test container

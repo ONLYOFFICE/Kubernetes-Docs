@@ -30,7 +30,7 @@ data:
           ;;
         forgotten)
           ;;
-        {{ .Values.docservice.image.tag }})
+        {{ .Values.images.tag }})
           ;;
         *)
           rm -rfv $FILES_DIR$ENTRY

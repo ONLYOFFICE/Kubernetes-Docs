@@ -70,7 +70,7 @@ spec:
       {{- end }}
       containers:
       - name: grafana-dashboard
-        image: {{ .Values.grafanaDashboard.job.image.repository }}:{{ .Values.grafanaDashboard.job.image.tag }}
+        image: {{ .Values.grafanaDashboard.job.image.repository }}:{{ default .Values.images.tag .Values.grafanaDashboard.job.image.tag }}
         imagePullPolicy: {{ .Values.grafanaDashboard.job.image.pullPolicy }}
         {{- if .Values.grafanaDashboard.job.containerSecurityContext.enabled }}
         securityContext: {{- omit .Values.grafanaDashboard.job.containerSecurityContext "enabled" | toYaml | nindent 10 }}

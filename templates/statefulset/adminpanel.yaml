@@ -79,7 +79,7 @@ spec:
       {{- end }}
       containers:
       - name: adminpanel
-        image: {{ .Values.adminpanel.image.repository }}:{{ .Values.adminpanel.image.tag }}
+        image: {{ .Values.adminpanel.image.repository }}:{{ default .Values.images.tag .Values.adminpanel.image.tag }}
         imagePullPolicy: {{ .Values.adminpanel.image.pullPolicy }}
         {{- if .Values.adminpanel.containerSecurityContext.enabled }}
         securityContext: {{- omit .Values.adminpanel.containerSecurityContext "enabled" | toYaml | nindent 10 }}

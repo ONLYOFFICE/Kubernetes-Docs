@@ -83,7 +83,7 @@ spec:
       {{- end }}
       containers:
         - name: custom-resources
-          image: {{ .Values.customResources.job.image.repository }}:{{ .Values.customResources.job.image.tag }}
+          image: {{ .Values.customResources.job.image.repository }}:{{ default .Values.images.tag .Values.customResources.job.image.tag }}
           imagePullPolicy: {{ .Values.customResources.job.image.pullPolicy }}
           {{- if .Values.customResources.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.customResources.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}

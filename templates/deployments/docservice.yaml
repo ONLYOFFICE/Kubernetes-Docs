@@ -163,9 +163,9 @@ spec:
       containers:
         - name: proxy
           {{- if .Values.global }}
-          image: {{ include "ds.imageRepository" (list . .Values.proxy.image.repository) }}:{{ .Values.proxy.image.tag }}
+          image: {{ include "ds.imageRepository" (list . .Values.proxy.image.repository) }}:{{ default .Values.images.tag .Values.proxy.image.tag }}
           {{- else }}
-          image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
+          image: {{ .Values.proxy.image.repository }}:{{ default .Values.images.tag .Values.proxy.image.tag }}
           {{- end }}
           imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
           {{- if .Values.proxy.containerSecurityContext.enabled }}
@@ -270,9 +270,9 @@ spec:
 
         - name: docservice
           {{- if .Values.global }}
-          image: {{ include "ds.imageRepository" (list . .Values.docservice.image.repository) }}:{{ .Values.docservice.image.tag }}
+          image: {{ include "ds.imageRepository" (list . .Values.docservice.image.repository) }}:{{ default .Values.images.tag .Values.docservice.image.tag }}
           {{- else }}
-          image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }}
+          image: {{ .Values.docservice.image.repository }}:{{ default .Values.images.tag .Values.docservice.image.tag }}
           {{- end }}
           imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
           {{- if .Values.docservice.containerSecurityContext.enabled }}
