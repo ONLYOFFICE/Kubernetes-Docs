@@ -11,7 +11,7 @@ spec:
       claimName: docs-custom-resources
   containers:
   - name: docs-custom-resources
-    image: onlyoffice/docs-utils:9.2.1-1
+    image: onlyoffice/docs-utils:9.3.1-1
     command: ["/bin/sh", "-c"]
     args:
     - mkdir -p /resources/custom-k8s && tail -f /dev/null
