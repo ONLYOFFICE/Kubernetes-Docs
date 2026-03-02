@@ -75,20 +75,11 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - Although installation is possible using the Kubernetes cluster version 1.19+, we recommend [using at least one of three latest minor release versions](https://kubernetes.io/releases/).
 - You should also have a local configured copy of `kubectl`. See [this](https://kubernetes.io/docs/tasks/tools/install-kubectl/) guide how to install and configure `kubectl`.
 - You should install Helm v3.15+. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
-- If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy. 
+- If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy.
 - If the installation of components external to ‘Docs’ is performed from Helm Chart in an OpenShift cluster, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
+- To install Docs into an OpenShift cluster, it may be necessary to grant a specific SecurityContextConstraints policy. This policy provides permission to run containers using a user with ID = 101 and ID = 1001. For more information, see [OPENSHIFT.md](./OPENSHIFT.md) file.
 
 ## Deploy prerequisites
-
-Note: It may be required to apply `SecurityContextConstraints` policy when installing into OpenShift cluster, which adds permission to run containers from a user whose `ID = 1001`.
-
-To do this, run the following commands:
-```
-$ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/helm-components.yaml
-$ oc adm policy add-scc-to-group scc-helm-components system:authenticated
-```
-
-Alternatively, you can specify the allowed range of users and groups from the target namespace, see the parameters `runAsUser` and `fsGroup` while installing dependencies, such as RabbitMQ, Redis, PostgreSQL, etc.
 
 ### 1. Add Helm repositories
 
@@ -106,7 +97,7 @@ $ helm repo update
 
 Install NFS Server Provisioner
 
-Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing to an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html).
+Note: When installing NFS Server Provisioner, Storage Classes - `NFS` is created. When installing into an OpenShift cluster, the user must have a role that allows you to create Storage Classes in the cluster. Read more [here](https://docs.openshift.com/container-platform/4.7/storage/dynamic-provisioning.html).
 
 ```bash
 $ helm install nfs-server nfs-server-provisioner/nfs-server-provisioner \
@@ -332,23 +323,6 @@ and then run the `helm upgrade documentserver onlyoffice/docs --set extraThemes.
 In order to connect Amazon S3 bucket as a cache, you need to [create](#7-make-changes-to-node-config-configuration-files) a configuration file or edit the existing one in accordance with [this guide](https://helpcenter.onlyoffice.com/ru/installation/docs-connect-amazon.aspx) and change the value of the parameter `persistence.storageS3` to `true`. 
 
 ## Deploy ONLYOFFICE Docs
-
-Note: It may be required to apply `SecurityContextConstraints` policy when installing into OpenShift cluster, which adds permission to run containers from a user whose `ID = 101`.
-
-To do this, run the following commands:
-
-```
-$ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/docs-components.yaml
-$ oc adm policy add-scc-to-group scc-docs-components system:authenticated
-```
-
-Alternatively, you can apply the `nonroot-v2` `SecurityContextConstraints` (SCC) policy in the `commonAnnotations` or `annotations` for all resources that describe the podTemplate. Ensure that both the user and the service account have the necessary permissions to use this SCC. To verify who has permission to use the `nonroot-v2`, execute the following command: `oc adm policy who-can use scc nonroot-v2`
-
-```bash
-helm install documentserver onlyoffice/docs --set commonAnnotations."openshift\.io/required-scc"="nonroot-v2"
-```
-
-If required set `podSecurityContext.enabled` and `<resources>.containerSecurityContext.enabled` to `true`
 
 ### 1. Deploy the ONLYOFFICE Docs license
 
@@ -1054,14 +1028,7 @@ The list of supported ingress controllers for virtual path configuration:
 For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pattern `(/|$)(.*)` to the `ingress.path`, for example, `/docs` becomes `/docs(/|$)(.*)`.
 
 #### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
-This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift.
-To expose ONLYOFFICE Docs via route, use these parameters: `openshift.route.enabled`, `openshift.route.host`, `openshift.route.path`.
-
-```bash
-$ helm install documentserver onlyoffice/docs --set openshift.route.enabled=true,openshift.route.host=your-domain-name,openshift.route.path=/docs
-```
-
-For tls termination, manually add certificates to the route via OpenShift web console.
+This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./OPENSHIFT.md#publish-onlyoffice-docs-via-route).
 
 ### 5.4 Admin Panel deployment (optional)
 
