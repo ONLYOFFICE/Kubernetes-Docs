@@ -490,7 +490,7 @@ customPlugins:
 ## Global image parameters for all Onlyoffice Docs services and jobs
 images:
   ## images.tag Global image tag for all Onlyoffice Docs services and jobs
-  tag: 9.3.0-1
+  tag: 9.3.1-1
 
 ## Onlyoffice Docs Docservice Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
@@ -653,6 +653,7 @@ docservice:
     ## docservice.image.repository docservice container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
+    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
     repository: onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
     ## If set to, it takes priority over the `images.tag`
@@ -831,6 +832,7 @@ proxy:
     ## proxy.image.repository proxy container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
+    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
     repository: onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
     ## If set to, it takes priority over the `images.tag`
@@ -1104,6 +1106,7 @@ converter:
     ## converter.image.repository converter container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
+    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
     repository: onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
     ## If set to, it takes priority over the `images.tag`
@@ -1264,6 +1267,7 @@ adminpanel:
     ## adminpanel.image.repository adminpanel container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
+    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
     repository: onlyoffice/docs-adminpanel-de
     ## adminpanel.image.tag adminpanel container image tag
     ## If set to, it takes priority over the `images.tag`
@@ -2307,7 +2311,9 @@ customResources:
     initContainers: []
     image:
       ## customResources.job.image.repository Job by custom-resources ONLYOFFICE Docs image repository
-      repository: onlyoffice/docs-utils
+      ## For more information, see after the Parameters table
+      ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
+      repository: onlyoffice/docs-cluster-de
       ## customResources.job.image.tag Job by custom-resources ONLYOFFICE Docs image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""

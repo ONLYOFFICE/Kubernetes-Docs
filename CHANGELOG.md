@@ -1,5 +1,25 @@
 # Change log
 
+## 6.0.0
+
+### New Features
+
+* Added the ability to add custom fonts, plugins, and dictionaries without rebuilding container images
+* Added the ability to use a single common image for running ONLYOFFICE Docs services
+* Added a common image tag for ONLYOFFICE Docs services and jobs
+* Added a separate field for selector labels
+
+### Changes
+
+* Released ONLYOFFICE Docs [v9.3.1](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#931)
+* ONLYOFFICE Docs services are now run from a single common container image
+* Updated the mechanism used to start ONLYOFFICE Docs services
+* Updated and aligned the installation process for OpenShift environments
+
+### Fixes
+
+* Fixed an upgrade issue occurring when dynamic values were used in `commonLabels`
+
 ## 5.3.1
 
 ### Changes
