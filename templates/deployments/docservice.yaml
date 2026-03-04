@@ -111,6 +111,8 @@ spec:
           emptyDir: {}
         - name: themes
           emptyDir: {}
+        - name: custom-fonts
+          emptyDir: {}
         {{- end }}
         {{- if .Values.customDictionaries.build }}
         - name: dictionaries
@@ -241,6 +243,8 @@ spec:
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs/slide/themes
           - name: fonts
             mountPath: /var/www/{{ .Values.product.name }}/documentserver/fonts
+          - name: custom-fonts
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/core-fonts/custom-k8s
           {{- end }}
           {{- if .Values.customDictionaries.build }}
           - name: dictionaries
