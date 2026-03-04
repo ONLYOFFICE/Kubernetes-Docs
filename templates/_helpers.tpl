@@ -446,7 +446,21 @@ Return true if a configmap object containing the ds clearCache script should be 
 Get the ds labels
 */}}
 {{- define "ds.labels.commonLabels" -}}
-{{- range $key, $value := .Values.commonLabels }}
+{{- $commonLabels := .Values.commonLabels | deepCopy }}
+{{- if not (empty .Values.commonMatchLabels) }}
+    {{- $commonLabels = merge $commonLabels (.Values.commonMatchLabels | deepCopy) }}
+{{- end }}
+{{- range $key, $value := $commonLabels }}
+{{ $key }}: {{ tpl $value $ }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Get the common labels used in matchLabels selector expressions
+*/}}
+{{- define "ds.labels.matchLabels" -}}
+{{- $commonMatchLabels := default .Values.commonLabels .Values.commonMatchLabels }}
+{{- range $key, $value := $commonMatchLabels }}
 {{ $key }}: {{ tpl $value $ }}
 {{- end }}
 {{- end -}}

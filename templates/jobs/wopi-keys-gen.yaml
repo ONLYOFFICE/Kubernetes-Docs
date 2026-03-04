@@ -70,7 +70,7 @@ spec:
       {{- end }}
       containers:
       - name: wopi-keys
-        image: {{ .Values.wopiKeysGeneration.job.image.repository }}:{{ .Values.wopiKeysGeneration.job.image.tag }}
+        image: {{ .Values.wopiKeysGeneration.job.image.repository }}:{{ default .Values.images.tag .Values.wopiKeysGeneration.job.image.tag }}
         imagePullPolicy: {{ .Values.wopiKeysGeneration.job.image.pullPolicy }}
         {{- if .Values.wopiKeysGeneration.job.containerSecurityContext.enabled }}
         securityContext: {{- omit .Values.wopiKeysGeneration.job.containerSecurityContext "enabled" | toYaml | nindent 10 }}

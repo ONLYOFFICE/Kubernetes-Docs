@@ -15,8 +15,8 @@ metadata:
 spec:
   selector:
     app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
-    {{- if .Values.commonLabels }}
-    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- if or .Values.commonLabels .Values.commonMatchLabels }}
+    {{- include "ds.labels.matchLabels" . | trim | nindent 4 }}
     {{- end }}
   ports:
     - name: http

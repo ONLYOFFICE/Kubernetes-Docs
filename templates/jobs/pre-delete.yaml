@@ -80,7 +80,7 @@ spec:
       {{- end }}
       containers:
         - name: pre-delete
-          image: {{ .Values.delete.job.image.repository }}:{{ .Values.delete.job.image.tag }}
+          image: {{ .Values.delete.job.image.repository }}:{{ default .Values.images.tag .Values.delete.job.image.tag }}
           imagePullPolicy: {{ .Values.delete.job.image.pullPolicy }}
           {{- if .Values.delete.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.delete.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}

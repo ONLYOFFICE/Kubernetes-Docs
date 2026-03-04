@@ -36,7 +36,7 @@ jobs:
       - name: selective-check
         id: selective-check
         run: |
-            tag=$(yq -r .docservice.image.tag ./values.yaml)
+            tag=$(yq -r .images.tag ./values.yaml)
 
             if docker buildx imagetools inspect onlyoffice/docs-docservice:${tag} > /dev/null; then
                IMAGE_PRESENT=true

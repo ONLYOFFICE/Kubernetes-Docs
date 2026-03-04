@@ -1,0 +1,145 @@
+{{- if or .Values.customFonts.build .Values.customDictionaries.build .Values.customPlugins.build }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "custom-resources") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "custom-resources") }}
+    {{- if .Values.commonLabels }}
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if or .Values.commonAnnotations .Values.customResources.job.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.customResources.job.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "custom-resources") }}
+        {{- if .Values.commonLabels }}
+        {{- include "ds.labels.commonLabels" . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.customResources.job.podAnnotations }}
+      annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.customResources.job.podAnnotations "context" $ ) | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "ds.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- toYaml .Values.podSecurityContext.jobs | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.customResources.job.customPodAntiAffinity .Values.customResources.job.podAffinity .Values.customResources.job.nodeAffinity }}
+      affinity:
+        {{- with .Values.customResources.job.customPodAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.customResources.job.podAffinity }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.customResources.job.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.nodeSelector .Values.customResources.job.nodeSelector }}
+      nodeSelector: {{ toYaml (default .Values.nodeSelector .Values.customResources.job.nodeSelector) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.tolerations .Values.customResources.job.tolerations }}
+      tolerations: {{ toYaml (default .Values.tolerations .Values.customResources.job.tolerations) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      volumes:
+        {{- if .Values.persistence.customResources.enabled }}
+        - name: custom-resources
+          persistentVolumeClaim:
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.customResources.existingClaim "ds-custom-resources") }}
+        {{- end }}
+        - name: buffer
+          persistentVolumeClaim:
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.buffer.existingClaim "ds-buffer") }}
+        {{- if .Values.customFonts.build }}
+        - name: fonts
+          emptyDir: {}
+        {{- end }}
+        {{- if or (not .Values.customPlugins.defaultPlugins.enabled) .Values.customPlugins.defaultPlugins.list }}
+        - name: plugin-list-default
+          configMap:
+            name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "plugin-list-default") }}
+        {{- end }}
+      {{- with .Values.customResources.job.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: custom-resources
+          image: {{ .Values.customResources.job.image.repository }}:{{ default .Values.images.tag .Values.customResources.job.image.tag }}
+          imagePullPolicy: {{ .Values.customResources.job.image.pullPolicy }}
+          {{- if .Values.customResources.job.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.customResources.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources: {{- toYaml .Values.customResources.job.resources | nindent 12 }}
+          command: ["dumb-init", "--", "/init/init-docker-entrypoint.sh"]
+          args:
+          {{- if .Values.customFonts.build }}
+          - -f
+          {{- end }}
+          {{- if .Values.customDictionaries.build }}
+          - -d
+          {{- end }}
+          {{- if .Values.customPlugins.build }}
+          - -p
+          {{- end }}
+          {{- if or .Values.customPlugins.defaultPlugins.list (not .Values.customPlugins.defaultPlugins.enabled) (not .Values.customPlugins.marketplace.enabled) }}
+          env:
+          {{- if or (not .Values.customPlugins.defaultPlugins.enabled) .Values.customPlugins.defaultPlugins.list }}
+          - name: PLUGINS_LIST_DEFAULT
+            value: "false"
+          {{- end }}
+          {{- if not .Values.customPlugins.marketplace.enabled }}
+          - name: PLUGINS_MARKET_DISABLED
+            value: "true"
+          {{- end }}
+          {{- end }}
+          volumeMounts:
+          {{- $context := . }}
+          - name: buffer
+            mountPath: /var/lib/{{ .Values.product.name }}/documentserver/buffer
+          {{- if .Values.customFonts.build }}
+          - name: fonts
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/fonts
+          - name: custom-resources
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/core-fonts/custom-k8s
+            subPath: custom-k8s
+          {{- end }}
+          {{- if .Values.customDictionaries.build }}
+          {{- range .Values.customDictionaries.dictionarieNames }}
+          - name: custom-resources
+            mountPath: /var/www/{{ $context.Values.product.name }}/documentserver/dictionaries/{{ . }}
+            subPath: {{ . }}
+          {{- end }}
+          {{- end }}
+          {{- if and .Values.persistence.customResources.enabled .Values.customPlugins.build }}
+          {{- range .Values.customPlugins.pluginNames }}
+          - name: custom-resources
+            mountPath: /var/www/{{ $context.Values.product.name }}/documentserver/sdkjs-plugins/{{ . }}
+            subPath: {{ . }}
+          {{- end }}
+          {{- end }}
+          {{- if or (not .Values.customPlugins.defaultPlugins.enabled) .Values.customPlugins.defaultPlugins.list }}
+          - name: plugin-list-default
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs-plugins/plugin-list-default.json
+            subPath: plugin-list-default.json
+          {{- end }}
+      restartPolicy: Never
+{{- end }}

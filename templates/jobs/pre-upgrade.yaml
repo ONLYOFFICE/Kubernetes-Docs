@@ -11,7 +11,7 @@ metadata:
     {{- end }}
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-weight": "4"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
     {{- if or .Values.commonAnnotations .Values.upgrade.job.annotations }}
     {{- $dictValue := default .Values.commonAnnotations .Values.upgrade.job.annotations }}
@@ -78,7 +78,7 @@ spec:
       {{- end }}
       containers:
         - name: pre-upgrade
-          image: {{ .Values.upgrade.job.image.repository }}:{{ .Values.upgrade.job.image.tag }}
+          image: {{ .Values.upgrade.job.image.repository }}:{{ default .Values.images.tag .Values.upgrade.job.image.tag }}
           imagePullPolicy: {{ .Values.upgrade.job.image.pullPolicy }}
           {{- if .Values.upgrade.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.upgrade.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}

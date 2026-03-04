@@ -19,8 +19,8 @@ spec:
   selector:
     matchLabels:
       app: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}
-      {{- if .Values.commonLabels }}
-      {{- include "ds.labels.commonLabels" . | trim | nindent 6 }}
+      {{- if or .Values.commonLabels .Values.commonMatchLabels }}
+      {{- include "ds.labels.matchLabels" . | trim | nindent 6 }}
       {{- end }}
   {{- if .Values.docservice.updateStrategy }}
   strategy: {{- toYaml .Values.docservice.updateStrategy | nindent 4 }}
@@ -95,6 +95,29 @@ spec:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       volumes:
+        {{- if or .Values.customFonts.build .Values.customDictionaries.build .Values.customPlugins.build }}
+        - name: buffer
+          persistentVolumeClaim:
+            claimName: {{ include "ds.pvc.name" (list . .Values.persistence.buffer.existingClaim "ds-buffer") }}
+        {{- end }}
+        {{- if or .Values.customPlugins.build .Values.customPlugins.emptyPluginsDir }}
+        - name: plugin
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.customFonts.build }}
+        - name: fonts
+          emptyDir: {}
+        - name: images
+          emptyDir: {}
+        - name: themes
+          emptyDir: {}
+        - name: custom-fonts
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.customDictionaries.build }}
+        - name: dictionaries
+          emptyDir: {}
+        {{- end }}
         {{- if not .Values.persistence.storageS3 }}
         - name: ds-files
           persistentVolumeClaim:
@@ -142,9 +165,9 @@ spec:
       containers:
         - name: proxy
           {{- if .Values.global }}
-          image: {{ include "ds.imageRepository" (list . .Values.proxy.image.repository) }}:{{ .Values.proxy.image.tag }}
+          image: {{ include "ds.imageRepository" (list . .Values.proxy.image.repository) }}:{{ default .Values.images.tag .Values.proxy.image.tag }}
           {{- else }}
-          image: {{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
+          image: {{ .Values.proxy.image.repository }}:{{ default .Values.images.tag .Values.proxy.image.tag }}
           {{- end }}
           imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
           {{- if .Values.proxy.containerSecurityContext.enabled }}
@@ -165,6 +188,20 @@ spec:
           livenessProbe: {{- omit .Values.proxy.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.proxy.resources | nindent 12 }}
+          command:
+          - /usr/local/bin/proxy-docker-entrypoint.sh
+          {{- if or .Values.customFonts.build .Values.customDictionaries.build .Values.customPlugins.build }}
+          args:
+          {{- if .Values.customFonts.build }}
+          - -f
+          {{- end }}
+          {{- if .Values.customDictionaries.build }}
+          - -d
+          {{- end }}
+          {{- if and .Values.customPlugins.build (not .Values.customPlugins.emptyPluginsDir) }}
+          - -p
+          {{- end }}
+          {{- end }}
           {{- if or .Values.proxy.infoAllowedIP .Values.proxy.infoAllowedUser .Values.proxy.extraEnvVars .Values.proxy.logFormat }}
           env:
           {{- if .Values.proxy.logFormat }}
@@ -194,6 +231,29 @@ spec:
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
+          {{- if or .Values.customFonts.build .Values.customDictionaries.build .Values.customPlugins.build }}
+          - name: buffer
+            mountPath: /var/lib/{{ .Values.product.name }}/documentserver/buffer
+            readOnly: true
+          {{- end }}
+          {{- if .Values.customFonts.build }}
+          - name: images
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs/common/Images
+          - name: themes
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs/slide/themes
+          - name: fonts
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/fonts
+          - name: custom-fonts
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/core-fonts/custom-k8s
+          {{- end }}
+          {{- if .Values.customDictionaries.build }}
+          - name: dictionaries
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/dictionaries
+          {{- end }}
+          {{- if or .Values.customPlugins.build .Values.customPlugins.emptyPluginsDir }}
+          - name: plugin
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs-plugins
+          {{- end }}
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
@@ -214,9 +274,9 @@ spec:
 
         - name: docservice
           {{- if .Values.global }}
-          image: {{ include "ds.imageRepository" (list . .Values.docservice.image.repository) }}:{{ .Values.docservice.image.tag }}
+          image: {{ include "ds.imageRepository" (list . .Values.docservice.image.repository) }}:{{ default .Values.images.tag .Values.docservice.image.tag }}
           {{- else }}
-          image: {{ .Values.docservice.image.repository }}:{{ .Values.docservice.image.tag }}
+          image: {{ .Values.docservice.image.repository }}:{{ default .Values.images.tag .Values.docservice.image.tag }}
           {{- end }}
           imagePullPolicy: {{ .Values.docservice.image.pullPolicy }}
           {{- if .Values.docservice.containerSecurityContext.enabled }}
@@ -237,6 +297,14 @@ spec:
           livenessProbe: {{- omit .Values.docservice.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.docservice.resources | nindent 12 }}
+          args:
+          - docservice
+          {{- if .Values.customFonts.build }}
+          - -f
+          {{- end }}
+          {{- if and .Values.customPlugins.build (not .Values.customPlugins.emptyPluginsDir) }}
+          - -p
+          {{- end }}
           env:
           - name: DB_PWD
             valueFrom:
@@ -287,6 +355,19 @@ spec:
           - configMapRef:
               name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
           volumeMounts:
+          {{- if or .Values.customFonts.build .Values.customPlugins.build }}
+          - name: buffer
+            mountPath: /var/lib/{{ .Values.product.name }}/documentserver/buffer
+            readOnly: true
+          {{- end }}
+          {{- if .Values.customFonts.build }}
+          - name: fonts
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/fonts
+          {{- end }}
+          {{- if or .Values.customPlugins.build .Values.customPlugins.emptyPluginsDir }}
+          - name: plugin
+            mountPath: /var/www/{{ .Values.product.name }}/documentserver/sdkjs-plugins
+          {{- end }}
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
             mountPath: /var/lib/{{ .Values.product.name }}/documentserver/App_Data/cache/files
