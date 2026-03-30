@@ -653,8 +653,8 @@ docservice:
     ## docservice.image.repository docservice container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-docservice-de
+    ## This image repository is kept for backward compatibility. You can use `docker.io/onlyoffice/docs-cluster-de` instead
+    repository: docker.io/onlyoffice/docs-docservice-de
     ## docservice.image.tag docservice container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -832,8 +832,8 @@ proxy:
     ## proxy.image.repository proxy container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-proxy-de
+    ## This image repository is kept for backward compatibility. You can use `docker.io/onlyoffice/docs-cluster-de` instead
+    repository: docker.io/onlyoffice/docs-proxy-de
     ## proxy.image.tag proxy container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1106,8 +1106,8 @@ converter:
     ## converter.image.repository converter container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-converter-de
+    ## This image repository is kept for backward compatibility. You can use `docker.io/onlyoffice/docs-cluster-de` instead
+    repository: docker.io/onlyoffice/docs-converter-de
     ## converter.image.tag converter container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1267,8 +1267,8 @@ adminpanel:
     ## adminpanel.image.repository adminpanel container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-adminpanel-de
+    ## This image repository is kept for backward compatibility. You can use `docker.io/onlyoffice/docs-cluster-de` instead
+    repository: docker.io/onlyoffice/docs-adminpanel-de
     ## adminpanel.image.tag adminpanel container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1443,7 +1443,7 @@ example:
   ## Example container image parameters
   image:
     ## example.image.repository example container image name
-    repository: onlyoffice/docs-example
+    repository: docker.io/onlyoffice/docs-example
     ## example.image.tag example container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1653,7 +1653,7 @@ install:
     initContainers: []
     image:
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
-      repository: onlyoffice/docs-utils
+      repository: docker.io/onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -1739,7 +1739,7 @@ upgrade:
     initContainers: []
     image:
       ## upgrade.job.image.repository Job by upgrade image repository
-      repository: onlyoffice/docs-utils
+      repository: docker.io/onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -1833,7 +1833,7 @@ rollback:
     initContainers: []
     image:
       ## rollback.job.image.repository Job by rollback image repository
-      repository: onlyoffice/docs-utils
+      repository: docker.io/onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -1927,7 +1927,7 @@ delete:
     initContainers: []
     image:
       ## delete.job.image.repository Job by delete image repository
-      repository: onlyoffice/docs-utils
+      repository: docker.io/onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -2013,7 +2013,7 @@ clearCache:
     initContainers: []
     image:
       ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
-      repository: onlyoffice/docs-utils
+      repository: docker.io/onlyoffice/docs-utils
       ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -2092,7 +2092,7 @@ grafanaDashboard:
     initContainers: []
     image:
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
-      repository: onlyoffice/docs-utils
+      repository: docker.io/onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -2164,7 +2164,7 @@ wopiKeysGeneration:
     initContainers: []
     image:
       ## wopiKeysGeneration.job.image.repository Job by Wopi Keys Generation ONLYOFFICE Docs image repository
-      repository: onlyoffice/docs-utils
+      repository: docker.io/onlyoffice/docs-utils
       ## wopiKeysGeneration.job.image.tag Job by Wopi Keys Generation ONLYOFFICE Docs image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -2238,7 +2238,7 @@ wopiKeysDeletion:
     initContainers: []
     image:
       ## wopiKeysDeletion.job.image.repository Job by Wopi Keys Deletion ONLYOFFICE Docs image repository
-      repository: onlyoffice/docs-utils
+      repository: docker.io/onlyoffice/docs-utils
       ## wopiKeysDeletion.job.image.tag Job by Wopi Keys Deletion ONLYOFFICE Docs image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -2313,7 +2313,7 @@ customResources:
       ## customResources.job.image.repository Job by custom-resources ONLYOFFICE Docs image repository
       ## For more information, see after the Parameters table
       ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-      repository: onlyoffice/docs-cluster-de
+      repository: docker.io/onlyoffice/docs-cluster-de
       ## customResources.job.image.tag Job by custom-resources ONLYOFFICE Docs image tag
       ## If set to, it takes priority over the `images.tag`
       tag: ""
@@ -2384,7 +2384,7 @@ tests:
   ## Test container image parameters
   image:
     ## tests.image.repository test container image name
-    repository: onlyoffice/docs-utils
+    repository: docker.io/onlyoffice/docs-utils
     ## tests.image.tag test container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
