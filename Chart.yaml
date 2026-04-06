@@ -1,9 +1,23 @@
 apiVersion: v2
 name: docs
-description: Helm chart for installing ONLYOFFICE Docs in Kubernetes
-
+version: 6.1.0
+kubeVersion: ">= 1.19.0"
+description: ONLYOFFICE Docs is a secure, open-source office suite for document collaboration.
 type: application
-
-version: 6.0.0
-
-appVersion: 9.3.1
+keywords:
+  - office
+  - office-suite
+  - onlyoffice
+  - documents
+  - spreadsheets
+  - presentations
+  - forms
+  - pdf
+  - collaboration
+  - productivity
+home: https://onlyoffice.com
+sources:
+  - https://github.com/ONLYOFFICE
+  - https://github.com/ONLYOFFICE/DocumentServer
+icon: https://avatars.githubusercontent.com/u/1426033
+appVersion: "9.3.1"
