@@ -5,6 +5,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 ## Contents
 - [Requirements](#requirements)
 - [Introduction](#introduction)
+- [Recommended system requirements](#recommended-system-requirements)
 - [Deploy prerequisites](#deploy-prerequisites)
   * [1. Add Helm repositories](#1-add-helm-repositories)
   * [2. Install Persistent Storage](#2-install-persistent-storage)
@@ -78,6 +79,55 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy.
 - If the installation of components external to ‘Docs’ is performed from Helm Chart in an OpenShift cluster, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
 - To install Docs into an OpenShift cluster, it may be necessary to grant a specific SecurityContextConstraints policy. This policy provides permission to run containers using a user with ID = 101 and ID = 1001. For more information, see [OPENSHIFT.md](./OPENSHIFT.md) file.
+
+## Recommended system requirements
+
+The table below provides recommended system requirements depending on the number of simultaneous connections. These values are based on load testing results. Each worker node is expected to have **4 CPU** and **8 GiB RAM**.
+
+The following resource requests and limits were used during testing:
+
+**Proxy:**
+```yaml
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "4Gi"
+    cpu: "4000m"
+```
+
+**Docservice:**
+```yaml
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "4Gi"
+    cpu: "4000m"
+```
+
+**Converter:**
+```yaml
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "6Gi"
+    cpu: "4000m"
+```
+
+| Connections | Cluster worker nodes | DS nodes | Docservice replicas | Converter replicas | Persistent Storage |
+|:-----------:|:--------------------:|:--------:|:-------------------:|:------------------:|:------------------:|
+| 500         | 2                    | 2        | 2                   | 2                  | 50Gi               |
+| 1000        | 2                    | 2        | 3                   | 3                  | 100Gi              |
+| 2000        | 3                    | 2        | 6                   | 6                  | 200Gi              |
+| 5000        | 6                    | 5        | 15                  | 15                 | 500Gi              |
+| 10000       | 11                   | 10       | 30                  | 30                 | 1000Gi             |
+
+Note: For 2000 connections and above, dependencies (NFS, RabbitMQ, Redis, PostgreSQL) are deployed on a separate dedicated node. For fewer than 2000 connections, dependencies are co-located on the same nodes as ONLYOFFICE Docs.
 
 ## Deploy prerequisites
 
