@@ -78,7 +78,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - You should install Helm v3.15+. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
 - If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy.
 - If the installation of components external to ‘Docs’ is performed from Helm Chart in an OpenShift cluster, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
-- To install Docs into an OpenShift cluster, it may be necessary to grant a specific SecurityContextConstraints policy. This policy provides permission to run containers using a user with ID = 101 and ID = 1001. For more information, see [OPENSHIFT.md](./OPENSHIFT.md) file.
+- To install Docs into an OpenShift cluster, it may be necessary to grant a specific SecurityContextConstraints policy. This policy provides permission to run containers using a user with ID = 101 and ID = 1001. For more information, see [OPENSHIFT.md](./docs/OPENSHIFT.md) file.
 
 ## Recommended system requirements
 
@@ -330,21 +330,21 @@ and then run the `helm upgrade documentserver onlyoffice/docs --set extraConf.co
 
 *This step is optional. You can skip step [#8](#8-add-custom-fonts) entirely if you don't need to add your fonts*
 
-In order to add fonts to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./CUSTOM_RESOURCES.md#adding-custom-fonts).
+In order to add fonts to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./docs/CUSTOM_RESOURCES.md#adding-custom-fonts).
 
 ### 9. Add Plugins
 
 *This step is optional. You can skip step [#9](#9-add-plugins) entirely if you don't need to add plugins*
 
-In order to add plugins to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./CUSTOM_RESOURCES.md#adding-custom-plugins).
+In order to add plugins to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./docs/CUSTOM_RESOURCES.md#adding-custom-plugins).
 
-You can also configure the [list of default plugins](./CUSTOM_RESOURCES.md#disabling-default-plugins) displayed or remove them [completely](./CUSTOM_RESOURCES.md#completely-disable-plugins-directory).
+You can also configure the [list of default plugins](./docs/CUSTOM_RESOURCES.md#disabling-default-plugins) displayed or remove them [completely](./docs/CUSTOM_RESOURCES.md#completely-disable-plugins-directory).
 
 ### 10. Add custom dictionaries
 
 *This step is optional. You can skip step [#10](#10-add-custom-dictionaries) entirely if you don't need to add your dictionaries*
 
-In order to add your custom dictionaries to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./CUSTOM_RESOURCES.md#adding-custom-dictionaries).
+In order to add your custom dictionaries to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./docs/CUSTOM_RESOURCES.md#adding-custom-dictionaries).
 
 ### 11. Change interface themes
 
@@ -483,7 +483,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `persistence.runtimeConfig.existingClaim`                   | The name of the existing PVC used to store the runtime config. If not specified, a PVC named "ds-runtime-config" will be created                                               | `""`                                                                                      |
 | `persistence.runtimeConfig.annotations`                     | Defines annotations that will be additionally added to "ds-runtime-config" PVC. If set to, it takes priority over the `commonAnnotations`                                      | `{}`                                                                                      |
 | `persistence.runtimeConfig.size`                            | PVC Storage Request for runtime config volume                                                                                                                                  | `1Gi`                                                                                     |
-| `persistence.customResources.enabled`                       | Defines whether to use PVC and whether to mount it in a container in the Job `custom-resources`. The [use of this PVC](./CUSTOM_RESOURCES.md) can be disabled if you only use `customPlugins.marketplace.enabled=false` or `customPlugins.defaultPlugins.list` or `customPlugins.defaultPlugins.enabled=false` | `true` |
+| `persistence.customResources.enabled`                       | Defines whether to use PVC and whether to mount it in a container in the Job `custom-resources`. The [use of this PVC](./docs/CUSTOM_RESOURCES.md) can be disabled if you only use `customPlugins.marketplace.enabled=false` or `customPlugins.defaultPlugins.list` or `customPlugins.defaultPlugins.enabled=false` | `true` |
 | `persistence.customResources.existingClaim`                 | The name of the existing PVC used to store the custom resources. It is used if `customFonts.build` or `customDictionaries.build` or `customPlugins.build` is set to `true`     | `docs-custom-resources`                                                                   |
 | `persistence.buffer.existingClaim`                          | The name of the existing PVC used to share generated files. If not specified, a PVC named "ds-buffer" will be created only during installation (`"helm.sh/hook": pre-install`). It is created and used if `customFonts.build` or `customDictionaries.build` or `customPlugins.build` is set to `true` | `""` |
 | `persistence.buffer.annotations`                            | Defines annotations that will be additionally added to "ds-buffer" PVC. If set to, it takes priority over the `commonAnnotations`                                              | `{}`                                                                                      |
@@ -524,15 +524,15 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `requestFilteringAgent.allowMetaIPAddress`                  | Defines if it is allowed to connect meta address or not                                                                                                                        | `false`                                                                                   |
 | `requestFilteringAgent.allowIPAddressList`                  | Defines the list of IP addresses allowed to connect. This values are preferred than `requestFilteringAgent.denyIPAddressList`                                                  | `[]`                                                                                      |
 | `requestFilteringAgent.denyIPAddressList`                   | Defines the list of IP addresses that are denied access                                                                                                                        | `[]`                                                                                      |
-| `customFonts.build`                                         | Enables the addition of [custom Fonts](./CUSTOM_RESOURCES.md#adding-custom-fonts). Fonts should be added to the "custom-k8s" subdirectory of the `persistence.customResources` PVC root | `false`                                                                          |
-| `customDictionaries.build`                                  | Enables the addition of [custom Dictionaries](./CUSTOM_RESOURCES.md#adding-custom-dictionaries)                                                                                | `false`                                                                                   |
+| `customFonts.build`                                         | Enables the addition of [custom Fonts](./docs/CUSTOM_RESOURCES.md#adding-custom-fonts). Fonts should be added to the "custom-k8s" subdirectory of the `persistence.customResources` PVC root | `false`                                                                          |
+| `customDictionaries.build`                                  | Enables the addition of [custom Dictionaries](./docs/CUSTOM_RESOURCES.md#adding-custom-dictionaries)                                                                                | `false`                                                                                   |
 | `customDictionaries.dictionarieNames`                       | Defines a list of subdirectories with the names of additional dictionaries. The names must match the names of the directories added to the root of the `persistence.customResources` PVC. It is executed if the `customDictionaries.build` is set to `true` | `[]`         |
-| `customPlugins.build`                                       | Enables the addition of [custom Plugins](./CUSTOM_RESOURCES.md#adding-custom-plugins)                                                                                          | `false`                                                                                   |
+| `customPlugins.build`                                       | Enables the addition of [custom Plugins](./docs/CUSTOM_RESOURCES.md#adding-custom-plugins)                                                                                          | `false`                                                                                   |
 | `customPlugins.pluginNames`                                 | Defines a list of subdirectories with the names of additional plugins. The names must match the names of the directories added to the root of the `persistence.customResources` PVC. It is executed if the `customPlugins.build` is set to `true` | `[]`                   |
-| `customPlugins.marketplace.enabled`                         | Defines whether the [Plugin Manager](./CUSTOM_RESOURCES.md#disable-plugin-manager) will be added to the server and to the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                       | `true`                                      |
-| `customPlugins.defaultPlugins.enabled`                      | Defines whether [plugins](./CUSTOM_RESOURCES.md#disable-all-default-plugins) will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                              | `true`                                 |
-| `customPlugins.defaultPlugins.list`                         | Defines [which plugins](./CUSTOM_RESOURCES.md#install-selected-default-plugins-only) from the default list will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`          | `[]`                         |
-| `customPlugins.emptyPluginsDir`                             | Defines whether a directory with plugins in containers will [contain files](./CUSTOM_RESOURCES.md#completely-disable-plugins-directory), including service files. If set to `true`, an empty volume with the `emptyDir` type will be mapped  | `false`                     |
+| `customPlugins.marketplace.enabled`                         | Defines whether the [Plugin Manager](./docs/CUSTOM_RESOURCES.md#disable-plugin-manager) will be added to the server and to the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                       | `true`                                      |
+| `customPlugins.defaultPlugins.enabled`                      | Defines whether [plugins](./docs/CUSTOM_RESOURCES.md#disable-all-default-plugins) will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                              | `true`                                 |
+| `customPlugins.defaultPlugins.list`                         | Defines [which plugins](./docs/CUSTOM_RESOURCES.md#install-selected-default-plugins-only) from the default list will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`          | `[]`                         |
+| `customPlugins.emptyPluginsDir`                             | Defines whether a directory with plugins in containers will [contain files](./docs/CUSTOM_RESOURCES.md#completely-disable-plugins-directory), including service files. If set to `true`, an empty volume with the `emptyDir` type will be mapped  | `false`                     |
 | `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `9.3.1-1`                                                                                 |
 | `docservice.annotations`                                    | Defines annotations that will be additionally added to Docservice Deployment. If set to, it takes priority over the `commonAnnotations`                                        | `{}`                                                                                      |
 | `docservice.podAnnotations`                                 | Map of annotations to add to the Docservice deployment pods                                                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
@@ -1078,7 +1078,7 @@ The list of supported ingress controllers for virtual path configuration:
 For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pattern `(/|$)(.*)` to the `ingress.path`, for example, `/docs` becomes `/docs(/|$)(.*)`.
 
 #### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
-This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./OPENSHIFT.md#publish-onlyoffice-docs-via-route).
+This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
 
 ### 5.4 Admin Panel deployment (optional)
 
