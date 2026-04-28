@@ -45,6 +45,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5324-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
     + [5.3.2.5 Expose ONLYOFFICE Docs on a virtual path](#5325-expose-onlyoffice-docs-on-a-virtual-path)
     + [5.3.3 Expose ONLYOFFICE Docs via route in OpenShift](#533-expose-onlyoffice-docs-via-route-in-openshift)
+    + [5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)](#534-expose-onlyoffice-docs-via-httproute-gateway-api)
   * [5.4 Admin Panel deployment (optional)](#54-admin-panel-deployment-optional)
   * [6. Scale ONLYOFFICE Docs (optional)](#6-scale-onlyoffice-docs-optional) 
       + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
@@ -705,6 +706,11 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `openshift.route.host`                                      | OpenShift Route hostname for the ONLYOFFICE Docs route                                                                                                                         | `""`                                                                                      |
 | `openshift.route.path`                                      | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
 | `openshift.route.wildcardPolicy`                            | The policy for handling wildcard subdomains in the OpenShift Route. Allowed values are `None`, `Subdomain`                                                                     | `None`                                                                                    |
+| `httproute.enabled`                                     | Enable the creation of an HTTPRoute for the ONLYOFFICE Docs. Used if you have a Gateway API controller in your cluster | `false`                                                                                   |
+| `httproute.annotations`                                   | Map of annotations to add to the HTTPRoute. If set to, it takes priority over the `commonAnnotations`                                                                            | `{}`                                                                                      |
+| `httproute.hostnames`                                           | An array of hostnames. For example, `["docs.example.com"]` | `[]` |
+| `httproute.path`                                           | The path where ONLYOFFICE Docs will be available | `/` |
+| `httproute.parentRefs`                                           | References to the Gateway resource. It should contain at least the name and namespace of the Gateway that will route traffic to ONLYOFFICE Docs. For example: `[{name: my-gateway, namespace: default}]` | `[]` |
 | `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
 | `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
 | `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana                                 | `false`                                                                                   |
@@ -1079,6 +1085,9 @@ For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pa
 
 #### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
 This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
+
+#### 5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)
+This type of exposure allows you to expose ONLYOFFICE Docs with HTTPRoute via Gateway API. For details, see the [GATEWAY.md](./GATEWAY.md) guide.
 
 ### 5.4 Admin Panel deployment (optional)
 

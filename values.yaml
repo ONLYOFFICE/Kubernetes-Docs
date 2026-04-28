@@ -1593,6 +1593,29 @@ openshift:
     ## openshift.route.wildcardPolicy Defines how wildcards are handled for the Route host (e.g., None, Subdomain)
     wildcardPolicy: None
 
+# Onlyoffice Docs HTTPRoute parameters
+##
+httproute:
+  ## httpRoute.enabled Enable the creation of an HTTPRoute for ONLYOFFICE Docs
+  enabled: false
+  ## httpRoute.annotations Map of annotations to add to the HTTPRoute
+  ## If set, these are merged with commonAnnotations, with httpRoute.annotations taking precedence.
+  annotations: {}
+  ## httpRoute.hostnames The hostnames for the ONLYOFFICE Docs HTTPRoute resource
+  hostnames: []
+  # - hostname1.example.com
+  # - hostname2.example.com
+  ## httpRoute.path The path for the ONLYOFFICE Docs HTTPRoute resource
+  path: "/"
+  ## httpRoute.parentRefs An array of parentRefs for the HTTPRoute, specifying the parent resources (e.g., Gateways) that should route traffic to ONLYOFFICE Docs
+  parentRefs: []
+  # - name: my-gateway-1
+  #   namespace: my-gateway-namespace
+  # - group: gateway.networking.k8s.io
+  #   kind: Gateway
+  #   name: my-gateway-2
+  #   namespace: my-gateway-namespace
+  
 ## Grafana parameters
 ## See more details about installing Grafana here:
 ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#using-grafana-to-visualize-metrics-optional
