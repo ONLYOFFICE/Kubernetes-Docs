@@ -491,6 +491,8 @@ customPlugins:
 images:
   ## images.tag Global image tag for all Onlyoffice Docs services and jobs
   tag: 9.3.1-1
+  ## images.registry Global image registry for all Onlyoffice Docs containers
+  registry: ""
 
 ## Onlyoffice Docs Docservice Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
@@ -650,6 +652,8 @@ docservice:
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:
+    ## docservice.image.registry docservice container image registry
+    registry: ""
     ## docservice.image.repository docservice container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -829,6 +833,8 @@ proxy:
   welcomePage:
     enabled: true
   image:
+    ## proxy.image.registry proxy container image registry
+    registry: ""
     ## proxy.image.repository proxy container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -1103,6 +1109,8 @@ converter:
   extraVolumes: []
   ## Converter container image parameters
   image:
+    ## converter.image.registry converter container image registry
+    registry: ""
     ## converter.image.repository converter container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -1264,6 +1272,8 @@ adminpanel:
   extraVolumes: []
   ## Adminpanel container image parameters
   image:
+    ## adminpanel.image.registry adminpanel container image registry
+    registry: ""
     ## adminpanel.image.repository adminpanel container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -1442,6 +1452,8 @@ example:
   extraVolumes: []
   ## Example container image parameters
   image:
+    ## example.image.registry example container image registry
+    registry: ""
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
@@ -1675,6 +1687,8 @@ install:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## install.job.image.registry pre-install job image registry
+      registry: ""
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
@@ -1761,6 +1775,8 @@ upgrade:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## upgrade.job.image.registry upgrade job image registry
+      registry: ""
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
@@ -1855,6 +1871,8 @@ rollback:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## rollback.job.image.registry rollback job image registry
+      registry: ""
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
@@ -1949,6 +1967,8 @@ delete:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## delete.job.image.registry delete job image registry
+      registry: ""
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
@@ -2035,6 +2055,8 @@ clearCache:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## clearCache.job.image.registry Clear Cache job container image registry
+      registry: ""
       ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
@@ -2114,6 +2136,8 @@ grafanaDashboard:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## grafanaDashboard.job.image.registry Grafana Dashboard job container image registry
+      registry: ""
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
@@ -2186,6 +2210,8 @@ wopiKeysGeneration:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## wopiKeysGeneration.job.image.registry Wopi Keys Generation job container image registry
+      registry: ""
       ## wopiKeysGeneration.job.image.repository Job by Wopi Keys Generation ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysGeneration.job.image.tag Job by Wopi Keys Generation ONLYOFFICE Docs image tag
@@ -2260,6 +2286,8 @@ wopiKeysDeletion:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## wopiKeysDeletion.job.image.registry Wopi Keys Deletion job container image registry
+      registry: ""
       ## wopiKeysDeletion.job.image.repository Job by Wopi Keys Deletion ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysDeletion.job.image.tag Job by Wopi Keys Deletion ONLYOFFICE Docs image tag
@@ -2333,6 +2361,8 @@ customResources:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## customResources.job.image.registry custom-resources job container image registry
+      registry: ""
       ## customResources.job.image.repository Job by custom-resources ONLYOFFICE Docs image repository
       ## For more information, see after the Parameters table
       ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -2406,6 +2436,8 @@ tests:
   initContainers: []
   ## Test container image parameters
   image:
+    ## tests.image.registry test container image registry
+    registry: ""
     ## tests.image.repository test container image name
     repository: onlyoffice/docs-utils
     ## tests.image.tag test container image tag
