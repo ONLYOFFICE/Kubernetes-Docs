@@ -1,7 +1,7 @@
 apiVersion: v2
 name: docs
 version: 6.1.0
-kubeVersion: ">= 1.19.0"
+kubeVersion: '>=1.19.0-0'
 description: ONLYOFFICE Docs is a secure, open-source office suite for document collaboration.
 type: application
 keywords:
