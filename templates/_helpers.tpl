@@ -637,15 +637,9 @@ A function to return correct registry.
 */}}
 {{- define "ds.imageRegistry" -}}
 {{- $context := index . 0 -}}
-{{- $componentName := index . 1 -}}
-{{- $component := index $context.Values $componentName | default dict -}}
-{{- $componentImage := index $component "image" | default dict -}}
-{{- $componentRegistry := index $componentImage "registry" | default "" -}}
-{{- $images := $context.Values.images | default dict -}}
-{{- $globalRegistry := index $images "registry" | default "" -}}
-{{- $registry := coalesce $componentRegistry $globalRegistry "" -}}
-{{- if $registry -}}
-{{- printf "%s/" ($registry | trimSuffix "/") -}}
+{{- $registry := coalesce (index . 1) $context.Values.images.registry -}}
+{{- if $registry }}
+    {{- printf "%s/" ($registry | trimSuffix "/") -}}
 {{- end -}}
 {{- end -}}
 

@@ -73,7 +73,7 @@ spec:
       {{- end }}
       containers:
         - name: clear-cache
-          image: {{ include "ds.imageRegistry" (list . "clearCache.job") }}{{ .Values.clearCache.job.image.repository }}:{{ default .Values.images.tag .Values.clearCache.job.image.tag }}
+          image: {{ include "ds.imageRegistry" (list . .Values.clearCache.job.image.registry ) }}{{ .Values.clearCache.job.image.repository }}:{{ default .Values.images.tag .Values.clearCache.job.image.tag }}
           imagePullPolicy: {{ .Values.clearCache.job.image.pullPolicy }}
           {{- if .Values.clearCache.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.clearCache.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}

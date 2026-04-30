@@ -75,7 +75,7 @@ spec:
       {{- end }}
       containers:
         - name: pre-install
-          image: {{ include "ds.imageRegistry" (list . "install.job") }}{{ .Values.install.job.image.repository }}:{{ default .Values.images.tag .Values.install.job.image.tag }}
+          image: {{ include "ds.imageRegistry" (list . .Values.install.job.image.registry ) }}{{ .Values.install.job.image.repository }}:{{ default .Values.images.tag .Values.install.job.image.tag }}
           imagePullPolicy: {{ .Values.install.job.image.pullPolicy }}
           {{- if .Values.install.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.install.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}

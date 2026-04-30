@@ -79,7 +79,7 @@ spec:
       {{- end }}
       containers:
       - name: example
-        image: {{ include "ds.imageRegistry" (list . "example") }}{{ .Values.example.image.repository }}:{{ default .Values.images.tag .Values.example.image.tag }}
+        image: {{ include "ds.imageRegistry" (list . .Values.example.image.registry ) }}{{ .Values.example.image.repository }}:{{ default .Values.images.tag .Values.example.image.tag }}
         imagePullPolicy: {{ .Values.example.image.pullPolicy }}
         {{- if .Values.example.containerSecurityContext.enabled }}
         securityContext: {{- omit .Values.example.containerSecurityContext "enabled" | toYaml | nindent 10 }}
