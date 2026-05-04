@@ -1536,10 +1536,10 @@ ingress:
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: 100m
-    ## Use the annotation below if your NGINX Ingress controller by nginx.org
-    ## ref: https://github.com/nginx/kubernetes-ingress/
-    ## nginx.org/client-max-body-size: 100m
+    nginx.org/client-max-body-size: 100m
+    ## Use the annotation below if your NGINX Ingress controller by the Kubernetes community (deprecated in favor of nginx.org)
+    ## ref: https://github.com/kubernetes/ingress-nginx/
+    ## nginx.ingress.kubernetes.io/proxy-body-size: 100m
   ## ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
   ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
   ingressClassName: nginx
@@ -1551,7 +1551,7 @@ ingress:
   ## ref: https://github.com/nginx/kubernetes-ingress
   ## Use `haproxytech` for the HAProxy Ingress controller
   ## ref: https://github.com/haproxytech/kubernetes-ingress
-  controllerName: ingress-nginx
+  controllerName: nginx-ingress
   ssl:
     ## ingress.ssl.enabled Enable TLS for the ONLYOFFICE Docs ingress
     enabled: false
@@ -1638,12 +1638,15 @@ grafana:
   ## If not set, the name will be taken from `namespaceOverride` or .Release.Namespace
   namespace: ""
   ## grafana.ingress.enabled Enable the creation of an ingress for the Grafana
-  ## Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana
+  ## Used if you set `grafana.enabled` to `true` and want to use NGINX Ingress to access Grafana
+  ## When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource
+  ## When `ingress.controllerName=nginx-ingress`: creates a `/grafana/` path in the main ONLYOFFICE Docs Ingress
   ingress:
     enabled: false
-    ## grafana.ingress.annotations Map of annotations to add to grafana Ingress
+    ## grafana.ingress.annotations Deprecated. Map of annotations to add to grafana Ingress
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
+    ## Note: These annotations are for ingress-nginx controller only (legacy Kubernetes)
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 100m
   ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards

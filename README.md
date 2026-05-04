@@ -39,7 +39,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [5.3 Expose ONLYOFFICE Docs](#53-expose-onlyoffice-docs)
     + [5.3.1 Expose ONLYOFFICE Docs via Service (HTTP Only)](#531-expose-onlyoffice-docs-via-service-http-only)
     + [5.3.2 Expose ONLYOFFICE Docs via Ingress](#532-expose-onlyoffice-docs-via-ingress)
-    + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
+    + [5.3.2.1 Installing F5 NGINX Ingress Controller](#5321-installing-f5-nginx-ingress-controller)
     + [5.3.2.2 Expose ONLYOFFICE Docs via HTTP](#5322-expose-onlyoffice-docs-via-http)
     + [5.3.2.3 Expose ONLYOFFICE Docs via HTTPS](#5323-expose-onlyoffice-docs-via-https)
     + [5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5324-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
@@ -136,7 +136,6 @@ Note: For 2000 connections and above, dependencies (NFS, RabbitMQ, Redis, Postgr
 
 ```bash
 $ helm repo add bitnami https://charts.bitnami.com/bitnami
-$ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 $ helm repo add nfs-server-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
 $ helm repo add onlyoffice https://download.onlyoffice.com/charts/stable
 $ helm repo update
@@ -693,9 +692,9 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `service.sessionAffinity`                                   | [Session Affinity](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity) for ONLYOFFICE Docs service. If not set, `None` will be set as the default value | `""`                                                                                  |
 | `service.sessionAffinityConfig`                             | [Configuration](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout) for ONLYOFFICE Docs service Session Affinity. Used if the `service.sessionAffinity` is set | `{}`                                                                 |
 | `ingress.enabled`                                           | Enable the creation of an ingress for the ONLYOFFICE Docs                                                                                                                      | `false`                                                                                   |
-| `ingress.annotations`                                       | Map of annotations to add to the Ingress. If set to, it takes priority over the `commonAnnotations`                                                                            | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                                       |
+| `ingress.annotations`                                       | Map of annotations to add to the Ingress. If set to, it takes priority over the `commonAnnotations`                                                                            | `nginx.org/client-max-body-size: 100m`                                                    |
 | `ingress.ingressClassName`                                  | Used to reference the IngressClass that should be used to implement this Ingress                                                                                               | `nginx`                                                                                   |
-| `ingress.controllerName`                                    | Used to distinguish between controllers with the same IngressClassName but from different vendors                                                                              | `ingress-nginx`                                                                           |
+| `ingress.controllerName`                                    | Used to distinguish between controllers with the same IngressClassName but from different vendors                                                                              | `nginx-ingress`                                                                           |
 | `ingress.host`                                              | Ingress hostname for the ONLYOFFICE Docs ingress                                                                                                                               | `""`                                                                                      |
 | `ingress.tenants`                                           | Ingress hostnames if you need to use more than one name. For example, for multitenancy. If set to, it takes priority over the `ingress.host`. If `ingress.ssl.enabled` is set to `true`, it is assumed that the certificate for all specified domains is kept secret by `ingress.ssl.secret` | `[]` |
 | `ingress.ssl.enabled`                                       | Enable ssl for the ONLYOFFICE Docs ingress                                                                                                                                     | `false`                                                                                   |
@@ -719,8 +718,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `httproute.parentRefs`                                           | References to the Gateway resource. It should contain at least the name and namespace of the Gateway that will route traffic to ONLYOFFICE Docs. For example: `[{name: my-gateway, namespace: default}]` | `[]` |
 | `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
 | `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
-| `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana                                 | `false`                                                                                   |
-| `grafana.ingress.annotations`                               | Map of annotations to add to Grafana Ingress. If set to, it takes priority over the `commonAnnotations`                                                                        | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                                       |
+| `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true`. When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource. When `ingress.controllerName=nginx-ingress`: creates a `/grafana/` path in the main ONLYOFFICE Docs Ingress                                    | `false`                                                                                   |
+| `grafana.ingress.annotations`                               | **Deprecated**. Map of annotations to add to Grafana Ingress. Only used when `ingress.controllerName=ingress-nginx`. Not used with F5 NGINX Ingress. If set to, it takes priority over the `commonAnnotations` | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                       |
 | `grafana.dashboard.enabled`                                 | Enable the installation of ready-made Grafana dashboards. Used if you set `grafana.enabled` to `true`                                                                          | `false`                                                                                   |
 | `podSecurityContext.enabled`                                | Enable security context for the pods                                                                                                                                           | `false`                                                                                   |
 | `podSecurityContext.converter.fsGroup`                      | Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Converter Pod                                                 | `101`                                                                                     |
@@ -988,21 +987,17 @@ In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVIC
 
 #### 5.3.2 Expose ONLYOFFICE Docs via Ingress
 
-#### 5.3.2.1 Installing the Kubernetes Nginx Ingress Controller
+#### 5.3.2.1 Installing F5 NGINX Ingress Controller
 
-To install the Nginx Ingress Controller to your cluster, run the following command:
-
-```bash
-$ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
-```
-
-Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
+To install the F5 NGINX Ingress Controller to your cluster using the OCI registry, run the following command:
 
 ```bash
-$ helm install nginx-ingress -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/ingress_values.yaml ingress-nginx/ingress-nginx
+$ helm install nginx-ingress oci://ghcr.io/nginx/charts/nginx-ingress --version 2.5.1 --set controller.setAsDefault=true --set controller.replicaCount=2
 ```
 
-See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
+See more detail about installing F5 NGINX Ingress via Helm [here](https://docs.nginx.com/nginx-ingress-controller/install/helm/open-source/).
+
+Note: The chart templates also support the deprecated community `ingress-nginx` controller. To use it, set `ingress.controllerName=ingress-nginx` and configure the appropriate `ingress.annotations` with the `nginx.ingress.kubernetes.io/` prefix.
 
 #### 5.3.2.2 Expose ONLYOFFICE Docs via HTTP
 
@@ -1084,6 +1079,14 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
   ```
 Next, perform the installation or upgrade by setting the `ingress.enabled`, `ingress.ssl.enabled` and `ingress.letsencrypt.enabled` parameters to `true`. Also set your own values in the parameters `ingress.letsencrypt.email`, `ingress.host` or `ingress.tenants`(for example, `--set "ingress.tenants={tenant1.example.com,tenant2.example.com}"`) if you want to use multiple domain names.
 
+Note: If you are enabling or disabling Grafana (`grafana.enabled=true/false`) or changing the `ingress.path` value after ONLYOFFICE Docs is already installed with `ingress.letsencrypt.enabled=true` and `ingress.controllerName=nginx-ingress`, run the upgrade with `--server-side=true` and `--force-conflicts` to avoid field ownership conflicts:
+
+```bash
+$ helm upgrade documentserver onlyoffice/docs --server-side=true --force-conflicts
+```
+
+This is only required when using Let's Encrypt (`ingress.letsencrypt.enabled=true`). If you use your own certificate that is already installed in the cluster and do not enable Let's Encrypt, these flags are not needed during upgrade.
+
 #### 5.3.2.5 Expose ONLYOFFICE Docs on a virtual path
 This type of exposure allows you to expose ONLYOFFICE Docs on a virtual path, for example, `http://your-domain-name/docs`.
 To expose ONLYOFFICE Docs via ingress on a virtual path, set the `ingress.enabled`, `ingress.host` and `ingress.path` parameters.
@@ -1093,11 +1096,8 @@ $ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress
 ```
 
 The list of supported ingress controllers for virtual path configuration:
-* [Ingress NGINX by Kubernetes](https://github.com/kubernetes/ingress-nginx)
-* [NGINX Ingress by NGINX](https://github.com/nginx/kubernetes-ingress/)
+* [NGINX Ingress by NGINX (F5)](https://github.com/nginx/kubernetes-ingress/)
 * [HAProxy Ingress by HAProxy](https://github.com/haproxytech/kubernetes-ingress/)
-
-For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pattern `(/|$)(.*)` to the `ingress.path`, for example, `/docs` becomes `/docs(/|$)(.*)`.
 
 #### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
 This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
@@ -1426,11 +1426,15 @@ See more details about installing Grafana via Helm [here](https://github.com/bit
 
 ### 2 Access to Grafana via Ingress
 
-Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
+Note: It is assumed that step [#5.3.2.1](#5321-installing-f5-nginx-ingress-controller) has already been completed.
 
-If ONLYOFFICE Docs was installed with the parameter `grafana.ingress.enabled` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://INGRESS-ADDRESS/grafana/`
+**Grafana Ingress Behavior Depends on Ingress Controller Type:**
 
-If Ingres was installed using a secure connection (step [#5.3.2.3](#5323-expose-onlyoffice-docs-via-https)), then access to Grafana will be at: `https://your-domain-name/grafana/`
+**F5 NGINX Ingress (`nginx-ingress`, recommended):** The Grafana Ingress resource is NOT created as a separate ingress. Instead, Grafana is accessed through the main ONLYOFFICE Docs ingress at the `/grafana/` path. This configuration uses annotations with the `nginx.org/` prefix from the main `ingress.annotations` parameter. The `grafana.ingress.annotations` parameter is not used in this case.
+
+For F5 NGINX Ingress users, access to Grafana will be at: `http(s)://your-domain-name/grafana/`
+
+- **Legacy Kubernetes NGINX Ingress (`ingress-nginx`, deprecated):** If you are still using the deprecated community `ingress-nginx` controller, you can create a separate Grafana Ingress resource by setting `grafana.ingress.enabled` to `true`. 
 
 ### 3. View gathered metrics in Grafana
 

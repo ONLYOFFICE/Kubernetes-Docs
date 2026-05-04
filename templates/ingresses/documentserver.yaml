@@ -15,6 +15,9 @@ metadata:
     {{- end }}
     {{- if .Values.ingress.letsencrypt.enabled }}
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    {{- if eq .Values.ingress.controllerName "nginx-ingress" }}
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    {{- end }}
     {{- end }}
     {{- if and (not (eq .Values.ingress.path "/")) (eq "ingress-nginx" .Values.ingress.controllerName) }}
     nginx.ingress.kubernetes.io/use-regex: "true"
@@ -65,6 +68,15 @@ spec:
             name: {{ include "ds.svc.name" . }}
             port:
               number: {{ .Values.service.port }}
+      {{- if and (eq .Values.ingress.controllerName "nginx-ingress") .Values.grafana.enabled .Values.grafana.ingress.enabled }}
+      - path: /grafana/
+        pathType: {{ .Values.ingress.pathType }}
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 80
+      {{- end }}
   {{- end }}
   {{- if .Values.ingress.tenants }}
   {{- range .Values.ingress.tenants }}
@@ -78,6 +90,15 @@ spec:
             name: {{ include "ds.svc.name" $context }}
             port:
               number: {{ $context.Values.service.port }}
+      {{- if and (eq $context.Values.ingress.controllerName "nginx-ingress") $context.Values.grafana.enabled $context.Values.grafana.ingress.enabled }}
+      - path: /grafana/
+        pathType: {{ $context.Values.ingress.pathType }}
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 80
+      {{- end }}
   {{- end }}
   {{- end }}
 {{- end }}
