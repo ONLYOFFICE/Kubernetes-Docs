@@ -1138,6 +1138,14 @@ In this case, the `converter.replicas` parameter is ignored and the number of re
 With the `autoscaling.enabled` parameter enabled, by default Autoscaling will adjust the number of replicas based on the average percentage of CPU Utilization.
 For other configurable Autoscaling parameters, see the [Parameters](#4-parameters) table.
 
+> **Recommendation**
+>
+> It is recommended to additionally configure autoscaling based on the converttask6 queue size. CPU and memory metrics alone may not reflect the actual backlog of conversion tasks waiting to be processed.
+>
+> Combining queue-based autoscaling with CPU/memory metrics ensures the Converter scales up both when individual tasks are heavy (CPU/memory pressure) and when many tasks are queued up (queue length pressure). The HPA picks the maximum desired replica count across all configured metrics.
+>
+> For step-by-step instructions on setting up queue-based autoscaling, see [here](docs/HPA_CUSTOM_METRICS.md#configure-converter-auto-scaling-based-on-rabbitmq-queue-size).
+
 #### 6.2 Manual scaling
 
 The `docservice` and `converter` deployments consist of 2 pods each other by default.
