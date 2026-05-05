@@ -1,5 +1,21 @@
 # Change log
 
+## 6.1.0
+
+### New Features
+
+* Added the ability to connect via Gateway API HTTPRoute
+* Added a common image registry for ONLYOFFICE Docs services and jobs
+
+### Changes
+
+* Released ONLYOFFICE Docs [v9.4.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#940)
+* The default Kubernetes Nginx Ingress Controller has been replaced with F5 NGINX Ingress Controller
+
+### Fixes
+
+* Fixed a wasm duplicate in MIME types in Proxy
+
 ## 6.0.0
 
 ### New Features

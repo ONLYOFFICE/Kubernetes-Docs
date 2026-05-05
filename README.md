@@ -533,7 +533,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `customPlugins.defaultPlugins.enabled`                      | Defines whether [plugins](./docs/CUSTOM_RESOURCES.md#disable-all-default-plugins) will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                              | `true`                                 |
 | `customPlugins.defaultPlugins.list`                         | Defines [which plugins](./docs/CUSTOM_RESOURCES.md#install-selected-default-plugins-only) from the default list will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`          | `[]`                         |
 | `customPlugins.emptyPluginsDir`                             | Defines whether a directory with plugins in containers will [contain files](./docs/CUSTOM_RESOURCES.md#completely-disable-plugins-directory), including service files. If set to `true`, an empty volume with the `emptyDir` type will be mapped  | `false`                     |
-| `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `9.3.1-1`                                                                                 |
+| `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `9.4.0-1`                                                                                 |
 | `images.registry`                                           | Global image registry for all Onlyoffice Docs services and jobs.                                                                                                               |  `""`                                                                                     |
 | `docservice.annotations`                                    | Defines annotations that will be additionally added to Docservice Deployment. If set to, it takes priority over the `commonAnnotations`                                        | `{}`                                                                                      |
 | `docservice.podAnnotations`                                 | Map of annotations to add to the Docservice deployment pods                                                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
@@ -1103,7 +1103,7 @@ The list of supported ingress controllers for virtual path configuration:
 This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
 
 #### 5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)
-This type of exposure allows you to expose ONLYOFFICE Docs with HTTPRoute via Gateway API. For details, see the [GATEWAY.md](./GATEWAY.md) guide.
+This type of exposure allows you to expose ONLYOFFICE Docs with HTTPRoute via Gateway API. For details, see the [GATEWAY.md](./docs/GATEWAY.md) guide.
 
 ### 5.4 Admin Panel deployment (optional)
 
