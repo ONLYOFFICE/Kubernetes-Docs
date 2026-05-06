@@ -6,7 +6,9 @@ The chart's HPA template already supports external metrics through the `converte
 
 ### Prerequisites
 
-- A running RabbitMQ by bitnami with the `rabbitmq_prometheus` plugin enabled. The plugin is enabled by default. Also you can check that plugin is enabled with command:
+- A running RabbitMQ by bitnami with the `rabbitmq_prometheus` plugin enabled. Also RabbitMQ should be deployed with flag `--set metrics.enabled=true`. Without this flag metrics port is not exposed.
+
+The ptometheus plugin is enabled by default. Also you can check that plugin is enabled with command:
 
 ```bash
 kubectl exec rabbitmq-0 -- rabbitmq-plugins list | grep prometheus
@@ -39,7 +41,9 @@ helm install kps prometheus-community/kube-prometheus-stack \
 
 ### Step 2. Create a ServiceMonitor for RabbitMQ
 
-Tell Prometheus to scrape RabbitMQ metrics. Create a file `rabbitmq-servicemonitor.yaml`:
+Tell Prometheus to scrape RabbitMQ metrics.
+
+Create a file `rabbitmq-servicemonitor.yaml`:
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -103,16 +107,16 @@ helm install prometheus-adapter prometheus-community/prometheus-adapter \
 
 ### Step 4. Verify the metric is available
 
-Make sure RabbitMQ has at least one queue with messages, if you already deploy Kubernetes-Docs, just run:
+If you already deploy Kubernetes-Docs, just run:
 
 ```bash
-kubectl get --raw "/apis/external.metrics.k8s.io/v1beta1/namespaces/<namespace>/rabbitmq_queue_messages_ready?labelSelector=queue%3Dconverttask6"
+kubectl get --raw "/apis/external.metrics.k8s.io/v1beta1/namespaces/<namespace>/rabbitmq_queue_messages_ready?labelSelector=queue%3Dds.converttask6"
 ```
 
 Output should be like this:
 
 ```bash
-{"kind":"ExternalMetricValueList","apiVersion":"external.metrics.k8s.io/v1beta1","metadata":{},"items":[{"metricName":"rabbitmq_queue_messages_ready","metricLabels":{"queue":"converttask6"},"timestamp":"2026-05-04T12:25:38Z","value":"0"}]}
+{"kind":"ExternalMetricValueList","apiVersion":"external.metrics.k8s.io/v1beta1","metadata":{},"items":[{"metricName":"rabbitmq_queue_messages_ready","metricLabels":{"queue":"ds.converttask6"},"timestamp":"2026-05-04T12:25:38Z","value":"0"}]}
 ```
 
 A successful response returns a numeric `value`. If `items` is empty or you get an error, check:
@@ -144,7 +148,7 @@ converter:
             name: rabbitmq_queue_messages_ready
             selector:
               matchLabels:
-                queue: converttask6
+                queue: ds.converttask6
           target:
             type: AverageValue
             averageValue: "1"
@@ -209,7 +213,7 @@ spec:
         name: rabbitmq_queue_messages_ready
         selector:
           matchLabels:
-            queue: converttask6
+            queue: ds.converttask6
       target:
         averageValue: "1"
         type: AverageValue
