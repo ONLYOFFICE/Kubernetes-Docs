@@ -14,6 +14,10 @@ The ptometheus plugin is enabled by default. Also you can check that plugin is e
 kubectl exec rabbitmq-0 -- rabbitmq-plugins list | grep prometheus
 ```
 
+- **(Optional)** If you want to use HPA based on resources as well (CPU/RAM for example), API metrics.k8s.io must be registered, which is generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server). It can be launched as a cluster add-on. To use the target utilization value (`target.type==Utilization`), it is necessary that the values for `resources.requests` are specified in the deployment.
+
+Note: You need install metrics-server if you want to use HPA based on resources. If you want scale converter based only on queue size, you dont need it.
+
 - DocumentServer chart installed.
 
 ### Step 1. Install kube-prometheus-stack
@@ -126,6 +130,8 @@ A successful response returns a numeric `value`. If `items` is empty or you get 
 - That the `external.metrics.k8s.io` APIService is registered: `kubectl get apiservice | grep external.metrics`
 
 ### Step 5. Re-deploy DocumentServer with the new autoscaling configuration
+
+Note: Set `converter.autoscaling.targetCPU.enabled` and  `converter.autoscaling.targetMemory.enabled` to `false` if you do not install `metrics-server` and don't need use HPA based on cpu/ram resouces.
 
 Create a file `converter-autoscaling-values.yaml` with the queue-based autoscaling parameters:
 
