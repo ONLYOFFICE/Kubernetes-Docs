@@ -14,9 +14,9 @@ The ptometheus plugin is enabled by default. Also you can check that plugin is e
 kubectl exec rabbitmq-0 -- rabbitmq-plugins list | grep prometheus
 ```
 
-- **(Optional)** If you want to use HPA based on resources as well (CPU/RAM for example), API metrics.k8s.io must be registered, which is generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server). It can be launched as a cluster add-on. To use the target utilization value (`target.type==Utilization`), it is necessary that the values for `resources.requests` are specified in the deployment.
+- Also you should use HPA based on resources (CPU/RAM) as well, API metrics.k8s.io must be registered, which is generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server). It can be launched as a cluster add-on. To use the target utilization value (`target.type==Utilization`), it is necessary that the values for `resources.requests` are specified in the deployment.
 
-Note: You need install metrics-server if you want to use HPA based on resources. If you want scale converter based only on queue size, you dont need it.
+Note: Installing a metrics-server is mandatory, because HPA only works properly when used in conjunction with queue size and CPU load monitoring within the converter pod.
 
 - DocumentServer chart installed.
 
@@ -92,13 +92,13 @@ prometheus:
 rules:
   default: false
   external:
-  - seriesQuery: 'rabbitmq_queue_messages_ready{queue!=""}'
+  - seriesQuery: 'rabbitmq_queue_messages{queue!=""}'
     resources:
       template: <<.Resource>>
     name:
       matches: "^(.*)$"
       as: "${1}"
-    metricsQuery: 'sum by (queue) (rabbitmq_queue_messages_ready{<<.LabelMatchers>>})'
+    metricsQuery: 'sum by (queue) (rabbitmq_queue_messages{<<.LabelMatchers>>})'
 ```
 
 Install:
@@ -114,24 +114,24 @@ helm install prometheus-adapter prometheus-community/prometheus-adapter \
 If you already deploy Kubernetes-Docs, just run:
 
 ```bash
-kubectl get --raw "/apis/external.metrics.k8s.io/v1beta1/namespaces/<namespace>/rabbitmq_queue_messages_ready?labelSelector=queue%3Dds.converttask6"
+kubectl get --raw "/apis/external.metrics.k8s.io/v1beta1/namespaces/<namespace>/rabbitmq_queue_messages?labelSelector=queue%3Dds.converttask6"
 ```
 
 Output should be like this:
 
 ```bash
-{"kind":"ExternalMetricValueList","apiVersion":"external.metrics.k8s.io/v1beta1","metadata":{},"items":[{"metricName":"rabbitmq_queue_messages_ready","metricLabels":{"queue":"ds.converttask6"},"timestamp":"2026-05-04T12:25:38Z","value":"0"}]}
+{"kind":"ExternalMetricValueList","apiVersion":"external.metrics.k8s.io/v1beta1","metadata":{},"items":[{"metricName":"rabbitmq_queue_messages","metricLabels":{"queue":"ds.converttask6"},"timestamp":"2026-05-04T12:25:38Z","value":"0"}]}
 ```
 
 A successful response returns a numeric `value`. If `items` is empty or you get an error, check:
 
-- The Prometheus UI for the `rabbitmq_queue_messages_ready` metric
+- The Prometheus UI for the `rabbitmq_queue_messages` metric
 - The Prometheus Adapter logs: `kubectl logs -n monitoring deploy/prometheus-adapter`
 - That the `external.metrics.k8s.io` APIService is registered: `kubectl get apiservice | grep external.metrics`
 
 ### Step 5. Re-deploy DocumentServer with the new autoscaling configuration
 
-Note: Set `converter.autoscaling.targetCPU.enabled` and  `converter.autoscaling.targetMemory.enabled` to `false` if you do not install `metrics-server` and don't need use HPA based on cpu/ram resouces.
+Note: Set `converter.autoscaling.targetMemory.enabled` to `false` if you don't want scale converter depends by RAM usage. **Do not** set `converter.autoscaling.targetCPU.enabled` to `false` CPU scaling is **required** for proper operation.
 
 Create a file `converter-autoscaling-values.yaml` with the queue-based autoscaling parameters:
 
@@ -151,7 +151,7 @@ converter:
       - type: External
         external:
           metric:
-            name: rabbitmq_queue_messages_ready
+            name: rabbitmq_queue_messages
             selector:
               matchLabels:
                 queue: ds.converttask6
@@ -216,7 +216,7 @@ spec:
         averageUtilization: 80
   - external:
       metric:
-        name: rabbitmq_queue_messages_ready
+        name: rabbitmq_queue_messages
         selector:
           matchLabels:
             queue: ds.converttask6
