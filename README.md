@@ -1079,10 +1079,10 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
   ```
 Next, perform the installation or upgrade by setting the `ingress.enabled`, `ingress.ssl.enabled` and `ingress.letsencrypt.enabled` parameters to `true`. Also set your own values in the parameters `ingress.letsencrypt.email`, `ingress.host` or `ingress.tenants`(for example, `--set "ingress.tenants={tenant1.example.com,tenant2.example.com}"`) if you want to use multiple domain names.
 
-Note: If you are enabling or disabling Grafana (`grafana.enabled=true/false`) or changing the `ingress.path` value after ONLYOFFICE Docs is already installed with `ingress.letsencrypt.enabled=true` and `ingress.controllerName=nginx-ingress`, run the upgrade with `--server-side=true` and `--force-conflicts` to avoid field ownership conflicts:
+Note: If you are enabling or disabling Grafana (`grafana.enabled=true/false`), changing the `ingress.path`, `ingress.host`, or `ingress.tenants` values after ONLYOFFICE Docs is already installed with `ingress.letsencrypt.enabled=true` and `ingress.controllerName=nginx-ingress`, run the upgrade with `--server-side=true` and `--force-conflicts` to avoid field ownership conflicts:
 
 ```bash
-$ helm upgrade documentserver onlyoffice/docs --server-side=true --force-conflicts
+$ helm upgrade documentserver onlyoffice/docs --server-side=true --force-conflicts -f values.yaml
 ```
 
 This is only required when using Let's Encrypt (`ingress.letsencrypt.enabled=true`). If you use your own certificate that is already installed in the cluster and do not enable Let's Encrypt, these flags are not needed during upgrade.
