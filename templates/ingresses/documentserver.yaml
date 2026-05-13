@@ -24,7 +24,6 @@ metadata:
     nginx.ingress.kubernetes.io/x-forwarded-prefix: "{{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     {{- else if and (not (eq .Values.ingress.path "/")) (eq "nginx-ingress" .Values.ingress.controllerName) }}
-    nginx.org/websocket-services: "{{ include "ds.svc.name" . }}"
     nginx.org/rewrites: "serviceName={{ include "ds.svc.name" . }} rewrite=/"
     nginx.org/proxy-set-headers: |
       X-Forwarded-Prefix: {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }},
@@ -34,6 +33,9 @@ metadata:
       acl existing-x-forwarded-host req.hdr(X-Forwarded-Host) -m found
       http-request add-header X-Forwarded-Prefix {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }} unless existing-x-forwarded-host
       http-request replace-path {{ include "ds.path.withoutTrailingSlash" .Values.ingress.path }}[/]?(.*) /\1
+    {{- end }}
+    {{- if eq "nginx-ingress" .Values.ingress.controllerName }}
+    nginx.org/websocket-services: "{{ include "ds.svc.name" . }}"
     {{- end }}
 spec:
   {{- $context := . }}
