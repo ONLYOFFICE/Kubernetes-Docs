@@ -1006,10 +1006,10 @@ Note: The chart templates also support the deprecated community `ingress-nginx` 
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to ONLYOFFICE Docs. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
-To expose ONLYOFFICE Docs via ingress HTTP, set the `ingress.enabled` parameter to true:
+To expose ONLYOFFICE Docs via ingress HTTP, set the `ingress.enabled` and the `ingress.host` parameters to true:
 
 ```bash
-$ helm install documentserver onlyoffice/docs --set ingress.enabled=true
+$ helm install documentserver onlyoffice/docs --set ingress.enabled=true --set ingress.host=example.com
 ```
 
 Run the following command to get the `documentserver` ingress IP:
@@ -1018,12 +1018,10 @@ Run the following command to get the `documentserver` ingress IP:
 $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
-After that, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
-
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.spec.rules[*].host}"
 ```
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
@@ -1037,9 +1035,9 @@ Create the `tls` secret with an ssl certificate inside.
 Put the ssl certificate and the private key into the `tls.crt` and `tls.key` files and then run:
 
 ```bash
-$ kubectl create secret generic tls \
-  --from-file=./tls.crt \
-  --from-file=./tls.key
+$ kubectl create secret tls tls \
+  --cert=./tls.crt \
+  --key=./tls.key
 ```
 
 ```bash
