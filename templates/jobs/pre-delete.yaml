@@ -69,7 +69,7 @@ spec:
           configMap:
             name: {{ template "ds.delete.configMapName" . }}
             defaultMode: 0755
-        {{- if and .Values.privateCluster (not .Values.delete.existingConfigmap.dsStop) }}
+        {{- if .Values.delete.existingConfigmap.dsStop }}
         - name: remove-dt-scripts
           configMap:
             name: {{ template "ds.delete.configmap.tblRemove.name" . }}
@@ -92,8 +92,6 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
-          - name: PRIVATE_CLUSTER
-            value: {{ .Values.privateCluster | quote }}
           volumeMounts:
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
@@ -102,7 +100,7 @@ spec:
           - name: stop-scripts
             mountPath: /scripts/stop.sh
             subPath: stop.sh
-          {{- if and .Values.privateCluster (not .Values.delete.existingConfigmap.dsStop) }}
+          {{- if .Values.delete.existingConfigmap.dsStop }}
           - name: remove-dt-scripts
             mountPath: /scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
             subPath: {{ .Values.delete.existingConfigmap.tblRemove.keyName }}

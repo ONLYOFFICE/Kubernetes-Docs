@@ -64,7 +64,7 @@ spec:
           configMap:
             name: {{ template "ds.upgrade.configMapName" . }}
             defaultMode: 0755
-        {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
+        {{- if .Values.upgrade.existingConfigmap.dsStop }}
         - name: remove-dt-scripts
           configMap:
             name: {{ template "ds.upgrade.configmap.tblRemove.name" . }}
@@ -90,13 +90,11 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
-          - name: PRIVATE_CLUSTER
-            value: {{ .Values.privateCluster | quote }}
           volumeMounts:
           - name: stop-scripts
             mountPath: /scripts/stop.sh
             subPath: stop.sh
-          {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
+          {{- if .Values.upgrade.existingConfigmap.dsStop }}
           - name: remove-dt-scripts
             mountPath: /scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
             subPath: {{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}

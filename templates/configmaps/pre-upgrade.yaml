@@ -61,71 +61,45 @@ data:
         exit 1
       fi
       {{- end }}
-      if [[ "$PRIVATE_CLUSTER" != "true" ]]; then
-        wget -O /scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }} \
-          {{- if eq .Values.connections.dbType "postgres" }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/removetbl.sql
-          {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mysql/removetbl.sql
-          {{- else if (eq .Values.connections.dbType "mssql") }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mssql/removetbl.sql
-          {{- else if (eq .Values.connections.dbType "oracle") }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/oracle/removetbl.sql
-          {{- else if (eq .Values.connections.dbType "dameng") }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/dameng/removetbl.sql
-          {{- end }}
-        wget -O /scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }} \
-          {{- if eq .Values.connections.dbType "postgres" }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/postgresql/createdb.sql
-          {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mysql/createdb.sql
-          {{- else if (eq .Values.connections.dbType "mssql") }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/mssql/createdb.sql
-          {{- else if (eq .Values.connections.dbType "oracle") }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/oracle/createdb.sql
-          {{- else if (eq .Values.connections.dbType "dameng") }}
-          https://raw.githubusercontent.com/ONLYOFFICE/server/{{ template "ds.sqlScripts.branchName" . }}/schema/dameng/createdb.sql
-          {{- end }}
-      fi
       {{- if eq .Values.connections.dbType "postgres" }}
       PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
         --port={{ .Values.connections.dbPort }} \
         --user={{ .Values.connections.dbUser }} \
         --dbname={{ .Values.connections.dbName }} \
         --variable=ON_ERROR_STOP=ON \
-        --file=/scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+        --file=/scripts/schema/postgresql/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
       PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
         --port={{ .Values.connections.dbPort }} \
         --user={{ .Values.connections.dbUser }} \
         --dbname={{ .Values.connections.dbName }} \
         --variable=ON_ERROR_STOP=ON \
-        --file=/scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+        --file=/scripts/schema/postgresql/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
       {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
       mysql -h {{ .Values.connections.dbHost }} \
         -P {{ .Values.connections.dbPort }} \
         -u {{ .Values.connections.dbUser }} \
         -p$DB_PWD \
-        {{ .Values.connections.dbName }} < /scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+        {{ .Values.connections.dbName }} < /scripts/schema/mysql/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
       mysql -h {{ .Values.connections.dbHost }} \
         -P {{ .Values.connections.dbPort }} \
         -u {{ .Values.connections.dbUser }} \
         -p$DB_PWD \
-        {{ .Values.connections.dbName }} < /scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+        {{ .Values.connections.dbName }} < /scripts/schema/mysql/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
       {{- else if (eq .Values.connections.dbType "mssql") }}
       /opt/mssql-tools18/bin/sqlcmd -S {{ .Values.connections.dbHost }},{{ .Values.connections.dbPort }} \
         -U {{ .Values.connections.dbUser }} \
         -P $DB_PWD \
-        -d {{ .Values.connections.dbName }} -C < /scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+        -d {{ .Values.connections.dbName }} -C < /scripts/schema/mssql/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
       /opt/mssql-tools18/bin/sqlcmd -S {{ .Values.connections.dbHost }},{{ .Values.connections.dbPort }} \
         -U {{ .Values.connections.dbUser }} \
         -P $DB_PWD \
-        -d {{ .Values.connections.dbName }} -C < /scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+        -d {{ .Values.connections.dbName }} -C < /scripts/schema/mssql/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
       {{- else if (eq .Values.connections.dbType "oracle") }}
-      sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
-      sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+      sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/schema/oracle/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+      sqlplus {{ .Values.connections.dbUser }}/$DB_PWD@//{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }}/{{ .Values.connections.dbName }} @/scripts/schema/oracle/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
       {{- else if (eq .Values.connections.dbType "dameng") }}
-      disql {{ .Values.connections.dbUser }}/$DB_PWD@{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }} \`/scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
-      disql {{ .Values.connections.dbUser }}/$DB_PWD@{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }} \`/scripts/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
+      disql {{ .Values.connections.dbUser }}/$DB_PWD@{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }} \`/scripts/schema/dameng/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
+      disql {{ .Values.connections.dbUser }}/$DB_PWD@{{ .Values.connections.dbHost }}:{{ .Values.connections.dbPort }} \`/scripts/schema/dameng/{{ .Values.upgrade.existingConfigmap.tblCreate.keyName }}
       {{- end }}
       if [ $? -ne 0 ]; then
         echo -e "\e[0;31m The DATABASE preparation scripts could not be executed \e[0m"

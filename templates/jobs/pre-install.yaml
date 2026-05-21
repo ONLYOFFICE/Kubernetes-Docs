@@ -64,7 +64,7 @@ spec:
           configMap:
             name: {{ template "ds.install.configMapName" . }}
             defaultMode: 0755
-        {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
+        {{- if .Values.install.existingConfigmap.initdb }}
         - name: create-dt-scripts
           configMap:
             name: {{ template "ds.install.configmap.tblCreate.name" . }}
@@ -87,13 +87,11 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
-          - name: PRIVATE_CLUSTER
-            value: {{ .Values.privateCluster | quote }}
           volumeMounts:
           - name: initdb-scripts
             mountPath: /scripts/initdb.sh
             subPath: initdb.sh
-          {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
+          {{- if .Values.install.existingConfigmap.initdb }}
           - name: create-dt-scripts
             mountPath: /scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
             subPath: {{ .Values.install.existingConfigmap.tblCreate.keyName }}

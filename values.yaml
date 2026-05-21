@@ -133,9 +133,6 @@ webProxy:
   https: "https://proxy.example.com"
   ## webProxy.noProxy Patterns for IP addresses or k8s services name or domain names that shouldn’t use the Web Proxy
   noProxy: "localhost,127.0.0.1,docservice"
-## privateCluster Specify whether the k8s cluster is used in a private network without internet access
-## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
-privateCluster: false
 ## commonNameSuffix The name that will be added to the name of all created resources as a suffix
 ## Example:
 ## commonNameSuffix: "{{ .Chart.Name }}"
@@ -1734,7 +1731,7 @@ install:
   existingConfigmap:
     tblCreate:
       ## install.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `install.existingConfigmap.initdb` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## install.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
@@ -1822,7 +1819,7 @@ upgrade:
   existingConfigmap:
     tblRemove:
       ## upgrade.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `upgrade.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## upgrade.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
@@ -1830,7 +1827,7 @@ upgrade:
       keyName: removetbl.sql
     tblCreate:
       ## upgrade.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `upgrade.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## upgrade.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
@@ -1918,7 +1915,7 @@ rollback:
   existingConfigmap:
     tblRemove:
       ## rollback.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `rollback.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## rollback.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
@@ -1926,7 +1923,7 @@ rollback:
       keyName: removetbl.sql
     tblCreate:
       ## rollback.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `rollback.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## rollback.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
@@ -2014,7 +2011,7 @@ delete:
   existingConfigmap:
     tblRemove:
       ## delete.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `delete.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## delete.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database

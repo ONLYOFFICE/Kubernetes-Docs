@@ -731,7 +731,6 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `webProxy.http`                                             | Web Proxy address for `HTTP` traffic                                                                                                                                           | `http://proxy.example.com`                                                                |
 | `webProxy.https`                                            | Web Proxy address for `HTTPS` traffic                                                                                                                                          | `https://proxy.example.com`                                                               |
 | `webProxy.noProxy`                                          | Patterns for IP addresses or k8s services name or domain names that shouldn’t use the Web Proxy                                                                                | `localhost,127.0.0.1,docservice`                                                          |
-| `privateCluster`                                            | Specify whether the k8s cluster is used in a private network without internet access                                                                                           | `false`                                                                                   |
 | `upgrade.job.enabled`                                       | Enable the execution of job pre-upgrade before upgrading ONLYOFFICE Docs                                                                                                       | `true`                                                                                    |
 | `upgrade.job.annotations`                                   | Defines annotations that will be additionally added to pre-upgrade Job. If set to, it takes priority over the `commonAnnotations`                                              | `{}`                                                                                      |
 | `upgrade.job.podAnnotations`                                | Map of annotations to add to the pre-upgrade Pod                                                                                                                               | `{}`                                                                                      |
@@ -1290,47 +1289,9 @@ In this case, more detailed information can be found in the application logs.
 
 ### 11. Run Jobs in a private k8s cluster (optional)
 
-When running `Job` for installation, update, rollback and deletion, the container being launched needs Internet access to download the latest sql scripts.
-If the access of containers to the external network is prohibited in your k8s cluster, then you can perform these Jobs by setting the `privateCluster=true` parameter and manually create a `ConfigMap` with the necessary sql scripts.
+As of Helm Chart version 6.1.0, SQL scripts required for DB initialization are bundled into the docs-utils image.
 
-To do this, run the following commands:
-
-If your cluster already has `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
-
-```bash
-$ kubectl delete cm remove-db-scripts init-db-scripts
-```
-
-Download the ONLYOFFICE Docs database scripts for database cleaning and database tables creating:
-
-If PostgreSQL is selected as the database server:
-
-```bash
-$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
-$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
-```
-
-If MySQL is selected as the database server:
-
-```bash
-$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/removetbl.sql
-$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/createdb.sql
-```
-
-Create a configmap from them:
-
-```bash
-$ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
-$ kubectl create configmap init-db-scripts --from-file=./createdb.sql
-```
-
-Note: If you specified a different name for `ConfigMap` and for the file from which it is created, set the appropriate parameters for the corresponding Jobs:
- - `existingConfigmap.tblRemove.name` and `existingConfigmap.tblRemove.keyName` for scripts for database cleaning
- - `existingConfigmap.tblCreate.name` and `existingConfigmap.tblCreate.keyName` for scripts for database tables creating
-
-Next, when executing the commands `helm install|upgrade|rollback|delete`, set the parameter `privateCluster=true`
-
-  > **Note**: If it is possible to use a Web Proxy in your network to ensure the Pods containers have access to the Internet, then you can leave the parameter `privateCluster=false`, not manually create a configmaps with sql scripts and set the parameter `webProxy.enabled=true`, also setting the appropriate parameters for the Web Proxy.
+  > **Note**: If you map a custom script to the configmap specified in the `install.existingConfigmap.initdb` or `upgrade|rollback|delete.existingConfigmap.dsStop` parameters and it requires internet access, then and if it is possible to use a Web Proxy in your network to ensure the Pods containers have access to the Internet, then set the parameter `webProxy.enabled=true`, also setting the appropriate parameters for the Web Proxy.
 
 ### 12. Access to the info page (optional)
 
