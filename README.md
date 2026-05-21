@@ -1045,6 +1045,8 @@ $ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress
 
 ```
 
+The `ingress.host` field is required. 
+
 Run the following command to get the `documentserver` ingress IP:
 
 ```bash
@@ -1054,7 +1056,7 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.spec.rules[*].host}"
 ```
 
 Associate the `documentserver` ingress IP or hostname with your domain name through your DNS provider.
