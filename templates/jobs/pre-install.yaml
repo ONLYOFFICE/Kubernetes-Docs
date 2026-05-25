@@ -64,7 +64,7 @@ spec:
           configMap:
             name: {{ template "ds.install.configMapName" . }}
             defaultMode: 0755
-        {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
+        {{- if .Values.install.existingConfigmap.initdb }}
         - name: create-dt-scripts
           configMap:
             name: {{ template "ds.install.configmap.tblCreate.name" . }}
@@ -75,7 +75,7 @@ spec:
       {{- end }}
       containers:
         - name: pre-install
-          image: {{ .Values.install.job.image.repository }}:{{ default .Values.images.tag .Values.install.job.image.tag }}
+          image: {{ include "ds.imageRegistry" (list . .Values.install.job.image.registry ) }}{{ .Values.install.job.image.repository }}:{{ default .Values.images.tag .Values.install.job.image.tag }}
           imagePullPolicy: {{ .Values.install.job.image.pullPolicy }}
           {{- if .Values.install.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.install.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -87,13 +87,11 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
-          - name: PRIVATE_CLUSTER
-            value: {{ .Values.privateCluster | quote }}
           volumeMounts:
           - name: initdb-scripts
             mountPath: /scripts/initdb.sh
             subPath: initdb.sh
-          {{- if and .Values.privateCluster (not .Values.install.existingConfigmap.initdb) }}
+          {{- if .Values.install.existingConfigmap.initdb }}
           - name: create-dt-scripts
             mountPath: /scripts/{{ .Values.install.existingConfigmap.tblCreate.keyName }}
             subPath: {{ .Values.install.existingConfigmap.tblCreate.keyName }}

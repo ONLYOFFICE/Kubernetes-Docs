@@ -64,7 +64,7 @@ spec:
           configMap:
             name: {{ template "ds.upgrade.configMapName" . }}
             defaultMode: 0755
-        {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
+        {{- if .Values.upgrade.existingConfigmap.dsStop }}
         - name: remove-dt-scripts
           configMap:
             name: {{ template "ds.upgrade.configmap.tblRemove.name" . }}
@@ -78,7 +78,7 @@ spec:
       {{- end }}
       containers:
         - name: pre-upgrade
-          image: {{ .Values.upgrade.job.image.repository }}:{{ default .Values.images.tag .Values.upgrade.job.image.tag }}
+          image: {{ include "ds.imageRegistry" (list . .Values.upgrade.job.image.registry ) }}{{ .Values.upgrade.job.image.repository }}:{{ default .Values.images.tag .Values.upgrade.job.image.tag }}
           imagePullPolicy: {{ .Values.upgrade.job.image.pullPolicy }}
           {{- if .Values.upgrade.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.upgrade.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -90,13 +90,11 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
-          - name: PRIVATE_CLUSTER
-            value: {{ .Values.privateCluster | quote }}
           volumeMounts:
           - name: stop-scripts
             mountPath: /scripts/stop.sh
             subPath: stop.sh
-          {{- if and .Values.privateCluster (not .Values.upgrade.existingConfigmap.dsStop) }}
+          {{- if .Values.upgrade.existingConfigmap.dsStop }}
           - name: remove-dt-scripts
             mountPath: /scripts/{{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}
             subPath: {{ .Values.upgrade.existingConfigmap.tblRemove.keyName }}

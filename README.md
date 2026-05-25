@@ -5,6 +5,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 ## Contents
 - [Requirements](#requirements)
 - [Introduction](#introduction)
+- [Recommended system requirements](#recommended-system-requirements)
 - [Deploy prerequisites](#deploy-prerequisites)
   * [1. Add Helm repositories](#1-add-helm-repositories)
   * [2. Install Persistent Storage](#2-install-persistent-storage)
@@ -38,12 +39,13 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [5.3 Expose ONLYOFFICE Docs](#53-expose-onlyoffice-docs)
     + [5.3.1 Expose ONLYOFFICE Docs via Service (HTTP Only)](#531-expose-onlyoffice-docs-via-service-http-only)
     + [5.3.2 Expose ONLYOFFICE Docs via Ingress](#532-expose-onlyoffice-docs-via-ingress)
-    + [5.3.2.1 Installing the Kubernetes Nginx Ingress Controller](#5321-installing-the-kubernetes-nginx-ingress-controller)
+    + [5.3.2.1 Installing F5 NGINX Ingress Controller](#5321-installing-f5-nginx-ingress-controller)
     + [5.3.2.2 Expose ONLYOFFICE Docs via HTTP](#5322-expose-onlyoffice-docs-via-http)
     + [5.3.2.3 Expose ONLYOFFICE Docs via HTTPS](#5323-expose-onlyoffice-docs-via-https)
     + [5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5324-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
     + [5.3.2.5 Expose ONLYOFFICE Docs on a virtual path](#5325-expose-onlyoffice-docs-on-a-virtual-path)
     + [5.3.3 Expose ONLYOFFICE Docs via route in OpenShift](#533-expose-onlyoffice-docs-via-route-in-openshift)
+    + [5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)](#534-expose-onlyoffice-docs-via-httproute-gateway-api)
   * [5.4 Admin Panel deployment (optional)](#54-admin-panel-deployment-optional)
   * [6. Scale ONLYOFFICE Docs (optional)](#6-scale-onlyoffice-docs-optional) 
       + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
@@ -77,7 +79,56 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - You should install Helm v3.15+. Please follow the instruction [here](https://helm.sh/docs/intro/install/) to install it.
 - If you use OpenShift, you can use both `oc` and `kubectl` to manage deploy.
 - If the installation of components external to ‘Docs’ is performed from Helm Chart in an OpenShift cluster, then it is recommended to install them from a user who has the `cluster-admin` role, in order to avoid possible problems with access rights. See [this](https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html) guide to add the necessary roles to the user.
-- To install Docs into an OpenShift cluster, it may be necessary to grant a specific SecurityContextConstraints policy. This policy provides permission to run containers using a user with ID = 101 and ID = 1001. For more information, see [OPENSHIFT.md](./OPENSHIFT.md) file.
+- To install Docs into an OpenShift cluster, it may be necessary to grant a specific SecurityContextConstraints policy. This policy provides permission to run containers using a user with ID = 101 and ID = 1001. For more information, see [OPENSHIFT.md](./docs/OPENSHIFT.md) file.
+
+## Recommended system requirements
+
+The table below provides recommended system requirements depending on the number of simultaneous connections. These values are based on load testing results. Each worker node is expected to have **4 CPU** and **8 GiB RAM**.
+
+The following resource requests and limits were used during testing:
+
+**Proxy:**
+```yaml
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "4Gi"
+    cpu: "4000m"
+```
+
+**Docservice:**
+```yaml
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "4Gi"
+    cpu: "4000m"
+```
+
+**Converter:**
+```yaml
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "6Gi"
+    cpu: "4000m"
+```
+
+| Connections | Cluster worker nodes | DS nodes | Docservice replicas | Converter replicas | Persistent Storage |
+|:-----------:|:--------------------:|:--------:|:-------------------:|:------------------:|:------------------:|
+| 500         | 2                    | 2        | 2                   | 2                  | 50Gi               |
+| 1000        | 2                    | 2        | 3                   | 3                  | 100Gi              |
+| 2000        | 3                    | 2        | 6                   | 6                  | 200Gi              |
+| 5000        | 6                    | 5        | 15                  | 15                 | 500Gi              |
+| 10000       | 11                   | 10       | 30                  | 30                 | 1000Gi             |
+
+Note: For 2000 connections and above, dependencies (NFS, RabbitMQ, Redis, PostgreSQL) are deployed on a separate dedicated node. For fewer than 2000 connections, dependencies are co-located on the same nodes as ONLYOFFICE Docs.
 
 ## Deploy prerequisites
 
@@ -85,7 +136,6 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 
 ```bash
 $ helm repo add bitnami https://charts.bitnami.com/bitnami
-$ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 $ helm repo add nfs-server-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
 $ helm repo add onlyoffice https://download.onlyoffice.com/charts/stable
 $ helm repo update
@@ -280,21 +330,21 @@ and then run the `helm upgrade documentserver onlyoffice/docs --set extraConf.co
 
 *This step is optional. You can skip step [#8](#8-add-custom-fonts) entirely if you don't need to add your fonts*
 
-In order to add fonts to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./CUSTOM_RESOURCES.md#adding-custom-fonts).
+In order to add fonts to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./docs/CUSTOM_RESOURCES.md#adding-custom-fonts).
 
 ### 9. Add Plugins
 
 *This step is optional. You can skip step [#9](#9-add-plugins) entirely if you don't need to add plugins*
 
-In order to add plugins to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./CUSTOM_RESOURCES.md#adding-custom-plugins).
+In order to add plugins to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./docs/CUSTOM_RESOURCES.md#adding-custom-plugins).
 
-You can also configure the [list of default plugins](./CUSTOM_RESOURCES.md#disabling-default-plugins) displayed or remove them [completely](./CUSTOM_RESOURCES.md#completely-disable-plugins-directory).
+You can also configure the [list of default plugins](./docs/CUSTOM_RESOURCES.md#disabling-default-plugins) displayed or remove them [completely](./docs/CUSTOM_RESOURCES.md#completely-disable-plugins-directory).
 
 ### 10. Add custom dictionaries
 
 *This step is optional. You can skip step [#10](#10-add-custom-dictionaries) entirely if you don't need to add your dictionaries*
 
-In order to add your custom dictionaries to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./CUSTOM_RESOURCES.md#adding-custom-dictionaries).
+In order to add your custom dictionaries to ONLYOFFICE Docs, you need to follow a number of steps. See more details [here](./docs/CUSTOM_RESOURCES.md#adding-custom-dictionaries).
 
 ### 11. Change interface themes
 
@@ -433,7 +483,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `persistence.runtimeConfig.existingClaim`                   | The name of the existing PVC used to store the runtime config. If not specified, a PVC named "ds-runtime-config" will be created                                               | `""`                                                                                      |
 | `persistence.runtimeConfig.annotations`                     | Defines annotations that will be additionally added to "ds-runtime-config" PVC. If set to, it takes priority over the `commonAnnotations`                                      | `{}`                                                                                      |
 | `persistence.runtimeConfig.size`                            | PVC Storage Request for runtime config volume                                                                                                                                  | `1Gi`                                                                                     |
-| `persistence.customResources.enabled`                       | Defines whether to use PVC and whether to mount it in a container in the Job `custom-resources`. The [use of this PVC](./CUSTOM_RESOURCES.md) can be disabled if you only use `customPlugins.marketplace.enabled=false` or `customPlugins.defaultPlugins.list` or `customPlugins.defaultPlugins.enabled=false` | `true` |
+| `persistence.customResources.enabled`                       | Defines whether to use PVC and whether to mount it in a container in the Job `custom-resources`. The [use of this PVC](./docs/CUSTOM_RESOURCES.md) can be disabled if you only use `customPlugins.marketplace.enabled=false` or `customPlugins.defaultPlugins.list` or `customPlugins.defaultPlugins.enabled=false` | `true` |
 | `persistence.customResources.existingClaim`                 | The name of the existing PVC used to store the custom resources. It is used if `customFonts.build` or `customDictionaries.build` or `customPlugins.build` is set to `true`     | `docs-custom-resources`                                                                   |
 | `persistence.buffer.existingClaim`                          | The name of the existing PVC used to share generated files. If not specified, a PVC named "ds-buffer" will be created only during installation (`"helm.sh/hook": pre-install`). It is created and used if `customFonts.build` or `customDictionaries.build` or `customPlugins.build` is set to `true` | `""` |
 | `persistence.buffer.annotations`                            | Defines annotations that will be additionally added to "ds-buffer" PVC. If set to, it takes priority over the `commonAnnotations`                                              | `{}`                                                                                      |
@@ -474,16 +524,17 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `requestFilteringAgent.allowMetaIPAddress`                  | Defines if it is allowed to connect meta address or not                                                                                                                        | `false`                                                                                   |
 | `requestFilteringAgent.allowIPAddressList`                  | Defines the list of IP addresses allowed to connect. This values are preferred than `requestFilteringAgent.denyIPAddressList`                                                  | `[]`                                                                                      |
 | `requestFilteringAgent.denyIPAddressList`                   | Defines the list of IP addresses that are denied access                                                                                                                        | `[]`                                                                                      |
-| `customFonts.build`                                         | Enables the addition of [custom Fonts](./CUSTOM_RESOURCES.md#adding-custom-fonts). Fonts should be added to the "custom-k8s" subdirectory of the `persistence.customResources` PVC root | `false`                                                                          |
-| `customDictionaries.build`                                  | Enables the addition of [custom Dictionaries](./CUSTOM_RESOURCES.md#adding-custom-dictionaries)                                                                                | `false`                                                                                   |
+| `customFonts.build`                                         | Enables the addition of [custom Fonts](./docs/CUSTOM_RESOURCES.md#adding-custom-fonts). Fonts should be added to the "custom-k8s" subdirectory of the `persistence.customResources` PVC root | `false`                                                                          |
+| `customDictionaries.build`                                  | Enables the addition of [custom Dictionaries](./docs/CUSTOM_RESOURCES.md#adding-custom-dictionaries)                                                                                | `false`                                                                                   |
 | `customDictionaries.dictionarieNames`                       | Defines a list of subdirectories with the names of additional dictionaries. The names must match the names of the directories added to the root of the `persistence.customResources` PVC. It is executed if the `customDictionaries.build` is set to `true` | `[]`         |
-| `customPlugins.build`                                       | Enables the addition of [custom Plugins](./CUSTOM_RESOURCES.md#adding-custom-plugins)                                                                                          | `false`                                                                                   |
+| `customPlugins.build`                                       | Enables the addition of [custom Plugins](./docs/CUSTOM_RESOURCES.md#adding-custom-plugins)                                                                                          | `false`                                                                                   |
 | `customPlugins.pluginNames`                                 | Defines a list of subdirectories with the names of additional plugins. The names must match the names of the directories added to the root of the `persistence.customResources` PVC. It is executed if the `customPlugins.build` is set to `true` | `[]`                   |
-| `customPlugins.marketplace.enabled`                         | Defines whether the [Plugin Manager](./CUSTOM_RESOURCES.md#disable-plugin-manager) will be added to the server and to the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                       | `true`                                      |
-| `customPlugins.defaultPlugins.enabled`                      | Defines whether [plugins](./CUSTOM_RESOURCES.md#disable-all-default-plugins) will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                              | `true`                                 |
-| `customPlugins.defaultPlugins.list`                         | Defines [which plugins](./CUSTOM_RESOURCES.md#install-selected-default-plugins-only) from the default list will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`          | `[]`                         |
-| `customPlugins.emptyPluginsDir`                             | Defines whether a directory with plugins in containers will [contain files](./CUSTOM_RESOURCES.md#completely-disable-plugins-directory), including service files. If set to `true`, an empty volume with the `emptyDir` type will be mapped  | `false`                     |
-| `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `9.3.1-1`                                                                                 |
+| `customPlugins.marketplace.enabled`                         | Defines whether the [Plugin Manager](./docs/CUSTOM_RESOURCES.md#disable-plugin-manager) will be added to the server and to the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                       | `true`                                      |
+| `customPlugins.defaultPlugins.enabled`                      | Defines whether [plugins](./docs/CUSTOM_RESOURCES.md#disable-all-default-plugins) will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                              | `true`                                 |
+| `customPlugins.defaultPlugins.list`                         | Defines [which plugins](./docs/CUSTOM_RESOURCES.md#install-selected-default-plugins-only) from the default list will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`          | `[]`                         |
+| `customPlugins.emptyPluginsDir`                             | Defines whether a directory with plugins in containers will [contain files](./docs/CUSTOM_RESOURCES.md#completely-disable-plugins-directory), including service files. If set to `true`, an empty volume with the `emptyDir` type will be mapped  | `false`                     |
+| `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `9.4.0-1`                                                                                 |
+| `images.registry`                                           | Global image registry for all Onlyoffice Docs services and jobs.                                                                                                               |  `""`                                                                                     |
 | `docservice.annotations`                                    | Defines annotations that will be additionally added to Docservice Deployment. If set to, it takes priority over the `commonAnnotations`                                        | `{}`                                                                                      |
 | `docservice.podAnnotations`                                 | Map of annotations to add to the Docservice deployment pods                                                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
 | `docservice.replicas`                                       | Docservice replicas quantity. If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored                                                                      | `2`                                                                                       |
@@ -496,6 +547,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `docservice.terminationGracePeriodSeconds`                  | The time to terminate gracefully during which the Docservice Pod will have the `Terminating` status                                                                            | `30`                                                                                      |
 | `docservice.hostAliases`                                    | Adds [additional entries](https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/) to the hosts file in the Docservice and Proxy containers                    | `[]`                                                                                      |
 | `docservice.initContainers`                                 | Defines containers that run before docservice and proxy containers in the Docservice deployment pod. For example, a container that changes the owner of the PersistentVolume   | `[]`                                                                                      |
+| `docservice.image.registry`                                 | Docservice container image registry. Takes priority over `images.registry`                                                                                                     | `""`                                                                                      |
 | `docservice.image.repository`                               | Docservice container image repository. This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead*                             | `onlyoffice/docs-docservice-de`                                                           |
 | `docservice.image.tag`                                      | Docservice container image tag. If set to, it takes priority over the `images.tag`                                                                                             | `""`                                                                                      |
 | `docservice.image.pullPolicy`                               | Docservice container image pull policy                                                                                                                                         | `IfNotPresent`                                                                            |
@@ -532,6 +584,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `proxy.infoAllowedSecretKeyName`                            | The name of the key that contains the info auth user password. Used if `proxy.infoAllowedUser` is set                                                                          | `info-auth-password`                                                                      |
 | `proxy.infoAllowedExistingSecret`                           | Name of existing secret to use for info auth password. Used if `proxy.infoAllowedUser` is set. Must contain the key specified in `proxy.infoAllowedSecretKeyName`. If set to, it takes priority over the `proxy.infoAllowedPassword` | `""`                                |
 | `proxy.welcomePage.enabled`                                 | Defines whether the welcome page will be displayed                                                                                                                             | `true`                                                                                    |
+| `proxy.image.registry`                                      | Docservice Proxy container image registry. Takes priority over `images.registry`                                                                                               |  `""`                                                                                     |
 | `proxy.image.repository`                                    | Docservice Proxy container image repository. This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead*                       | `onlyoffice/docs-proxy-de`                                                                |
 | `proxy.image.tag`                                           | Docservice Proxy container image tag. If set to, it takes priority over the `images.tag`                                                                                       | `""`                                                                                      |
 | `proxy.image.pullPolicy`                                    | Docservice Proxy container image pull policy                                                                                                                                   | `IfNotPresent`                                                                            |
@@ -556,6 +609,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `converter.terminationGracePeriodSeconds`                   | The time to terminate gracefully during which the Converter Pod will have the `Terminating` status                                                                             | `30`                                                                                      |
 | `converter.hostAliases`                                     | Adds [additional entries](https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/) to the hosts file in the Converter container                                | `[]`                                                                                      |
 | `converter.initContainers`                                  | Defines containers that run before Converter container in the Converter deployment pod. For example, a container that changes the owner of the PersistentVolume                | `[]`                                                                                      |
+| `converter.image.registry`                                  | Converter container image registry. Takes priority over `images.registry`                                                                                                      |  `""`                                                                                     |
 | `converter.image.repository`                                | Converter container image repository. This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead*                              | `onlyoffice/docs-converter-de`                                                            |
 | `converter.image.tag`                                       | Converter container image tag. If set to, it takes priority over the `images.tag`                                                                                              | `""`                                                                                      |
 | `converter.image.pullPolicy`                                | Converter container image pull policy                                                                                                                                          | `IfNotPresent`                                                                            |
@@ -588,6 +642,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `adminpanel.terminationGracePeriodSeconds`                  | The time to terminate gracefully during which the Admin panel Pod will have the `Terminating` status                                                                             | `30`                                                                                    |
 | `adminpanel.hostAliases`                                    | Adds [additional entries](https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/) to the hosts file in the Admin panel container                                | `[]`                                                                                    |
 | `adminpanel.initContainers`                                 | Defines containers that run before Admin panel container in the Admin panel deployment pod. For example, a container that changes the owner of the PersistentVolume              | `[]`                                                                                    |
+| `adminpanel.image.registry`                                 | Admin panel container image registry. Takes priority over `images.registry`                                                                                                      |  `""`                                                                                   |
 | `adminpanel.image.repository`                               | Admin panel container image repository. This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead*                              | `onlyoffice/docs-adminpanel-de`                                                         |
 | `adminpanel.image.tag`                                      | Admin panel container image tag. If set to, it takes priority over the `images.tag`                                                                                              | `""`                                                                                    |
 | `adminpanel.image.pullPolicy`                               | Admin panel container image pull policy                                                                                                                                          | `IfNotPresent`                                                                          |
@@ -610,6 +665,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `example.terminationGracePeriodSeconds`                     | The time to terminate gracefully during which the Example Pod will have the `Terminating` status                                                                               | `30`                                                                                      |
 | `example.hostAliases`                                       | Adds [additional entries](https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/) to the hosts file in the Example container                                  | `[]`                                                                                      |
 | `example.initContainers`                                    | Defines containers that run before Example container in the Pod                                                                                                                | `[]`                                                                                      |
+| `example.image.registry`                                    | Example container image registry. Takes priority over `images.registry`                                                                                                        | `""`                                                                                      |
 | `example.image.repository`                                  | Example container image name                                                                                                                                                   | `onlyoffice/docs-example`                                                                 |
 | `example.image.tag`                                         | Example container image tag. If set to, it takes priority over the `images.tag`                                                                                                | `""`                                                                                      |
 | `example.image.pullPolicy`                                  | Example container image pull policy                                                                                                                                            | `IfNotPresent`                                                                            |
@@ -636,9 +692,9 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `service.sessionAffinity`                                   | [Session Affinity](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity) for ONLYOFFICE Docs service. If not set, `None` will be set as the default value | `""`                                                                                  |
 | `service.sessionAffinityConfig`                             | [Configuration](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout) for ONLYOFFICE Docs service Session Affinity. Used if the `service.sessionAffinity` is set | `{}`                                                                 |
 | `ingress.enabled`                                           | Enable the creation of an ingress for the ONLYOFFICE Docs                                                                                                                      | `false`                                                                                   |
-| `ingress.annotations`                                       | Map of annotations to add to the Ingress. If set to, it takes priority over the `commonAnnotations`                                                                            | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                                       |
+| `ingress.annotations`                                       | Map of annotations to add to the Ingress. If set to, it takes priority over the `commonAnnotations`                                                                            | `nginx.org/client-max-body-size: 100m`                                                    |
 | `ingress.ingressClassName`                                  | Used to reference the IngressClass that should be used to implement this Ingress                                                                                               | `nginx`                                                                                   |
-| `ingress.controllerName`                                    | Used to distinguish between controllers with the same IngressClassName but from different vendors                                                                              | `ingress-nginx`                                                                           |
+| `ingress.controllerName`                                    | Used to distinguish between controllers with the same IngressClassName but from different vendors                                                                              | `nginx-ingress`                                                                           |
 | `ingress.host`                                              | Ingress hostname for the ONLYOFFICE Docs ingress                                                                                                                               | `""`                                                                                      |
 | `ingress.tenants`                                           | Ingress hostnames if you need to use more than one name. For example, for multitenancy. If set to, it takes priority over the `ingress.host`. If `ingress.ssl.enabled` is set to `true`, it is assumed that the certificate for all specified domains is kept secret by `ingress.ssl.secret` | `[]` |
 | `ingress.ssl.enabled`                                       | Enable ssl for the ONLYOFFICE Docs ingress                                                                                                                                     | `false`                                                                                   |
@@ -655,10 +711,15 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `openshift.route.host`                                      | OpenShift Route hostname for the ONLYOFFICE Docs route                                                                                                                         | `""`                                                                                      |
 | `openshift.route.path`                                      | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
 | `openshift.route.wildcardPolicy`                            | The policy for handling wildcard subdomains in the OpenShift Route. Allowed values are `None`, `Subdomain`                                                                     | `None`                                                                                    |
+| `httproute.enabled`                                     | Enable the creation of an HTTPRoute for the ONLYOFFICE Docs. Used if you have a Gateway API controller in your cluster | `false`                                                                                   |
+| `httproute.annotations`                                   | Map of annotations to add to the HTTPRoute. If set to, it takes priority over the `commonAnnotations`                                                                            | `{}`                                                                                      |
+| `httproute.hostnames`                                           | An array of hostnames. For example, `["docs.example.com"]` | `[]` |
+| `httproute.path`                                           | The path where ONLYOFFICE Docs will be available | `/` |
+| `httproute.parentRefs`                                           | References to the Gateway resource. It should contain at least the name and namespace of the Gateway that will route traffic to ONLYOFFICE Docs. For example: `[{name: my-gateway, namespace: default}]` | `[]` |
 | `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
 | `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
-| `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana                                 | `false`                                                                                   |
-| `grafana.ingress.annotations`                               | Map of annotations to add to Grafana Ingress. If set to, it takes priority over the `commonAnnotations`                                                                        | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                                       |
+| `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true`. When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource. When `ingress.controllerName=nginx-ingress`: creates a `/grafana/` path in the main ONLYOFFICE Docs Ingress                                    | `false`                                                                                   |
+| `grafana.ingress.annotations`                               | **Deprecated**. Map of annotations to add to Grafana Ingress. Only used when `ingress.controllerName=ingress-nginx`. Not used with F5 NGINX Ingress. If set to, it takes priority over the `commonAnnotations` | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                       |
 | `grafana.dashboard.enabled`                                 | Enable the installation of ready-made Grafana dashboards. Used if you set `grafana.enabled` to `true`                                                                          | `false`                                                                                   |
 | `podSecurityContext.enabled`                                | Enable security context for the pods                                                                                                                                           | `false`                                                                                   |
 | `podSecurityContext.converter.fsGroup`                      | Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Converter Pod                                                 | `101`                                                                                     |
@@ -670,7 +731,6 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `webProxy.http`                                             | Web Proxy address for `HTTP` traffic                                                                                                                                           | `http://proxy.example.com`                                                                |
 | `webProxy.https`                                            | Web Proxy address for `HTTPS` traffic                                                                                                                                          | `https://proxy.example.com`                                                               |
 | `webProxy.noProxy`                                          | Patterns for IP addresses or k8s services name or domain names that shouldn’t use the Web Proxy                                                                                | `localhost,127.0.0.1,docservice`                                                          |
-| `privateCluster`                                            | Specify whether the k8s cluster is used in a private network without internet access                                                                                           | `false`                                                                                   |
 | `upgrade.job.enabled`                                       | Enable the execution of job pre-upgrade before upgrading ONLYOFFICE Docs                                                                                                       | `true`                                                                                    |
 | `upgrade.job.annotations`                                   | Defines annotations that will be additionally added to pre-upgrade Job. If set to, it takes priority over the `commonAnnotations`                                              | `{}`                                                                                      |
 | `upgrade.job.podAnnotations`                                | Map of annotations to add to the pre-upgrade Pod                                                                                                                               | `{}`                                                                                      |
@@ -680,6 +740,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `upgrade.job.nodeSelector`                                  | Node labels for pre-upgrade Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                           | `{}`                                                                                      |
 | `upgrade.job.tolerations`                                   | Tolerations for pre-upgrade Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                            | `[]`                                                                                      |
 | `upgrade.job.initContainers`                                | Defines containers that run before pre-upgrade container in the Pod                                                                                                            | `[]`                                                                                      |
+| `upgrade.job.image.registry`                                | Upgrade container image registry. Takes priority over `images.registry`                                                                                                        | `""`                                                                                      |
 | `upgrade.job.image.repository`                              | Job by upgrade image repository                                                                                                                                                | `onlyoffice/docs-utils`                                                                   |
 | `upgrade.job.image.tag`                                     | Job by upgrade image tag. If set to, it takes priority over the `images.tag`                                                                                                   | `""`                                                                                      |
 | `upgrade.job.image.pullPolicy`                              | Job by upgrade image pull policy                                                                                                                                               | `IfNotPresent`                                                                            |
@@ -700,6 +761,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `rollback.job.nodeSelector`                                 | Node labels for pre-rollback Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                          | `{}`                                                                                      |
 | `rollback.job.tolerations`                                  | Tolerations for pre-rollback Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                           | `[]`                                                                                      |
 | `rollback.job.initContainers`                               | Defines containers that run before pre-rollback container in the Pod                                                                                                           | `[]`                                                                                      |
+| `rollback.job.image.registry`                               | Rollback container image registry. Takes priority over `images.registry`                                                                                                       | `""`                                                                                      |
 | `rollback.job.image.repository`                             | Job by rollback image repository                                                                                                                                               | `onlyoffice/docs-utils`                                                                   |
 | `rollback.job.image.tag`                                    | Job by rollback image tag. If set to, it takes priority over the `images.tag`                                                                                                  | `""`                                                                                      |
 | `rollback.job.image.pullPolicy`                             | Job by rollback image pull policy                                                                                                                                              | `IfNotPresent`                                                                            |
@@ -720,6 +782,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `delete.job.nodeSelector`                                   | Node labels for pre-delete Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                            | `{}`                                                                                      |
 | `delete.job.tolerations`                                    | Tolerations for pre-delete Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                             | `[]`                                                                                      |
 | `delete.job.initContainers`                                 | Defines containers that run before pre-delete container in the Pod                                                                                                             | `[]`                                                                                      |
+| `delete.job.image.registry`                                 | Delete container image registry. Takes priority over `images.registry`                                                                                                         | `""`                                                                                      |
 | `delete.job.image.repository`                               | Job by delete image repository                                                                                                                                                 | `onlyoffice/docs-utils`                                                                   |
 | `delete.job.image.tag`                                      | Job by delete image tag. If set to, it takes priority over the `images.tag`                                                                                                    | `""`                                                                                      |
 | `delete.job.image.pullPolicy`                               | Job by delete image pull policy                                                                                                                                                | `IfNotPresent`                                                                            |
@@ -738,6 +801,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `install.job.nodeSelector`                                  | Node labels for pre-install Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                           | `{}`                                                                                      |
 | `install.job.tolerations`                                   | Tolerations for pre-install Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                            | `[]`                                                                                      |
 | `install.job.initContainers`                                | Defines containers that run before pre-install container in the Pod                                                                                                            | `[]`                                                                                      |
+| `install.job.image.registry`                                | Pre-install container image registry. Takes priority over `images.registry`                                                                                                    | `""`                                                                                      |
 | `install.job.image.repository`                              | Job by pre-install ONLYOFFICE Docs image repository                                                                                                                            | `onlyoffice/docs-utils`                                                                   |
 | `install.job.image.tag`                                     | Job by pre-install ONLYOFFICE Docs image tag. If set to, it takes priority over the `images.tag`                                                                               | `""`                                                                                      |
 | `install.job.image.pullPolicy`                              | Job by pre-install ONLYOFFICE Docs image pull policy                                                                                                                           | `IfNotPresent`                                                                            |
@@ -756,6 +820,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `clearCache.job.nodeSelector`                               | Node labels for Clear Cache Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                           | `{}`                                                                                      |
 | `clearCache.job.tolerations`                                | Tolerations for Clear Cache Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                            | `[]`                                                                                      |
 | `clearCache.job.initContainers`                             | Defines containers that run before Clear Cache container in the Pod                                                                                                            | `[]`                                                                                      |
+| `clearCache.job.image.registry`                             | Clear Cache container image registry. Takes priority over `images.registry`                                                                                                    | `""`                                                                                      |
 | `clearCache.job.image.repository`                           | Job by Clear Cache ONLYOFFICE Docs image repository                                                                                                                            | `onlyoffice/docs-utils`                                                                   |
 | `clearCache.job.image.tag`                                  | Job by Clear Cache ONLYOFFICE Docs image tag. If set to, it takes priority over the `images.tag`                                                                               | `""`                                                                                      |
 | `clearCache.job.image.pullPolicy`                           | Job by Clear Cache ONLYOFFICE Docs image pull policy                                                                                                                           | `IfNotPresent`                                                                            |
@@ -772,6 +837,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `grafanaDashboard.job.nodeSelector`                         | Node labels for Grafana Dashboard Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                     | `{}`                                                                                      |
 | `grafanaDashboard.job.tolerations`                          | Tolerations for Grafana Dashboard Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                      | `[]`                                                                                      |
 | `grafanaDashboard.job.initContainers`                       | Defines containers that run before Grafana Dashboard container in the Pod                                                                                                      | `[]`                                                                                      |
+| `grafanaDashboard.job.image.registry`                       | Grafana Dashboard container image registry. Takes priority over `images.registry`                                                                                              | `""`                                                                                      |
 | `grafanaDashboard.job.image.repository`                     | Job by Grafana Dashboard ONLYOFFICE Docs image repository                                                                                                                      | `onlyoffice/docs-utils`                                                                   |
 | `grafanaDashboard.job.image.tag`                            | Job by Grafana Dashboard ONLYOFFICE Docs image tag. If set to, it takes priority over the `images.tag`                                                                         | `""`                                                                                      |
 | `grafanaDashboard.job.image.pullPolicy`                     | Job by Grafana Dashboard ONLYOFFICE Docs image pull policy                                                                                                                     | `IfNotPresent`                                                                            |
@@ -786,6 +852,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `wopiKeysGeneration.job.nodeSelector`                       | Node labels for Wopi Keys Generation Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                  | `{}`                                                                                      |
 | `wopiKeysGeneration.job.tolerations`                        | Tolerations for Wopi Keys Generation Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                   | `[]`                                                                                      |
 | `wopiKeysGeneration.job.initContainers`                     | Defines containers that run before Wopi Keys Generation container in the Pod                                                                                                   | `[]`                                                                                      |
+| `wopiKeysGeneration.job.image.registry`                     | Wopi Keys Generation container image registry. Takes priority over `images.registry`                                                                                           | `""`                                                                                      |
 | `wopiKeysGeneration.job.image.repository`                   | Job by Wopi Keys Generation ONLYOFFICE Docs image repository                                                                                                                   | `onlyoffice/docs-utils`                                                                   |
 | `wopiKeysGeneration.job.image.tag`                          | Job by Wopi Keys Generation ONLYOFFICE Docs image tag. If set to, it takes priority over the `images.tag`                                                                      | `""`                                                                                      |
 | `wopiKeysGeneration.job.image.pullPolicy`                   | Job by Wopi Keys Generation ONLYOFFICE Docs image pull policy                                                                                                                  | `IfNotPresent`                                                                            |
@@ -801,6 +868,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `wopiKeysDeletion.job.nodeSelector`                         | Node labels for Wopi Keys Deletion Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                    | `{}`                                                                                      |
 | `wopiKeysDeletion.job.tolerations`                          | Tolerations for Wopi Keys Deletion Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                     | `[]`                                                                                      |
 | `wopiKeysDeletion.job.initContainers`                       | Defines containers that run before Wopi Keys Deletion container in the Pod                                                                                                     | `[]`                                                                                      |
+| `wopiKeysDeletion.job.image.registry`                       | Wopi Keys Deletion container image registry. Takes priority over `images.registry`                                                                                             | `""`                                                                                      |
 | `wopiKeysDeletion.job.image.repository`                     | Job by Wopi Keys Deletion ONLYOFFICE Docs image repository                                                                                                                     | `onlyoffice/docs-utils`                                                                   |
 | `wopiKeysDeletion.job.image.tag`                            | Job by Wopi Keys Deletion ONLYOFFICE Docs image tag. If set to, it takes priority over the `images.tag`                                                                        | `""`                                                                                      |
 | `wopiKeysDeletion.job.image.pullPolicy`                     | Job by Wopi Keys Deletion ONLYOFFICE Docs image pull policy                                                                                                                    | `IfNotPresent`                                                                            |
@@ -815,6 +883,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `customResources.job.nodeSelector`                          | Node labels for Custom Resources Job Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                      | `{}`                                                                                      |
 | `customResources.job.tolerations`                           | Tolerations for Custom Resources Job Pod assignment. If set to, it takes priority over the `tolerations`                                                                       | `[]`                                                                                      |
 | `customResources.job.initContainers`                        | Defines containers that run before Custom Resources container in the Pod                                                                                                       | `[]`                                                                                      |
+| `customResources.job.image.registry`                        | Custom Resources container image registry. Takes priority over `images.registry`                                                                                               | `""`                                                                                      |
 | `customResources.job.image.repository`                      | Job by Custom Resources ONLYOFFICE Docs image repository*                                                                                                                       | `onlyoffice/docs-cluster-de`                                                              |
 | `customResources.job.image.tag`                             | Job by Custom Resources ONLYOFFICE Docs image tag. If set to, it takes priority over the `images.tag`                                                                          | `""`                                                                                      |
 | `customResources.job.image.pullPolicy`                      | Job by Custom Resources ONLYOFFICE Docs image pull policy                                                                                                                      | `IfNotPresent`                                                                            |
@@ -829,6 +898,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `tests.nodeSelector`                                        | Node labels for Test Pod assignment. If set to, it takes priority over the `nodeSelector`                                                                                      | `{}`                                                                                      |
 | `tests.tolerations`                                         | Tolerations for Test Pod assignment. If set to, it takes priority over the `tolerations`                                                                                       | `[]`                                                                                      |
 | `tests.initContainers`                                      | Defines containers that run before Test container in the Pod                                                                                                                   | `[]`                                                                                      |
+| `tests.image.registry`                                      | Test container image registry. Takes priority over `images.registry`                                                                                                           | `""`                                                                                      |
 | `tests.image.repository`                                    | Test container image name                                                                                                                                                      | `onlyoffice/docs-utils`                                                                   |
 | `tests.image.tag`                                           | Test container image tag. If set to, it takes priority over the `images.tag`                                                                                                   | `""`                                                                                      |
 | `tests.image.pullPolicy`                                    | Test container image pull policy                                                                                                                                               | `IfNotPresent`                                                                            |
@@ -916,21 +986,17 @@ In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVIC
 
 #### 5.3.2 Expose ONLYOFFICE Docs via Ingress
 
-#### 5.3.2.1 Installing the Kubernetes Nginx Ingress Controller
+#### 5.3.2.1 Installing F5 NGINX Ingress Controller
 
-To install the Nginx Ingress Controller to your cluster, run the following command:
-
-```bash
-$ helm install nginx-ingress ingress-nginx/ingress-nginx --set controller.publishService.enabled=true,controller.replicaCount=2
-```
-
-Note: To install Nginx Ingress with the same parameters and to enable exposing ingress-nginx metrics to be gathered by Prometheus, run the following command:
+To install the F5 NGINX Ingress Controller to your cluster using the OCI registry, run the following command:
 
 ```bash
-$ helm install nginx-ingress -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/ingress_values.yaml ingress-nginx/ingress-nginx
+$ helm install nginx-ingress oci://ghcr.io/nginx/charts/nginx-ingress --version 2.5.1 --set controller.setAsDefault=true --set controller.replicaCount=2
 ```
 
-See more detail about installing Nginx Ingress via Helm [here](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx).
+See more detail about installing F5 NGINX Ingress via Helm [here](https://docs.nginx.com/nginx-ingress-controller/install/helm/open-source/).
+
+Note: The chart templates also support the deprecated community `ingress-nginx` controller. To use it, set `ingress.controllerName=ingress-nginx` and configure the appropriate `ingress.annotations` with the `nginx.ingress.kubernetes.io/` prefix.
 
 #### 5.3.2.2 Expose ONLYOFFICE Docs via HTTP
 
@@ -939,10 +1005,10 @@ See more detail about installing Nginx Ingress via Helm [here](https://github.co
 This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to ONLYOFFICE Docs. 
 Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster. You can use the one set of ingress instances and the one loadbalancer for those. It can optimize the entry point performance and reduce your cluster payments, cause providers can charge a fee for each loadbalancer.
 
-To expose ONLYOFFICE Docs via ingress HTTP, set the `ingress.enabled` parameter to true:
+To expose ONLYOFFICE Docs via ingress HTTP, set the `ingress.enabled` and the `ingress.host` parameters to true:
 
 ```bash
-$ helm install documentserver onlyoffice/docs --set ingress.enabled=true
+$ helm install documentserver onlyoffice/docs --set ingress.enabled=true --set ingress.host=example.com
 ```
 
 Run the following command to get the `documentserver` ingress IP:
@@ -951,12 +1017,10 @@ Run the following command to get the `documentserver` ingress IP:
 $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].ip}"
 ```
 
-After that, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-IP/`.
-
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.spec.rules[*].host}"
 ```
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
@@ -970,15 +1034,17 @@ Create the `tls` secret with an ssl certificate inside.
 Put the ssl certificate and the private key into the `tls.crt` and `tls.key` files and then run:
 
 ```bash
-$ kubectl create secret generic tls \
-  --from-file=./tls.crt \
-  --from-file=./tls.key
+$ kubectl create secret tls tls \
+  --cert=./tls.crt \
+  --key=./tls.key
 ```
 
 ```bash
 $ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
 
 ```
+
+The `ingress.host` field is required. 
 
 Run the following command to get the `documentserver` ingress IP:
 
@@ -989,7 +1055,7 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
+$ kubectl get ingress documentserver -o jsonpath="{.spec.rules[*].host}"
 ```
 
 Associate the `documentserver` ingress IP or hostname with your domain name through your DNS provider.
@@ -1012,6 +1078,14 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
   ```
 Next, perform the installation or upgrade by setting the `ingress.enabled`, `ingress.ssl.enabled` and `ingress.letsencrypt.enabled` parameters to `true`. Also set your own values in the parameters `ingress.letsencrypt.email`, `ingress.host` or `ingress.tenants`(for example, `--set "ingress.tenants={tenant1.example.com,tenant2.example.com}"`) if you want to use multiple domain names.
 
+Note: If you are enabling or disabling Grafana (`grafana.enabled=true/false`), changing the `ingress.path`, `ingress.host`, or `ingress.tenants` values after ONLYOFFICE Docs is already installed with `ingress.letsencrypt.enabled=true` and `ingress.controllerName=nginx-ingress`, run the upgrade with `--server-side=true` and `--force-conflicts` to avoid field ownership conflicts:
+
+```bash
+$ helm upgrade documentserver onlyoffice/docs --server-side=true --force-conflicts -f values.yaml
+```
+
+This is only required when using Let's Encrypt (`ingress.letsencrypt.enabled=true`). If you use your own certificate that is already installed in the cluster and do not enable Let's Encrypt, these flags are not needed during upgrade.
+
 #### 5.3.2.5 Expose ONLYOFFICE Docs on a virtual path
 This type of exposure allows you to expose ONLYOFFICE Docs on a virtual path, for example, `http://your-domain-name/docs`.
 To expose ONLYOFFICE Docs via ingress on a virtual path, set the `ingress.enabled`, `ingress.host` and `ingress.path` parameters.
@@ -1021,14 +1095,14 @@ $ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress
 ```
 
 The list of supported ingress controllers for virtual path configuration:
-* [Ingress NGINX by Kubernetes](https://github.com/kubernetes/ingress-nginx)
-* [NGINX Ingress by NGINX](https://github.com/nginx/kubernetes-ingress/)
+* [NGINX Ingress by NGINX (F5)](https://github.com/nginx/kubernetes-ingress/)
 * [HAProxy Ingress by HAProxy](https://github.com/haproxytech/kubernetes-ingress/)
 
-For virtual path configuration with `Ingress NGINX by Kubernetes`, append the pattern `(/|$)(.*)` to the `ingress.path`, for example, `/docs` becomes `/docs(/|$)(.*)`.
-
 #### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
-This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./OPENSHIFT.md#publish-onlyoffice-docs-via-route).
+This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
+
+#### 5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)
+This type of exposure allows you to expose ONLYOFFICE Docs with HTTPRoute via Gateway API. For details, see the [GATEWAY.md](./docs/GATEWAY.md) guide.
 
 ### 5.4 Admin Panel deployment (optional)
 
@@ -1062,6 +1136,14 @@ In this case, the `converter.replicas` parameter is ignored and the number of re
 
 With the `autoscaling.enabled` parameter enabled, by default Autoscaling will adjust the number of replicas based on the average percentage of CPU Utilization.
 For other configurable Autoscaling parameters, see the [Parameters](#4-parameters) table.
+
+> **Recommendation**
+>
+> It is recommended to additionally configure autoscaling based on the converttask6 queue size. CPU and memory metrics alone may not reflect the actual backlog of conversion tasks waiting to be processed.
+>
+> Combining queue-based autoscaling with CPU/memory metrics ensures the Converter scales up both when individual tasks are heavy (CPU/memory pressure) and when many tasks are queued up (queue length pressure). The HPA picks the maximum desired replica count across all configured metrics.
+>
+> For step-by-step instructions on setting up queue-based autoscaling, see [here](docs/HPA_CUSTOM_METRICS.md#configure-converter-auto-scaling-based-on-rabbitmq-queue-size).
 
 #### 6.2 Manual scaling
 
@@ -1207,47 +1289,9 @@ In this case, more detailed information can be found in the application logs.
 
 ### 11. Run Jobs in a private k8s cluster (optional)
 
-When running `Job` for installation, update, rollback and deletion, the container being launched needs Internet access to download the latest sql scripts.
-If the access of containers to the external network is prohibited in your k8s cluster, then you can perform these Jobs by setting the `privateCluster=true` parameter and manually create a `ConfigMap` with the necessary sql scripts.
+As of Helm Chart version 6.1.0, SQL scripts required for DB initialization are bundled into the docs-utils image.
 
-To do this, run the following commands:
-
-If your cluster already has `remove-db-scripts` and `init-db-scripts` configmaps, then delete them:
-
-```bash
-$ kubectl delete cm remove-db-scripts init-db-scripts
-```
-
-Download the ONLYOFFICE Docs database scripts for database cleaning and database tables creating:
-
-If PostgreSQL is selected as the database server:
-
-```bash
-$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/removetbl.sql
-$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/postgresql/createdb.sql
-```
-
-If MySQL is selected as the database server:
-
-```bash
-$ wget -O removetbl.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/removetbl.sql
-$ wget -O createdb.sql https://raw.githubusercontent.com/ONLYOFFICE/server/master/schema/mysql/createdb.sql
-```
-
-Create a configmap from them:
-
-```bash
-$ kubectl create configmap remove-db-scripts --from-file=./removetbl.sql
-$ kubectl create configmap init-db-scripts --from-file=./createdb.sql
-```
-
-Note: If you specified a different name for `ConfigMap` and for the file from which it is created, set the appropriate parameters for the corresponding Jobs:
- - `existingConfigmap.tblRemove.name` and `existingConfigmap.tblRemove.keyName` for scripts for database cleaning
- - `existingConfigmap.tblCreate.name` and `existingConfigmap.tblCreate.keyName` for scripts for database tables creating
-
-Next, when executing the commands `helm install|upgrade|rollback|delete`, set the parameter `privateCluster=true`
-
-  > **Note**: If it is possible to use a Web Proxy in your network to ensure the Pods containers have access to the Internet, then you can leave the parameter `privateCluster=false`, not manually create a configmaps with sql scripts and set the parameter `webProxy.enabled=true`, also setting the appropriate parameters for the Web Proxy.
+  > **Note**: If you map a custom script to the configmap specified in the `install.existingConfigmap.initdb` or `upgrade|rollback|delete.existingConfigmap.dsStop` parameters and it requires internet access, then and if it is possible to use a Web Proxy in your network to ensure the Pods containers have access to the Internet, then set the parameter `webProxy.enabled=true`, also setting the appropriate parameters for the Web Proxy.
 
 ### 12. Access to the info page (optional)
 
@@ -1343,11 +1387,15 @@ See more details about installing Grafana via Helm [here](https://github.com/bit
 
 ### 2 Access to Grafana via Ingress
 
-Note: It is assumed that step [#5.3.2.1](#5321-installing-the-kubernetes-nginx-ingress-controller) has already been completed.
+Note: It is assumed that step [#5.3.2.1](#5321-installing-f5-nginx-ingress-controller) has already been completed.
 
-If ONLYOFFICE Docs was installed with the parameter `grafana.ingress.enabled` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://INGRESS-ADDRESS/grafana/`
+**Grafana Ingress Behavior Depends on Ingress Controller Type:**
 
-If Ingres was installed using a secure connection (step [#5.3.2.3](#5323-expose-onlyoffice-docs-via-https)), then access to Grafana will be at: `https://your-domain-name/grafana/`
+**F5 NGINX Ingress (`nginx-ingress`, recommended):** The Grafana Ingress resource is NOT created as a separate ingress. Instead, Grafana is accessed through the main ONLYOFFICE Docs ingress at the `/grafana/` path. This configuration uses annotations with the `nginx.org/` prefix from the main `ingress.annotations` parameter. The `grafana.ingress.annotations` parameter is not used in this case.
+
+For F5 NGINX Ingress users, access to Grafana will be at: `http(s)://your-domain-name/grafana/`
+
+- **Legacy Kubernetes NGINX Ingress (`ingress-nginx`, deprecated):** If you are still using the deprecated community `ingress-nginx` controller, you can create a separate Grafana Ingress resource by setting `grafana.ingress.enabled` to `true`. 
 
 ### 3. View gathered metrics in Grafana
 

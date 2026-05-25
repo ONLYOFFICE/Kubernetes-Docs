@@ -133,9 +133,6 @@ webProxy:
   https: "https://proxy.example.com"
   ## webProxy.noProxy Patterns for IP addresses or k8s services name or domain names that shouldn’t use the Web Proxy
   noProxy: "localhost,127.0.0.1,docservice"
-## privateCluster Specify whether the k8s cluster is used in a private network without internet access
-## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
-privateCluster: false
 ## commonNameSuffix The name that will be added to the name of all created resources as a suffix
 ## Example:
 ## commonNameSuffix: "{{ .Chart.Name }}"
@@ -228,7 +225,7 @@ persistence:
     ## persistence.customResources.enabled Defines whether to use PVC and whether to mount it in a container in the Job `custom-resources`
     ## The use of this PVC can be disabled if you only use `customPlugins.marketplace.enabled=false` or `customPlugins.defaultPlugins.list` or `customPlugins.defaultPlugins.enabled=false`
     ## For more details, see here:
-    ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+    ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/docs/CUSTOM_RESOURCES.md
     enabled: true
     ## persistence.customResources.existingClaim The name of the existing PVC used to store the custom resources
     existingClaim: "docs-custom-resources"
@@ -438,14 +435,14 @@ requestFilteringAgent:
 ## When set to `true`, the Job `customResources` will be executed
 ## Fonts should be added to the "custom-k8s" subdirectory of the `persistence.customResources` PVC root
 ## For more details, see here:
-## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/docs/CUSTOM_RESOURCES.md
 customFonts:
   build: false
 customDictionaries:
   ## customDictionaries.build Enables the addition of custom Dictionaries
   ## When set to `true`, the Job `customResources` will be executed
   ## For more details, see here:
-  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/docs/CUSTOM_RESOURCES.md
   build: false
   ## customDictionaries.dictionarieNames Defines a list of subdirectories with the names of additional dictionaries
   ## The names must match the names of the directories added to the root of the `persistence.customResources` PVC
@@ -460,7 +457,7 @@ customPlugins:
   ## customPlugins.build Enables the addition of custom Plugins
   ## When set to `true`, the Job `customResources` will be executed
   ## For more details, see here:
-  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/docs/CUSTOM_RESOURCES.md
   build: false
   ## customPlugins.pluginNames Defines a list of subdirectories with the names of additional plugins
   ## The names must match the names of the directories added to the root of the `persistence.customResources` PVC
@@ -490,7 +487,9 @@ customPlugins:
 ## Global image parameters for all Onlyoffice Docs services and jobs
 images:
   ## images.tag Global image tag for all Onlyoffice Docs services and jobs
-  tag: 9.3.1-1
+  tag: 9.4.0-1
+  ## images.registry Global image registry for all Onlyoffice Docs containers
+  registry: ""
 
 ## Onlyoffice Docs Docservice Deployment parameters
 ## This block defines the parameters common to all the Pods of this deployment
@@ -650,6 +649,8 @@ docservice:
   ## Parameters of the docservice container of the Docservice deployment
   ##
   image:
+    ## docservice.image.registry docservice container image registry
+    registry: ""
     ## docservice.image.repository docservice container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -829,6 +830,8 @@ proxy:
   welcomePage:
     enabled: true
   image:
+    ## proxy.image.registry proxy container image registry
+    registry: ""
     ## proxy.image.repository proxy container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -1103,6 +1106,8 @@ converter:
   extraVolumes: []
   ## Converter container image parameters
   image:
+    ## converter.image.registry converter container image registry
+    registry: ""
     ## converter.image.repository converter container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -1264,6 +1269,8 @@ adminpanel:
   extraVolumes: []
   ## Adminpanel container image parameters
   image:
+    ## adminpanel.image.registry adminpanel container image registry
+    registry: ""
     ## adminpanel.image.repository adminpanel container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -1442,6 +1449,8 @@ example:
   extraVolumes: []
   ## Example container image parameters
   image:
+    ## example.image.registry example container image registry
+    registry: ""
     ## example.image.repository example container image name
     repository: onlyoffice/docs-example
     ## example.image.tag example container image tag
@@ -1524,10 +1533,10 @@ ingress:
   ## If set to, it takes priority over the `commonAnnotations`
   ## You can also use `tpl` as the value for the key
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: 100m
-    ## Use the annotation below if your NGINX Ingress controller by nginx.org
-    ## ref: https://github.com/nginx/kubernetes-ingress/
-    ## nginx.org/client-max-body-size: 100m
+    nginx.org/client-max-body-size: 100m
+    ## Use the annotation below if your NGINX Ingress controller by the Kubernetes community (deprecated in favor of nginx.org)
+    ## ref: https://github.com/kubernetes/ingress-nginx/
+    ## nginx.ingress.kubernetes.io/proxy-body-size: 100m
   ## ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
   ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
   ingressClassName: nginx
@@ -1539,7 +1548,7 @@ ingress:
   ## ref: https://github.com/nginx/kubernetes-ingress
   ## Use `haproxytech` for the HAProxy Ingress controller
   ## ref: https://github.com/haproxytech/kubernetes-ingress
-  controllerName: ingress-nginx
+  controllerName: nginx-ingress
   ssl:
     ## ingress.ssl.enabled Enable TLS for the ONLYOFFICE Docs ingress
     enabled: false
@@ -1593,6 +1602,29 @@ openshift:
     ## openshift.route.wildcardPolicy Defines how wildcards are handled for the Route host (e.g., None, Subdomain)
     wildcardPolicy: None
 
+# Onlyoffice Docs HTTPRoute parameters
+##
+httproute:
+  ## httpRoute.enabled Enable the creation of an HTTPRoute for ONLYOFFICE Docs
+  enabled: false
+  ## httpRoute.annotations Map of annotations to add to the HTTPRoute
+  ## If set, these are merged with commonAnnotations, with httpRoute.annotations taking precedence.
+  annotations: {}
+  ## httpRoute.hostnames The hostnames for the ONLYOFFICE Docs HTTPRoute resource
+  hostnames: []
+  # - hostname1.example.com
+  # - hostname2.example.com
+  ## httpRoute.path The path for the ONLYOFFICE Docs HTTPRoute resource
+  path: "/"
+  ## httpRoute.parentRefs An array of parentRefs for the HTTPRoute, specifying the parent resources (e.g., Gateways) that should route traffic to ONLYOFFICE Docs
+  parentRefs: []
+  # - name: my-gateway-1
+  #   namespace: my-gateway-namespace
+  # - group: gateway.networking.k8s.io
+  #   kind: Gateway
+  #   name: my-gateway-2
+  #   namespace: my-gateway-namespace
+  
 ## Grafana parameters
 ## See more details about installing Grafana here:
 ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#using-grafana-to-visualize-metrics-optional
@@ -1603,12 +1635,15 @@ grafana:
   ## If not set, the name will be taken from `namespaceOverride` or .Release.Namespace
   namespace: ""
   ## grafana.ingress.enabled Enable the creation of an ingress for the Grafana
-  ## Used if you set `grafana.enabled` to `true` and want to use Nginx Ingress to access Grafana
+  ## Used if you set `grafana.enabled` to `true` and want to use NGINX Ingress to access Grafana
+  ## When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource
+  ## When `ingress.controllerName=nginx-ingress`: creates a `/grafana/` path in the main ONLYOFFICE Docs Ingress
   ingress:
     enabled: false
-    ## grafana.ingress.annotations Map of annotations to add to grafana Ingress
+    ## grafana.ingress.annotations Deprecated. Map of annotations to add to grafana Ingress
     ## If set to, it takes priority over the `commonAnnotations`
     ## You can also use `tpl` as the value for the key
+    ## Note: These annotations are for ingress-nginx controller only (legacy Kubernetes)
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 100m
   ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
@@ -1652,6 +1687,8 @@ install:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## install.job.image.registry pre-install job image registry
+      registry: ""
       ## install.job.image.repository Job by pre-install ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## install.job.image.tag Job by pre-install ONLYOFFICE Docs image tag
@@ -1694,7 +1731,7 @@ install:
   existingConfigmap:
     tblCreate:
       ## install.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `install.existingConfigmap.initdb` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## install.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
@@ -1738,6 +1775,8 @@ upgrade:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## upgrade.job.image.registry upgrade job image registry
+      registry: ""
       ## upgrade.job.image.repository Job by upgrade image repository
       repository: onlyoffice/docs-utils
       ## upgrade.job.image.tag Job by upgrade image tag
@@ -1780,7 +1819,7 @@ upgrade:
   existingConfigmap:
     tblRemove:
       ## upgrade.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `upgrade.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## upgrade.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
@@ -1788,7 +1827,7 @@ upgrade:
       keyName: removetbl.sql
     tblCreate:
       ## upgrade.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `upgrade.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## upgrade.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
@@ -1832,6 +1871,8 @@ rollback:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## rollback.job.image.registry rollback job image registry
+      registry: ""
       ## rollback.job.image.repository Job by rollback image repository
       repository: onlyoffice/docs-utils
       ## rollback.job.image.tag Job by rollback image tag
@@ -1874,7 +1915,7 @@ rollback:
   existingConfigmap:
     tblRemove:
       ## rollback.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `rollback.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## rollback.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
@@ -1882,7 +1923,7 @@ rollback:
       keyName: removetbl.sql
     tblCreate:
       ## rollback.existingConfigmap.tblCreate.name The name of the existing ConfigMap that contains the sql file for craeting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `rollback.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: init-db-scripts
       ## rollback.existingConfigmap.tblCreate.keyName The name of the sql file containing instructions for creating tables from the database
@@ -1926,6 +1967,8 @@ delete:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## delete.job.image.registry delete job image registry
+      registry: ""
       ## delete.job.image.repository Job by delete image repository
       repository: onlyoffice/docs-utils
       ## delete.job.image.tag Job by delete image tag
@@ -1968,7 +2011,7 @@ delete:
   existingConfigmap:
     tblRemove:
       ## delete.existingConfigmap.tblRemove.name The name of the existing ConfigMap that contains the sql file for deleting tables from the database
-      ## Used if `privateCluster` is set to `true`
+      ## Used if `delete.existingConfigmap.dsStop` is set
       ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#11-run-jobs-in-a-private-k8s-cluster-optional
       name: remove-db-scripts
       ## delete.existingConfigmap.tblRemove.keyName The name of the sql file containing instructions for deleting tables from the database
@@ -2012,6 +2055,8 @@ clearCache:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## clearCache.job.image.registry Clear Cache job container image registry
+      registry: ""
       ## clearCache.job.image.repository Job by Clear Cache ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## clearCache.job.image.tag Job by Clear Cache ONLYOFFICE Docs image tag
@@ -2091,6 +2136,8 @@ grafanaDashboard:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## grafanaDashboard.job.image.registry Grafana Dashboard job container image registry
+      registry: ""
       ## grafanaDashboard.job.image.repository Job by Grafana Dashboard ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## grafanaDashboard.job.image.tag Job by Grafana Dashboard ONLYOFFICE Docs image tag
@@ -2163,6 +2210,8 @@ wopiKeysGeneration:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## wopiKeysGeneration.job.image.registry Wopi Keys Generation job container image registry
+      registry: ""
       ## wopiKeysGeneration.job.image.repository Job by Wopi Keys Generation ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysGeneration.job.image.tag Job by Wopi Keys Generation ONLYOFFICE Docs image tag
@@ -2237,6 +2286,8 @@ wopiKeysDeletion:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## wopiKeysDeletion.job.image.registry Wopi Keys Deletion job container image registry
+      registry: ""
       ## wopiKeysDeletion.job.image.repository Job by Wopi Keys Deletion ONLYOFFICE Docs image repository
       repository: onlyoffice/docs-utils
       ## wopiKeysDeletion.job.image.tag Job by Wopi Keys Deletion ONLYOFFICE Docs image tag
@@ -2280,7 +2331,7 @@ wopiKeysDeletion:
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
 ## He creates custom resources. It is executed if `customFonts.build` or `customDictionaries.build` or `customPlugins.build` is set to `true`
 ## For more details, see here:
-## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/CUSTOM_RESOURCES.md
+## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/docs/CUSTOM_RESOURCES.md
 customResources:
   job:
     ## customResources.job.annotations Defines annotations that will be additionally added to custom-resources Job
@@ -2310,6 +2361,8 @@ customResources:
     ## ref:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     initContainers: []
     image:
+      ## customResources.job.image.registry custom-resources job container image registry
+      registry: ""
       ## customResources.job.image.repository Job by custom-resources ONLYOFFICE Docs image repository
       ## For more information, see after the Parameters table
       ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
@@ -2383,6 +2436,8 @@ tests:
   initContainers: []
   ## Test container image parameters
   image:
+    ## tests.image.registry test container image registry
+    registry: ""
     ## tests.image.repository test container image name
     repository: onlyoffice/docs-utils
     ## tests.image.tag test container image tag

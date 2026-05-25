@@ -1,0 +1,49 @@
+{{- if .Values.httproute.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  annotations:
+    {{- if or .Values.commonAnnotations .Values.httproute.annotations }}
+      {{- $dictValue := default .Values.commonAnnotations .Values.httproute.annotations }}
+      {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  hostnames:
+  {{- with .Values.httproute.hostnames }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
+  parentRefs:
+  {{- with .Values.httproute.parentRefs }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
+  rules:
+  - backendRefs:
+    - group: ""
+      kind: Service
+      name: {{ include "ds.svc.name" . }}
+      port: {{ .Values.service.port }}
+      weight: 1
+    {{- if ne .Values.httproute.path "/" }}
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        set:
+        - name: X-Forwarded-Prefix
+          value: {{ include "ds.path.withoutTrailingSlash" .Values.httproute.path }}
+    matches:
+    - path:
+        type: PathPrefix
+        value: {{ include "ds.path.withoutTrailingSlash" .Values.httproute.path }}
+    {{- end }}
+{{- end }}

@@ -70,7 +70,7 @@ spec:
       {{- end }}
       containers:
       - name: wopi-keys
-        image: {{ .Values.wopiKeysDeletion.job.image.repository }}:{{ default .Values.images.tag .Values.wopiKeysDeletion.job.image.tag }}
+        image: {{ include "ds.imageRegistry" (list . .Values.wopiKeysDeletion.job.image.registry ) }}{{ .Values.wopiKeysDeletion.job.image.repository }}:{{ default .Values.images.tag .Values.wopiKeysDeletion.job.image.tag }}
         imagePullPolicy: {{ .Values.wopiKeysDeletion.job.image.pullPolicy }}
         {{- if .Values.wopiKeysDeletion.job.containerSecurityContext.enabled }}
         securityContext: {{- omit .Values.wopiKeysDeletion.job.containerSecurityContext "enabled" | toYaml | nindent 10 }}

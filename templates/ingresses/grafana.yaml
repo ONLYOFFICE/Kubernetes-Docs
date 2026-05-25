@@ -1,4 +1,4 @@
-{{- if and .Values.grafana.enabled .Values.grafana.ingress.enabled }}
+{{- if and (eq .Values.ingress.controllerName "ingress-nginx") .Values.grafana.enabled .Values.grafana.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

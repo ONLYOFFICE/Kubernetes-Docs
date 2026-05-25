@@ -69,7 +69,7 @@ spec:
           configMap:
             name: {{ template "ds.delete.configMapName" . }}
             defaultMode: 0755
-        {{- if and .Values.privateCluster (not .Values.delete.existingConfigmap.dsStop) }}
+        {{- if .Values.delete.existingConfigmap.dsStop }}
         - name: remove-dt-scripts
           configMap:
             name: {{ template "ds.delete.configmap.tblRemove.name" . }}
@@ -80,7 +80,7 @@ spec:
       {{- end }}
       containers:
         - name: pre-delete
-          image: {{ .Values.delete.job.image.repository }}:{{ default .Values.images.tag .Values.delete.job.image.tag }}
+          image: {{ include "ds.imageRegistry" (list . .Values.delete.job.image.registry ) }}{{ .Values.delete.job.image.repository }}:{{ default .Values.images.tag .Values.delete.job.image.tag }}
           imagePullPolicy: {{ .Values.delete.job.image.pullPolicy }}
           {{- if .Values.delete.job.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.delete.job.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -92,8 +92,6 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
-          - name: PRIVATE_CLUSTER
-            value: {{ .Values.privateCluster | quote }}
           volumeMounts:
           {{- if not .Values.persistence.storageS3 }}
           - name: ds-files
@@ -102,7 +100,7 @@ spec:
           - name: stop-scripts
             mountPath: /scripts/stop.sh
             subPath: stop.sh
-          {{- if and .Values.privateCluster (not .Values.delete.existingConfigmap.dsStop) }}
+          {{- if .Values.delete.existingConfigmap.dsStop }}
           - name: remove-dt-scripts
             mountPath: /scripts/{{ .Values.delete.existingConfigmap.tblRemove.keyName }}
             subPath: {{ .Values.delete.existingConfigmap.tblRemove.keyName }}
