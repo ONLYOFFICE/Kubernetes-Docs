@@ -1,0 +1,251 @@
+# Kubernetes v1.30+ AppArmor configuration for the Helm chart.
+# Profiles must be loaded on every worker node before these values are used.
+
+docservice:
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 101
+    runAsGroup: 101
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+    appArmorProfile:
+      type: Localhost
+      localhostProfile: onlyoffice-docs
+
+proxy:
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 101
+    runAsGroup: 101
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+    appArmorProfile:
+      type: Localhost
+      localhostProfile: onlyoffice-docs
+
+converter:
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 101
+    runAsGroup: 101
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+    appArmorProfile:
+      type: Localhost
+      localhostProfile: onlyoffice-docs
+
+adminpanel:
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 101
+    runAsGroup: 101
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+    appArmorProfile:
+      type: Localhost
+      localhostProfile: onlyoffice-docs
+
+example:
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+    appArmorProfile:
+      type: Localhost
+      localhostProfile: onlyoffice-docs
+
+install:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+upgrade:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+rollback:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+delete:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+clearCache:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+grafanaDashboard:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+wopiKeysGeneration:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+wopiKeysDeletion:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+customResources:
+  job:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 101
+      runAsGroup: 101
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      appArmorProfile:
+        type: Localhost
+        localhostProfile: onlyoffice-docs
+
+tests:
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 101
+    runAsGroup: 101
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+    appArmorProfile:
+      type: Localhost
+      localhostProfile: onlyoffice-docs
