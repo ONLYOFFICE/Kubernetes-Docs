@@ -1,5 +1,11 @@
 # Change log
 
+## 6.1.1
+
+### Changes
+
+* Released ONLYOFFICE Docs v9.4.1
+
 ## 6.1.0
 
 ### New Features

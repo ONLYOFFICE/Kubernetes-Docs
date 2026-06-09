@@ -533,7 +533,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `customPlugins.defaultPlugins.enabled`                      | Defines whether [plugins](./docs/CUSTOM_RESOURCES.md#disable-all-default-plugins) will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                              | `true`                                 |
 | `customPlugins.defaultPlugins.list`                         | Defines [which plugins](./docs/CUSTOM_RESOURCES.md#install-selected-default-plugins-only) from the default list will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`          | `[]`                         |
 | `customPlugins.emptyPluginsDir`                             | Defines whether a directory with plugins in containers will [contain files](./docs/CUSTOM_RESOURCES.md#completely-disable-plugins-directory), including service files. If set to `true`, an empty volume with the `emptyDir` type will be mapped  | `false`                     |
-| `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `9.4.0-1`                                                                                 |
+| `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `9.4.1-1`                                                                                 |
 | `images.registry`                                           | Global image registry for all Onlyoffice Docs services and jobs.                                                                                                               |  `""`                                                                                     |
 | `docservice.annotations`                                    | Defines annotations that will be additionally added to Docservice Deployment. If set to, it takes priority over the `commonAnnotations`                                        | `{}`                                                                                      |
 | `docservice.podAnnotations`                                 | Map of annotations to add to the Docservice deployment pods                                                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
@@ -1020,7 +1020,7 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-$ kubectl get ingress documentserver -o jsonpath="{.spec.rules[*].host}"
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-INGRESS-HOSTNAME/`.
@@ -1055,7 +1055,7 @@ $ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[
 If the ingress IP is empty, try getting the `documentserver` ingress hostname:
 
 ```bash
-$ kubectl get ingress documentserver -o jsonpath="{.spec.rules[*].host}"
+$ kubectl get ingress documentserver -o jsonpath="{.status.loadBalancer.ingress[*].hostname}"
 ```
 
 Associate the `documentserver` ingress IP or hostname with your domain name through your DNS provider.
