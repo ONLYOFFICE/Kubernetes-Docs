@@ -1,0 +1,87 @@
+{{- if .Values.gateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.commonAnnotations .Values.gateway.annotations }}
+  {{- $dictValue := default .Values.commonAnnotations .Values.gateway.annotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+  {{- $hosts := list }}
+  {{- if .Values.gateway.tenants }}
+    {{- $hosts = .Values.gateway.tenants }}
+  {{- else if .Values.gateway.host }}
+    {{- $hosts = list .Values.gateway.host }}
+  {{- end }}
+  {{- if .Values.gateway.external.parentRefs }}
+  {{- toYaml .Values.gateway.external.parentRefs | nindent 4 }}
+  {{- else }}
+  {{- $gwName := include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+  {{- if $hosts }}
+    {{- range $idx, $host := $hosts }}
+    {{- if not (and $.Values.gateway.ssl.enabled $.Values.gateway.ssl.redirect.enabled) }}
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ $gwName }}
+      sectionName: {{ printf "http-%d" $idx }}
+    {{- end }}
+    {{- if $.Values.gateway.ssl.enabled }}
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ $gwName }}
+      sectionName: {{ printf "https-%d" $idx }}
+    {{- end }}
+    {{- end }}
+  {{- else }}
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ $gwName }}
+      sectionName: http
+  {{- end }}
+  {{- end }}
+  {{- if $hosts }}
+  hostnames:
+    {{- range $hosts }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: {{ .Values.gateway.pathType }}
+            value: {{ include "ds.gateway.pathValue" .Values.gateway.path | quote }}
+      {{- if ne .Values.gateway.path "/" }}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: X-Forwarded-Prefix
+                value: {{ include "ds.gateway.pathValue" .Values.gateway.path | quote }}
+      {{- end }}
+      backendRefs:
+        - kind: Service
+          name: {{ include "ds.svc.name" . }}
+          port: {{ .Values.service.port }}
+    {{- if and .Values.grafana.enabled .Values.grafana.gateway.enabled }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /grafana
+      backendRefs:
+        - kind: Service
+          name: grafana
+          port: 80
+    {{- end }}
+{{- end }}

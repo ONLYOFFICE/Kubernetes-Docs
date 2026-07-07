@@ -1,0 +1,19 @@
+{{- if and .Values.gateway.enabled .Values.gateway.clientSettingsPolicy }}
+apiVersion: gateway.nginx.org/v1alpha1
+kind: ClientSettingsPolicy
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}-client
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+  {{- with .Values.gateway.clientSettingsPolicy }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}

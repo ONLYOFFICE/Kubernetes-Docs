@@ -1,0 +1,72 @@
+{{- if and .Values.gateway.enabled .Values.gateway.ssl.enabled (not .Values.gateway.host) (not .Values.gateway.tenants) }}
+  {{- fail "gateway.ssl.enabled=true requires gateway.host or gateway.tenants to be set. TLS SNI listeners cannot be created without a hostname." }}
+{{- end }}
+{{- if and .Values.gateway.enabled (not .Values.gateway.external.parentRefs) }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.commonAnnotations .Values.gateway.annotations .Values.gateway.letsencrypt.enabled }}
+  annotations:
+    {{- if or .Values.commonAnnotations .Values.gateway.annotations }}
+    {{- $dictValue := default .Values.commonAnnotations .Values.gateway.annotations }}
+    {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.gateway.letsencrypt.enabled }}
+    cert-manager.io/cluster-issuer: {{ .Values.gateway.letsencrypt.clusterIssuerName }}
+    {{- end }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ .Values.gateway.gatewayClassName }}
+  listeners:
+  {{- $context := . }}
+  {{- $hosts := list }}
+  {{- if .Values.gateway.tenants }}
+    {{- $hosts = .Values.gateway.tenants }}
+  {{- else if .Values.gateway.host }}
+    {{- $hosts = list .Values.gateway.host }}
+  {{- end }}
+  {{- if $hosts }}
+    {{- range $idx, $host := $hosts }}
+    - name: {{ printf "http-%d" $idx }}
+      port: 80
+      protocol: HTTP
+      hostname: {{ $host | quote }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+    {{- if $context.Values.gateway.ssl.enabled }}
+    - name: {{ printf "https-%d" $idx }}
+      port: 443
+      protocol: HTTPS
+      hostname: {{ $host | quote }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ $context.Values.gateway.ssl.secret }}
+            {{- if $context.Values.gateway.ssl.secretNamespace }}
+            namespace: {{ $context.Values.gateway.ssl.secretNamespace | quote }}
+            {{- end }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+    {{- end }}
+    {{- end }}
+  {{- else }}
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+  {{- end }}
+  {{- with .Values.gateway.listeners.custom }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

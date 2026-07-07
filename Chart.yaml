@@ -19,5 +19,5 @@ sources:
   - https://github.com/ONLYOFFICE
   - https://github.com/ONLYOFFICE/DocumentServer
 icon: https://avatars.githubusercontent.com/u/1426033
-version: 6.1.1
-appVersion: 9.4.1
+version: 6.2.0
+appVersion: 9.5.0

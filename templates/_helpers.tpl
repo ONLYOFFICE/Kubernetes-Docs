@@ -527,6 +527,23 @@ Get the ds Grafana Namespace
 {{- end -}}
 
 {{/*
+Normalise gateway.path for use as HTTPRoute path value.
+Trims any trailing slash except for the root "/".
+- "/"          -> "/"
+- "/ds"        -> "/ds"
+- "/ds/"       -> "/ds"
+- "^/ds/.*$"   -> "^/ds/.*$"  (regex, returned as-is)
+*/}}
+{{- define "ds.gateway.pathValue" -}}
+{{- $pathValue := . -}}
+{{- if hasPrefix "^" $pathValue -}}
+    {{- $pathValue -}}
+{{- else -}}
+    {{- trimSuffix "/" $pathValue | default "/" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the ds virtual path with trailing slash
 /                   -> /
 /path               -> /path/

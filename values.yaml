@@ -1524,6 +1524,122 @@ example:
   ##     subPath: my_cm.txt
   extraVolumeMounts: []
 
+## Onlyoffice Docs Gateway API parameters
+##
+gateway:
+  ## gateway.enabled Enable the creation of a Gateway and HTTPRoute resources for ONLYOFFICE Docs
+  enabled: false
+  ## gateway.external Connect HTTPRoute to an existing external Gateway(s)
+  external:
+    ## gateway.external.parentRefs An array required to identify an existing Gateway(s) resource for routing
+    ## If it is specified, the chart does NOT create its own Gateway resource
+    ## The elements specified here will be added to the `spec.parentRefs` of the HTTPRoute resource being created
+    ## Example:
+    ## parentRefs:
+    ##   - group: gateway.networking.k8s.io
+    ##     kind: Gateway
+    ##     name: custom-gateway
+    ##     namespace: custom-ns
+    ##     sectionName: custom-http
+    parentRefs: []
+  ## gateway.annotations Map of annotations to add to the Gateway and HTTPRoute resources
+  ## If set, takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
+  annotations: {}
+  ## gateway.gatewayClassName Name of the GatewayClass to use
+  ## For NGINX Gateway Fabric the default class name is `nginx`
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/
+  gatewayClassName: nginx
+  ## gateway.listeners.custom Used to add custom listener settings
+  ## For example, to use the same Gateway resource for HTTPRoute routes from other namespaces
+  ## ref: https://gateway-api.sigs.k8s.io/docs/concepts/security/#1-route-binding
+  listeners:
+    ## Example:
+    ## custom:
+    ##   - name: custom-http-route
+    ##     port: 80
+    ##     protocol: HTTP
+    ##     allowedRoutes:
+    ##       namespaces:
+    ##         from: Selector
+    ##         selector:
+    ##           matchExpressions:
+    ##           - key: kubernetes.io/metadata.name
+    ##             operator: In
+    ##             values:
+    ##             - foo
+    custom: []
+  ssl:
+    ## gateway.ssl.enabled Enable TLS termination on the Gateway HTTPS listener(s)
+    enabled: false
+    ## gateway.ssl.secret Name of the Kubernetes Secret that holds the TLS certificate
+    ## Used only when `gateway.ssl.enabled=true`
+    ## When `gateway.letsencrypt.enabled=true` this Secret will be created and managed by cert-manager
+    secret: tls
+    ## gateway.ssl.secretNamespace If you want to use an existing secret located in a different Namespace and containing a certificate,
+    ## specify here the Namespace name and the secret file name in `gateway.ssl.secret`
+    ## To do this, you must have created a corresponding `ReferenceGrant` in the same Namespace as the secret
+    ## ref: https://gateway-api.sigs.k8s.io/reference/api-types/referencegrant/
+    secretNamespace: ""
+    ## gateway.ssl.redirect Automatic HTTP -> HTTPS redirect
+    ## When enabled, the chart creates a separate HTTPRoute that attaches to the
+    ## HTTP listener(s) and applies a RequestRedirect filter, sending all HTTP
+    ## traffic to HTTPS via a 3xx response.
+    ## In this mode, the MAIN HTTPRoute attaches ONLY to HTTPS listener(s),
+    ## leaving HTTP handling to the redirect HTTPRoute.
+    ## Requires `gateway.ssl.enabled=true` (helm install fails otherwise).
+    ## Ignored in external Gateway mode (gateway.external.parentRefs is non-empty)
+    ## — managing redirect on an external Gateway is the responsibility of its owner.
+    ## ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#httprequestredirectfilter
+    ## ref: https://docs.nginx.com/nginx-gateway-fabric/traffic-management/https-termination/
+    redirect:
+      ## gateway.ssl.redirect.enabled Enable HTTP -> HTTPS redirect
+      enabled: false
+      ## gateway.ssl.redirect.statusCode HTTP status code returned by the redirect
+      statusCode: 301
+  ## gateway.host Hostname for the Gateway listener(s)
+  host: ""
+  ## gateway.tenants Multiple hostnames for multi-tenant deployments
+  ## For each tenant, a pair of listeners (HTTP + HTTPS if `ssl.enabled`) is created.
+  ## Takes priority over `gateway.host` if non-empty.
+  ## If `gateway.ssl.enabled=true`, the Secret named in `gateway.ssl.secret` must
+  ## contain a certificate that is valid for all listed hostnames (e.g. a SAN cert
+  ## or a wildcard).
+  tenants: []
+  ## gateway.pathType Specifies the path type for the ONLYOFFICE Docs HTTPRoute
+  ## Allowed values: `Exact`, `PathPrefix` or `RegularExpression`
+  pathType: PathPrefix
+  ## gateway.path Specifies the path under which ONLYOFFICE Docs will be available
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#5335-expose-onlyoffice-docs-on-a-virtual-path
+  ## Allowed forms:
+  ##   "/"            — serve at the root, no path rewrite
+  ##   "/ds"          — serve under /ds, strips /ds before forwarding,
+  ##                    injects `X-Forwarded-Prefix: /ds`
+  ##   "^/ds/.*$"     — RegularExpression path matching (RE2)
+  path: "/"
+  ## gateway.clientSettingsPolicy Configure connection behavior between client and NGINX
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/overview/custom-policies
+  ## The list of supported directives can be found here:
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/traffic-management/client-settings
+  ## The directives specified here will be applied to the HttpRoute object
+  clientSettingsPolicy:
+    body:
+      maxSize: "100m"
+  letsencrypt:
+    ## gateway.letsencrypt.enabled Enable cert-manager Issuer for Let's Encrypt via Gateway API
+    ## Used if `gateway.enabled` is set to `true` and `gateway.external.parentRefs` is not specified
+    ## Requires cert-manager (v1.14+) with the Gateway API feature flag enabled (`config.enableGatewayAPI=true`).
+    ## ref: https://cert-manager.io/docs/usage/gateway/
+    enabled: false
+    ## gateway.letsencrypt.clusterIssuerName Name of the generated ClusterIssuer
+    clusterIssuerName: "letsencrypt-prod-gw"
+    ## gateway.letsencrypt.email Your email address used for ACME registration
+    email: ""
+    ## gateway.letsencrypt.server The address of the Let's Encrypt server to which requests for certificates will be sent
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    ## gateway.letsencrypt.secretName Name of the Secret that stores the ACME account private key
+    secretName: "letsencrypt-prod-gw-private-key"
+
 ## Onlyoffice Docs ingress parameters
 ##
 ingress:
@@ -1601,29 +1717,6 @@ openshift:
     path: "/"
     ## openshift.route.wildcardPolicy Defines how wildcards are handled for the Route host (e.g., None, Subdomain)
     wildcardPolicy: None
-
-# Onlyoffice Docs HTTPRoute parameters
-##
-httproute:
-  ## httpRoute.enabled Enable the creation of an HTTPRoute for ONLYOFFICE Docs
-  enabled: false
-  ## httpRoute.annotations Map of annotations to add to the HTTPRoute
-  ## If set, these are merged with commonAnnotations, with httpRoute.annotations taking precedence.
-  annotations: {}
-  ## httpRoute.hostnames The hostnames for the ONLYOFFICE Docs HTTPRoute resource
-  hostnames: []
-  # - hostname1.example.com
-  # - hostname2.example.com
-  ## httpRoute.path The path for the ONLYOFFICE Docs HTTPRoute resource
-  path: "/"
-  ## httpRoute.parentRefs An array of parentRefs for the HTTPRoute, specifying the parent resources (e.g., Gateways) that should route traffic to ONLYOFFICE Docs
-  parentRefs: []
-  # - name: my-gateway-1
-  #   namespace: my-gateway-namespace
-  # - group: gateway.networking.k8s.io
-  #   kind: Gateway
-  #   name: my-gateway-2
-  #   namespace: my-gateway-namespace
   
 ## Grafana parameters
 ## See more details about installing Grafana here:
@@ -1634,6 +1727,10 @@ grafana:
   ## grafana.namespace The name of the namespace in which RBAC components and Grafana resources will be deployed
   ## If not set, the name will be taken from `namespaceOverride` or .Release.Namespace
   namespace: ""
+  ## grafana.gateway.enabled Enable the creation of an HTTPRoute rules for the Grafana
+  ## Used if you set `grafana.enabled` to `true` and want to use Gateway API to access Grafana
+  gateway:
+    enabled: false
   ## grafana.ingress.enabled Enable the creation of an ingress for the Grafana
   ## Used if you set `grafana.enabled` to `true` and want to use NGINX Ingress to access Grafana
   ## When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource

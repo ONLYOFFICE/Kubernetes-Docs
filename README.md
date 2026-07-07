@@ -44,8 +44,13 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [5.3.2.3 Expose ONLYOFFICE Docs via HTTPS](#5323-expose-onlyoffice-docs-via-https)
     + [5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5324-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
     + [5.3.2.5 Expose ONLYOFFICE Docs on a virtual path](#5325-expose-onlyoffice-docs-on-a-virtual-path)
-    + [5.3.3 Expose ONLYOFFICE Docs via route in OpenShift](#533-expose-onlyoffice-docs-via-route-in-openshift)
-    + [5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)](#534-expose-onlyoffice-docs-via-httproute-gateway-api)
+    + [5.3.3 Expose ONLYOFFICE Docs via Gateway API](#533-expose-onlyoffice-docs-via-gateway-api)
+    + [5.3.3.1 Installing Gateway API CRDs and NGINX Gateway Fabric](#5331-installing-gateway-api-crds-and-nginx-gateway-fabric)
+    + [5.3.3.2 Exposing ONLYOFFICE Docs via Gateway API (HTTP)](#5332-exposing-onlyoffice-docs-via-gateway-api-http)
+    + [5.3.3.3 Exposing ONLYOFFICE Docs via Gateway API (HTTPS)](#5333-exposing-onlyoffice-docs-via-gateway-api-https)
+    + [5.3.3.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5334-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
+    + [5.3.3.5 Expose ONLYOFFICE Docs on a virtual path](#5335-expose-onlyoffice-docs-on-a-virtual-path)
+    + [5.3.4 Expose ONLYOFFICE Docs via route in OpenShift](#534-expose-onlyoffice-docs-via-route-in-openshift)
   * [5.4 Admin Panel deployment (optional)](#54-admin-panel-deployment-optional)
   * [6. Scale ONLYOFFICE Docs (optional)](#6-scale-onlyoffice-docs-optional) 
       + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
@@ -60,7 +65,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [1. Deploy Grafana](#1-deploy-grafana)
     + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
     + [1.2 Deploy Grafana with the installation of ready-made dashboards](#12-deploy-grafana-with-the-installation-of-ready-made-dashboards)
-  * [2 Access to Grafana via Ingress](#2-access-to-grafana-via-ingress)
+  * [2. Access to Grafana via Gateway or Ingress](#2-access-to-grafana-via-gateway-or-ingress)
   * [3. View gathered metrics in Grafana](#3-view-gathered-metrics-in-grafana)
 
 ## Requirements
@@ -691,6 +696,26 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `service.port`                                              | ONLYOFFICE Docs service port                                                                                                                                                   | `8888`                                                                                    |
 | `service.sessionAffinity`                                   | [Session Affinity](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity) for ONLYOFFICE Docs service. If not set, `None` will be set as the default value | `""`                                                                                  |
 | `service.sessionAffinityConfig`                             | [Configuration](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout) for ONLYOFFICE Docs service Session Affinity. Used if the `service.sessionAffinity` is set | `{}`                                                                 |
+| `gateway.enabled`                                           | Enable the creation of a Gateway and HTTPRoute resources for the ONLYOFFICE Docs                                                                                                      | `false`                                                                                   |
+| `gateway.external.parentRefs`                               | An array required to identify an existing Gateway(s) resource for routing. If it is specified, the chart does NOT create its own Gateway resource. The elements specified here will be added to the `spec.parentRefs` of the HTTPRoute resource being created  | `[]`                                                                                    |
+| `gateway.annotations`                                       | Map of annotations to add to the Gateway and HTTPRoute resources. If set to, it takes priority over the `commonAnnotations`. You can also use `tpl` as the value for the key  | `{}`                                                                                      |
+| `gateway.gatewayClassName`                                  | Name of the GatewayClass to use. For NGINX Gateway Fabric the default class name is `nginx`                                                                                    | `nginx`                                                                                   |
+| `gateway.listeners.custom`                                  | Used to add custom listener settings. For example, to use the same Gateway resource for HTTPRoute routes from [other namespaces](https://gateway-api.sigs.k8s.io/docs/concepts/security/#1-route-binding) | `[]`                                                                                   |
+| `gateway.ssl.enabled`                                       | Enable TLS termination on the Gateway HTTPS listener(s)                                                                                                                        | `false`                                                                                   |
+| `gateway.ssl.secret`                                        | Name of the Kubernetes Secret that holds the TLS certificate. Used only when `gateway.ssl.enabled=true`. When `gateway.letsencrypt.enabled=true` this Secret is created and managed by cert-manager | `tls`                                                                |
+| `gateway.ssl.secretNamespace`                               | If you want to use an existing secret located in a different Namespace and containing a certificate,specify here the Namespace name and the secret file name in `gateway.ssl.secret`. To do this, you must have created a corresponding [ReferenceGrant](https://gateway-api.sigs.k8s.io/reference/api-types/referencegrant/) in the same Namespace as the secret | `""`                                                                 |
+| `gateway.ssl.redirect.enabled`                              | Enable HTTP -> HTTPS [redirect](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/https-termination/). For more information, see the comments in `values.yaml` in the `gateway.ssl.redirect` field             | `false`                                                                                   |
+| `gateway.ssl.redirect.statusCode`                               | HTTP status code returned by the redirect | `301`                                                                 |
+| `gateway.host`                                              | Hostname for the Gateway listener(s)                                                                                                                                           | `""`                                                                                      |
+| `gateway.tenants`                                           | Multiple hostnames for multi-tenant deployments. For each tenant, a pair of listeners (HTTP + HTTPS if `gateway.ssl.enabled`) is created. Takes priority over `gateway.host` if non-empty. If `gateway.ssl.enabled=true`, the Secret named in `gateway.ssl.secret` contain a certificate that is valid for all listed hostnames (e.g. a SAN cert or wildcard) | `[]` |
+| `gateway.pathType`                                          | Specifies the path type for the ONLYOFFICE Docs HTTPRoute. Allowed values are `Exact`, `PathPrefix` or `RegularExpression`                                                     | `PathPrefix`                                                                              |
+| `gateway.path`                                              | Specifies the path under which ONLYOFFICE Docs will be available. `"/"` serves at the root, `"/ds"` serves under `/ds` and injects `X-Forwarded-Prefix: /ds`, `"^/ds/.*$"` matches as RegularExpression | `/`                                                                              |
+| `gateway.clientSettingsPolicy`                              | Map of directives applied to the HTTPRoute via NGF `ClientSettingsPolicy`. The directives specified here are rendered as-is into `spec`. See [NGF custom policies](https://docs.nginx.com/nginx-gateway-fabric/overview/custom-policies) and [client settings reference](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/client-settings) | `body.maxSize: "100m"`        |
+| `gateway.letsencrypt.enabled`                               | Enable [cert-manager](https://cert-manager.io/docs/usage/gateway/) `ClusterIssuer` for Let's Encrypt via Gateway API. Used if `gateway.enabled` is set to `true` and `gateway.external.parentRefs` is not specified. Requires cert-manager (v1.14+) with the Gateway API feature flag enabled (`config.enableGatewayAPI=true`) | `false`                                                          |
+| `gateway.letsencrypt.clusterIssuerName`                     | Name of the generated ClusterIssuer                                                                                                                                            | `letsencrypt-prod-gw`                                                                     |
+| `gateway.letsencrypt.email`                                 | Your email address used for ACME registration                                                                                                                                  | `""`                                                                                      |
+| `gateway.letsencrypt.server`                                | The address of the Let's Encrypt server to which requests for certificates will be sent                                                                                        | `https://acme-v02.api.letsencrypt.org/directory`                                          |
+| `gateway.letsencrypt.secretName`                            | Name of the Secret that stores the ACME account private key                                                                                                                    | `letsencrypt-prod-gw-private-key`                                                         |
 | `ingress.enabled`                                           | Enable the creation of an ingress for the ONLYOFFICE Docs                                                                                                                      | `false`                                                                                   |
 | `ingress.annotations`                                       | Map of annotations to add to the Ingress. If set to, it takes priority over the `commonAnnotations`                                                                            | `nginx.org/client-max-body-size: 100m`                                                    |
 | `ingress.ingressClassName`                                  | Used to reference the IngressClass that should be used to implement this Ingress                                                                                               | `nginx`                                                                                   |
@@ -711,15 +736,11 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `openshift.route.host`                                      | OpenShift Route hostname for the ONLYOFFICE Docs route                                                                                                                         | `""`                                                                                      |
 | `openshift.route.path`                                      | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
 | `openshift.route.wildcardPolicy`                            | The policy for handling wildcard subdomains in the OpenShift Route. Allowed values are `None`, `Subdomain`                                                                     | `None`                                                                                    |
-| `httproute.enabled`                                     | Enable the creation of an HTTPRoute for the ONLYOFFICE Docs. Used if you have a Gateway API controller in your cluster | `false`                                                                                   |
-| `httproute.annotations`                                   | Map of annotations to add to the HTTPRoute. If set to, it takes priority over the `commonAnnotations`                                                                            | `{}`                                                                                      |
-| `httproute.hostnames`                                           | An array of hostnames. For example, `["docs.example.com"]` | `[]` |
-| `httproute.path`                                           | The path where ONLYOFFICE Docs will be available | `/` |
-| `httproute.parentRefs`                                           | References to the Gateway resource. It should contain at least the name and namespace of the Gateway that will route traffic to ONLYOFFICE Docs. For example: `[{name: my-gateway, namespace: default}]` | `[]` |
 | `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
 | `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
+| `grafana.gateway.enabled`                                   | Enable the creation of an HTTPRoute rules for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Gateway API to access Grafana | `false` |
 | `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true`. When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource. When `ingress.controllerName=nginx-ingress`: creates a `/grafana/` path in the main ONLYOFFICE Docs Ingress                                    | `false`                                                                                   |
-| `grafana.ingress.annotations`                               | **Deprecated**. Map of annotations to add to Grafana Ingress. Only used when `ingress.controllerName=ingress-nginx`. Not used with F5 NGINX Ingress. If set to, it takes priority over the `commonAnnotations` | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                       |
+| `grafana.ingress.annotations`                               | **Deprecated**. Map of annotations to add to Grafana Ingress. Only used when `ingress.controllerName=ingress-nginx`. Not used with F5 NGINX Ingress and Gateway API. If set to, it takes priority over the `commonAnnotations` | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                       |
 | `grafana.dashboard.enabled`                                 | Enable the installation of ready-made Grafana dashboards. Used if you set `grafana.enabled` to `true`                                                                          | `false`                                                                                   |
 | `podSecurityContext.enabled`                                | Enable security context for the pods                                                                                                                                           | `false`                                                                                   |
 | `podSecurityContext.converter.fsGroup`                      | Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Converter Pod                                                 | `101`                                                                                     |
@@ -915,7 +936,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 Specify each parameter using the `--set key=value[,key=value]` argument to helm install. For example,
 
 ```bash
-$ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
+$ helm install documentserver onlyoffice/docs --set gateway.enabled=true,gateway.ssl.enabled=true,gateway.host=docs.example.com
 ```
 
 This command gives expose ONLYOFFICE Docs via HTTPS.
@@ -945,7 +966,7 @@ To deploy metrics, set `metrics.enabled` to true:
 $ helm install documentserver onlyoffice/docs --set metrics.enabled=true
 ```
 
-If you want to use Grafana to visualize metrics, set `grafana.enabled` to `true`. If you want to use Nginx Ingress to access Grafana, set `grafana.ingress.enabled` to `true`:
+If you want to use Grafana to visualize metrics, set `grafana.enabled` to `true`. If you want to use Gateway API or Nginx Ingress to access Grafana, set `grafana.gateway.enabled` or `grafana.ingress.enabled` to `true`:
 
 ```bash
 $ helm install documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.ingress.enabled=true
@@ -1098,11 +1119,190 @@ The list of supported ingress controllers for virtual path configuration:
 * [NGINX Ingress by NGINX (F5)](https://github.com/nginx/kubernetes-ingress/)
 * [HAProxy Ingress by HAProxy](https://github.com/haproxytech/kubernetes-ingress/)
 
-#### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
-This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
+#### 5.3.3 Expose ONLYOFFICE Docs via Gateway API
 
-#### 5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)
-This type of exposure allows you to expose ONLYOFFICE Docs with HTTPRoute via Gateway API. For details, see the [GATEWAY.md](./docs/GATEWAY.md) guide.
+> The [Gateway API](https://gateway-api.sigs.k8s.io/) is the successor to the
+> Ingress API. This chart supports both — pick one,
+> or run them in parallel during migration.
+>
+> You can keep `ingress.enabled=true` and `gateway.enabled=true` at the same
+> time, but for production deployments choose one path.
+
+#### 5.3.3.1 Installing Gateway API CRDs and NGINX Gateway Fabric
+
+The Gateway API resources (Gateway, HTTPRoute, ReferenceGrant, …) are
+delivered as CRDs that you install once per cluster. Install the standard
+channel of the latest release:
+
+```bash
+$ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+```
+
+Install NGINX Gateway Fabric (NGF) via Helm using the OCI registry:
+
+```bash
+$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
+    --set nginxGateway.replicas=2 \
+    --set nginx.replicas=2 \
+    --create-namespace -n nginx-gateway
+```
+
+See the NGF documentation for additional installation options [here](https://docs.nginx.com/nginx-gateway-fabric/install/).
+
+Verify that the GatewayClass is available:
+
+```bash
+$ kubectl get gatewayclass
+NAME    CONTROLLER                                   ACCEPTED   AGE
+nginx   gateway.nginx.org/nginx-gateway-controller   True       1m
+```
+
+If you want a different Gateway API implementation (Envoy Gateway, Cilium, Istio, …), install it according to its own docs and set
+`gateway.gatewayClassName` accordingly.
+
+#### 5.3.3.2 Exposing ONLYOFFICE Docs via Gateway API (HTTP)
+
+*You should skip step[5.3.2.2](#5322-expose-onlyoffice-docs-via-http) if you are going to expose ONLYOFFICE Docs via HTTPS*
+
+This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to ONLYOFFICE Docs. 
+Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster.
+
+To expose ONLYOFFICE Docs over plain HTTP via Gateway API, set `gateway.enabled=true` and `gateway.host`:
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.host=docs.example.com
+```
+
+Note: The `gateway.host` field is optional. Access is also possible by IP address.
+
+Once the Gateway is programmed, NGF creates a dedicated NGINX data-plane Deployment and Service. Get the Gateway address:
+
+```bash
+$ kubectl get gateway documentserver \
+    -o jsonpath="{.status.addresses[*].value}"
+```
+
+Associate the `documentserver` gateway IP with your domain name through your DNS provider.
+
+In this case, ONLYOFFICE Docs will be available at `http://docs.example.com/`.
+
+#### 5.3.3.3 Exposing ONLYOFFICE Docs via Gateway API (HTTPS)
+
+This type of exposure allows you to enable internal TLS termination for ONLYOFFICE Docs.
+
+Create the `tls` secret with an ssl certificate inside.
+
+Put the ssl certificate and the private key into the `tls.crt` and `tls.key` files and then run:
+
+```bash
+$ kubectl create secret tls tls \
+  --cert=./tls.crt \
+  --key=./tls.key
+```
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.ssl.enabled=true \
+    --set gateway.ssl.secret=tls \
+    --set gateway.host=docs.example.com
+
+```
+The `gateway.host` field is required. Specify your domain name in it.
+
+Once the Gateway is programmed, NGF creates a dedicated NGINX data-plane Deployment and Service. Get the Gateway address:
+
+```bash
+$ kubectl get gateway documentserver \
+    -o jsonpath="{.status.addresses[*].value}"
+```
+
+Associate the `documentserver` gateway IP with your domain name through your DNS provider.
+
+After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
+
+#### 5.3.3.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate
+
+- Add Helm repositories:
+
+  ```bash
+  $ helm repo add jetstack https://charts.jetstack.io
+  $ helm repo update
+  ```
+
+- Install cert-manager with Gateway API support enabled:
+
+  ```bash
+  $ helm install cert-manager --version v1.20.2 jetstack/cert-manager \
+      --namespace cert-manager \
+      --create-namespace \
+      --set crds.enabled=true \
+      --set crds.keep=false \
+      --set config.enableGatewayAPI=true
+  ```
+The `config.enableGatewayAPI=true` flag is required so that cert-manager will reconcile Gateway resources and create temporary HTTPRoutes for the ACME HTTP-01 challenge.
+
+Then install the chart with TLS and Let's Encrypt enabled:
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.ssl.enabled=true \
+    --set gateway.ssl.secret=tls \
+    --set gateway.host=docs.example.com \
+    --set gateway.letsencrypt.enabled=true \
+    --set gateway.letsencrypt.email=you@example.com
+```
+
+The `gateway.host` and `gateway.letsencrypt.email` fields is required. Specify your domain name and email address in it, respectively.
+
+For multi-tenant deployments, use `gateway.tenants` instead of `gateway.host`:
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.ssl.enabled=true \
+    --set gateway.ssl.secret=tls \
+    --set "gateway.tenants={tenant1.example.com,tenant2.example.com}" \
+    --set gateway.letsencrypt.enabled=true \
+    --set gateway.letsencrypt.email=you@example.com
+```
+
+Once the Gateway is programmed, NGF creates a dedicated NGINX data-plane Deployment and Service. Get the Gateway address:
+
+```bash
+$ kubectl get gateway documentserver \
+    -o jsonpath="{.status.addresses[*].value}"
+```
+
+Associate the `documentserver` gateway IP with your domain name through your DNS provider.
+
+After that, the certificate must be successfully issued.
+To view the state of the certificate issuing, run the following command:
+
+```bash
+$ kubectl describe certificate tls
+```
+
+The chart creates a Gateway with both HTTP (port 80) and HTTPS (port 443) listeners. The HTTP listener is required so that the ACME HTTP-01 solver can answer challenge requests. cert-manager creates a temporary HTTPRoute through the same Gateway for the duration of the challenge, then writes the issued certificate into the Secret named in `gateway.ssl.secret`.
+
+After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
+
+#### 5.3.3.5 Expose ONLYOFFICE Docs on a virtual path
+This type of exposure allows you to expose ONLYOFFICE Docs on a virtual path, for example, `http://your-domain-name/docs`.
+To expose ONLYOFFICE Docs via Gateway on a virtual path, set the `gateway.enabled` and `gateway.path` parameters.
+If you set `gateway.path=/docs`, it will be at `http://documentserver-address/docs/` and `X-Forwarded-Prefix: /docs` will be injected for upstream.
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.path=/docs
+```
+
+#### 5.3.4 Expose ONLYOFFICE Docs via route in OpenShift
+This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
 
 ### 5.4 Admin Panel deployment (optional)
 
@@ -1385,17 +1585,27 @@ Note: You can see the description of the ONLYOFFICE Docs metrics that are visual
 
 See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
 
-### 2 Access to Grafana via Ingress
+### 2. Access to Grafana via Gateway or Ingress
 
-Note: It is assumed that step [#5.3.2.1](#5321-installing-f5-nginx-ingress-controller) has already been completed.
+- Access via Gateway
 
-**Grafana Ingress Behavior Depends on Ingress Controller Type:**
+  Note: It is assumed that step [#5.3.3.1](#5331-installing-gateway-api-crds-and-nginx-gateway-fabric) has already been completed.
 
-**F5 NGINX Ingress (`nginx-ingress`, recommended):** The Grafana Ingress resource is NOT created as a separate ingress. Instead, Grafana is accessed through the main ONLYOFFICE Docs ingress at the `/grafana/` path. This configuration uses annotations with the `nginx.org/` prefix from the main `ingress.annotations` parameter. The `grafana.ingress.annotations` parameter is not used in this case.
+  If ONLYOFFICE Docs was installed with the parameter `grafana.gateway.enabled` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://documentserver-address/grafana/`
 
-For F5 NGINX Ingress users, access to Grafana will be at: `http(s)://your-domain-name/grafana/`
+  If Gateway was installed using a secure connection (step [#5.3.3.3](#5333-exposing-onlyoffice-docs-via-gateway-api-https) or [#5.3.3.4](#5334-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)), then access to Grafana will be at: `https://your-domain-name/grafana/`
 
-- **Legacy Kubernetes NGINX Ingress (`ingress-nginx`, deprecated):** If you are still using the deprecated community `ingress-nginx` controller, you can create a separate Grafana Ingress resource by setting `grafana.ingress.enabled` to `true`. 
+- Access via Ingress
+
+  Note: It is assumed that step [#5.3.2.1](#5321-installing-f5-nginx-ingress-controller) has already been completed.
+
+  **Grafana Ingress Behavior Depends on Ingress Controller Type:**
+
+  **F5 NGINX Ingress (`nginx-ingress`, recommended):** The Grafana Ingress resource is NOT created as a separate ingress. Instead, Grafana is accessed through the main ONLYOFFICE Docs ingress at the `/grafana/` path. This configuration uses annotations with the `nginx.org/` prefix from the main `ingress.annotations` parameter. The `grafana.ingress.annotations` parameter is not used in this case.
+
+  For F5 NGINX Ingress users, access to Grafana will be at: `http(s)://your-domain-name/grafana/`
+
+  - **Legacy Kubernetes NGINX Ingress (`ingress-nginx`, deprecated):** If you are still using the deprecated community `ingress-nginx` controller, you can create a separate Grafana Ingress resource by setting `grafana.ingress.enabled` to `true`.
 
 ### 3. View gathered metrics in Grafana
 
