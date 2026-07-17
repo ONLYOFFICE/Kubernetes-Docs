@@ -1,0 +1,17 @@
+statsd:
+  mappingConfig: |
+    mappings:
+      # ds.coauth.connections is a gauge reported per-pod (labeled by "replica").
+      # Without a TTL, a series for a replica that no longer exists (e.g. after
+      # a rolling update / pod restart) stays in the exporter and keeps showing
+      # up in Grafana/Prometheus forever, since nothing ever tells the exporter
+      # to drop it. TTL makes the exporter forget a label combination if it
+      # hasn't received a fresh sample for that long.
+      #
+      # 3m is used as a safety margin over the ~30s statsd.eventFlushInterval
+      # docservice reports on - adjust ttl if eventFlushInterval changes a lot,
+      # or if you want it to expire faster/slower after a pod goes away.
+      - match: "ds.coauth.connections"
+        name: "ds_coauth_connections"
+        match_metric_type: gauge
+        ttl: 3m
