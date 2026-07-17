@@ -1119,6 +1119,8 @@ The list of supported ingress controllers for virtual path configuration:
 * [NGINX Ingress by NGINX (F5)](https://github.com/nginx/kubernetes-ingress/)
 * [HAProxy Ingress by HAProxy](https://github.com/haproxytech/kubernetes-ingress/)
 
+For complete controller-specific configuration examples, see the [Ingress guide](docs/INGRESS.md).
+
 #### 5.3.3 Expose ONLYOFFICE Docs via Gateway API
 
 > The [Gateway API](https://gateway-api.sigs.k8s.io/) is the successor to the
