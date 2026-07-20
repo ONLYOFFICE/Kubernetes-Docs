@@ -303,6 +303,7 @@ $ helm install statsd-exporter -f https://raw.githubusercontent.com/ONLYOFFICE/K
   --set statsd.tcpPort=8126 \
   --set statsd.eventFlushInterval=30000ms
 ```
+
 The statsd-mapping.yaml file configures a ttl for the ds_coauth_connections metric. This metric is a per-pod gauge (labeled by replica), and without a ttl a series for a pod that no longer exists (e.g. after a rolling update) is never removed and keeps showing up in Grafana/Prometheus indefinitely. With the ttl set, the exporter drops a label combination once it hasn't received a fresh sample for that long. Adjust the ttl value in the file if you want stale replicas to expire faster or slower.
 See more details about installing Prometheus StatsD exporter via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-statsd-exporter).
 
