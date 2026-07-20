@@ -306,6 +306,10 @@ spec:
           - -p
           {{- end }}
           env:
+          - name: REPLICA_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
           - name: DB_PWD
             valueFrom:
               secretKeyRef:
