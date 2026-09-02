@@ -16,24 +16,7 @@ metadata:
     {{- include "ds.annotations.commonAnnotations" ( dict "keyName" .Values.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
 data:
-  get_dashboard.sh: |-
-    #!/bin/bash
-    CM=(dashboard-node-exporter dashboard-deployment dashboard-redis dashboard-rabbitmq dashboard-postgresql dashboard-documentserver dashboard-cluster-resourses)
-    wget https://grafana.com/api/dashboards/1860/revisions/22/download -O /scripts/dashboard-node-exporter.json
-    wget https://grafana.com/api/dashboards/8588/revisions/1/download -O /scripts/dashboard-deployment.json
-    wget https://grafana.com/api/dashboards/11835/revisions/1/download -O /scripts/dashboard-redis.json
-    wget https://grafana.com/api/dashboards/10991/revisions/8/download -O /scripts/dashboard-rabbitmq.json
-    wget https://grafana.com/api/dashboards/9628/revisions/6/download -O /scripts/dashboard-postgresql.json
-    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/documentserver-statsd-exporter.json -O /scripts/dashboard-documentserver.json
-    wget https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/kubernetes-cluster-resourses.json -O /scripts/dashboard-cluster-resourses.json
-    sed -i 's/${DS_PROMETHEUS}/Prometheus/g' /scripts/*.json
-    sed -i 's/$DS_PROMETHEUS/Prometheus/g' /scripts/*.json
-    for i in "${CM[@]}"; do
-      kubectl get cm ${i}
-      if [[ "$?" -ne 0 ]]; then
-        kubectl create configmap ${i} --from-file=/scripts/${i}.json
-      else
-        echo -e "\e[0;32m ConfigMap ${i} already exists. Skipping ... \e[0m"
-      fi
-    done
+  dashboards.json: |-
+  {{ .Values.grafana.dashboard.list | toJson | indent 4 }}
+{{ (.Files.Glob "sources/scripts/get_dashboard.py").AsConfig | indent 2 }}
 {{- end }}

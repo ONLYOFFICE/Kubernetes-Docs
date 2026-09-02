@@ -1,5 +1,5 @@
 extraScrapeConfigs: |
-  - job_name: 'statsd'
+  - job_name: 'documentserver-statsd'
     scrape_interval: 30s
     static_configs:
       - targets:

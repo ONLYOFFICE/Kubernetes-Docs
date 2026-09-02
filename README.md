@@ -9,8 +9,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - [Deploy prerequisites](#deploy-prerequisites)
   * [1. Add Helm repositories](#1-add-helm-repositories)
   * [2. Install Persistent Storage](#2-install-persistent-storage)
-  * [3. Deploy RabbitMQ](#3-deploy-rabbitmq)
-  * [4. Deploy Redis](#4-deploy-redis)
+  * [3. Deploy Message Broker](#3-deploy-message-broker)
+  * [4. Deploy Key-Value datastore](#4-deploy-key-value-datastore)
   * [5. Deploy Database](#5-deploy-database)
   * [6. Deploy StatsD exporter](#6-deploy-statsd-exporter)
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
@@ -140,7 +140,6 @@ Note: For 2000 connections and above, dependencies (NFS, RabbitMQ, Redis, Postgr
 ### 1. Add Helm repositories
 
 ```bash
-$ helm repo add bitnami https://charts.bitnami.com/bitnami
 $ helm repo add nfs-server-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
 $ helm repo add onlyoffice https://download.onlyoffice.com/charts/stable
 $ helm repo update
@@ -182,91 +181,24 @@ Note: The default `nfs` Persistent Volume Claim is 8Gi. You can change it in the
 *Also, PersistentVolume must have as the owner the user from whom the ONLYOFFICE Docs will be started. By default it is `ds` (101:101).*
 
 Note: If you want to enable `WOPI`, please set the parameter `wopi.enabled=true`. In this case Persistent Storage must be connected to the cluster nodes with the disabled caching attributes for the mounted directory for the clients. For NFS Server Provisioner it can be achieved by adding `noac` option to the parameter `storageClass.mountOptions`. Please find more information [here](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner/blob/master/charts/nfs-server-provisioner/values.yaml#L83).
-### 3. Deploy RabbitMQ
 
-To install RabbitMQ to your cluster, run the following command:
+### 3. Deploy Message Broker
 
-```bash
-$ helm install rabbitmq --version 16.0.14 bitnami/rabbitmq \
-  --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set resourcesPreset=none \
-  --set image.repository=bitnamilegacy/rabbitmq \
-  --set image.tag=4.1.3-debian-12-r1 \
-  --set global.security.allowInsecureImages=true \
-  --set metrics.enabled=false
-```
+As a message broker, you can use RabbitMQ or ActiveMQ.
 
-Note: Set the `metrics.enabled=true` to enable exposing RabbitMQ metrics to be gathered by Prometheus.
+To install RabbitMQ to your cluster, you can use [this](./docs/DEPENDENCIES.md#deploy-rabbitmq) step.
 
-See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#rabbitmq).
+### 4. Deploy Key-Value Datastore
 
-### 4. Deploy Redis
+As a key-value datastore, you can use Redis or Valkey.
 
-To install Redis to your cluster, run the following command:
-
-```bash
-$ helm install redis --version 22.0.7 bitnami/redis \
-  --set architecture=standalone \
-  --set master.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set master.resourcesPreset=none \
-  --set global.security.allowInsecureImages=true \
-  --set image.repository=bitnamilegacy/redis \
-  --set image.tag=8.2.1-debian-12-r0 \
-  --set metrics.enabled=false
-```
-
-Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/redis-exporter` and `metrics.image.tag=1.76.0-debian-12-r0`.
-
-See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/redis).
+To install Valkey to your cluster, you can use [this](./docs/DEPENDENCIES.md#deploy-valkey) step.
 
 ### 5. Deploy Database
 
-As a database server, you can use PostgreSQL, MySQL or MariaDB
+As a database server, you can use PostgreSQL, MySQL, MariaDB, Oracle Database, Microsoft SQL Server or Dameng Database.
 
-**If PostgreSQL is selected as the database server, then follow these steps**
-
-To install PostgreSQL to your cluster, run the following command:
-
-```
-$ helm install postgresql --version 16.7.27 bitnami/postgresql \
-  --set auth.database=postgres \
-  --set primary.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set primary.persistence.size=PERSISTENT_SIZE \
-  --set primary.resourcesPreset=none \
-  --set image.repository=bitnamilegacy/postgresql \
-  --set global.security.allowInsecureImages=true \
-  --set image.tag=17.6.0-debian-12-r2 \
-  --set metrics.enabled=false
-```
-
-Note: Set the `metrics.enabled=true` to enable exposing Database metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/postgres-exporter` and `metrics.image.tag=0.17.1-debian-12-r16`.
-
-See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/postgresql#postgresql).
-
-**If MySQL is selected as the database server, then follow these steps**
-
-To install MySQL to your cluster, run the following command:
-
-```
-$ helm install mysql --version 14.0.3 bitnami/mysql \
-  --set auth.database=onlyoffice \
-  --set auth.username=onlyoffice \
-  --set primary.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set primary.persistence.size=PERSISTENT_SIZE \
-  --set primary.resourcesPreset=none \
-  --set image.repository=bitnamilegacy/mysql \
-  --set global.security.allowInsecureImages=true \
-  --set image.tag=9.4.0-debian-12-r1 \
-  --set metrics.enabled=false
-```
-
-See more details about installing MySQL via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/mysql).
-
-Here `PERSISTENT_SIZE` is a size for the Database persistent volume. For example: `8Gi`.
-
-It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
-
-Note: Set the `metrics.enabled=true` to enable exposing Database metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/mysqld-exporter` and `metrics.image.tag=0.17.2-debian-12-r16`.
+To install PostgreSQL to your cluster, you can use [this](./docs/DEPENDENCIES.md#deploy-postgresql-database) step.
 
 ### 6. Deploy StatsD exporter
 
@@ -285,9 +217,11 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ helm install prometheus -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/extraScrapeConfigs.yaml prometheus-community/prometheus \
+$ helm install prometheus -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/extraScrapeConfigs.yaml prometheus-community/prometheus \
   --set server.global.scrape_interval=1m
 ```
+
+Note: If you also want to add a scrape config to collect metrics from the dependencies installed according to the manual [DEPENDENCIES.md](./docs/DEPENDENCIES.md) then change the path to `https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/extraScrapeConfigsWithDep.yaml`.
 
 To change the scrape interval, specify the `server.global.scrape_interval` parameter.
 
@@ -559,8 +493,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `docservice.image.pullPolicy`                               | Docservice container image pull policy                                                                                                                                         | `IfNotPresent`                                                                            |
 | `docservice.containerSecurityContext.enabled`               | Enable security context for the Docservice container                                                                                                                           | `false`                                                                                   |
 | `docservice.lifecycleHooks`                                 | Defines the Docservice [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                      |
-| `docservice.resources.requests`                             | The requested resources for the Docservice container                                                                                                                           | `{}`                                                                                      |
-| `docservice.resources.limits`                               | The resources limits for the Docservice container                                                                                                                              | `{}`                                                                                      |
+| `docservice.resources.requests`                             | The requested resources for the Docservice container                                                                                                                           | `memory: "256Mi", cpu: "200m"`                                                                                      |
+| `docservice.resources.limits`                               | The resources limits for the Docservice container                                                                                                                              | `memory: "6Gi", cpu: "4000m"`                                                                                      |
 | `docservice.extraEnvVars`                                   | An array with extra env variables for the Docservice container                                                                                                                 | `[]`                                                                                      |
 | `docservice.extraVolumes`                                   | An array with extra volumes for the Docservice Pod                                                                                                                             | `[]`                                                                                      |
 | `docservice.extraVolumeMounts`                              | An array with extra volume mounts for the Docservice container                                                                                                                 | `[]`                                                                                      |
@@ -596,8 +530,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `proxy.image.pullPolicy`                                    | Docservice Proxy container image pull policy                                                                                                                                   | `IfNotPresent`                                                                            |
 | `proxy.containerSecurityContext.enabled`                    | Enable security context for the Proxy container                                                                                                                                | `false`                                                                                   |
 | `proxy.lifecycleHooks`                                      | Defines the Proxy [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                           |
-| `proxy.resources.requests`                                  | The requested resources for the Proxy container                                                                                                                                | `{}`                                                                                      |
-| `proxy.resources.limits`                                    | The resources limits for the Proxy container                                                                                                                                   | `{}`                                                                                      |
+| `proxy.resources.requests`                                  | The requested resources for the Proxy container                                                                                                                                | `memory: "256Mi", cpu: "100m"`                                                                                      |
+| `proxy.resources.limits`                                    | The resources limits for the Proxy container                                                                                                                                   | `memory: "4Gi", cpu: "4000m"`                                                                                      |
 | `proxy.extraEnvVars`                                        | An array with extra env variables for the Proxy container                                                                                                                      | `[]`                                                                                      |
 | `proxy.extraVolumeMounts`                                   | An array with extra volume mounts for the Proxy container                                                                                                                      | `[]`                                                                                      |
 | `proxy.readinessProbe.enabled`                              | Enable readinessProbe for  Proxy container                                                                                                                                     | `true`                                                                                    |
@@ -621,8 +555,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `converter.image.pullPolicy`                                | Converter container image pull policy                                                                                                                                          | `IfNotPresent`                                                                            |
 | `converter.containerSecurityContext.enabled`                | Enable security context for the Converter container                                                                                                                            | `false`                                                                                   |
 | `converter.lifecycleHooks`                                  | Defines the Converter [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                       |
-| `converter.resources.requests`                              | The requested resources for the Converter container                                                                                                                            | `{}`                                                                                      |
-| `converter.resources.limits`                                | The resources limits for the Converter container                                                                                                                               | `{}`                                                                                      |
+| `converter.resources.requests`                              | The requested resources for the Converter container                                                                                                                            | `memory: "256Mi", cpu: "200m"`                                                                                      |
+| `converter.resources.limits`                                | The resources limits for the Converter container                                                                                                                               | `memory: "6Gi", cpu: "4000m"`                                                                                      |
 | `converter.extraEnvVars`                                    | An array with extra env variables for the Converter container                                                                                                                  | `[]`                                                                                      |
 | `converter.extraVolumes`                                    | An array with extra volumes for the Converter Pod                                                                                                                              | `[]`                                                                                      |
 | `converter.extraVolumeMounts`                               | An array with extra volume mounts for the Converter container                                                                                                                  | `[]`                                                                                      |
@@ -654,8 +588,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `adminpanel.image.pullPolicy`                               | Admin panel container image pull policy                                                                                                                                          | `IfNotPresent`                                                                          |
 | `adminpanel.containerSecurityContext.enabled`               | Enable security context for the Admin panel container                                                                                                                            | `false`                                                                                 |
 | `adminpanel.lifecycleHooks`                                 | Defines the Admin panel [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                     |
-| `adminpanel.resources.requests`                             | The requested resources for the Admin panel container                                                                                                                            | `{}`                                                                                    |
-| `adminpanel.resources.limits`                               | The resources limits for the Admin panel container                                                                                                                               | `{}`                                                                                    |
+| `adminpanel.resources.requests`                             | The requested resources for the Admin panel container                                                                                                                            | `memory: "256Mi", cpu: "200m"`                                                                                    |
+| `adminpanel.resources.limits`                               | The resources limits for the Admin panel container                                                                                                                               | `memory: "4Gi", cpu: "4000m"`                                                                                    |
 | `adminpanel.extraEnvVars`                                   | An array with extra env variables for the Admin panel container                                                                                                                  | `[]`                                                                                    |
 | `adminpanel.extraVolumes`                                   | An array with extra volumes for the Admin panel Pod                                                                                                                              | `[]`                                                                                    |
 | `adminpanel.extraVolumeMounts`                              | An array with extra volume mounts for the Admin panel container                                                                                                                  | `[]`                                                                                    |
@@ -677,8 +611,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `example.image.pullPolicy`                                  | Example container image pull policy                                                                                                                                            | `IfNotPresent`                                                                            |
 | `example.containerSecurityContext.enabled`                  | Enable security context for the Example container                                                                                                                              | `false`                                                                                   |
 | `example.dsUrl`                                             | ONLYOFFICE Docs external address. It should be changed only if it is necessary to check the operation of the conversion in Example (e.g. http://\<documentserver-address\>/)   | `/`                                                                                       |
-| `example.resources.requests`                                | The requested resources for the Example container                                                                                                                              | `{}`                                                                                      |
-| `example.resources.limits`                                  | The resources limits for the Example container                                                                                                                                 | `{}`                                                                                      |
+| `example.resources.requests`                                | The requested resources for the Example container                                                                                                                              | `memory: "128Mi", cpu: "100m"`                                                                                      |
+| `example.resources.limits`                                  | The resources limits for the Example container                                                                                                                                 | `memory: "4Gi", cpu: "4000m"`                                                                                      |
 | `example.extraEnvVars`                                      | An array with extra env variables for the Example container                                                                                                                    | `[]`                                                                                      |
 | `example.extraConf.configMap`                               | The name of the ConfigMap containing the json file that override the default values. See an example of creation [here](https://github.com/ONLYOFFICE/Kubernetes-Docs?tab=readme-ov-file#71-create-a-configmap-containing-a-json-file) | `""`                               |
 | `example.extraConf.filename`                                | The name of the json file that contains custom values. Must be the same as the `key` name in `example.extraConf.ConfigMap`                                                     | `local.json`                                                                              |
@@ -705,7 +639,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `gateway.ssl.enabled`                                       | Enable TLS termination on the Gateway HTTPS listener(s)                                                                                                                        | `false`                                                                                   |
 | `gateway.ssl.secret`                                        | Name of the Kubernetes Secret that holds the TLS certificate. Used only when `gateway.ssl.enabled=true`. When `gateway.letsencrypt.enabled=true` this Secret is created and managed by cert-manager | `tls`                                                                |
 | `gateway.ssl.secretNamespace`                               | If you want to use an existing secret located in a different Namespace and containing a certificate,specify here the Namespace name and the secret file name in `gateway.ssl.secret`. To do this, you must have created a corresponding [ReferenceGrant](https://gateway-api.sigs.k8s.io/reference/api-types/referencegrant/) in the same Namespace as the secret | `""`                                                                 |
-| `gateway.ssl.redirect.enabled`                              | Enable HTTP -> HTTPS [redirect](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/https-termination/). For more information, see the comments in `values.yaml` in the `gateway.ssl.redirect` field             | `false`                                                                                   |
+| `gateway.ssl.redirect.enabled`                              | Enable HTTP -> HTTPS [redirect](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/https-termination/). For more information, see the comments in [values.yaml](values.yaml) in the `gateway.ssl.redirect` field             | `false`                                                                                   |
 | `gateway.ssl.redirect.statusCode`                               | HTTP status code returned by the redirect | `301`                                                                 |
 | `gateway.host`                                              | Hostname for the Gateway listener(s)                                                                                                                                           | `""`                                                                                      |
 | `gateway.tenants`                                           | Multiple hostnames for multi-tenant deployments. For each tenant, a pair of listeners (HTTP + HTTPS if `gateway.ssl.enabled`) is created. Takes priority over `gateway.host` if non-empty. If `gateway.ssl.enabled=true`, the Secret named in `gateway.ssl.secret` contain a certificate that is valid for all listed hostnames (e.g. a SAN cert or wildcard) | `[]` |
@@ -743,6 +677,11 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true`. When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource. When `ingress.controllerName=nginx-ingress`: creates a `/grafana/` path in the main ONLYOFFICE Docs Ingress                                    | `false`                                                                                   |
 | `grafana.ingress.annotations`                               | **Deprecated**. Map of annotations to add to Grafana Ingress. Only used when `ingress.controllerName=ingress-nginx`. Not used with F5 NGINX Ingress and Gateway API. If set to, it takes priority over the `commonAnnotations` | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                       |
 | `grafana.dashboard.enabled`                                 | Enable the installation of ready-made Grafana dashboards. Used if you set `grafana.enabled` to `true`                                                                          | `false`                                                                                   |
+| `grafana.dashboard.list`                                    | Defines the list of dashboards that will be added to Grafana. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.dashboard.list` field       | `grafana.dashboard.list[].name, grafana.dashboard.list[].url`                             |
+| `grafana.sidecar.datasources.label`                         | The label set on the `grafana-datasource` Secret. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.sidecar` field                          | `grafana_datasource`                                                                      |
+| `grafana.sidecar.datasources.labelValue`                    | The value of the label set on the `grafana-datasource` Secret. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.sidecar` field             | `docs`                                                                                    |
+| `grafana.sidecar.dashboards.label`                          | The label set on the `dashboard-*` ConfigMaps. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.sidecar` field                             | `grafana_dashboard`                                                                       |
+| `grafana.sidecar.dashboards.labelValue`                     | The value of the label set on the `dashboard-*` ConfigMaps. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.sidecar` field                | `docs`                                                                                    |
 | `podSecurityContext.enabled`                                | Enable security context for the pods                                                                                                                                           | `false`                                                                                   |
 | `podSecurityContext.converter.fsGroup`                      | Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Converter Pod                                                 | `101`                                                                                     |
 | `podSecurityContext.docservice.fsGroup`                     | Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Docservice Pod                                                | `101`                                                                                     |
@@ -1092,7 +1031,7 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
   ```
 - Installing cert-manager
   ```bash
-  $ helm install cert-manager --version v1.17.4 jetstack/cert-manager \
+  $ helm install cert-manager --version v1.20.2 jetstack/cert-manager \
     --namespace cert-manager \
     --create-namespace \
     --set crds.enabled=true \
@@ -1520,15 +1459,13 @@ Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been
 To install Grafana to your cluster, run the following command:
 
 ```bash
-$ helm install grafana --version 12.1.8 bitnami/grafana \
-  --set service.ports.grafana=80 \
-  --set config.useGrafanaIniFile=true \
-  --set config.grafanaIniConfigMap=grafana-ini \
-  --set datasources.secretName=grafana-datasource \
-  --set resourcesPreset=none \
-  --set image.repository=bitnamilegacy/grafana \
-  --set image.tag=12.1.1-debian-12-r1 \
-  --set global.security.allowInsecureImages=true
+$ helm install grafana oci://ghcr.io/grafana-community/helm-charts/grafana --version 12.11.2 \
+  --set service.port=80 \
+  --set 'grafana\.ini.server.root_url=%(protocol)s://%(domain)s:%(http_port)s/grafana/' \
+  --set 'grafana\.ini.server.serve_from_sub_path=true' \
+  --set sidecar.datasources.enabled=true \
+  --set sidecar.datasources.label=grafana_datasource \
+  --set-string sidecar.datasources.labelValue=docs
 ```
 
 #### 1.2 Deploy Grafana with the installation of ready-made dashboards
@@ -1545,32 +1482,16 @@ the necessary edits will be made to them and configmap will be created from them
 To install Grafana to your cluster, run the following command:
 
 ```bash
-$ helm install grafana --version 12.1.8 bitnami/grafana \
-  --set service.ports.grafana=80 \
-  --set config.useGrafanaIniFile=true \
-  --set config.grafanaIniConfigMap=grafana-ini \
-  --set datasources.secretName=grafana-datasource \
-  --set resourcesPreset=none \
-  --set image.repository=bitnamilegacy/grafana \
-  --set image.tag=12.1.1-debian-12-r1 \
-  --set global.security.allowInsecureImages=true \
-  --set dashboardsProvider.enabled=true \
-  --set dashboardsConfigMaps[0].configMapName=dashboard-node-exporter \
-  --set dashboardsConfigMaps[0].fileName=dashboard-node-exporter.json \
-  --set dashboardsConfigMaps[1].configMapName=dashboard-deployment \
-  --set dashboardsConfigMaps[1].fileName=dashboard-deployment.json \
-  --set dashboardsConfigMaps[2].configMapName=dashboard-redis \
-  --set dashboardsConfigMaps[2].fileName=dashboard-redis.json \
-  --set dashboardsConfigMaps[3].configMapName=dashboard-rabbitmq \
-  --set dashboardsConfigMaps[3].fileName=dashboard-rabbitmq.json \
-  --set dashboardsConfigMaps[4].configMapName=dashboard-postgresql \
-  --set dashboardsConfigMaps[4].fileName=dashboard-postgresql.json \
-  --set dashboardsConfigMaps[5].configMapName=dashboard-nginx-ingress \
-  --set dashboardsConfigMaps[5].fileName=dashboard-nginx-ingress.json \
-  --set dashboardsConfigMaps[6].configMapName=dashboard-documentserver \
-  --set dashboardsConfigMaps[6].fileName=dashboard-documentserver.json \
-  --set dashboardsConfigMaps[7].configMapName=dashboard-cluster-resourses \
-  --set dashboardsConfigMaps[7].fileName=dashboard-cluster-resourses.json
+$ helm install grafana oci://ghcr.io/grafana-community/helm-charts/grafana --version 12.11.2 \
+  --set service.port=80 \
+  --set 'grafana\.ini.server.root_url=%(protocol)s://%(domain)s:%(http_port)s/grafana/' \
+  --set 'grafana\.ini.server.serve_from_sub_path=true' \
+  --set sidecar.datasources.enabled=true \
+  --set sidecar.datasources.label=grafana_datasource \
+  --set-string sidecar.datasources.labelValue=docs \
+  --set sidecar.dashboards.enabled=true \
+  --set sidecar.dashboards.label=grafana_dashboard \
+  --set-string sidecar.dashboards.labelValue=docs
 ```
 
 After executing this command, the following dashboards will be imported into Grafana:
@@ -1586,7 +1507,7 @@ After executing this command, the following dashboards will be imported into Gra
 
 Note: You can see the description of the ONLYOFFICE Docs metrics that are visualized in Grafana [here](https://github.com/ONLYOFFICE/Kubernetes-Docs/wiki/Document-Server-Metrics).
 
-See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
+See more details about installing Grafana via Helm [here](https://github.com/grafana/helm-charts/tree/main/charts/grafana).
 
 ### 2. Access to Grafana via Gateway or Ingress
 
@@ -1619,7 +1540,7 @@ Go to the address `http(s)://your-domain-name/grafana/`
 To get the password, run the following command:
 
 ```
-$ kubectl get secret grafana-admin --namespace default -o jsonpath="{.data.GF_SECURITY_ADMIN_PASSWORD}" | base64 --decode
+$ kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
 In the dashboard section, you will see the added dashboards that will display the metrics received from Prometheus.

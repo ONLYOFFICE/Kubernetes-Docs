@@ -477,7 +477,7 @@ customPlugins:
     ## customPlugins.defaultPlugins.list Defines which "plugins" from the default list will be installed on the server and in the `Plugins` menu
     ## It is executed if the `customPlugins.build` is set to `true`
     ## Example:
-    ## emptyPluginsDir:
+    ## list:
     ## - ai
     ## - photoeditor
     list: []
@@ -746,15 +746,12 @@ docservice:
   ## docservice.resources.requests The requested resources for the docservice container
   ## docservice.resources.limits The resources limits for the docservice container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "256Mi"
-    ##   cpu: "100m"
-    requests: {}
-    ## limits:
-    ##   memory: "4Gi"
-    ##   cpu: "2000m"
-    limits: {}
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "6Gi"
+      cpu: "4000m"
   ## docservice.extraEnvVars An array with extra env variables for the Docservice container
   ## Example:
   ## extraEnvVars:
@@ -927,15 +924,12 @@ proxy:
   ## proxy.resources.requests The requested resources for the proxy container
   ## proxy.resources.limits The resources limits for the proxy container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "256Mi"
-    ##   cpu: "100m"
-    requests: {}
-    ## limits:
-    ##   memory: "4Gi"
-    ##   cpu: "2000m"
-    limits: {}
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "4Gi"
+      cpu: "4000m"
   ## proxy.extraEnvVars An array with extra env variables for the Proxy container
   ## Example:
   ## extraEnvVars:
@@ -1151,15 +1145,12 @@ converter:
   ## converter.resources.requests The requested resources for the converter container
   ## converter.resources.limits The resources limits for the converter container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "256Mi"
-    ##   cpu: "200m"
-    requests: {}
-    ## limits:
-    ##   memory: "6Gi"
-    ##   cpu: "2000m"
-    limits: {}
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "6Gi"
+      cpu: "4000m"
   ## converter.extraEnvVars An array with extra env variables for the Converter container
   ## Example:
   ## extraEnvVars:
@@ -1317,15 +1308,12 @@ adminpanel:
   ## adminpanel.resources.requests The requested resources for the adminpanel container
   ## adminpanel.resources.limits The resources limits for the adminpanel container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "256Mi"
-    ##   cpu: "200m"
-    requests: {}
-    ## limits:
-    ##   memory: "2Gi"
-    ##   cpu: "1000m"
-    limits: {}
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "4Gi"
+      cpu: "4000m"
   ## adminpanel.extraEnvVars An array with extra env variables for the Adminpanel container
   ## Example:
   ## extraEnvVars:
@@ -1494,15 +1482,12 @@ example:
   ## example.resources.requests The requested resources for the example container
   ## example.resources.limits The resources limits for the example container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "128Mi"
-    ##   cpu: "100m"
-    requests: {}
-    ## limits:
-    ##   memory: "128Mi"
-    ##   cpu: "250m"
-    limits: {}
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "4Gi"
+      cpu: "4000m"
   ## example.extraEnvVars An array with extra env variables for the Example container
   ## Example:
   ## extraEnvVars:
@@ -1743,10 +1728,53 @@ grafana:
     ## Note: These annotations are for ingress-nginx controller only (legacy Kubernetes)
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 100m
-  ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
-  ## Used if you set `grafana.enabled` to `true`
+  ## Labels used by the Grafana Community chart sidecars to auto-discover the datasource Secret
+  ## and the dashboard ConfigMaps created by this chart.
+  ## IMPORTANT: both the label KEY and its VALUE must match what the Grafana Community chart
+  ## looks for, i.e. `sidecar.datasources.label` + `sidecar.datasources.labelValue`
+  ## (and the dashboards equivalents) passed when installing `grafana/grafana`.
+  ## The Grafana sidecar matches a resource only when the label key is present AND its value
+  ## equals the configured labelValue. If you change labelValue here, pass the same value when you install the Grafana chart.
+  ## ref: https://github.com/grafana/helm-charts/tree/main/charts/grafana
+  sidecar:
+    datasources:
+      ## grafana.sidecar.datasources.label The label KEY set on the `grafana-datasource` Secret. The label KEY must be equal the Grafana chart's.
+      label: grafana_datasource
+      ## grafana.sidecar.datasources.labelValue The label VALUE; must equal the Grafana chart's.
+      ## `sidecar.datasources.labelValue`
+      labelValue: "docs"
+    dashboards:
+      ## grafana.sidecar.dashboards.label The label KEY set on the dashboard ConfigMaps The label KEY must be equal the Grafana chart's.
+      label: grafana_dashboard
+      ## grafana.sidecar.dashboards.labelValue The label VALUE; must equal the Grafana chart's.
+      ## `sidecar.dashboards.labelValue`
+      labelValue: "docs"
   dashboard:
+    ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
+    ## Used if you set `grafana.enabled` to `true`
     enabled: false
+    ## grafana.dashboard.list Defines the list of dashboards that will be added to Grafana
+    ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#12-deploy-grafana-with-the-installation-of-ready-made-dashboards
+    ## When installing Grafana, specify the value from `grafana.dashboard.list[].name`
+    ## in the `dashboardsConfigMaps[].configMapName` and `dashboardsConfigMaps[].fileName` fields
+    ## When installing Grafana, in the `dashboardsConfigMaps[].fileName` field,
+    ## you need to specify the value from `grafana.dashboard.list[].name` with the `.json` extension
+    ## The script creates a Key with this value in the ConfigMap with the name from this field
+    list:
+      - name: dashboard-node-exporter
+        url: "https://grafana.com/api/dashboards/1860/revisions/22/download"
+      - name: dashboard-deployment
+        url: "https://grafana.com/api/dashboards/8588/revisions/1/download"
+      - name: dashboard-redis
+        url: "https://grafana.com/api/dashboards/11835/revisions/1/download"
+      - name: dashboard-rabbitmq
+        url: "https://grafana.com/api/dashboards/10991/revisions/8/download"
+      - name: dashboard-postgresql
+        url: "https://raw.githubusercontent.com/cloudnative-pg/grafana-dashboards/main/charts/cluster/grafana-dashboard.json"
+      - name: dashboard-documentserver
+        url: "https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/documentserver-statsd-exporter.json"
+      - name: dashboard-cluster-resourses
+        url: "https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/kubernetes-cluster-resourses.json"
 
 ## Onlyoffice Docs jobs parameters
 ##
@@ -1823,7 +1851,7 @@ install:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     tblCreate:
@@ -1911,7 +1939,7 @@ upgrade:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -2007,7 +2035,7 @@ rollback:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -2103,7 +2131,7 @@ delete:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -2191,7 +2219,7 @@ clearCache:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     ## clearCache.existingConfigmap.name The name of the existing ConfigMap that contains the clears the Cache directory custom script
@@ -2272,7 +2300,7 @@ grafanaDashboard:
       requests: {}
       ## limits:
       ##   memory: "1Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
 ## Job by Wopi Keys Generation has pre-install and pre-upgrade hooks and executes before any resources are created in Kubernetes
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
@@ -2346,7 +2374,7 @@ wopiKeysGeneration:
       requests: {}
       ## limits:
       ##   memory: "1Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
 ## Job by Wopi Keys Deletion has a pre-delete hook and executes on a deletion request before all of the release's resources have been deleted
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
@@ -2422,7 +2450,7 @@ wopiKeysDeletion:
       requests: {}
       ## limits:
       ##   memory: "1Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
 ## Job by customResources has pre-install and pre-upgrade hooks and executes before any resources are created in Kubernetes
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
@@ -2499,7 +2527,7 @@ customResources:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
 
 ## Onlyoffice Docs tests parameters
@@ -2571,6 +2599,6 @@ tests:
     ##   cpu: "200m"
     requests: {}
     ## limits:
-    ##   memory: "512Mi"
-    ##   cpu: "1000m"
+    ##   memory: "1Gi"
+    ##   cpu: "2000m"
     limits: {}

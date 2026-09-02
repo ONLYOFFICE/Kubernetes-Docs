@@ -1,5 +1,20 @@
 # Change log
 
+## 6.2.0
+
+### New Features
+
+* Added the ability to customize the list of installed Grafana dashboards
+
+### Changes
+
+* Default values for `resources.requests` and `resources.limits` have been set for Docs services
+* The Database deployment has been moved from the Bitnami chart to the [CloudNativePG](https://cloudnative-pg.io/docs/devel/)
+* The Message Broker deployment has been moved from the Bitnami chart to the [RabbitMQ Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview)
+* The Key-Value Datastore deployment has been moved from the Bitnami chart to the [Valkey Cluster Operator](https://github.com/valkey-io/valkey-operator)
+* Migrated Grafana deployment from the Bitnami chart to the Grafana Community chart (`grafana/grafana`). The datasource Secret and dashboard ConfigMaps are now auto-discovered via the Grafana sidecars (`grafana_datasource` / `grafana_dashboard` labels)
+* Update the HPA Custom Metrics to work with the RabbitMQ Cluster Operator
+
 ## 6.1.1
 
 ### Changes

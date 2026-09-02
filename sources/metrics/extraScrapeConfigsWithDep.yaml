@@ -1,0 +1,51 @@
+extraScrapeConfigs: |
+  - job_name: 'documentserver-statsd'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+        - statsd-exporter-prometheus-statsd-exporter:9102
+  - job_name: 'cloudnativepg-postgresql-cluster'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_cnpg_io_cluster]
+        regex: postgres
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_label_cnpg_io_podRole]
+        regex: instance
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_container_port_name]
+        regex: metrics
+        action: keep
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+  - job_name: 'rabbitmq-cluster'
+    kubernetes_sd_configs:
+      - role: endpoints
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_component]
+        regex: rabbitmq
+        action: keep
+      - source_labels: [__meta_kubernetes_endpoint_port_name]
+        regex: prometheus
+        action: keep
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+  - job_name: 'valkey-cluster'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        regex: metrics-exporter
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_container_port_number]
+        regex: "9121"
+        action: keep
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
