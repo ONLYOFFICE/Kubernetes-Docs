@@ -1,6 +1,6 @@
 # Change log
 
-## 6.2.0
+## 7.0.0
 
 ### New Features
 
@@ -13,7 +13,8 @@
 * The Message Broker deployment has been moved from the Bitnami chart to the [RabbitMQ Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview)
 * The Key-Value Datastore deployment has been moved from the Bitnami chart to the [Valkey Cluster Operator](https://github.com/valkey-io/valkey-operator)
 * Migrated Grafana deployment from the Bitnami chart to the Grafana Community chart (`grafana/grafana`). The datasource Secret and dashboard ConfigMaps are now auto-discovered via the Grafana sidecars (`grafana_datasource` / `grafana_dashboard` labels)
-* Update the HPA Custom Metrics to work with the RabbitMQ Cluster Operator
+* The HPA Custom Metrics have been updated to work with the RabbitMQ Cluster Operator
+* The length of the generated secrets has been increased to 32 characters
 
 ## 6.1.1
 

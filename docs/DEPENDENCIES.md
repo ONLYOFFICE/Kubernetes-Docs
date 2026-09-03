@@ -141,7 +141,7 @@ Apply the created manifest:
 kubectl apply -f postgresql.yaml
 ```
 
-This creates one master and two replicas. Two PgBouncer replicas will also be created.
+This creates one master and two replicas. Two PgBouncer instances will also be created.
 
 > **Note:**\
 > If you set `spec.instances: 1` in `kind: Cluster`, only the master will be created.
@@ -240,6 +240,11 @@ Apply the created manifest:
 ```bash
 kubectl apply -f rabbitmq.yaml
 ```
+
+This creates three master instances.
+
+> **Note:**\
+> If you set `spec.replicas: 1` in `kind: RabbitmqCluster`, only one master instance will be created.
 
 To install Docs, specify the corresponding parameters:
 
@@ -342,6 +347,11 @@ Apply the created manifest:
 ```bash
 kubectl apply -f valkey.yaml
 ```
+
+This creates three master and one replica for each master group.
+
+> **Note:**\
+> If you set `spec.shards: 1` and `spec.replicas: 0` in `kind: ValkeyCluster`, only the master will be created.
 
 To install Docs, specify the corresponding parameters:
 
