@@ -674,7 +674,7 @@ Get the Secret value
     {{- if $getSecretValue -}}
         {{- printf "%s" $getSecretValue -}}
     {{- else -}}
-        {{- printf "%s" (randAlpha 16) -}}
+        {{- printf "%s" (randAlpha 32) -}}
     {{- end -}}
 {{- else -}}
     {{- printf "%s" $existValue -}}
