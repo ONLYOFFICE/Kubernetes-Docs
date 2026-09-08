@@ -333,7 +333,7 @@ log:
   type: pattern
   ## log.pattern Defines the log pattern if `log.type=pattern`
   ## ref: https://github.com/log4js-node/log4js-node/blob/master/docs/layouts.md#pattern-format
-  pattern: "[%d] [%p] [%X{DOCID}] [%X{USERID}] %c - %.10000m"
+  pattern: "[%d] [%p] [%X{TENANT}] [%X{DOCID}] [%X{USERID}] %c - %.10000m"
 ## Onlyoffice Docs `WOPI` parameters
 wopi:
   ## wopi.enabled Defines if `WOPI` is enabled
