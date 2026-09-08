@@ -1498,16 +1498,15 @@ After executing this command, the following dashboards will be imported into Gra
 
   - Node Exporter
   - Deployment Statefulset Daemonset
+  - ONLYOFFICE Docs
   - Redis Dashboard for Prometheus Redis Exporter
   - RabbitMQ-Overview
   - PostgreSQL Database
-  - NGINX Ingress controller
-  - ONLYOFFICE Docs
   - Resource usage by Pods and Containers
 
 Note: You can see the description of the ONLYOFFICE Docs metrics that are visualized in Grafana [here](https://github.com/ONLYOFFICE/Kubernetes-Docs/wiki/Document-Server-Metrics).
 
-See more details about installing Grafana via Helm [here](https://github.com/grafana/helm-charts/tree/main/charts/grafana).
+See more details about installing Grafana via Helm [here](https://github.com/grafana-community/helm-charts/tree/main/charts/grafana).
 
 ### 2. Access to Grafana via Gateway or Ingress
 
