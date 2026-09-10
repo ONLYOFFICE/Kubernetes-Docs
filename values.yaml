@@ -487,7 +487,7 @@ customPlugins:
 ## Global image parameters for all Onlyoffice Docs services and jobs
 images:
   ## images.tag Global image tag for all Onlyoffice Docs services and jobs
-  tag: 9.4.1-1
+  tag: 10.0.0-1
   ## images.registry Global image registry for all Onlyoffice Docs containers
   registry: ""
 
@@ -654,8 +654,9 @@ docservice:
     ## docservice.image.repository docservice container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-docservice-de
+    ## The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image
+    ## The build of `onlyoffice/docs-docservice-de` is still ongoing to ensure compatibility
+    repository: onlyoffice/docs-cluster-de
     ## docservice.image.tag docservice container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -783,7 +784,7 @@ proxy:
   logFormat: []
   ## proxy.gzipProxied Defines the nginx config gzip_proxied directive
   ## ref: https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied
-  gzipProxied: "off"
+  gzipProxied: "any"
   ## proxy.clientMaxBodySize Defines the nginx config client_max_body_size directive
   ## ref: https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
   clientMaxBodySize: "100m"
@@ -832,8 +833,9 @@ proxy:
     ## proxy.image.repository proxy container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-proxy-de
+    ## The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image
+    ## The build of `onlyoffice/docs-proxy-de` is still ongoing to ensure compatibility
+    repository: onlyoffice/docs-cluster-de
     ## proxy.image.tag proxy container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1105,8 +1107,9 @@ converter:
     ## converter.image.repository converter container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-converter-de
+    ## The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image
+    ## The build of `onlyoffice/docs-converter-de` is still ongoing to ensure compatibility
+    repository: onlyoffice/docs-cluster-de
     ## converter.image.tag converter container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1265,8 +1268,9 @@ adminpanel:
     ## adminpanel.image.repository adminpanel container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-adminpanel-de
+    ## The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image
+    ## The build of `onlyoffice/docs-adminpanel-de` is still ongoing to ensure compatibility
+    repository: onlyoffice/docs-cluster-de
     ## adminpanel.image.tag adminpanel container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1735,7 +1739,7 @@ grafana:
   ## (and the dashboards equivalents) passed when installing `grafana/grafana`.
   ## The Grafana sidecar matches a resource only when the label key is present AND its value
   ## equals the configured labelValue. If you change labelValue here, pass the same value when you install the Grafana chart.
-  ## ref: https://github.com/grafana/helm-charts/tree/main/charts/grafana
+  ## ref: https://github.com/grafana-community/helm-charts/tree/main/charts/grafana
   sidecar:
     datasources:
       ## grafana.sidecar.datasources.label The label KEY set on the `grafana-datasource` Secret. The label KEY must be equal the Grafana chart's.

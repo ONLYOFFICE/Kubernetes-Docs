@@ -8,6 +8,10 @@
 
 ### Changes
 
+* Released ONLYOFFICE Docs [v10.0.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#1000)
+* Changed the base image from Fedora:43 to Fedora:44
+* The repository of ONLYOFFICE Docs services images has been changed to a single common default image
+* Changed the Nginx `gzip_proxied` default to `any` in the Proxy container
 * Default values for `resources.requests` and `resources.limits` have been set for Docs services
 * The Database deployment has been moved from the Bitnami chart to the [CloudNativePG](https://cloudnative-pg.io/docs/devel/)
 * The Message Broker deployment has been moved from the Bitnami chart to the [RabbitMQ Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview)
