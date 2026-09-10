@@ -10,13 +10,13 @@
 
 * Released ONLYOFFICE Docs [v10.0.0](https://github.com/ONLYOFFICE/DocumentServer/blob/master/CHANGELOG.md#1000)
 * Changed the base image from Fedora:43 to Fedora:44
-* The repository of ONLYOFFICE Docs services images has been changed to a single common default image
+* The ONLYOFFICE Docs services images repository now uses a single common image by default
 * Changed the Nginx `gzip_proxied` default to `any` in the Proxy container
 * Default values for `resources.requests` and `resources.limits` have been set for Docs services
 * The Database deployment has been moved from the Bitnami chart to the [CloudNativePG](https://cloudnative-pg.io/docs/devel/)
 * The Message Broker deployment has been moved from the Bitnami chart to the [RabbitMQ Cluster Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview)
 * The Key-Value Datastore deployment has been moved from the Bitnami chart to the [Valkey Cluster Operator](https://github.com/valkey-io/valkey-operator)
-* Migrated Grafana deployment from the Bitnami chart to the Grafana Community chart (`grafana/grafana`). The datasource Secret and dashboard ConfigMaps are now auto-discovered via the Grafana sidecars (`grafana_datasource` / `grafana_dashboard` labels)
+* Migrated Grafana deployment from the Bitnami chart to the [Grafana Community chart](https://github.com/grafana-community/helm-charts/tree/main/charts/grafana). The datasource Secret and dashboard ConfigMaps are now auto-discovered via the Grafana sidecars (`grafana_datasource` / `grafana_dashboard` labels)
 * The HPA Custom Metrics have been updated to work with the RabbitMQ Cluster Operator
 * The length of the generated secrets has been increased to 32 characters
 
