@@ -14,7 +14,7 @@ Install the CloudNativePG Operator:
 helm repo add cnpg https://cloudnative-pg.github.io/charts
 helm repo update
 
-helm install cnpg --version 0.29.0 \
+helm install cnpg --version 0.29.1 \
   --namespace cnpg-system \
   --create-namespace \
   cnpg/cloudnative-pg
@@ -171,7 +171,7 @@ Install [cert-manager](https://cert-manager.io/docs/usage/gateway/). You can fol
 Install the RabbitMQ Cluster Operator:
 
 ```bash
-kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/download/v2.22.3/cluster-operator.yml
+kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/download/v2.23.0/cluster-operator.yml
 ```
 
 For more details, see [here](https://github.com/rabbitmq/cluster-operator).
@@ -270,7 +270,7 @@ Install the Valkey Cluster Operator:
 helm repo add valkey https://valkey.io/valkey-helm/
 helm repo update
 
-helm install valkey --version 0.5.0 valkey/valkey-operator \
+helm install valkey --version 0.6.0 valkey/valkey-operator \
   --namespace valkey-operator-system \
   --create-namespace
 ```

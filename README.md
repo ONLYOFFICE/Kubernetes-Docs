@@ -180,7 +180,7 @@ Note: The default `nfs` Persistent Volume Claim is 8Gi. You can change it in the
 *The PersistentVolume type to be used for PVC placement must support Access Mode [ReadWriteMany](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).*
 *Also, PersistentVolume must have as the owner the user from whom the ONLYOFFICE Docs will be started. By default it is `ds` (101:101).*
 
-Note: If you want to enable `WOPI`, please set the parameter `wopi.enabled=true`. In this case Persistent Storage must be connected to the cluster nodes with the disabled caching attributes for the mounted directory for the clients. For NFS Server Provisioner it can be achieved by adding `noac` option to the parameter `storageClass.mountOptions`. Please find more information [here](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner/blob/master/charts/nfs-server-provisioner/values.yaml#L83).
+Note: If you want to enable `WOPI`, please set the parameter `wopi.enabled=true`. In this case Persistent Storage must be connected to the cluster nodes with the disabled caching attributes for the mounted directory for the clients. For NFS Server Provisioner it can be achieved by adding `noac` (Also add `vers=4.1`, `retrans=2`, `timeo=30`) option to the parameter `storageClass.mountOptions`. Please find more information [here](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner/blob/master/charts/nfs-server-provisioner/values.yaml#L83).
 
 ### 3. Deploy Message Broker
 
@@ -1083,7 +1083,7 @@ $ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/
 Install NGINX Gateway Fabric (NGF) via Helm using the OCI registry:
 
 ```bash
-$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --version 2.7.0 \
+$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --version 2.7.2 \
     --set nginxGateway.replicas=2 \
     --set nginx.replicas=2 \
     --create-namespace -n nginx-gateway
