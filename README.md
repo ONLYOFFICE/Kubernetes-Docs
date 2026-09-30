@@ -1254,7 +1254,7 @@ To deploy the Admin Panel, set the `adminpanel.enabled` parameter to true:
 $ helm install documentserver onlyoffice/docs --set adminpanel.enabled=true
 ```
 
-For first authorization, use the secret value `Bootstrap code`. You can find it by opening the adminpanel Pod log. The `Bootstrap code` is valid for 1 hour.
+For the first authorization, you need to generate an administrator password. To do this, run the CLI command `kubectl exec -it adminpanel-0 -- documentserver-admin create-admin`.
 
 ### 6. Scale ONLYOFFICE Docs (optional)
 
