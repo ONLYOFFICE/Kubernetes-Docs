@@ -17,6 +17,6 @@ metadata:
     {{- end }}
 data:
   dashboards.json: |-
-  {{ .Values.grafana.dashboard.list | toJson | indent 4 }}
+{{ .Values.grafana.dashboard.list | toJson | indent 4 }}
 {{ (.Files.Glob "sources/scripts/get_dashboard.py").AsConfig | indent 2 }}
 {{- end }}
