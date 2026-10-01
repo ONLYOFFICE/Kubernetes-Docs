@@ -20,4 +20,8 @@ data:
       proxy_set_header X-Forwarded-Path /example;
       proxy_set_header X-Forwarded-For example.com;
     }
+  ds-adminpanel.conf: |-
+    location ^~ /admin {
+      proxy_pass http://adminpanel;
+    }
 {{- end }}
