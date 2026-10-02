@@ -1614,6 +1614,17 @@ gateway:
   clientSettingsPolicy:
     body:
       maxSize: "100m"
+  ## gateway.upstreamSettingsPolicy Configure upstream (Service) behavior for NGINX Gateway Fabric
+  ## The policy is attached to the ONLYOFFICE Docs Service (`kind: Service`, same namespace)
+  ## Required for session stickiness when HTTP long-polling is used instead of WebSocket
+  ## and `docservice.replicas` > 1, otherwise requests fail with `Session ID unknown`
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/traffic-management/upstream-settings/
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/traffic-management/session-persistence/
+  ## Example (Sticky by document shard key (it is recommended), sent by the editor in every request):
+  ## upstreamSettingsPolicy:
+  ##   loadBalancingMethod: "hash consistent"
+  ##   hashMethodKey: "$arg_shardkey"
+  upstreamSettingsPolicy: {}
   letsencrypt:
     ## gateway.letsencrypt.enabled Enable cert-manager Issuer for Let's Encrypt via Gateway API
     ## Used if `gateway.enabled` is set to `true` and `gateway.external.parentRefs` is not specified
