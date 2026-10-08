@@ -412,10 +412,6 @@ extraThemes:
   ## extraThemes.filename The name of the json file that contains custom interface themes
   ## Must be the same as the `key` name in `extraThemes.configMap`
   filename: custom-themes.json
-## sqlScripts.branchName The name of the repository branch from which sql scripts will be downloaded
-## ref: https://github.com/ONLYOFFICE/server/tree/master/schema
-sqlScripts:
-  branchName: master
 ## Onlyoffice Docs request-filtering-agent parameters
 ## These parameters are used if JWT is disabled: `jwt.enabled=false`
 requestFilteringAgent:
