@@ -5,6 +5,7 @@
 ### New Features
 
 * Added the ability to customize the list of installed Grafana dashboards
+* Added the ability to configure session persistence for HTTP long-polling connections when using Gateway API or Ingress
 
 ### Changes
 

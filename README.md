@@ -477,7 +477,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `images.registry`                                           | Global image registry for all Onlyoffice Docs services and jobs.                                                                                                               |  `""`                                                                                     |
 | `docservice.annotations`                                    | Defines annotations that will be additionally added to Docservice Deployment. If set to, it takes priority over the `commonAnnotations`                                        | `{}`                                                                                      |
 | `docservice.podAnnotations`                                 | Map of annotations to add to the Docservice deployment pods                                                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
-| `docservice.replicas`                                       | Docservice replicas quantity. If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored                                                                      | `2`                                                                                       |
+| `docservice.replicas`                                       | Docservice replicas quantity. If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored. If the value is greater than `1` and the editors use HTTP long-polling instead of WebSocket, session persistence must be configured, see [here](./docs/SESSION_PERSISTENCE.md) | `2`                                                                                       |
 | `docservice.updateStrategy.type`                            | Docservice deployment update strategy type                                                                                                                                     | `Recreate`                                                                                |
 | `docservice.customPodAntiAffinity`                          | Prohibiting the scheduling of Docservice Pods relative to other Pods containing the specified labels on the same node                                                          | `{}`                                                                                      |
 | `docservice.podAffinity`                                    | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Docservice Pods scheduling by nodes relative to other Pods | `{}`                                                          |
@@ -501,7 +501,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `docservice.readinessProbe.enabled`                         | Enable readinessProbe for Docservice container                                                                                                                                 | `true`                                                                                    |
 | `docservice.livenessProbe.enabled`                          | Enable livenessProbe for Docservice container                                                                                                                                  | `true`                                                                                    |
 | `docservice.startupProbe.enabled`                           | Enable startupProbe for Docservice container                                                                                                                                   | `true`                                                                                    |
-| `docservice.autoscaling.enabled`                            | Enable Docservice deployment autoscaling                                                                                                                                       | `false`                                                                                   |
+| `docservice.autoscaling.enabled`                            | Enable Docservice deployment autoscaling. If the editors use HTTP long-polling instead of WebSocket, session persistence must be configured, see [here](./docs/SESSION_PERSISTENCE.md) | `false`                                                                                   |
 | `docservice.autoscaling.annotations`                        | Defines annotations that will be additionally added to Docservice deployment HPA. If set to, it takes priority over the `commonAnnotations`                                    | `{}`                                                                                      |
 | `docservice.autoscaling.minReplicas`                        | Docservice deployment autoscaling minimum number of replicas                                                                                                                   | `2`                                                                                       |
 | `docservice.autoscaling.maxReplicas`                        | Docservice deployment autoscaling maximum number of replicas                                                                                                                   | `4`                                                                                       |
@@ -629,6 +629,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `service.annotations`                                       | Map of annotations to add to the ONLYOFFICE Docs service. If set to, it takes priority over the `commonAnnotations`                                                            | `{}`                                                                                      |
 | `service.type`                                              | ONLYOFFICE Docs service type                                                                                                                                                   | `ClusterIP`                                                                               |
 | `service.port`                                              | ONLYOFFICE Docs service port                                                                                                                                                   | `8888`                                                                                    |
+| `service.externalTrafficPolicy`                             | ONLYOFFICE Docs service [External Traffic Policy](https://kubernetes.io/docs/reference/networking/virtual-ips/#external-traffic-policy). Valid values are `Cluster` and `Local` | `Cluster`                                                                                  |
 | `service.sessionAffinity`                                   | [Session Affinity](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity) for ONLYOFFICE Docs service. If not set, `None` will be set as the default value | `""`                                                                                  |
 | `service.sessionAffinityConfig`                             | [Configuration](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout) for ONLYOFFICE Docs service Session Affinity. Used if the `service.sessionAffinity` is set | `{}`                                                                 |
 | `gateway.enabled`                                           | Enable the creation of a Gateway and HTTPRoute resources for the ONLYOFFICE Docs                                                                                                      | `false`                                                                                   |
@@ -646,6 +647,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `gateway.pathType`                                          | Specifies the path type for the ONLYOFFICE Docs HTTPRoute. Allowed values are `Exact`, `PathPrefix` or `RegularExpression`                                                     | `PathPrefix`                                                                              |
 | `gateway.path`                                              | Specifies the path under which ONLYOFFICE Docs will be available. `"/"` serves at the root, `"/ds"` serves under `/ds` and injects `X-Forwarded-Prefix: /ds`, `"^/ds/.*$"` matches as RegularExpression | `/`                                                                              |
 | `gateway.clientSettingsPolicy`                              | Map of directives applied to the HTTPRoute via NGF `ClientSettingsPolicy`. The directives specified here are rendered as-is into `spec`. See [NGF custom policies](https://docs.nginx.com/nginx-gateway-fabric/overview/custom-policies) and [client settings reference](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/client-settings) | `body.maxSize: "100m"`        |
+| `gateway.upstreamSettingsPolicy`                            | NGF [UpstreamSettingsPolicy](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/upstream-settings) spec applied to the ONLYOFFICE Docs Service (e.g. load balancing method for session stickiness) | `{}` |
 | `gateway.letsencrypt.enabled`                               | Enable [cert-manager](https://cert-manager.io/docs/usage/gateway/) `ClusterIssuer` for Let's Encrypt via Gateway API. Used if `gateway.enabled` is set to `true` and `gateway.external.parentRefs` is not specified. Requires cert-manager (v1.14+) with the Gateway API feature flag enabled (`config.enableGatewayAPI=true`) | `false`                                                          |
 | `gateway.letsencrypt.clusterIssuerName`                     | Name of the generated ClusterIssuer                                                                                                                                            | `letsencrypt-prod-gw`                                                                     |
 | `gateway.letsencrypt.email`                                 | Your email address used for ACME registration                                                                                                                                  | `""`                                                                                      |
@@ -952,7 +954,7 @@ In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVIC
 To install the F5 NGINX Ingress Controller to your cluster using the OCI registry, run the following command:
 
 ```bash
-$ helm install nginx-ingress oci://ghcr.io/nginx/charts/nginx-ingress --version 2.5.1 --set controller.setAsDefault=true --set controller.replicaCount=2
+$ helm install nginx-ingress oci://ghcr.io/nginx/charts/nginx-ingress --version 2.7.3 --set controller.setAsDefault=true --set controller.replicaCount=2
 ```
 
 See more detail about installing F5 NGINX Ingress via Helm [here](https://docs.nginx.com/nginx-ingress-controller/install/helm/open-source/).
@@ -1031,7 +1033,7 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
   ```
 - Installing cert-manager
   ```bash
-  $ helm install cert-manager --version v1.20.2 jetstack/cert-manager \
+  $ helm install cert-manager --version v1.21.2 jetstack/cert-manager \
     --namespace cert-manager \
     --create-namespace \
     --set crds.enabled=true \
@@ -1177,7 +1179,7 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 - Install cert-manager with Gateway API support enabled:
 
   ```bash
-  $ helm install cert-manager --version v1.20.2 jetstack/cert-manager \
+  $ helm install cert-manager --version v1.21.2 jetstack/cert-manager \
       --namespace cert-manager \
       --create-namespace \
       --set crds.enabled=true \
@@ -1273,6 +1275,10 @@ For more information about Horizontal Pod Autoscaling, see [here](https://kubern
 To enable HPA for the `docservice` deployment, specify the `docservice.autoscaling.enabled=true` parameter. 
 In this case, the `docservice.replicas` parameter is ignored and the number of replicas is controlled by HPA.
 
+> **Note**
+>
+> If the editors use HTTP long-polling instead of WebSocket, all requests of one co-editing session must reach the same `docservice` Pod when more than one replica is running. See [here](./docs/SESSION_PERSISTENCE.md).
+
 Similarly, to enable HPA for the `converter` deployment, specify the `converter.autoscaling.enabled=true` parameter. 
 In this case, the `converter.replicas` parameter is ignored and the number of replicas is controlled by HPA.
 
@@ -1298,6 +1304,10 @@ $ kubectl scale -n default deployment docservice --replicas=POD_COUNT
 ```
 
 where `POD_COUNT` is a number of the `docservice` pods.
+
+> **Note**
+>
+> If the editors use HTTP long-polling instead of WebSocket, all requests of one co-editing session must reach the same `docservice` Pod when more than one replica is running. See [here](./docs/SESSION_PERSISTENCE.md).
 
 Do the same to scale the `converter` deployment:
 
