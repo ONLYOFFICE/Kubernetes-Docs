@@ -512,6 +512,18 @@ docservice:
   ## docservice.updateStrategy.type Docservice deployment update strategy type
   updateStrategy:
     type: Recreate
+  ## docservice.topologySpreadConstraints Pod Topology Spread Constraints for Docservice Pods
+  ## The value is evaluated as a template
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ## Example:
+  ## topologySpreadConstraints:
+  ## - maxSkew: 1
+  ##   topologyKey: topology.kubernetes.io/zone
+  ##   whenUnsatisfiable: DoNotSchedule
+  ##   labelSelector:
+  ##     matchLabels:
+  ##       app: '{{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}'
+  topologySpreadConstraints: []
   ## docservice.customPodAntiAffinity Prohibiting the scheduling of Docservice Pods relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
@@ -968,6 +980,18 @@ converter:
   ## converter.updateStrategy.type Docservice deployment update strategy type
   updateStrategy:
     type: Recreate
+  ## converter.topologySpreadConstraints Pod Topology Spread Constraints for Converter Pods
+  ## The value is evaluated as a template
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ## Example:
+  ## topologySpreadConstraints:
+  ## - maxSkew: 1
+  ##   topologyKey: topology.kubernetes.io/region
+  ##   whenUnsatisfiable: ScheduleAnyway
+  ##   labelSelector:
+  ##     matchLabels:
+  ##       app: '{{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}'
+  topologySpreadConstraints: []
   ## converter.customPodAntiAffinity Prohibiting the scheduling of Converter Pods relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
@@ -1188,6 +1212,15 @@ adminpanel:
   ## adminpanel.updateStrategy.type Adminpanel StatefulSet update strategy type
   updateStrategy:
     type: RollingUpdate
+  ## adminpanel.topologySpreadConstraints Pod Topology Spread Constraints for Adminpanel Pod
+  ## The value is evaluated as a template
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ## Example:
+  ## topologySpreadConstraints:
+  ## - maxSkew: 1
+  ##   topologyKey: node
+  ##   whenUnsatisfiable: ScheduleAnyway
+  topologySpreadConstraints: []
   ## adminpanel.customPodAntiAffinity Prohibiting the scheduling of Adminpanel Pod relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
@@ -1357,6 +1390,15 @@ example:
   ## example.updateStrategy.type Example StatefulSet update strategy type
   updateStrategy:
     type: RollingUpdate
+  ## example.topologySpreadConstraints Pod Topology Spread Constraints for Example Pod
+  ## The value is evaluated as a template
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ## Example:
+  ## topologySpreadConstraints:
+  ## - maxSkew: 1
+  ##   topologyKey: node
+  ##   whenUnsatisfiable: ScheduleAnyway
+  topologySpreadConstraints: []
   ## example.customPodAntiAffinity Prohibiting the scheduling of Example Pod relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
