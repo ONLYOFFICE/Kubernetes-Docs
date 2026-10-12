@@ -2,7 +2,7 @@
 
 ## Security Context Constraints (SCC)
 > [!NOTE]
-> OpenShift enforces strict security policies on pods. ONLYOFFICE Docs requires a compatible SCC because the DocumentServer containers run with non-root UID 101, but some SCCs may conflict with this requirement. Therefore, we recommend assigning the `nonroot-v2`, `anyuid` or [docs-components](./sources/scc/common.yaml) SCC to the relevant service accounts.
+> OpenShift enforces strict security policies on pods. ONLYOFFICE Docs requires a compatible SCC because the DocumentServer containers run with non-root UID 101, but some SCCs may conflict with this requirement. Therefore, we recommend assigning the `nonroot-v2`, `anyuid` or [docs-components](../sources/scc/common.yaml) SCC to the relevant service accounts.
 
 ## Assign SCC to service accounts
 > [!NOTE]
@@ -54,7 +54,7 @@ oc apply -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/
 oc adm policy add-scc-to-user scc-docs-components -z documentserver -z wopi-sa
 ```
 
-If you chose `docs-components`, download the [common.yaml](./sources/scc/common.yaml) file. Update the `users` field to match the namespace where you are installing the chart, and then apply it:
+If you chose `docs-components`, download the [common.yaml](../sources/scc/common.yaml) file. Update the `users` field to match the namespace where you are installing the chart, and then apply it:
 
 ```bash
 curl -O https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/scc/common.yaml
