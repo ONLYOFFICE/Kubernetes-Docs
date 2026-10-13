@@ -1836,10 +1836,6 @@ grafana:
     enabled: false
     ## grafana.dashboard.list Defines the list of dashboards that will be added to Grafana
     ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#12-deploy-grafana-with-the-installation-of-ready-made-dashboards
-    ## When installing Grafana, specify the value from `grafana.dashboard.list[].name`
-    ## in the `dashboardsConfigMaps[].configMapName` and `dashboardsConfigMaps[].fileName` fields
-    ## When installing Grafana, in the `dashboardsConfigMaps[].fileName` field,
-    ## you need to specify the value from `grafana.dashboard.list[].name` with the `.json` extension
     ## The script creates a Key with this value in the ConfigMap with the name from this field
     list:
       - name: dashboard-node-exporter
