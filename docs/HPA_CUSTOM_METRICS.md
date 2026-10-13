@@ -28,7 +28,7 @@ Install a minimal Prometheus setup. Grafana, Alertmanager, and other components 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 
-helm install kps prometheus-community/kube-prometheus-stack \
+helm install kps --version 92.3.0 prometheus-community/kube-prometheus-stack \
   -n monitoring --create-namespace \
   --set grafana.enabled=false \
   --set alertmanager.enabled=false \
@@ -104,7 +104,7 @@ rules:
 Install:
 
 ```bash
-helm install prometheus-adapter prometheus-community/prometheus-adapter \
+helm install prometheus-adapter --version 5.3.0 prometheus-community/prometheus-adapter \
   -n monitoring \
   -f adapter-values.yaml
 ```

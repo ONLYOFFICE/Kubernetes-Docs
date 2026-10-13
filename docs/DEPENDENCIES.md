@@ -270,7 +270,7 @@ Install the Valkey Cluster Operator:
 helm repo add valkey https://valkey.io/valkey-helm/
 helm repo update
 
-helm install valkey --version 0.6.0 valkey/valkey-operator \
+helm install valkey --version 0.7.0 valkey/valkey-operator \
   --namespace valkey-operator-system \
   --create-namespace
 ```

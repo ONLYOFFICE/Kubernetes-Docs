@@ -217,7 +217,7 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ helm install prometheus -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/extraScrapeConfigs.yaml prometheus-community/prometheus \
+$ helm install prometheus -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/extraScrapeConfigs.yaml --version 29.36.1 prometheus-community/prometheus \
   --set server.global.scrape_interval=1m
 ```
 
@@ -231,8 +231,8 @@ See more details about installing Prometheus via Helm [here](https://github.com/
 
 To install StatsD exporter to your cluster, run the following command:
 
-```
-$ helm install statsd-exporter -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/statsd-mapping.yaml prometheus-community/prometheus-statsd-exporter \
+```bash
+$ helm install statsd-exporter -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/statsd-mapping.yaml --version 1.0.0 prometheus-community/prometheus-statsd-exporter \
   --set statsd.udpPort=8125 \
   --set statsd.tcpPort=8126 \
   --set statsd.eventFlushInterval=30000ms
@@ -1030,14 +1030,9 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 #### 5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate
-- Add Helm repositories:
-  ```bash
-  $ helm repo add jetstack https://charts.jetstack.io
-  $ helm repo update
-  ```
 - Installing cert-manager
   ```bash
-  $ helm install cert-manager --version v1.21.2 jetstack/cert-manager \
+  $ helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.21.2 \
     --namespace cert-manager \
     --create-namespace \
     --set crds.enabled=true \
@@ -1173,17 +1168,10 @@ After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 #### 5.3.3.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate
 
-- Add Helm repositories:
-
-  ```bash
-  $ helm repo add jetstack https://charts.jetstack.io
-  $ helm repo update
-  ```
-
 - Install cert-manager with Gateway API support enabled:
 
   ```bash
-  $ helm install cert-manager --version v1.21.2 jetstack/cert-manager \
+  $ helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.21.2 \
       --namespace cert-manager \
       --create-namespace \
       --set crds.enabled=true \
@@ -1473,7 +1461,7 @@ Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been
 To install Grafana to your cluster, run the following command:
 
 ```bash
-$ helm install grafana oci://ghcr.io/grafana-community/helm-charts/grafana --version 12.11.2 \
+$ helm install grafana oci://ghcr.io/grafana-community/helm-charts/grafana --version 13.5.0 \
   --set service.port=80 \
   --set 'grafana\.ini.server.root_url=%(protocol)s://%(domain)s:%(http_port)s/grafana/' \
   --set 'grafana\.ini.server.serve_from_sub_path=true' \
@@ -1496,7 +1484,7 @@ the necessary edits will be made to them and configmap will be created from them
 To install Grafana to your cluster, run the following command:
 
 ```bash
-$ helm install grafana oci://ghcr.io/grafana-community/helm-charts/grafana --version 12.11.2 \
+$ helm install grafana oci://ghcr.io/grafana-community/helm-charts/grafana --version 13.5.0 \
   --set service.port=80 \
   --set 'grafana\.ini.server.root_url=%(protocol)s://%(domain)s:%(http_port)s/grafana/' \
   --set 'grafana\.ini.server.serve_from_sub_path=true' \
