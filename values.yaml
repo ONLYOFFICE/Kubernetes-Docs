@@ -1844,6 +1844,8 @@ grafana:
     ## grafana.dashboard.list Defines the list of dashboards that will be added to Grafana
     ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#12-deploy-grafana-with-the-installation-of-ready-made-dashboards
     ## The script creates a Key with this value in the ConfigMap with the name from this field
+    ## If you have completed the installation with a complete list of dashboards and then update Docs by removing one of them from the list,
+    ## you will need to manually delete the ConfigMap named after that dashboard after the update and restart Grafana
     list:
       - name: dashboard-node-exporter
         url: "https://grafana.com/api/dashboards/1860/revisions/22/download"
