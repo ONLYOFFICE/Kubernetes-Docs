@@ -1,0 +1,19 @@
+{{- if and .Values.gateway.enabled .Values.gateway.upstreamSettingsPolicy }}
+apiVersion: gateway.nginx.org/v1alpha1
+kind: UpstreamSettingsPolicy
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}-upstream
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+spec:
+  targetRefs:
+    - group: core
+      kind: Service
+      name: {{ include "ds.svc.name" . }}
+  {{- with .Values.gateway.upstreamSettingsPolicy }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}

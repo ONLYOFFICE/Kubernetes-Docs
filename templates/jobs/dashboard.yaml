@@ -75,16 +75,24 @@ spec:
         {{- if .Values.grafanaDashboard.job.containerSecurityContext.enabled }}
         securityContext: {{- omit .Values.grafanaDashboard.job.containerSecurityContext "enabled" | toYaml | nindent 10 }}
         {{- end }}
+        env:
+        - name: SIDECAR_DASHBOARD_LABEL
+          value: {{ .Values.grafana.sidecar.dashboards.label | quote }}
+        - name: SIDECAR_DASHBOARD_LABEL_VALUE
+          value: {{ .Values.grafana.sidecar.dashboards.labelValue | quote }}
         resources: {{- toYaml .Values.grafanaDashboard.job.resources | nindent 10 }}
         command: ["/bin/sh", "-c"]
         {{- if .Values.webProxy.enabled }}
-        args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} /scripts/get_dashboard.sh"]
+        args: ["http_proxy={{ .Values.webProxy.http }} https_proxy={{ .Values.webProxy.https }} no_proxy={{ .Values.webProxy.noProxy }} python /scripts/get_dashboard.py"]
         {{- else }}
-        args: ["/scripts/get_dashboard.sh"]
+        args: ["python /scripts/get_dashboard.py"]
         {{- end }}
         volumeMounts:
         - name: grafana-dashboard
-          mountPath: /scripts/get_dashboard.sh
-          subPath: get_dashboard.sh
+          mountPath: /scripts/get_dashboard.py
+          subPath: get_dashboard.py
+        - name: grafana-dashboard
+          mountPath: /scripts/dashboards.json
+          subPath: dashboards.json
       restartPolicy: Never
 {{- end }}

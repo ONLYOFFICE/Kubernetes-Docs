@@ -44,6 +44,10 @@ spec:
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- toYaml .Values.podSecurityContext.adminpanel | nindent 8 }}
       {{- end }}
+      {{- with .Values.adminpanel.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
       {{- if or .Values.adminpanel.customPodAntiAffinity .Values.adminpanel.podAffinity .Values.adminpanel.nodeAffinity }}
       affinity:
         {{- with .Values.adminpanel.customPodAntiAffinity }}

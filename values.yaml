@@ -303,6 +303,10 @@ service:
   type: ClusterIP
   ## service.port ONLYOFFICE Docs service port
   port: 8888
+  ## service.externalTrafficPolicy ONLYOFFICE Docs service external traffic policy
+  ## Valid values are `Cluster` and `Local`
+  ## ref: https://kubernetes.io/docs/reference/networking/virtual-ips/#external-traffic-policy
+  externalTrafficPolicy: Cluster
   ## service.sessionAffinity Session Affinity for ONLYOFFICE Docs service
   ## If not set, `None` will be set as the default value
   ## ref: https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity
@@ -333,7 +337,7 @@ log:
   type: pattern
   ## log.pattern Defines the log pattern if `log.type=pattern`
   ## ref: https://github.com/log4js-node/log4js-node/blob/master/docs/layouts.md#pattern-format
-  pattern: "[%d] [%p] [%X{DOCID}] [%X{USERID}] %c - %.10000m"
+  pattern: "[%d] [%p] [%X{TENANT}] [%X{DOCID}] [%X{USERID}] %c - %.10000m"
 ## Onlyoffice Docs `WOPI` parameters
 wopi:
   ## wopi.enabled Defines if `WOPI` is enabled
@@ -408,10 +412,6 @@ extraThemes:
   ## extraThemes.filename The name of the json file that contains custom interface themes
   ## Must be the same as the `key` name in `extraThemes.configMap`
   filename: custom-themes.json
-## sqlScripts.branchName The name of the repository branch from which sql scripts will be downloaded
-## ref: https://github.com/ONLYOFFICE/server/tree/master/schema
-sqlScripts:
-  branchName: master
 ## Onlyoffice Docs request-filtering-agent parameters
 ## These parameters are used if JWT is disabled: `jwt.enabled=false`
 requestFilteringAgent:
@@ -477,7 +477,7 @@ customPlugins:
     ## customPlugins.defaultPlugins.list Defines which "plugins" from the default list will be installed on the server and in the `Plugins` menu
     ## It is executed if the `customPlugins.build` is set to `true`
     ## Example:
-    ## emptyPluginsDir:
+    ## list:
     ## - ai
     ## - photoeditor
     list: []
@@ -487,7 +487,7 @@ customPlugins:
 ## Global image parameters for all Onlyoffice Docs services and jobs
 images:
   ## images.tag Global image tag for all Onlyoffice Docs services and jobs
-  tag: 9.4.1-1
+  tag: 10.0.0-1
   ## images.registry Global image registry for all Onlyoffice Docs containers
   registry: ""
 
@@ -504,12 +504,26 @@ docservice:
     rollme: "{{ randAlphaNum 5 | quote }}"
   ## docservice.replicas Number of Docservice replicas to deploy
   ## If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored
+  ## If the value is greater than `1` and the editors use HTTP long-polling instead of WebSocket, session persistence must be configured
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/docs/SESSION_PERSISTENCE.md
   replicas: 2
   ## Update strategy used to replace old Pods by new ones. Allowed values: `RollingUpdate` or `Recreate`
   ## For Docservice deployment, it is recommended to use the `Recreate` type
   ## docservice.updateStrategy.type Docservice deployment update strategy type
   updateStrategy:
     type: Recreate
+  ## docservice.topologySpreadConstraints Pod Topology Spread Constraints for Docservice Pods
+  ## The value is evaluated as a template
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ## Example:
+  ## topologySpreadConstraints:
+  ## - maxSkew: 1
+  ##   topologyKey: topology.kubernetes.io/zone
+  ##   whenUnsatisfiable: DoNotSchedule
+  ##   labelSelector:
+  ##     matchLabels:
+  ##       app: '{{ include "ds.resources.name" (list . .Values.commonNameSuffix "docservice") }}'
+  topologySpreadConstraints: []
   ## docservice.customPodAntiAffinity Prohibiting the scheduling of Docservice Pods relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
@@ -563,6 +577,8 @@ docservice:
   ## The parameters below for autoscaling are used only when `docservice.autoscaling.enabled=true`
   autoscaling:
     ## docservice.autoscaling.enabled Enable Docservice deployment autoscaling
+    ## If the editors use HTTP long-polling instead of WebSocket, session persistence must be configured
+    ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs/blob/master/docs/SESSION_PERSISTENCE.md
     enabled: false
     ## docservice.autoscaling.annotations Defines annotations that will be additionally added to Docservice deployment HPA
     ## If set to, it takes priority over the `commonAnnotations`
@@ -654,8 +670,9 @@ docservice:
     ## docservice.image.repository docservice container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-docservice-de
+    ## The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image
+    ## The build of `onlyoffice/docs-docservice-de` is still ongoing to ensure compatibility
+    repository: onlyoffice/docs-cluster-de
     ## docservice.image.tag docservice container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -746,15 +763,12 @@ docservice:
   ## docservice.resources.requests The requested resources for the docservice container
   ## docservice.resources.limits The resources limits for the docservice container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "256Mi"
-    ##   cpu: "100m"
-    requests: {}
-    ## limits:
-    ##   memory: "4Gi"
-    ##   cpu: "2000m"
-    limits: {}
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "6Gi"
+      cpu: "4000m"
   ## docservice.extraEnvVars An array with extra env variables for the Docservice container
   ## Example:
   ## extraEnvVars:
@@ -786,7 +800,7 @@ proxy:
   logFormat: []
   ## proxy.gzipProxied Defines the nginx config gzip_proxied directive
   ## ref: https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied
-  gzipProxied: "off"
+  gzipProxied: "any"
   ## proxy.clientMaxBodySize Defines the nginx config client_max_body_size directive
   ## ref: https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
   clientMaxBodySize: "100m"
@@ -835,8 +849,9 @@ proxy:
     ## proxy.image.repository proxy container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-proxy-de
+    ## The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image
+    ## The build of `onlyoffice/docs-proxy-de` is still ongoing to ensure compatibility
+    repository: onlyoffice/docs-cluster-de
     ## proxy.image.tag proxy container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -927,15 +942,12 @@ proxy:
   ## proxy.resources.requests The requested resources for the proxy container
   ## proxy.resources.limits The resources limits for the proxy container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "256Mi"
-    ##   cpu: "100m"
-    requests: {}
-    ## limits:
-    ##   memory: "4Gi"
-    ##   cpu: "2000m"
-    limits: {}
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "4Gi"
+      cpu: "4000m"
   ## proxy.extraEnvVars An array with extra env variables for the Proxy container
   ## Example:
   ## extraEnvVars:
@@ -968,6 +980,18 @@ converter:
   ## converter.updateStrategy.type Docservice deployment update strategy type
   updateStrategy:
     type: Recreate
+  ## converter.topologySpreadConstraints Pod Topology Spread Constraints for Converter Pods
+  ## The value is evaluated as a template
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ## Example:
+  ## topologySpreadConstraints:
+  ## - maxSkew: 1
+  ##   topologyKey: topology.kubernetes.io/region
+  ##   whenUnsatisfiable: ScheduleAnyway
+  ##   labelSelector:
+  ##     matchLabels:
+  ##       app: '{{ include "ds.resources.name" (list . .Values.commonNameSuffix "converter") }}'
+  topologySpreadConstraints: []
   ## converter.customPodAntiAffinity Prohibiting the scheduling of Converter Pods relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
@@ -1111,8 +1135,9 @@ converter:
     ## converter.image.repository converter container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-converter-de
+    ## The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image
+    ## The build of `onlyoffice/docs-converter-de` is still ongoing to ensure compatibility
+    repository: onlyoffice/docs-cluster-de
     ## converter.image.tag converter container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1151,15 +1176,12 @@ converter:
   ## converter.resources.requests The requested resources for the converter container
   ## converter.resources.limits The resources limits for the converter container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "256Mi"
-    ##   cpu: "200m"
-    requests: {}
-    ## limits:
-    ##   memory: "6Gi"
-    ##   cpu: "2000m"
-    limits: {}
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "6Gi"
+      cpu: "4000m"
   ## converter.extraEnvVars An array with extra env variables for the Converter container
   ## Example:
   ## extraEnvVars:
@@ -1190,6 +1212,15 @@ adminpanel:
   ## adminpanel.updateStrategy.type Adminpanel StatefulSet update strategy type
   updateStrategy:
     type: RollingUpdate
+  ## adminpanel.topologySpreadConstraints Pod Topology Spread Constraints for Adminpanel Pod
+  ## The value is evaluated as a template
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ## Example:
+  ## topologySpreadConstraints:
+  ## - maxSkew: 1
+  ##   topologyKey: node
+  ##   whenUnsatisfiable: ScheduleAnyway
+  topologySpreadConstraints: []
   ## adminpanel.customPodAntiAffinity Prohibiting the scheduling of Adminpanel Pod relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
@@ -1274,8 +1305,9 @@ adminpanel:
     ## adminpanel.image.repository adminpanel container image repository
     ## For more information, see after the Parameters table
     ## https://github.com/ONLYOFFICE/Kubernetes-Docs#4-parameters
-    ## This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead
-    repository: onlyoffice/docs-adminpanel-de
+    ## The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image
+    ## The build of `onlyoffice/docs-adminpanel-de` is still ongoing to ensure compatibility
+    repository: onlyoffice/docs-cluster-de
     ## adminpanel.image.tag adminpanel container image tag
     ## If set to, it takes priority over the `images.tag`
     tag: ""
@@ -1317,15 +1349,12 @@ adminpanel:
   ## adminpanel.resources.requests The requested resources for the adminpanel container
   ## adminpanel.resources.limits The resources limits for the adminpanel container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "256Mi"
-    ##   cpu: "200m"
-    requests: {}
-    ## limits:
-    ##   memory: "2Gi"
-    ##   cpu: "1000m"
-    limits: {}
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "4Gi"
+      cpu: "4000m"
   ## adminpanel.extraEnvVars An array with extra env variables for the Adminpanel container
   ## Example:
   ## extraEnvVars:
@@ -1361,6 +1390,15 @@ example:
   ## example.updateStrategy.type Example StatefulSet update strategy type
   updateStrategy:
     type: RollingUpdate
+  ## example.topologySpreadConstraints Pod Topology Spread Constraints for Example Pod
+  ## The value is evaluated as a template
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ## Example:
+  ## topologySpreadConstraints:
+  ## - maxSkew: 1
+  ##   topologyKey: node
+  ##   whenUnsatisfiable: ScheduleAnyway
+  topologySpreadConstraints: []
   ## example.customPodAntiAffinity Prohibiting the scheduling of Example Pod relative to other Pods containing the specified labels on the same node
   ## Example:
   ## customPodAntiAffinity:
@@ -1494,15 +1532,12 @@ example:
   ## example.resources.requests The requested resources for the example container
   ## example.resources.limits The resources limits for the example container
   resources:
-    ## Example:
-    ## requests:
-    ##   memory: "128Mi"
-    ##   cpu: "100m"
-    requests: {}
-    ## limits:
-    ##   memory: "128Mi"
-    ##   cpu: "250m"
-    limits: {}
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "4Gi"
+      cpu: "4000m"
   ## example.extraEnvVars An array with extra env variables for the Example container
   ## Example:
   ## extraEnvVars:
@@ -1524,6 +1559,137 @@ example:
   ##     subPath: my_cm.txt
   extraVolumeMounts: []
 
+## Onlyoffice Docs Gateway API parameters
+##
+gateway:
+  ## gateway.enabled Enable the creation of a Gateway and HTTPRoute resources for ONLYOFFICE Docs
+  enabled: false
+  ## gateway.external Connect HTTPRoute to an existing external Gateway(s)
+  external:
+    ## gateway.external.parentRefs An array required to identify an existing Gateway(s) resource for routing
+    ## If it is specified, the chart does NOT create its own Gateway resource
+    ## The elements specified here will be added to the `spec.parentRefs` of the HTTPRoute resource being created
+    ## Example:
+    ## parentRefs:
+    ##   - group: gateway.networking.k8s.io
+    ##     kind: Gateway
+    ##     name: custom-gateway
+    ##     namespace: custom-ns
+    ##     sectionName: custom-http
+    parentRefs: []
+  ## gateway.annotations Map of annotations to add to the Gateway and HTTPRoute resources
+  ## If set, takes priority over the `commonAnnotations`
+  ## You can also use `tpl` as the value for the key
+  annotations: {}
+  ## gateway.gatewayClassName Name of the GatewayClass to use
+  ## For NGINX Gateway Fabric the default class name is `nginx`
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/
+  gatewayClassName: nginx
+  ## gateway.listeners.custom Used to add custom listener settings
+  ## For example, to use the same Gateway resource for HTTPRoute routes from other namespaces
+  ## ref: https://gateway-api.sigs.k8s.io/docs/concepts/security/#1-route-binding
+  listeners:
+    ## Example:
+    ## custom:
+    ##   - name: custom-http-route
+    ##     port: 80
+    ##     protocol: HTTP
+    ##     allowedRoutes:
+    ##       namespaces:
+    ##         from: Selector
+    ##         selector:
+    ##           matchExpressions:
+    ##           - key: kubernetes.io/metadata.name
+    ##             operator: In
+    ##             values:
+    ##             - foo
+    custom: []
+  ssl:
+    ## gateway.ssl.enabled Enable TLS termination on the Gateway HTTPS listener(s)
+    enabled: false
+    ## gateway.ssl.secret Name of the Kubernetes Secret that holds the TLS certificate
+    ## Used only when `gateway.ssl.enabled=true`
+    ## When `gateway.letsencrypt.enabled=true` this Secret will be created and managed by cert-manager
+    secret: tls
+    ## gateway.ssl.secretNamespace If you want to use an existing secret located in a different Namespace and containing a certificate,
+    ## specify here the Namespace name and the secret file name in `gateway.ssl.secret`
+    ## To do this, you must have created a corresponding `ReferenceGrant` in the same Namespace as the secret
+    ## ref: https://gateway-api.sigs.k8s.io/reference/api-types/referencegrant/
+    secretNamespace: ""
+    ## gateway.ssl.redirect Automatic HTTP -> HTTPS redirect
+    ## When enabled, the chart creates a separate HTTPRoute that attaches to the
+    ## HTTP listener(s) and applies a RequestRedirect filter, sending all HTTP
+    ## traffic to HTTPS via a 3xx response.
+    ## In this mode, the MAIN HTTPRoute attaches ONLY to HTTPS listener(s),
+    ## leaving HTTP handling to the redirect HTTPRoute.
+    ## Requires `gateway.ssl.enabled=true` (helm install fails otherwise).
+    ## Ignored in external Gateway mode (gateway.external.parentRefs is non-empty)
+    ## — managing redirect on an external Gateway is the responsibility of its owner.
+    ## ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#httprequestredirectfilter
+    ## ref: https://docs.nginx.com/nginx-gateway-fabric/traffic-management/https-termination/
+    redirect:
+      ## gateway.ssl.redirect.enabled Enable HTTP -> HTTPS redirect
+      enabled: false
+      ## gateway.ssl.redirect.statusCode HTTP status code returned by the redirect
+      statusCode: 301
+  ## gateway.host Hostname for the Gateway listener(s)
+  host: ""
+  ## gateway.tenants Multiple hostnames for multi-tenant deployments
+  ## For each tenant, a pair of listeners (HTTP + HTTPS if `ssl.enabled`) is created.
+  ## Takes priority over `gateway.host` if non-empty.
+  ## If `gateway.ssl.enabled=true`, the Secret named in `gateway.ssl.secret` must
+  ## contain a certificate that is valid for all listed hostnames (e.g. a SAN cert
+  ## or a wildcard).
+  tenants: []
+  ## gateway.pathType Specifies the path type for the ONLYOFFICE Docs HTTPRoute
+  ## Allowed values: `Exact`, `PathPrefix` or `RegularExpression`
+  pathType: PathPrefix
+  ## gateway.path Specifies the path under which ONLYOFFICE Docs will be available
+  ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#5335-expose-onlyoffice-docs-on-a-virtual-path
+  ## Allowed forms:
+  ##   "/"            — serve at the root, no path rewrite
+  ##   "/ds"          — serve under /ds, strips /ds before forwarding,
+  ##                    injects `X-Forwarded-Prefix: /ds`
+  ##   "^/ds/.*$"     — RegularExpression path matching (RE2)
+  path: "/"
+  ## gateway.clientSettingsPolicy Configure connection behavior between client and NGINX
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/overview/custom-policies
+  ## The list of supported directives can be found here:
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/traffic-management/client-settings
+  ## The directives specified here will be applied to the HttpRoute object
+  clientSettingsPolicy:
+    body:
+      maxSize: "100m"
+  ## gateway.upstreamSettingsPolicy Configure upstream (Service) behavior for NGINX Gateway Fabric
+  ## The policy is attached to the ONLYOFFICE Docs Service (`kind: Service`, same namespace)
+  ## Required for session stickiness when HTTP long-polling is used instead of WebSocket
+  ## and `docservice.replicas` > 1, otherwise requests fail with `Session ID unknown`
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/traffic-management/upstream-settings/
+  ## ref: https://docs.nginx.com/nginx-gateway-fabric/traffic-management/session-persistence/
+  ## Example for the ONLYOFFICE Docs API integration (sticky by document `shardkey`, it is recommended):
+  ## upstreamSettingsPolicy:
+  ##   loadBalancingMethod: "hash consistent"
+  ##   hashMethodKey: "$arg_shardkey"
+  ## Example for the WOPI integration (sticky by document `WOPISrc`, it is recommended):
+  ## upstreamSettingsPolicy:
+  ##   loadBalancingMethod: "hash consistent"
+  ##   hashMethodKey: "$arg_wopisrc"
+  upstreamSettingsPolicy: {}
+  letsencrypt:
+    ## gateway.letsencrypt.enabled Enable cert-manager Issuer for Let's Encrypt via Gateway API
+    ## Used if `gateway.enabled` is set to `true` and `gateway.external.parentRefs` is not specified
+    ## Requires cert-manager (v1.14+) with the Gateway API feature flag enabled (`config.enableGatewayAPI=true`).
+    ## ref: https://cert-manager.io/docs/usage/gateway/
+    enabled: false
+    ## gateway.letsencrypt.clusterIssuerName Name of the generated ClusterIssuer
+    clusterIssuerName: "letsencrypt-prod-gw"
+    ## gateway.letsencrypt.email Your email address used for ACME registration
+    email: ""
+    ## gateway.letsencrypt.server The address of the Let's Encrypt server to which requests for certificates will be sent
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    ## gateway.letsencrypt.secretName Name of the Secret that stores the ACME account private key
+    secretName: "letsencrypt-prod-gw-private-key"
+
 ## Onlyoffice Docs ingress parameters
 ##
 ingress:
@@ -1537,6 +1703,29 @@ ingress:
     ## Use the annotation below if your NGINX Ingress controller by the Kubernetes community (deprecated in favor of nginx.org)
     ## ref: https://github.com/kubernetes/ingress-nginx/
     ## nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    ## Session persistence (sticky sessions) for the NGINX Ingress controller by nginx.org
+    ## Required when `docservice.replicas` > 1 (or HPA is enabled) and the editors use HTTP long-polling
+    ## instead of WebSocket
+    ## Without it, requests of one Socket.IO session are spread across different docservice Pods
+    ## and fail with `400 Bad Request` / `Session ID unknown`
+    ## Use only one of the two options below
+    ## Option 1 (it is recommended). Consistent hashing by the document shardkey or WOPISrc
+    ## Sticky by document shardkey or WOPISrc, sent by the editor in every request
+    ## Requests without `shardkey` or `WOPISrc` (static files, healthcheck, etc.) are balanced using round-robin
+    ## ref: https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/
+    ## ref: https://nginx.org/en/docs/http/ngx_http_upstream_module.html#hash
+    ## For the ONLYOFFICE Docs API integration:
+    ## nginx.org/lb-method: "hash $arg_shardkey consistent"
+    ## For the ONLYOFFICE Docs WOPI integration:
+    ## nginx.org/lb-method: "hash $arg_wopisrc consistent"
+    ## Option 2. Sticky cookie
+    ## Binds a client (browser) to a docservice Pod using a cookie generated by NGINX
+    ## Format: "serviceName=<service> <cookie_name> [expires=<time>] [domain=<domain>] [httponly] [secure] [samesite=strict|lax|none] [path=<path>]"
+    ## `serviceName` must match the ONLYOFFICE Docs Service name (`documentserver` by default, or `service.existing`)
+    ## If ONLYOFFICE Docs is embedded into a page on a different domain, add `samesite=none secure` (HTTPS only);
+    ## such cookies may still be blocked by browsers when third-party cookies are disabled
+    ## ref: https://github.com/nginx/kubernetes-ingress/tree/main/examples/ingress-resources/session-persistence
+    ## nginx.org/sticky-cookie-services: "serviceName=documentserver DOCSRV expires=1h path=/"
   ## ingress.ingressClassName Used to reference the IngressClass that should be used to implement this Ingress
   ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource/
   ingressClassName: nginx
@@ -1601,29 +1790,6 @@ openshift:
     path: "/"
     ## openshift.route.wildcardPolicy Defines how wildcards are handled for the Route host (e.g., None, Subdomain)
     wildcardPolicy: None
-
-# Onlyoffice Docs HTTPRoute parameters
-##
-httproute:
-  ## httpRoute.enabled Enable the creation of an HTTPRoute for ONLYOFFICE Docs
-  enabled: false
-  ## httpRoute.annotations Map of annotations to add to the HTTPRoute
-  ## If set, these are merged with commonAnnotations, with httpRoute.annotations taking precedence.
-  annotations: {}
-  ## httpRoute.hostnames The hostnames for the ONLYOFFICE Docs HTTPRoute resource
-  hostnames: []
-  # - hostname1.example.com
-  # - hostname2.example.com
-  ## httpRoute.path The path for the ONLYOFFICE Docs HTTPRoute resource
-  path: "/"
-  ## httpRoute.parentRefs An array of parentRefs for the HTTPRoute, specifying the parent resources (e.g., Gateways) that should route traffic to ONLYOFFICE Docs
-  parentRefs: []
-  # - name: my-gateway-1
-  #   namespace: my-gateway-namespace
-  # - group: gateway.networking.k8s.io
-  #   kind: Gateway
-  #   name: my-gateway-2
-  #   namespace: my-gateway-namespace
   
 ## Grafana parameters
 ## See more details about installing Grafana here:
@@ -1634,6 +1800,10 @@ grafana:
   ## grafana.namespace The name of the namespace in which RBAC components and Grafana resources will be deployed
   ## If not set, the name will be taken from `namespaceOverride` or .Release.Namespace
   namespace: ""
+  ## grafana.gateway.enabled Enable the creation of an HTTPRoute rules for the Grafana
+  ## Used if you set `grafana.enabled` to `true` and want to use Gateway API to access Grafana
+  gateway:
+    enabled: false
   ## grafana.ingress.enabled Enable the creation of an ingress for the Grafana
   ## Used if you set `grafana.enabled` to `true` and want to use NGINX Ingress to access Grafana
   ## When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource
@@ -1646,10 +1816,51 @@ grafana:
     ## Note: These annotations are for ingress-nginx controller only (legacy Kubernetes)
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 100m
-  ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
-  ## Used if you set `grafana.enabled` to `true`
+  ## Labels used by the Grafana Community chart sidecars to auto-discover the datasource Secret
+  ## and the dashboard ConfigMaps created by this chart.
+  ## IMPORTANT: both the label KEY and its VALUE must match what the Grafana Community chart
+  ## looks for, i.e. `sidecar.datasources.label` + `sidecar.datasources.labelValue`
+  ## (and the dashboards equivalents) passed when installing `grafana/grafana`.
+  ## The Grafana sidecar matches a resource only when the label key is present AND its value
+  ## equals the configured labelValue. If you change labelValue here, pass the same value when you install the Grafana chart.
+  ## ref: https://github.com/grafana-community/helm-charts/tree/main/charts/grafana
+  sidecar:
+    datasources:
+      ## grafana.sidecar.datasources.label The label KEY set on the `grafana-datasource` Secret. The label KEY must be equal the Grafana chart's.
+      label: grafana_datasource
+      ## grafana.sidecar.datasources.labelValue The label VALUE; must equal the Grafana chart's.
+      ## `sidecar.datasources.labelValue`
+      labelValue: "docs"
+    dashboards:
+      ## grafana.sidecar.dashboards.label The label KEY set on the dashboard ConfigMaps The label KEY must be equal the Grafana chart's.
+      label: grafana_dashboard
+      ## grafana.sidecar.dashboards.labelValue The label VALUE; must equal the Grafana chart's.
+      ## `sidecar.dashboards.labelValue`
+      labelValue: "docs"
   dashboard:
+    ## grafana.dashboard.enabled Enable the installation of ready-made Grafana dashboards
+    ## Used if you set `grafana.enabled` to `true`
     enabled: false
+    ## grafana.dashboard.list Defines the list of dashboards that will be added to Grafana
+    ## ref: https://github.com/ONLYOFFICE/Kubernetes-Docs#12-deploy-grafana-with-the-installation-of-ready-made-dashboards
+    ## The script creates a Key with this value in the ConfigMap with the name from this field
+    ## If you have completed the installation with a complete list of dashboards and then update Docs by removing one of them from the list,
+    ## you will need to manually delete the ConfigMap named after that dashboard after the update and restart Grafana
+    list:
+      - name: dashboard-node-exporter
+        url: "https://grafana.com/api/dashboards/1860/revisions/22/download"
+      - name: dashboard-deployment
+        url: "https://grafana.com/api/dashboards/8588/revisions/1/download"
+      - name: dashboard-redis
+        url: "https://grafana.com/api/dashboards/11835/revisions/1/download"
+      - name: dashboard-rabbitmq
+        url: "https://grafana.com/api/dashboards/10991/revisions/8/download"
+      - name: dashboard-postgresql
+        url: "https://raw.githubusercontent.com/cloudnative-pg/grafana-dashboards/main/charts/cluster/grafana-dashboard.json"
+      - name: dashboard-documentserver
+        url: "https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/documentserver-statsd-exporter.json"
+      - name: dashboard-cluster-resourses
+        url: "https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/kubernetes-cluster-resourses.json"
 
 ## Onlyoffice Docs jobs parameters
 ##
@@ -1726,7 +1937,7 @@ install:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     tblCreate:
@@ -1814,7 +2025,7 @@ upgrade:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -1910,7 +2121,7 @@ rollback:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -2006,7 +2217,7 @@ delete:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     tblRemove:
@@ -2094,7 +2305,7 @@ clearCache:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
   existingConfigmap:
     ## clearCache.existingConfigmap.name The name of the existing ConfigMap that contains the clears the Cache directory custom script
@@ -2175,7 +2386,7 @@ grafanaDashboard:
       requests: {}
       ## limits:
       ##   memory: "1Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
 ## Job by Wopi Keys Generation has pre-install and pre-upgrade hooks and executes before any resources are created in Kubernetes
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
@@ -2249,7 +2460,7 @@ wopiKeysGeneration:
       requests: {}
       ## limits:
       ##   memory: "1Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
 ## Job by Wopi Keys Deletion has a pre-delete hook and executes on a deletion request before all of the release's resources have been deleted
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
@@ -2325,7 +2536,7 @@ wopiKeysDeletion:
       requests: {}
       ## limits:
       ##   memory: "1Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
 ## Job by customResources has pre-install and pre-upgrade hooks and executes before any resources are created in Kubernetes
 ## ref: https://helm.sh/docs/topics/charts_hooks/#the-available-hooks
@@ -2402,7 +2613,7 @@ customResources:
       requests: {}
       ## limits:
       ##   memory: "2Gi"
-      ##   cpu: "1000m"
+      ##   cpu: "2000m"
       limits: {}
 
 ## Onlyoffice Docs tests parameters
@@ -2474,6 +2685,6 @@ tests:
     ##   cpu: "200m"
     requests: {}
     ## limits:
-    ##   memory: "512Mi"
-    ##   cpu: "1000m"
+    ##   memory: "1Gi"
+    ##   cpu: "2000m"
     limits: {}

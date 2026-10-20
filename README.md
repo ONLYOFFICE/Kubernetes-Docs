@@ -9,8 +9,8 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
 - [Deploy prerequisites](#deploy-prerequisites)
   * [1. Add Helm repositories](#1-add-helm-repositories)
   * [2. Install Persistent Storage](#2-install-persistent-storage)
-  * [3. Deploy RabbitMQ](#3-deploy-rabbitmq)
-  * [4. Deploy Redis](#4-deploy-redis)
+  * [3. Deploy Message Broker](#3-deploy-message-broker)
+  * [4. Deploy Key-Value datastore](#4-deploy-key-value-datastore)
   * [5. Deploy Database](#5-deploy-database)
   * [6. Deploy StatsD exporter](#6-deploy-statsd-exporter)
     + [6.1 Add Helm repositories](#61-add-helm-repositories)
@@ -44,8 +44,13 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
     + [5.3.2.3 Expose ONLYOFFICE Docs via HTTPS](#5323-expose-onlyoffice-docs-via-https)
     + [5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5324-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
     + [5.3.2.5 Expose ONLYOFFICE Docs on a virtual path](#5325-expose-onlyoffice-docs-on-a-virtual-path)
-    + [5.3.3 Expose ONLYOFFICE Docs via route in OpenShift](#533-expose-onlyoffice-docs-via-route-in-openshift)
-    + [5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)](#534-expose-onlyoffice-docs-via-httproute-gateway-api)
+    + [5.3.3 Expose ONLYOFFICE Docs via Gateway API](#533-expose-onlyoffice-docs-via-gateway-api)
+    + [5.3.3.1 Installing Gateway API CRDs and NGINX Gateway Fabric](#5331-installing-gateway-api-crds-and-nginx-gateway-fabric)
+    + [5.3.3.2 Exposing ONLYOFFICE Docs via Gateway API (HTTP)](#5332-exposing-onlyoffice-docs-via-gateway-api-http)
+    + [5.3.3.3 Exposing ONLYOFFICE Docs via Gateway API (HTTPS)](#5333-exposing-onlyoffice-docs-via-gateway-api-https)
+    + [5.3.3.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate](#5334-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)
+    + [5.3.3.5 Expose ONLYOFFICE Docs on a virtual path](#5335-expose-onlyoffice-docs-on-a-virtual-path)
+    + [5.3.4 Expose ONLYOFFICE Docs via route in OpenShift](#534-expose-onlyoffice-docs-via-route-in-openshift)
   * [5.4 Admin Panel deployment (optional)](#54-admin-panel-deployment-optional)
   * [6. Scale ONLYOFFICE Docs (optional)](#6-scale-onlyoffice-docs-optional) 
       + [6.1 Horizontal Pod Autoscaling](#61-horizontal-pod-autoscaling)
@@ -60,7 +65,7 @@ This repository contains a set of files to deploy ONLYOFFICE Docs into a Kuberne
   * [1. Deploy Grafana](#1-deploy-grafana)
     + [1.1 Deploy Grafana without installing ready-made dashboards](#11-deploy-grafana-without-installing-ready-made-dashboards)
     + [1.2 Deploy Grafana with the installation of ready-made dashboards](#12-deploy-grafana-with-the-installation-of-ready-made-dashboards)
-  * [2 Access to Grafana via Ingress](#2-access-to-grafana-via-ingress)
+  * [2. Access to Grafana via Gateway or Ingress](#2-access-to-grafana-via-gateway-or-ingress)
   * [3. View gathered metrics in Grafana](#3-view-gathered-metrics-in-grafana)
 
 ## Requirements
@@ -135,7 +140,6 @@ Note: For 2000 connections and above, dependencies (NFS, RabbitMQ, Redis, Postgr
 ### 1. Add Helm repositories
 
 ```bash
-$ helm repo add bitnami https://charts.bitnami.com/bitnami
 $ helm repo add nfs-server-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner
 $ helm repo add onlyoffice https://download.onlyoffice.com/charts/stable
 $ helm repo update
@@ -176,92 +180,25 @@ Note: The default `nfs` Persistent Volume Claim is 8Gi. You can change it in the
 *The PersistentVolume type to be used for PVC placement must support Access Mode [ReadWriteMany](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).*
 *Also, PersistentVolume must have as the owner the user from whom the ONLYOFFICE Docs will be started. By default it is `ds` (101:101).*
 
-Note: If you want to enable `WOPI`, please set the parameter `wopi.enabled=true`. In this case Persistent Storage must be connected to the cluster nodes with the disabled caching attributes for the mounted directory for the clients. For NFS Server Provisioner it can be achieved by adding `noac` option to the parameter `storageClass.mountOptions`. Please find more information [here](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner/blob/master/charts/nfs-server-provisioner/values.yaml#L83).
-### 3. Deploy RabbitMQ
+Note: If you want to enable `WOPI`, please set the parameter `wopi.enabled=true`. In this case Persistent Storage must be connected to the cluster nodes with the disabled caching attributes for the mounted directory for the clients. For NFS Server Provisioner it can be achieved by adding `noac` (Also add `vers=4.1`, `retrans=2`, `timeo=30`) option to the parameter `storageClass.mountOptions`. Please find more information [here](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner/blob/master/charts/nfs-server-provisioner/values.yaml#L83).
 
-To install RabbitMQ to your cluster, run the following command:
+### 3. Deploy Message Broker
 
-```bash
-$ helm install rabbitmq --version 16.0.14 bitnami/rabbitmq \
-  --set persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set resourcesPreset=none \
-  --set image.repository=bitnamilegacy/rabbitmq \
-  --set image.tag=4.1.3-debian-12-r1 \
-  --set global.security.allowInsecureImages=true \
-  --set metrics.enabled=false
-```
+As a message broker, you can use RabbitMQ or ActiveMQ.
 
-Note: Set the `metrics.enabled=true` to enable exposing RabbitMQ metrics to be gathered by Prometheus.
+To install RabbitMQ to your cluster, you can use [this](./docs/DEPENDENCIES.md#deploy-rabbitmq) step.
 
-See more details about installing RabbitMQ via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#rabbitmq).
+### 4. Deploy Key-Value Datastore
 
-### 4. Deploy Redis
+As a key-value datastore, you can use Redis or Valkey.
 
-To install Redis to your cluster, run the following command:
-
-```bash
-$ helm install redis --version 22.0.7 bitnami/redis \
-  --set architecture=standalone \
-  --set master.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set master.resourcesPreset=none \
-  --set global.security.allowInsecureImages=true \
-  --set image.repository=bitnamilegacy/redis \
-  --set image.tag=8.2.1-debian-12-r0 \
-  --set metrics.enabled=false
-```
-
-Note: Set the `metrics.enabled=true` to enable exposing Redis metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/redis-exporter` and `metrics.image.tag=1.76.0-debian-12-r0`.
-
-See more details about installing Redis via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/redis).
+To install Valkey to your cluster, you can use [this](./docs/DEPENDENCIES.md#deploy-valkey) step.
 
 ### 5. Deploy Database
 
-As a database server, you can use PostgreSQL, MySQL or MariaDB
+As a database server, you can use PostgreSQL, MySQL, MariaDB, Oracle Database, Microsoft SQL Server or Dameng Database.
 
-**If PostgreSQL is selected as the database server, then follow these steps**
-
-To install PostgreSQL to your cluster, run the following command:
-
-```
-$ helm install postgresql --version 16.7.27 bitnami/postgresql \
-  --set auth.database=postgres \
-  --set primary.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set primary.persistence.size=PERSISTENT_SIZE \
-  --set primary.resourcesPreset=none \
-  --set image.repository=bitnamilegacy/postgresql \
-  --set global.security.allowInsecureImages=true \
-  --set image.tag=17.6.0-debian-12-r2 \
-  --set metrics.enabled=false
-```
-
-Note: Set the `metrics.enabled=true` to enable exposing Database metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/postgres-exporter` and `metrics.image.tag=0.17.1-debian-12-r16`.
-
-See more details about installing PostgreSQL via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/postgresql#postgresql).
-
-**If MySQL is selected as the database server, then follow these steps**
-
-To install MySQL to your cluster, run the following command:
-
-```
-$ helm install mysql --version 14.0.3 bitnami/mysql \
-  --set auth.database=onlyoffice \
-  --set auth.username=onlyoffice \
-  --set primary.persistence.storageClass=PERSISTENT_STORAGE_CLASS \
-  --set primary.persistence.size=PERSISTENT_SIZE \
-  --set primary.resourcesPreset=none \
-  --set image.repository=bitnamilegacy/mysql \
-  --set global.security.allowInsecureImages=true \
-  --set image.tag=9.4.0-debian-12-r1 \
-  --set metrics.enabled=false
-```
-
-See more details about installing MySQL via Helm [here](https://github.com/bitnami/charts/tree/main/bitnami/mysql).
-
-Here `PERSISTENT_SIZE` is a size for the Database persistent volume. For example: `8Gi`.
-
-It's recommended to use at least 2Gi of persistent storage for every 100 active users of ONLYOFFICE Docs.
-
-Note: Set the `metrics.enabled=true` to enable exposing Database metrics to be gathered by Prometheus. Also add the following parameters: `metrics.image.repository=bitnamilegacy/mysqld-exporter` and `metrics.image.tag=0.17.2-debian-12-r16`.
+To install PostgreSQL to your cluster, you can use [this](./docs/DEPENDENCIES.md#deploy-postgresql-database) step.
 
 ### 6. Deploy StatsD exporter
 
@@ -280,9 +217,11 @@ $ helm repo update
 To install Prometheus to your cluster, run the following command:
 
 ```bash
-$ helm install prometheus -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/extraScrapeConfigs.yaml prometheus-community/prometheus \
+$ helm install prometheus -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/extraScrapeConfigs.yaml --version 29.36.1 prometheus-community/prometheus \
   --set server.global.scrape_interval=1m
 ```
+
+Note: If you also want to add a scrape config to collect metrics from the dependencies installed according to the manual [DEPENDENCIES.md](./docs/DEPENDENCIES.md) then change the path to `https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/extraScrapeConfigsWithDep.yaml`.
 
 To change the scrape interval, specify the `server.global.scrape_interval` parameter.
 
@@ -292,13 +231,14 @@ See more details about installing Prometheus via Helm [here](https://github.com/
 
 To install StatsD exporter to your cluster, run the following command:
 
-```
-$ helm install statsd-exporter prometheus-community/prometheus-statsd-exporter \
+```bash
+$ helm install statsd-exporter -f https://raw.githubusercontent.com/ONLYOFFICE/Kubernetes-Docs/master/sources/metrics/statsd-mapping.yaml --version 1.0.0 prometheus-community/prometheus-statsd-exporter \
   --set statsd.udpPort=8125 \
   --set statsd.tcpPort=8126 \
   --set statsd.eventFlushInterval=30000ms
 ```
 
+The statsd-mapping.yaml file configures a ttl for the ds_coauth_connections metric. This metric is a per-pod gauge (labeled by replica), and without a ttl a series for a pod that no longer exists (e.g. after a rolling update) is never removed and keeps showing up in Grafana/Prometheus indefinitely. With the ttl set, the exporter drops a label combination once it hasn't received a fresh sample for that long. Adjust the ttl value in the file if you want stale replicas to expire faster or slower.
 See more details about installing Prometheus StatsD exporter via Helm [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-statsd-exporter).
 
 To allow the StatsD metrics in ONLYOFFICE Docs, follow step [5.2](#52-metrics-deployment-optional)
@@ -533,12 +473,13 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `customPlugins.defaultPlugins.enabled`                      | Defines whether [plugins](./docs/CUSTOM_RESOURCES.md#disable-all-default-plugins) will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`                              | `true`                                 |
 | `customPlugins.defaultPlugins.list`                         | Defines [which plugins](./docs/CUSTOM_RESOURCES.md#install-selected-default-plugins-only) from the default list will be installed on the server and in the `Plugins` menu. It is executed if the `customPlugins.build` is set to `true`          | `[]`                         |
 | `customPlugins.emptyPluginsDir`                             | Defines whether a directory with plugins in containers will [contain files](./docs/CUSTOM_RESOURCES.md#completely-disable-plugins-directory), including service files. If set to `true`, an empty volume with the `emptyDir` type will be mapped  | `false`                     |
-| `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `9.4.1-1`                                                                                 |
+| `images.tag`                                                | Global image tag for all Onlyoffice Docs services and jobs                                                                                                                     | `10.0.0-1`                                                                                 |
 | `images.registry`                                           | Global image registry for all Onlyoffice Docs services and jobs.                                                                                                               |  `""`                                                                                     |
 | `docservice.annotations`                                    | Defines annotations that will be additionally added to Docservice Deployment. If set to, it takes priority over the `commonAnnotations`                                        | `{}`                                                                                      |
 | `docservice.podAnnotations`                                 | Map of annotations to add to the Docservice deployment pods                                                                                                                    | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
-| `docservice.replicas`                                       | Docservice replicas quantity. If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored                                                                      | `2`                                                                                       |
+| `docservice.replicas`                                       | Docservice replicas quantity. If the `docservice.autoscaling.enabled` parameter is enabled, it is ignored. If the value is greater than `1` and the editors use HTTP long-polling instead of WebSocket, session persistence must be configured, see [here](./docs/SESSION_PERSISTENCE.md) | `2`                                                                                       |
 | `docservice.updateStrategy.type`                            | Docservice deployment update strategy type                                                                                                                                     | `Recreate`                                                                                |
+| `docservice.topologySpreadConstraints`                      | Pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) for Docservice Pods. The value is evaluated as a template | `[]`                                                                                      |
 | `docservice.customPodAntiAffinity`                          | Prohibiting the scheduling of Docservice Pods relative to other Pods containing the specified labels on the same node                                                          | `{}`                                                                                      |
 | `docservice.podAffinity`                                    | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Docservice Pods scheduling by nodes relative to other Pods | `{}`                                                          |
 | `docservice.nodeAffinity`                                   | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Docservice Pods scheduling by nodes                  | `{}`                                                                                      |
@@ -548,20 +489,20 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `docservice.hostAliases`                                    | Adds [additional entries](https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/) to the hosts file in the Docservice and Proxy containers                    | `[]`                                                                                      |
 | `docservice.initContainers`                                 | Defines containers that run before docservice and proxy containers in the Docservice deployment pod. For example, a container that changes the owner of the PersistentVolume   | `[]`                                                                                      |
 | `docservice.image.registry`                                 | Docservice container image registry. Takes priority over `images.registry`                                                                                                     | `""`                                                                                      |
-| `docservice.image.repository`                               | Docservice container image repository. This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead*                             | `onlyoffice/docs-docservice-de`                                                           |
+| `docservice.image.repository`                               | Docservice container image repository. The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image. The build of `onlyoffice/docs-docservice-de` is still ongoing to ensure compatibility.*                             | `onlyoffice/docs-cluster-de`                                                           |
 | `docservice.image.tag`                                      | Docservice container image tag. If set to, it takes priority over the `images.tag`                                                                                             | `""`                                                                                      |
 | `docservice.image.pullPolicy`                               | Docservice container image pull policy                                                                                                                                         | `IfNotPresent`                                                                            |
 | `docservice.containerSecurityContext.enabled`               | Enable security context for the Docservice container                                                                                                                           | `false`                                                                                   |
 | `docservice.lifecycleHooks`                                 | Defines the Docservice [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                      |
-| `docservice.resources.requests`                             | The requested resources for the Docservice container                                                                                                                           | `{}`                                                                                      |
-| `docservice.resources.limits`                               | The resources limits for the Docservice container                                                                                                                              | `{}`                                                                                      |
+| `docservice.resources.requests`                             | The requested resources for the Docservice container                                                                                                                           | `memory: "256Mi", cpu: "200m"`                                                                                      |
+| `docservice.resources.limits`                               | The resources limits for the Docservice container                                                                                                                              | `memory: "6Gi", cpu: "4000m"`                                                                                      |
 | `docservice.extraEnvVars`                                   | An array with extra env variables for the Docservice container                                                                                                                 | `[]`                                                                                      |
 | `docservice.extraVolumes`                                   | An array with extra volumes for the Docservice Pod                                                                                                                             | `[]`                                                                                      |
 | `docservice.extraVolumeMounts`                              | An array with extra volume mounts for the Docservice container                                                                                                                 | `[]`                                                                                      |
 | `docservice.readinessProbe.enabled`                         | Enable readinessProbe for Docservice container                                                                                                                                 | `true`                                                                                    |
 | `docservice.livenessProbe.enabled`                          | Enable livenessProbe for Docservice container                                                                                                                                  | `true`                                                                                    |
 | `docservice.startupProbe.enabled`                           | Enable startupProbe for Docservice container                                                                                                                                   | `true`                                                                                    |
-| `docservice.autoscaling.enabled`                            | Enable Docservice deployment autoscaling                                                                                                                                       | `false`                                                                                   |
+| `docservice.autoscaling.enabled`                            | Enable Docservice deployment autoscaling. If the editors use HTTP long-polling instead of WebSocket, session persistence must be configured, see [here](./docs/SESSION_PERSISTENCE.md) | `false`                                                                                   |
 | `docservice.autoscaling.annotations`                        | Defines annotations that will be additionally added to Docservice deployment HPA. If set to, it takes priority over the `commonAnnotations`                                    | `{}`                                                                                      |
 | `docservice.autoscaling.minReplicas`                        | Docservice deployment autoscaling minimum number of replicas                                                                                                                   | `2`                                                                                       |
 | `docservice.autoscaling.maxReplicas`                        | Docservice deployment autoscaling maximum number of replicas                                                                                                                   | `4`                                                                                       |
@@ -573,7 +514,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `docservice.autoscaling.behavior`                           | Configuring Docservice deployment scaling behavior policies for the `scaleDown` and `scaleUp` fields                                                                           | `{}`                                                                                      |
 | `proxy.accessLog`                                           | Defines the nginx config [access_log](https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log) format directive                                                     | `off`                                                                                     |
 | `proxy.logFormat`                                           | Defines the [format](https://nginx.org/en/docs/http/ngx_http_log_module.html#log_format) of log entries using text and various variables                                       | `'$remote_addr - $remote_user [$time_local] "$request" ' '$status $body_bytes_sent "$http_referer" ' '"$http_user_agent" "$http_x_forwarded_for"'` |
-| `proxy.gzipProxied`                                         | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive                                                       | `off`                                                                                     |
+| `proxy.gzipProxied`                                         | Defines the nginx config [gzip_proxied](https://nginx.org/en/docs/http/ngx_http_gzip_module.html#gzip_proxied) directive                                                       | `any`                                                                                     |
 | `proxy.clientMaxBodySize`                                   | Defines the nginx config [client_max_body_size](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size) directive                                       | `100m`                                                                                    |
 | `proxy.workerConnections`                                   | Defines the nginx config [worker_connections](https://nginx.org/en/docs/ngx_core_module.html#worker_connections) directive                                                     | `4096`                                                                                    |
 | `proxy.secureLinkSecret`                                    | Defines secret for the nginx config directive [secure_link_md5](https://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5). If the value is empty, a random one will be generated, which will be used later in the upgrade. If a value is set, it will be used | `""` |
@@ -585,13 +526,13 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `proxy.infoAllowedExistingSecret`                           | Name of existing secret to use for info auth password. Used if `proxy.infoAllowedUser` is set. Must contain the key specified in `proxy.infoAllowedSecretKeyName`. If set to, it takes priority over the `proxy.infoAllowedPassword` | `""`                                |
 | `proxy.welcomePage.enabled`                                 | Defines whether the welcome page will be displayed                                                                                                                             | `true`                                                                                    |
 | `proxy.image.registry`                                      | Docservice Proxy container image registry. Takes priority over `images.registry`                                                                                               |  `""`                                                                                     |
-| `proxy.image.repository`                                    | Docservice Proxy container image repository. This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead*                       | `onlyoffice/docs-proxy-de`                                                                |
+| `proxy.image.repository`                                    | Docservice Proxy container image repository. The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image. The build of `onlyoffice/docs-proxy-de` is still ongoing to ensure compatibility.*                       | `onlyoffice/docs-cluster-de`                                                                |
 | `proxy.image.tag`                                           | Docservice Proxy container image tag. If set to, it takes priority over the `images.tag`                                                                                       | `""`                                                                                      |
 | `proxy.image.pullPolicy`                                    | Docservice Proxy container image pull policy                                                                                                                                   | `IfNotPresent`                                                                            |
 | `proxy.containerSecurityContext.enabled`                    | Enable security context for the Proxy container                                                                                                                                | `false`                                                                                   |
 | `proxy.lifecycleHooks`                                      | Defines the Proxy [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                           |
-| `proxy.resources.requests`                                  | The requested resources for the Proxy container                                                                                                                                | `{}`                                                                                      |
-| `proxy.resources.limits`                                    | The resources limits for the Proxy container                                                                                                                                   | `{}`                                                                                      |
+| `proxy.resources.requests`                                  | The requested resources for the Proxy container                                                                                                                                | `memory: "256Mi", cpu: "100m"`                                                                                      |
+| `proxy.resources.limits`                                    | The resources limits for the Proxy container                                                                                                                                   | `memory: "4Gi", cpu: "4000m"`                                                                                      |
 | `proxy.extraEnvVars`                                        | An array with extra env variables for the Proxy container                                                                                                                      | `[]`                                                                                      |
 | `proxy.extraVolumeMounts`                                   | An array with extra volume mounts for the Proxy container                                                                                                                      | `[]`                                                                                      |
 | `proxy.readinessProbe.enabled`                              | Enable readinessProbe for  Proxy container                                                                                                                                     | `true`                                                                                    |
@@ -601,6 +542,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `converter.podAnnotations`                                  | Map of annotations to add to the Converter deployment pods                                                                                                                     | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
 | `converter.replicas`                                        | Converter replicas quantity. If the `converter.autoscaling.enabled` parameter is enabled, it is ignored                                                                        | `2`                                                                                       |
 | `converter.updateStrategy.type`                             | Converter deployment update strategy type                                                                                                                                      | `Recreate`                                                                                |
+| `converter.topologySpreadConstraints`                       | Pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) for Converter Pods. The value is evaluated as a template | `[]`                                                                                      |
 | `converter.customPodAntiAffinity`                           | Prohibiting the scheduling of Converter Pods relative to other Pods containing the specified labels on the same node                                                           | `{}`                                                                                      |
 | `converter.podAffinity`                                     | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Converter Pods scheduling by nodes relative to other Pods | `{}`                                                           |
 | `converter.nodeAffinity`                                    | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Converter Pods scheduling by nodes                   | `{}`                                                                                      |
@@ -610,13 +552,13 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `converter.hostAliases`                                     | Adds [additional entries](https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/) to the hosts file in the Converter container                                | `[]`                                                                                      |
 | `converter.initContainers`                                  | Defines containers that run before Converter container in the Converter deployment pod. For example, a container that changes the owner of the PersistentVolume                | `[]`                                                                                      |
 | `converter.image.registry`                                  | Converter container image registry. Takes priority over `images.registry`                                                                                                      |  `""`                                                                                     |
-| `converter.image.repository`                                | Converter container image repository. This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead*                              | `onlyoffice/docs-converter-de`                                                            |
+| `converter.image.repository`                                | Converter container image repository. The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image. The build of `onlyoffice/docs-converter-de` is still ongoing to ensure compatibility.*                              | `onlyoffice/docs-cluster-de`                                                            |
 | `converter.image.tag`                                       | Converter container image tag. If set to, it takes priority over the `images.tag`                                                                                              | `""`                                                                                      |
 | `converter.image.pullPolicy`                                | Converter container image pull policy                                                                                                                                          | `IfNotPresent`                                                                            |
 | `converter.containerSecurityContext.enabled`                | Enable security context for the Converter container                                                                                                                            | `false`                                                                                   |
 | `converter.lifecycleHooks`                                  | Defines the Converter [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                       |
-| `converter.resources.requests`                              | The requested resources for the Converter container                                                                                                                            | `{}`                                                                                      |
-| `converter.resources.limits`                                | The resources limits for the Converter container                                                                                                                               | `{}`                                                                                      |
+| `converter.resources.requests`                              | The requested resources for the Converter container                                                                                                                            | `memory: "256Mi", cpu: "200m"`                                                                                      |
+| `converter.resources.limits`                                | The resources limits for the Converter container                                                                                                                               | `memory: "6Gi", cpu: "4000m"`                                                                                      |
 | `converter.extraEnvVars`                                    | An array with extra env variables for the Converter container                                                                                                                  | `[]`                                                                                      |
 | `converter.extraVolumes`                                    | An array with extra volumes for the Converter Pod                                                                                                                              | `[]`                                                                                      |
 | `converter.extraVolumeMounts`                               | An array with extra volume mounts for the Converter container                                                                                                                  | `[]`                                                                                      |
@@ -634,6 +576,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `adminpanel.annotations`                                    | Defines annotations that will be additionally added to Admin panel Deployment. If set to, it takes priority over the `commonAnnotations`                                         | `{}`                                                                                    |
 | `adminpanel.podAnnotations`                                 | Map of annotations to add to the Admin panel deployment pods                                                                                                                     | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                               |
 | `adminpanel.updateStrategy.type`                            | Admin panel StatefulSet update strategy type                                                                                                                                     | `RollingUpdate`                                                                         |
+| `adminpanel.topologySpreadConstraints`                       | Pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) for Adminpanel Pod. The value is evaluated as a template | `[]`                                                                                      |
 | `adminpanel.customPodAntiAffinity`                          | Prohibiting the scheduling of Admin panel Pods relative to other Pods containing the specified labels on the same node                                                           | `{}`                                                                                    |
 | `adminpanel.podAffinity`                                    | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Admin panel Pods scheduling by nodes relative to other Pods | `{}`                                                         |
 | `adminpanel.nodeAffinity`                                   | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Admin panel Pods scheduling by nodes                   | `{}`                                                                                    |
@@ -643,13 +586,13 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `adminpanel.hostAliases`                                    | Adds [additional entries](https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/) to the hosts file in the Admin panel container                                | `[]`                                                                                    |
 | `adminpanel.initContainers`                                 | Defines containers that run before Admin panel container in the Admin panel deployment pod. For example, a container that changes the owner of the PersistentVolume              | `[]`                                                                                    |
 | `adminpanel.image.registry`                                 | Admin panel container image registry. Takes priority over `images.registry`                                                                                                      |  `""`                                                                                   |
-| `adminpanel.image.repository`                               | Admin panel container image repository. This image repository is kept for backward compatibility. You can use `onlyoffice/docs-cluster-de` instead*                              | `onlyoffice/docs-adminpanel-de`                                                         |
+| `adminpanel.image.repository`                               | Admin panel container image repository. The repository has been consolidated to the common `onlyoffice/docs-cluster-de` image. The build of `onlyoffice/docs-adminpanel-de` is still ongoing to ensure compatibility.*                              | `onlyoffice/docs-cluster-de`                                                         |
 | `adminpanel.image.tag`                                      | Admin panel container image tag. If set to, it takes priority over the `images.tag`                                                                                              | `""`                                                                                    |
 | `adminpanel.image.pullPolicy`                               | Admin panel container image pull policy                                                                                                                                          | `IfNotPresent`                                                                          |
 | `adminpanel.containerSecurityContext.enabled`               | Enable security context for the Admin panel container                                                                                                                            | `false`                                                                                 |
 | `adminpanel.lifecycleHooks`                                 | Defines the Admin panel [container lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks). It is used to trigger events to run at certain points in a container's lifecycle | `{}`                                                     |
-| `adminpanel.resources.requests`                             | The requested resources for the Admin panel container                                                                                                                            | `{}`                                                                                    |
-| `adminpanel.resources.limits`                               | The resources limits for the Admin panel container                                                                                                                               | `{}`                                                                                    |
+| `adminpanel.resources.requests`                             | The requested resources for the Admin panel container                                                                                                                            | `memory: "256Mi", cpu: "200m"`                                                                                    |
+| `adminpanel.resources.limits`                               | The resources limits for the Admin panel container                                                                                                                               | `memory: "4Gi", cpu: "4000m"`                                                                                    |
 | `adminpanel.extraEnvVars`                                   | An array with extra env variables for the Admin panel container                                                                                                                  | `[]`                                                                                    |
 | `adminpanel.extraVolumes`                                   | An array with extra volumes for the Admin panel Pod                                                                                                                              | `[]`                                                                                    |
 | `adminpanel.extraVolumeMounts`                              | An array with extra volume mounts for the Admin panel container                                                                                                                  | `[]`                                                                                    |
@@ -657,6 +600,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `example.annotations`                                       | Defines annotations that will be additionally added to Example StatefulSet. If set to, it takes priority over the `commonAnnotations`                                          | `{}`                                                                                      |
 | `example.podAnnotations`                                    | Map of annotations to add to the example pod                                                                                                                                   | `rollme: "{{ randAlphaNum 5 \| quote }}"`                                                 |
 | `example.updateStrategy.type`                               | Example StatefulSet update strategy type                                                                                                                                       | `RollingUpdate`                                                                           |
+| `example.topologySpreadConstraints`                       | Pod [Topology Spread Constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) for Example Pod. The value is evaluated as a template | `[]`                                                                                      |
 | `example.customPodAntiAffinity`                             | Prohibiting the scheduling of Example Pod relative to other Pods containing the specified labels on the same node                                                              | `{}`                                                                                      |
 | `example.podAffinity`                                       | Defines [Pod affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity) rules for Example Pod scheduling by nodes relative to other Pods | `{}`                                                              |
 | `example.nodeAffinity`                                      | Defines [Node affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity) rules for Example Pod scheduling by nodes                      | `{}`                                                                                      |
@@ -671,8 +615,8 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `example.image.pullPolicy`                                  | Example container image pull policy                                                                                                                                            | `IfNotPresent`                                                                            |
 | `example.containerSecurityContext.enabled`                  | Enable security context for the Example container                                                                                                                              | `false`                                                                                   |
 | `example.dsUrl`                                             | ONLYOFFICE Docs external address. It should be changed only if it is necessary to check the operation of the conversion in Example (e.g. http://\<documentserver-address\>/)   | `/`                                                                                       |
-| `example.resources.requests`                                | The requested resources for the Example container                                                                                                                              | `{}`                                                                                      |
-| `example.resources.limits`                                  | The resources limits for the Example container                                                                                                                                 | `{}`                                                                                      |
+| `example.resources.requests`                                | The requested resources for the Example container                                                                                                                              | `memory: "128Mi", cpu: "100m"`                                                                                      |
+| `example.resources.limits`                                  | The resources limits for the Example container                                                                                                                                 | `memory: "4Gi", cpu: "4000m"`                                                                                      |
 | `example.extraEnvVars`                                      | An array with extra env variables for the Example container                                                                                                                    | `[]`                                                                                      |
 | `example.extraConf.configMap`                               | The name of the ConfigMap containing the json file that override the default values. See an example of creation [here](https://github.com/ONLYOFFICE/Kubernetes-Docs?tab=readme-ov-file#71-create-a-configmap-containing-a-json-file) | `""`                               |
 | `example.extraConf.filename`                                | The name of the json file that contains custom values. Must be the same as the `key` name in `example.extraConf.ConfigMap`                                                     | `local.json`                                                                              |
@@ -689,8 +633,30 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `service.annotations`                                       | Map of annotations to add to the ONLYOFFICE Docs service. If set to, it takes priority over the `commonAnnotations`                                                            | `{}`                                                                                      |
 | `service.type`                                              | ONLYOFFICE Docs service type                                                                                                                                                   | `ClusterIP`                                                                               |
 | `service.port`                                              | ONLYOFFICE Docs service port                                                                                                                                                   | `8888`                                                                                    |
+| `service.externalTrafficPolicy`                             | ONLYOFFICE Docs service [External Traffic Policy](https://kubernetes.io/docs/reference/networking/virtual-ips/#external-traffic-policy). Valid values are `Cluster` and `Local` | `Cluster`                                                                                  |
 | `service.sessionAffinity`                                   | [Session Affinity](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity) for ONLYOFFICE Docs service. If not set, `None` will be set as the default value | `""`                                                                                  |
 | `service.sessionAffinityConfig`                             | [Configuration](https://kubernetes.io/docs/reference/networking/virtual-ips/#session-stickiness-timeout) for ONLYOFFICE Docs service Session Affinity. Used if the `service.sessionAffinity` is set | `{}`                                                                 |
+| `gateway.enabled`                                           | Enable the creation of a Gateway and HTTPRoute resources for the ONLYOFFICE Docs                                                                                                      | `false`                                                                                   |
+| `gateway.external.parentRefs`                               | An array required to identify an existing Gateway(s) resource for routing. If it is specified, the chart does NOT create its own Gateway resource. The elements specified here will be added to the `spec.parentRefs` of the HTTPRoute resource being created  | `[]`                                                                                    |
+| `gateway.annotations`                                       | Map of annotations to add to the Gateway and HTTPRoute resources. If set to, it takes priority over the `commonAnnotations`. You can also use `tpl` as the value for the key  | `{}`                                                                                      |
+| `gateway.gatewayClassName`                                  | Name of the GatewayClass to use. For NGINX Gateway Fabric the default class name is `nginx`                                                                                    | `nginx`                                                                                   |
+| `gateway.listeners.custom`                                  | Used to add custom listener settings. For example, to use the same Gateway resource for HTTPRoute routes from [other namespaces](https://gateway-api.sigs.k8s.io/docs/concepts/security/#1-route-binding) | `[]`                                                                                   |
+| `gateway.ssl.enabled`                                       | Enable TLS termination on the Gateway HTTPS listener(s)                                                                                                                        | `false`                                                                                   |
+| `gateway.ssl.secret`                                        | Name of the Kubernetes Secret that holds the TLS certificate. Used only when `gateway.ssl.enabled=true`. When `gateway.letsencrypt.enabled=true` this Secret is created and managed by cert-manager | `tls`                                                                |
+| `gateway.ssl.secretNamespace`                               | If you want to use an existing secret located in a different Namespace and containing a certificate,specify here the Namespace name and the secret file name in `gateway.ssl.secret`. To do this, you must have created a corresponding [ReferenceGrant](https://gateway-api.sigs.k8s.io/reference/api-types/referencegrant/) in the same Namespace as the secret | `""`                                                                 |
+| `gateway.ssl.redirect.enabled`                              | Enable HTTP -> HTTPS [redirect](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/https-termination/). For more information, see the comments in [values.yaml](values.yaml) in the `gateway.ssl.redirect` field             | `false`                                                                                   |
+| `gateway.ssl.redirect.statusCode`                               | HTTP status code returned by the redirect | `301`                                                                 |
+| `gateway.host`                                              | Hostname for the Gateway listener(s)                                                                                                                                           | `""`                                                                                      |
+| `gateway.tenants`                                           | Multiple hostnames for multi-tenant deployments. For each tenant, a pair of listeners (HTTP + HTTPS if `gateway.ssl.enabled`) is created. Takes priority over `gateway.host` if non-empty. If `gateway.ssl.enabled=true`, the Secret named in `gateway.ssl.secret` contain a certificate that is valid for all listed hostnames (e.g. a SAN cert or wildcard) | `[]` |
+| `gateway.pathType`                                          | Specifies the path type for the ONLYOFFICE Docs HTTPRoute. Allowed values are `Exact`, `PathPrefix` or `RegularExpression`                                                     | `PathPrefix`                                                                              |
+| `gateway.path`                                              | Specifies the path under which ONLYOFFICE Docs will be available. `"/"` serves at the root, `"/ds"` serves under `/ds` and injects `X-Forwarded-Prefix: /ds`, `"^/ds/.*$"` matches as RegularExpression | `/`                                                                              |
+| `gateway.clientSettingsPolicy`                              | Map of directives applied to the HTTPRoute via NGF `ClientSettingsPolicy`. The directives specified here are rendered as-is into `spec`. See [NGF custom policies](https://docs.nginx.com/nginx-gateway-fabric/overview/custom-policies) and [client settings reference](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/client-settings) | `body.maxSize: "100m"`        |
+| `gateway.upstreamSettingsPolicy`                            | NGF [UpstreamSettingsPolicy](https://docs.nginx.com/nginx-gateway-fabric/traffic-management/upstream-settings) spec applied to the ONLYOFFICE Docs Service (e.g. load balancing method for session stickiness) | `{}` |
+| `gateway.letsencrypt.enabled`                               | Enable [cert-manager](https://cert-manager.io/docs/usage/gateway/) `ClusterIssuer` for Let's Encrypt via Gateway API. Used if `gateway.enabled` is set to `true` and `gateway.external.parentRefs` is not specified. Requires cert-manager (v1.14+) with the Gateway API feature flag enabled (`config.enableGatewayAPI=true`) | `false`                                                          |
+| `gateway.letsencrypt.clusterIssuerName`                     | Name of the generated ClusterIssuer                                                                                                                                            | `letsencrypt-prod-gw`                                                                     |
+| `gateway.letsencrypt.email`                                 | Your email address used for ACME registration                                                                                                                                  | `""`                                                                                      |
+| `gateway.letsencrypt.server`                                | The address of the Let's Encrypt server to which requests for certificates will be sent                                                                                        | `https://acme-v02.api.letsencrypt.org/directory`                                          |
+| `gateway.letsencrypt.secretName`                            | Name of the Secret that stores the ACME account private key                                                                                                                    | `letsencrypt-prod-gw-private-key`                                                         |
 | `ingress.enabled`                                           | Enable the creation of an ingress for the ONLYOFFICE Docs                                                                                                                      | `false`                                                                                   |
 | `ingress.annotations`                                       | Map of annotations to add to the Ingress. If set to, it takes priority over the `commonAnnotations`                                                                            | `nginx.org/client-max-body-size: 100m`                                                    |
 | `ingress.ingressClassName`                                  | Used to reference the IngressClass that should be used to implement this Ingress                                                                                               | `nginx`                                                                                   |
@@ -711,16 +677,17 @@ The `helm delete` command removes all the Kubernetes components associated with 
 | `openshift.route.host`                                      | OpenShift Route hostname for the ONLYOFFICE Docs route                                                                                                                         | `""`                                                                                      |
 | `openshift.route.path`                                      | Specifies the path where ONLYOFFICE Docs will be available                                                                                                                     | `/`                                                                                       |
 | `openshift.route.wildcardPolicy`                            | The policy for handling wildcard subdomains in the OpenShift Route. Allowed values are `None`, `Subdomain`                                                                     | `None`                                                                                    |
-| `httproute.enabled`                                     | Enable the creation of an HTTPRoute for the ONLYOFFICE Docs. Used if you have a Gateway API controller in your cluster | `false`                                                                                   |
-| `httproute.annotations`                                   | Map of annotations to add to the HTTPRoute. If set to, it takes priority over the `commonAnnotations`                                                                            | `{}`                                                                                      |
-| `httproute.hostnames`                                           | An array of hostnames. For example, `["docs.example.com"]` | `[]` |
-| `httproute.path`                                           | The path where ONLYOFFICE Docs will be available | `/` |
-| `httproute.parentRefs`                                           | References to the Gateway resource. It should contain at least the name and namespace of the Gateway that will route traffic to ONLYOFFICE Docs. For example: `[{name: my-gateway, namespace: default}]` | `[]` |
 | `grafana.enabled`                                           | Enable the installation of resources required for the visualization of metrics in Grafana                                                                                      | `false`                                                                                   |
 | `grafana.namespace`                                         | The name of the namespace in which RBAC components and Grafana resources will be deployed. If not set, the name will be taken from `namespaceOverride` if set, or .Release.Namespace | `""`                                                                                |
+| `grafana.gateway.enabled`                                   | Enable the creation of an HTTPRoute rules for the Grafana. Used if you set `grafana.enabled` to `true` and want to use Gateway API to access Grafana | `false` |
 | `grafana.ingress.enabled`                                   | Enable the creation of an ingress for the Grafana. Used if you set `grafana.enabled` to `true`. When `ingress.controllerName=ingress-nginx`: creates a separate Grafana Ingress resource. When `ingress.controllerName=nginx-ingress`: creates a `/grafana/` path in the main ONLYOFFICE Docs Ingress                                    | `false`                                                                                   |
-| `grafana.ingress.annotations`                               | **Deprecated**. Map of annotations to add to Grafana Ingress. Only used when `ingress.controllerName=ingress-nginx`. Not used with F5 NGINX Ingress. If set to, it takes priority over the `commonAnnotations` | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                       |
+| `grafana.ingress.annotations`                               | **Deprecated**. Map of annotations to add to Grafana Ingress. Only used when `ingress.controllerName=ingress-nginx`. Not used with F5 NGINX Ingress and Gateway API. If set to, it takes priority over the `commonAnnotations` | `nginx.ingress.kubernetes.io/proxy-body-size: 100m`                       |
 | `grafana.dashboard.enabled`                                 | Enable the installation of ready-made Grafana dashboards. Used if you set `grafana.enabled` to `true`                                                                          | `false`                                                                                   |
+| `grafana.dashboard.list`                                    | Defines the list of dashboards that will be added to Grafana. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.dashboard.list` field       | `grafana.dashboard.list[].name, grafana.dashboard.list[].url`                             |
+| `grafana.sidecar.datasources.label`                         | The label set on the `grafana-datasource` Secret. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.sidecar` field                          | `grafana_datasource`                                                                      |
+| `grafana.sidecar.datasources.labelValue`                    | The value of the label set on the `grafana-datasource` Secret. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.sidecar` field             | `docs`                                                                                    |
+| `grafana.sidecar.dashboards.label`                          | The label set on the `dashboard-*` ConfigMaps. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.sidecar` field                             | `grafana_dashboard`                                                                       |
+| `grafana.sidecar.dashboards.labelValue`                     | The value of the label set on the `dashboard-*` ConfigMaps. For more information, see the comments in [values.yaml](values.yaml) in the `grafana.sidecar` field                | `docs`                                                                                    |
 | `podSecurityContext.enabled`                                | Enable security context for the pods                                                                                                                                           | `false`                                                                                   |
 | `podSecurityContext.converter.fsGroup`                      | Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Converter Pod                                                 | `101`                                                                                     |
 | `podSecurityContext.docservice.fsGroup`                     | Defines the Group ID to which the owner and permissions for all files in volumes are changed when mounted in the Docservice Pod                                                | `101`                                                                                     |
@@ -915,7 +882,7 @@ The `helm delete` command removes all the Kubernetes components associated with 
 Specify each parameter using the `--set key=value[,key=value]` argument to helm install. For example,
 
 ```bash
-$ helm install documentserver onlyoffice/docs --set ingress.enabled=true,ingress.ssl.enabled=true,ingress.host=example.com
+$ helm install documentserver onlyoffice/docs --set gateway.enabled=true,gateway.ssl.enabled=true,gateway.host=docs.example.com
 ```
 
 This command gives expose ONLYOFFICE Docs via HTTPS.
@@ -945,7 +912,7 @@ To deploy metrics, set `metrics.enabled` to true:
 $ helm install documentserver onlyoffice/docs --set metrics.enabled=true
 ```
 
-If you want to use Grafana to visualize metrics, set `grafana.enabled` to `true`. If you want to use Nginx Ingress to access Grafana, set `grafana.ingress.enabled` to `true`:
+If you want to use Grafana to visualize metrics, set `grafana.enabled` to `true`. If you want to use Gateway API or Nginx Ingress to access Grafana, set `grafana.gateway.enabled` or `grafana.ingress.enabled` to `true`:
 
 ```bash
 $ helm install documentserver onlyoffice/docs --set grafana.enabled=true --set grafana.ingress.enabled=true
@@ -991,7 +958,7 @@ In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVIC
 To install the F5 NGINX Ingress Controller to your cluster using the OCI registry, run the following command:
 
 ```bash
-$ helm install nginx-ingress oci://ghcr.io/nginx/charts/nginx-ingress --version 2.5.1 --set controller.setAsDefault=true --set controller.replicaCount=2
+$ helm install nginx-ingress oci://ghcr.io/nginx/charts/nginx-ingress --version 2.7.3 --set controller.setAsDefault=true --set controller.replicaCount=2
 ```
 
 See more detail about installing F5 NGINX Ingress via Helm [here](https://docs.nginx.com/nginx-ingress-controller/install/helm/open-source/).
@@ -1063,14 +1030,9 @@ Associate the `documentserver` ingress IP or hostname with your domain name thro
 After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
 
 #### 5.3.2.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate
-- Add Helm repositories:
-  ```bash
-  $ helm repo add jetstack https://charts.jetstack.io
-  $ helm repo update
-  ```
 - Installing cert-manager
   ```bash
-  $ helm install cert-manager --version v1.17.4 jetstack/cert-manager \
+  $ helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.21.2 \
     --namespace cert-manager \
     --create-namespace \
     --set crds.enabled=true \
@@ -1098,11 +1060,185 @@ The list of supported ingress controllers for virtual path configuration:
 * [NGINX Ingress by NGINX (F5)](https://github.com/nginx/kubernetes-ingress/)
 * [HAProxy Ingress by HAProxy](https://github.com/haproxytech/kubernetes-ingress/)
 
-#### 5.3.3 Expose ONLYOFFICE Docs via route in OpenShift
-This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
+For complete controller-specific configuration examples, see the [Ingress guide](docs/INGRESS.md).
 
-#### 5.3.4 Expose ONLYOFFICE Docs via HTTPRoute (Gateway API)
-This type of exposure allows you to expose ONLYOFFICE Docs with HTTPRoute via Gateway API. For details, see the [GATEWAY.md](./docs/GATEWAY.md) guide.
+#### 5.3.3 Expose ONLYOFFICE Docs via Gateway API
+
+> The [Gateway API](https://gateway-api.sigs.k8s.io/) is the successor to the
+> Ingress API. This chart supports both — pick one,
+> or run them in parallel during migration.
+>
+> You can keep `ingress.enabled=true` and `gateway.enabled=true` at the same
+> time, but for production deployments choose one path.
+
+#### 5.3.3.1 Installing Gateway API CRDs and NGINX Gateway Fabric
+
+The Gateway API resources (Gateway, HTTPRoute, ReferenceGrant, …) are
+delivered as CRDs that you install once per cluster. Install the standard
+channel of the latest release:
+
+```bash
+$ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/standard-install.yaml
+```
+
+Install NGINX Gateway Fabric (NGF) via Helm using the OCI registry:
+
+```bash
+$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --version 2.7.2 \
+    --set nginxGateway.replicas=2 \
+    --set nginx.replicas=2 \
+    --create-namespace -n nginx-gateway
+```
+
+See the NGF documentation for additional installation options [here](https://docs.nginx.com/nginx-gateway-fabric/install/).
+
+Verify that the GatewayClass is available:
+
+```bash
+$ kubectl get gatewayclass
+NAME    CONTROLLER                                   ACCEPTED   AGE
+nginx   gateway.nginx.org/nginx-gateway-controller   True       1m
+```
+
+If you want a different Gateway API implementation (Envoy Gateway, Cilium, Istio, …), install it according to its own docs and set
+`gateway.gatewayClassName` accordingly.
+
+#### 5.3.3.2 Exposing ONLYOFFICE Docs via Gateway API (HTTP)
+
+*You should skip step[5.3.2.2](#5322-expose-onlyoffice-docs-via-http) if you are going to expose ONLYOFFICE Docs via HTTPS*
+
+This type of exposure has more overheads of performance compared with exposure via service, it also creates a loadbalancer to get access to ONLYOFFICE Docs. 
+Use this type if you use external TLS termination and when you have several WEB applications in the k8s cluster.
+
+To expose ONLYOFFICE Docs over plain HTTP via Gateway API, set `gateway.enabled=true` and `gateway.host`:
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.host=docs.example.com
+```
+
+Note: The `gateway.host` field is optional. Access is also possible by IP address.
+
+Once the Gateway is programmed, NGF creates a dedicated NGINX data-plane Deployment and Service. Get the Gateway address:
+
+```bash
+$ kubectl get gateway documentserver \
+    -o jsonpath="{.status.addresses[*].value}"
+```
+
+Associate the `documentserver` gateway IP with your domain name through your DNS provider.
+
+In this case, ONLYOFFICE Docs will be available at `http://docs.example.com/`.
+
+#### 5.3.3.3 Exposing ONLYOFFICE Docs via Gateway API (HTTPS)
+
+This type of exposure allows you to enable internal TLS termination for ONLYOFFICE Docs.
+
+Create the `tls` secret with an ssl certificate inside.
+
+Put the ssl certificate and the private key into the `tls.crt` and `tls.key` files and then run:
+
+```bash
+$ kubectl create secret tls tls \
+  --cert=./tls.crt \
+  --key=./tls.key
+```
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.ssl.enabled=true \
+    --set gateway.ssl.secret=tls \
+    --set gateway.host=docs.example.com
+
+```
+The `gateway.host` field is required. Specify your domain name in it.
+
+Once the Gateway is programmed, NGF creates a dedicated NGINX data-plane Deployment and Service. Get the Gateway address:
+
+```bash
+$ kubectl get gateway documentserver \
+    -o jsonpath="{.status.addresses[*].value}"
+```
+
+Associate the `documentserver` gateway IP with your domain name through your DNS provider.
+
+After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
+
+#### 5.3.3.4 Expose ONLYOFFICE Docs via HTTPS using the Let's Encrypt certificate
+
+- Install cert-manager with Gateway API support enabled:
+
+  ```bash
+  $ helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.21.2 \
+      --namespace cert-manager \
+      --create-namespace \
+      --set crds.enabled=true \
+      --set crds.keep=false \
+      --set config.enableGatewayAPI=true
+  ```
+The `config.enableGatewayAPI=true` flag is required so that cert-manager will reconcile Gateway resources and create temporary HTTPRoutes for the ACME HTTP-01 challenge.
+
+Then install the chart with TLS and Let's Encrypt enabled:
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.ssl.enabled=true \
+    --set gateway.ssl.secret=tls \
+    --set gateway.host=docs.example.com \
+    --set gateway.letsencrypt.enabled=true \
+    --set gateway.letsencrypt.email=you@example.com
+```
+
+The `gateway.host` and `gateway.letsencrypt.email` fields is required. Specify your domain name and email address in it, respectively.
+
+For multi-tenant deployments, use `gateway.tenants` instead of `gateway.host`:
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.ssl.enabled=true \
+    --set gateway.ssl.secret=tls \
+    --set "gateway.tenants={tenant1.example.com,tenant2.example.com}" \
+    --set gateway.letsencrypt.enabled=true \
+    --set gateway.letsencrypt.email=you@example.com
+```
+
+Once the Gateway is programmed, NGF creates a dedicated NGINX data-plane Deployment and Service. Get the Gateway address:
+
+```bash
+$ kubectl get gateway documentserver \
+    -o jsonpath="{.status.addresses[*].value}"
+```
+
+Associate the `documentserver` gateway IP with your domain name through your DNS provider.
+
+After that, the certificate must be successfully issued.
+To view the state of the certificate issuing, run the following command:
+
+```bash
+$ kubectl describe certificate tls
+```
+
+The chart creates a Gateway with both HTTP (port 80) and HTTPS (port 443) listeners. The HTTP listener is required so that the ACME HTTP-01 solver can answer challenge requests. cert-manager creates a temporary HTTPRoute through the same Gateway for the duration of the challenge, then writes the issued certificate into the Secret named in `gateway.ssl.secret`.
+
+After that, ONLYOFFICE Docs will be available at `https://your-domain-name/`.
+
+#### 5.3.3.5 Expose ONLYOFFICE Docs on a virtual path
+This type of exposure allows you to expose ONLYOFFICE Docs on a virtual path, for example, `http://your-domain-name/docs`.
+To expose ONLYOFFICE Docs via Gateway on a virtual path, set the `gateway.enabled` and `gateway.path` parameters.
+If you set `gateway.path=/docs`, it will be at `http://documentserver-address/docs/` and `X-Forwarded-Prefix: /docs` will be injected for upstream.
+
+```bash
+$ helm install documentserver onlyoffice/docs \
+    --set gateway.enabled=true \
+    --set gateway.path=/docs
+```
+
+#### 5.3.4 Expose ONLYOFFICE Docs via route in OpenShift
+This type of exposure allows you to expose ONLYOFFICE Docs via route in OpenShift. Route configuration can be found [here](./docs/OPENSHIFT.md#publish-onlyoffice-docs-via-route).
 
 ### 5.4 Admin Panel deployment (optional)
 
@@ -1112,7 +1248,7 @@ To deploy the Admin Panel, set the `adminpanel.enabled` parameter to true:
 $ helm install documentserver onlyoffice/docs --set adminpanel.enabled=true
 ```
 
-For first authorization, use the secret value `Bootstrap code`. You can find it by opening the adminpanel Pod log. The `Bootstrap code` is valid for 1 hour.
+For the first authorization, you need to generate an administrator password. To do this, run the CLI command `kubectl exec -it adminpanel-0 -- documentserver-admin create-admin`.
 
 ### 6. Scale ONLYOFFICE Docs (optional)
 
@@ -1130,6 +1266,10 @@ For more information about Horizontal Pod Autoscaling, see [here](https://kubern
 
 To enable HPA for the `docservice` deployment, specify the `docservice.autoscaling.enabled=true` parameter. 
 In this case, the `docservice.replicas` parameter is ignored and the number of replicas is controlled by HPA.
+
+> **Note**
+>
+> If the editors use HTTP long-polling instead of WebSocket, all requests of one co-editing session must reach the same `docservice` Pod when more than one replica is running. See [here](./docs/SESSION_PERSISTENCE.md).
 
 Similarly, to enable HPA for the `converter` deployment, specify the `converter.autoscaling.enabled=true` parameter. 
 In this case, the `converter.replicas` parameter is ignored and the number of replicas is controlled by HPA.
@@ -1156,6 +1296,10 @@ $ kubectl scale -n default deployment docservice --replicas=POD_COUNT
 ```
 
 where `POD_COUNT` is a number of the `docservice` pods.
+
+> **Note**
+>
+> If the editors use HTTP long-polling instead of WebSocket, all requests of one co-editing session must reach the same `docservice` Pod when more than one replica is running. See [here](./docs/SESSION_PERSISTENCE.md).
 
 Do the same to scale the `converter` deployment:
 
@@ -1317,15 +1461,13 @@ Note: It is assumed that step [#6.2](#62-installing-prometheus) has already been
 To install Grafana to your cluster, run the following command:
 
 ```bash
-$ helm install grafana --version 12.1.8 bitnami/grafana \
-  --set service.ports.grafana=80 \
-  --set config.useGrafanaIniFile=true \
-  --set config.grafanaIniConfigMap=grafana-ini \
-  --set datasources.secretName=grafana-datasource \
-  --set resourcesPreset=none \
-  --set image.repository=bitnamilegacy/grafana \
-  --set image.tag=12.1.1-debian-12-r1 \
-  --set global.security.allowInsecureImages=true
+$ helm install grafana oci://ghcr.io/grafana-community/helm-charts/grafana --version 13.5.0 \
+  --set service.port=80 \
+  --set 'grafana\.ini.server.root_url=%(protocol)s://%(domain)s:%(http_port)s/grafana/' \
+  --set 'grafana\.ini.server.serve_from_sub_path=true' \
+  --set sidecar.datasources.enabled=true \
+  --set sidecar.datasources.label=grafana_datasource \
+  --set-string sidecar.datasources.labelValue=docs
 ```
 
 #### 1.2 Deploy Grafana with the installation of ready-made dashboards
@@ -1342,60 +1484,53 @@ the necessary edits will be made to them and configmap will be created from them
 To install Grafana to your cluster, run the following command:
 
 ```bash
-$ helm install grafana --version 12.1.8 bitnami/grafana \
-  --set service.ports.grafana=80 \
-  --set config.useGrafanaIniFile=true \
-  --set config.grafanaIniConfigMap=grafana-ini \
-  --set datasources.secretName=grafana-datasource \
-  --set resourcesPreset=none \
-  --set image.repository=bitnamilegacy/grafana \
-  --set image.tag=12.1.1-debian-12-r1 \
-  --set global.security.allowInsecureImages=true \
-  --set dashboardsProvider.enabled=true \
-  --set dashboardsConfigMaps[0].configMapName=dashboard-node-exporter \
-  --set dashboardsConfigMaps[0].fileName=dashboard-node-exporter.json \
-  --set dashboardsConfigMaps[1].configMapName=dashboard-deployment \
-  --set dashboardsConfigMaps[1].fileName=dashboard-deployment.json \
-  --set dashboardsConfigMaps[2].configMapName=dashboard-redis \
-  --set dashboardsConfigMaps[2].fileName=dashboard-redis.json \
-  --set dashboardsConfigMaps[3].configMapName=dashboard-rabbitmq \
-  --set dashboardsConfigMaps[3].fileName=dashboard-rabbitmq.json \
-  --set dashboardsConfigMaps[4].configMapName=dashboard-postgresql \
-  --set dashboardsConfigMaps[4].fileName=dashboard-postgresql.json \
-  --set dashboardsConfigMaps[5].configMapName=dashboard-nginx-ingress \
-  --set dashboardsConfigMaps[5].fileName=dashboard-nginx-ingress.json \
-  --set dashboardsConfigMaps[6].configMapName=dashboard-documentserver \
-  --set dashboardsConfigMaps[6].fileName=dashboard-documentserver.json \
-  --set dashboardsConfigMaps[7].configMapName=dashboard-cluster-resourses \
-  --set dashboardsConfigMaps[7].fileName=dashboard-cluster-resourses.json
+$ helm install grafana oci://ghcr.io/grafana-community/helm-charts/grafana --version 13.5.0 \
+  --set service.port=80 \
+  --set 'grafana\.ini.server.root_url=%(protocol)s://%(domain)s:%(http_port)s/grafana/' \
+  --set 'grafana\.ini.server.serve_from_sub_path=true' \
+  --set sidecar.datasources.enabled=true \
+  --set sidecar.datasources.label=grafana_datasource \
+  --set-string sidecar.datasources.labelValue=docs \
+  --set sidecar.dashboards.enabled=true \
+  --set sidecar.dashboards.label=grafana_dashboard \
+  --set-string sidecar.dashboards.labelValue=docs
 ```
 
 After executing this command, the following dashboards will be imported into Grafana:
 
   - Node Exporter
   - Deployment Statefulset Daemonset
+  - ONLYOFFICE Docs
   - Redis Dashboard for Prometheus Redis Exporter
   - RabbitMQ-Overview
   - PostgreSQL Database
-  - NGINX Ingress controller
-  - ONLYOFFICE Docs
   - Resource usage by Pods and Containers
 
 Note: You can see the description of the ONLYOFFICE Docs metrics that are visualized in Grafana [here](https://github.com/ONLYOFFICE/Kubernetes-Docs/wiki/Document-Server-Metrics).
 
-See more details about installing Grafana via Helm [here](https://github.com/bitnami/charts/tree/master/bitnami/grafana).
+See more details about installing Grafana via Helm [here](https://github.com/grafana-community/helm-charts/tree/main/charts/grafana).
 
-### 2 Access to Grafana via Ingress
+### 2. Access to Grafana via Gateway or Ingress
 
-Note: It is assumed that step [#5.3.2.1](#5321-installing-f5-nginx-ingress-controller) has already been completed.
+- Access via Gateway
 
-**Grafana Ingress Behavior Depends on Ingress Controller Type:**
+  Note: It is assumed that step [#5.3.3.1](#5331-installing-gateway-api-crds-and-nginx-gateway-fabric) has already been completed.
 
-**F5 NGINX Ingress (`nginx-ingress`, recommended):** The Grafana Ingress resource is NOT created as a separate ingress. Instead, Grafana is accessed through the main ONLYOFFICE Docs ingress at the `/grafana/` path. This configuration uses annotations with the `nginx.org/` prefix from the main `ingress.annotations` parameter. The `grafana.ingress.annotations` parameter is not used in this case.
+  If ONLYOFFICE Docs was installed with the parameter `grafana.gateway.enabled` (step [#5.2](#52-metrics-deployment-optional)) then access to Grafana will be at: `http://documentserver-address/grafana/`
 
-For F5 NGINX Ingress users, access to Grafana will be at: `http(s)://your-domain-name/grafana/`
+  If Gateway was installed using a secure connection (step [#5.3.3.3](#5333-exposing-onlyoffice-docs-via-gateway-api-https) or [#5.3.3.4](#5334-expose-onlyoffice-docs-via-https-using-the-lets-encrypt-certificate)), then access to Grafana will be at: `https://your-domain-name/grafana/`
 
-- **Legacy Kubernetes NGINX Ingress (`ingress-nginx`, deprecated):** If you are still using the deprecated community `ingress-nginx` controller, you can create a separate Grafana Ingress resource by setting `grafana.ingress.enabled` to `true`. 
+- Access via Ingress
+
+  Note: It is assumed that step [#5.3.2.1](#5321-installing-f5-nginx-ingress-controller) has already been completed.
+
+  **Grafana Ingress Behavior Depends on Ingress Controller Type:**
+
+  **F5 NGINX Ingress (`nginx-ingress`, recommended):** The Grafana Ingress resource is NOT created as a separate ingress. Instead, Grafana is accessed through the main ONLYOFFICE Docs ingress at the `/grafana/` path. This configuration uses annotations with the `nginx.org/` prefix from the main `ingress.annotations` parameter. The `grafana.ingress.annotations` parameter is not used in this case.
+
+  For F5 NGINX Ingress users, access to Grafana will be at: `http(s)://your-domain-name/grafana/`
+
+  - **Legacy Kubernetes NGINX Ingress (`ingress-nginx`, deprecated):** If you are still using the deprecated community `ingress-nginx` controller, you can create a separate Grafana Ingress resource by setting `grafana.ingress.enabled` to `true`.
 
 ### 3. View gathered metrics in Grafana
 
@@ -1406,7 +1541,7 @@ Go to the address `http(s)://your-domain-name/grafana/`
 To get the password, run the following command:
 
 ```
-$ kubectl get secret grafana-admin --namespace default -o jsonpath="{.data.GF_SECURITY_ADMIN_PASSWORD}" | base64 --decode
+$ kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
 In the dashboard section, you will see the added dashboards that will display the metrics received from Prometheus.

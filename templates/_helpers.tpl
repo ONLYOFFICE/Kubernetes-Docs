@@ -263,20 +263,6 @@ Return true if a service object should be created for ds
 {{- end -}}
 
 {{/*
-Define a branch with sql scripts for ds
-*/}}
-{{- define "ds.sqlScripts.branchName" -}}
-{{- $appVersion := .Chart.AppVersion -}}
-{{- if semverCompare ">=7.2.0" $appVersion -}}
-    {{- printf "master" -}}
-{{- else if semverCompare ">=7.1.0 <7.2.0" $appVersion -}}
-    {{- printf "v7.1.1.23" -}}
-{{- else -}}
-    {{- printf "%s" .Values.sqlScripts.branchName -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Get the configmap name containing the ds upgrade script
 */}}
 {{- define "ds.upgrade.configMapName" -}}
@@ -527,6 +513,23 @@ Get the ds Grafana Namespace
 {{- end -}}
 
 {{/*
+Normalise gateway.path for use as HTTPRoute path value.
+Trims any trailing slash except for the root "/".
+- "/"          -> "/"
+- "/ds"        -> "/ds"
+- "/ds/"       -> "/ds"
+- "^/ds/.*$"   -> "^/ds/.*$"  (regex, returned as-is)
+*/}}
+{{- define "ds.gateway.pathValue" -}}
+{{- $pathValue := . -}}
+{{- if hasPrefix "^" $pathValue -}}
+    {{- $pathValue -}}
+{{- else -}}
+    {{- trimSuffix "/" $pathValue | default "/" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the ds virtual path with trailing slash
 /                   -> /
 /path               -> /path/
@@ -657,7 +660,7 @@ Get the Secret value
     {{- if $getSecretValue -}}
         {{- printf "%s" $getSecretValue -}}
     {{- else -}}
-        {{- printf "%s" (randAlpha 16) -}}
+        {{- printf "%s" (randAlpha 32) -}}
     {{- end -}}
 {{- else -}}
     {{- printf "%s" $existValue -}}

@@ -22,7 +22,7 @@ data:
     PGPASSWORD=$DB_PWD psql --host={{ .Values.connections.dbHost }} \
       --port={{ .Values.connections.dbPort }} \
       --user={{ .Values.connections.dbUser }} \
-      --dbname={{ .Values.connections.dbName }} -c "\l" > /dev/null
+      --dbname={{ .Values.connections.dbName }} -c "\dt" > /dev/null
     {{- else if or (eq .Values.connections.dbType "mysql") (eq .Values.connections.dbType "mariadb") }}
     mysql -h {{ .Values.connections.dbHost }} \
       -P {{ .Values.connections.dbPort }} \

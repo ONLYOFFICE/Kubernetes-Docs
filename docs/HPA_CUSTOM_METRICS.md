@@ -6,12 +6,12 @@ The chart's HPA template already supports external metrics through the `converte
 
 ### Prerequisites
 
-- A running RabbitMQ by bitnami with the `rabbitmq_prometheus` plugin enabled. Also RabbitMQ should be deployed with flag `--set metrics.enabled=true`. Without this flag metrics port is not exposed.
+- A running RabbitMQ with the `rabbitmq_prometheus` plugin enabled. The metrics exporter should also be enabled. If [RabbitMQ Cluster Operator](./DEPENDENCIES.md#deploy-rabbitmq) is installed, both conditions are met by default.
 
-The ptometheus plugin is enabled by default. Also you can check that plugin is enabled with command:
+Also you can check that ptometheus plugin is enabled with command:
 
 ```bash
-kubectl exec rabbitmq-0 -- rabbitmq-plugins list | grep prometheus
+kubectl exec rabbitmq-server-0 -- rabbitmq-plugins list | grep prometheus
 ```
 
 - Also you should use HPA based on resources (CPU/RAM) as well, API metrics.k8s.io must be registered, which is generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server). It can be launched as a cluster add-on. To use the target utilization value (`target.type==Utilization`), it is necessary that the values for `resources.requests` are specified in the deployment.
@@ -28,7 +28,7 @@ Install a minimal Prometheus setup. Grafana, Alertmanager, and other components 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 
-helm install kps prometheus-community/kube-prometheus-stack \
+helm install kps --version 92.3.0 prometheus-community/kube-prometheus-stack \
   -n monitoring --create-namespace \
   --set grafana.enabled=false \
   --set alertmanager.enabled=false \
@@ -65,12 +65,12 @@ spec:
     matchNames:
     - <rabbitmq-namespace>
   endpoints:
-  - port: metrics
+  - port: prometheus
     path: /metrics/per-object
     interval: 15s
 ```
 
-Replace `<rabbitmq-namespace>` with the namespace where RabbitMQ is deployed and `<rabbitmq-release-name>` with the name of the Helm release used to install RabbitMQ (e.g. `rabbitmq` if you ran `helm install rabbitmq bitnami/rabbitmq`).
+Replace `<rabbitmq-namespace>` with the namespace where RabbitMQ is deployed and `<rabbitmq-release-name>` with the name of the release used to install RabbitMQ (e.g. `rabbitmq` if you you have installed `RabbitMQ Cluster Operator` and run `kubectl apply -f rabbitmq.yaml`, where `metadata.name==rabbitmq`).
 
 Apply:
 
@@ -104,7 +104,7 @@ rules:
 Install:
 
 ```bash
-helm install prometheus-adapter prometheus-community/prometheus-adapter \
+helm install prometheus-adapter --version 5.3.0 prometheus-community/prometheus-adapter \
   -n monitoring \
   -f adapter-values.yaml
 ```
@@ -145,8 +145,7 @@ converter:
       enabled: true
       utilizationPercentage: 75
     targetMemory:
-      enabled: true
-      utilizationPercentage: 80
+      enabled: false
     customMetricsType:
       - type: External
         external:
@@ -208,12 +207,6 @@ spec:
       target:
         type: Utilization
         averageUtilization: 75
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
   - external:
       metric:
         name: rabbitmq_queue_messages

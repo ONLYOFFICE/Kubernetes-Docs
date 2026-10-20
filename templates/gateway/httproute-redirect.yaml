@@ -1,0 +1,53 @@
+{{- if and .Values.gateway.enabled .Values.gateway.ssl.redirect.enabled (not .Values.gateway.ssl.enabled) }}
+  {{- fail "gateway.ssl.redirect.enabled=true requires gateway.ssl.enabled=true. There is no HTTPS listener to redirect to. Either enable TLS (gateway.ssl.enabled=true) or disable the redirect (gateway.ssl.redirect.enabled=false)." }}
+{{- end }}
+{{- if and .Values.gateway.enabled .Values.gateway.ssl.enabled .Values.gateway.ssl.redirect.enabled (not .Values.gateway.external.parentRefs) }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}-redirect
+  namespace: {{ include "ds.namespace" . | quote }}
+  {{- if .Values.commonLabels }}
+  labels:
+    {{- include "ds.labels.commonLabels" . | trim | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.commonAnnotations .Values.gateway.annotations }}
+  {{- $dictValue := default .Values.commonAnnotations .Values.gateway.annotations }}
+  annotations: {{- include "ds.annotations.commonAnnotations" ( dict "keyName" $dictValue "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+  {{- $gwName := include "ds.resources.name" (list . .Values.commonNameSuffix "documentserver") }}
+  {{- $hosts := list }}
+  {{- if .Values.gateway.tenants }}
+    {{- $hosts = .Values.gateway.tenants }}
+  {{- else if .Values.gateway.host }}
+    {{- $hosts = list .Values.gateway.host }}
+  {{- end }}
+  {{- if $hosts }}
+    {{- range $idx, $host := $hosts }}
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ $gwName }}
+      sectionName: {{ printf "http-%d" $idx }}
+    {{- end }}
+  {{- else }}
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ $gwName }}
+      sectionName: http
+  {{- end }}
+  {{- if $hosts }}
+  hostnames:
+    {{- range $hosts }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            port: 443
+            statusCode: {{ .Values.gateway.ssl.redirect.statusCode }}
+{{- end }}
