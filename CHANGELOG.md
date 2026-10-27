@@ -1,5 +1,11 @@
 # Change log
 
+## 7.0.1
+
+### Changes
+
+* Released ONLYOFFICE Docs v10.0.2
+
 ## 7.0.0
 
 ### New Features
