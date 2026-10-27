@@ -958,7 +958,7 @@ In this case, ONLYOFFICE Docs will be available at `http://DOCUMENTSERVER-SERVIC
 To install the F5 NGINX Ingress Controller to your cluster using the OCI registry, run the following command:
 
 ```bash
-$ helm install nginx-ingress oci://ghcr.io/nginx/charts/nginx-ingress --version 2.7.3 --set controller.setAsDefault=true --set controller.replicaCount=2
+$ helm install nginx-ingress oci://ghcr.io/nginx/charts/nginx-ingress --version 2.8.0 --set controller.setAsDefault=true --set controller.replicaCount=2
 ```
 
 See more detail about installing F5 NGINX Ingress via Helm [here](https://docs.nginx.com/nginx-ingress-controller/install/helm/open-source/).
@@ -1078,13 +1078,13 @@ delivered as CRDs that you install once per cluster. Install the standard
 channel of the latest release:
 
 ```bash
-$ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/standard-install.yaml
+$ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.3/standard-install.yaml
 ```
 
 Install NGINX Gateway Fabric (NGF) via Helm using the OCI registry:
 
 ```bash
-$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --version 2.7.2 \
+$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --version 2.8.0 \
     --set nginxGateway.replicas=2 \
     --set nginx.replicas=2 \
     --create-namespace -n nginx-gateway
