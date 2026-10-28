@@ -24,6 +24,7 @@ data:
   REDIS_SERVER_DB_NUM: {{ .Values.connections.redisDBNum | quote }}
   {{- if.Values.connections.redisClusterNodes }}
   REDIS_CLUSTER_NODES: {{ join " " .Values.connections.redisClusterNodes }}
+  REDIS_CLUSTER_TLS_ENABLED: {{ .Values.connections.redisClusterTLSEnabled | quote }}
   {{- end }}
   {{- if eq .Values.connections.redisConnectorName "ioredis" }}
   REDIS_SENTINEL_GROUP_NAME: {{ .Values.connections.redisSentinelGroupName }}

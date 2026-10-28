@@ -6,6 +6,10 @@
 
 * Released ONLYOFFICE Docs v10.0.2
 
+### Fixes
+
+* Fixed the connection to Redis Cluster over TLS. Added the `connections.redisClusterTLSEnabled` parameter
+
 ## 7.0.0
 
 ### New Features

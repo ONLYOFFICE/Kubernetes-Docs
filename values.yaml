@@ -58,6 +58,9 @@ connections:
   ## - 10.244.0.79:6379
   ## - 192.168.1.25:6379
   redisClusterNodes: []
+  ## connections.redisClusterTLSEnabled Enables TLS for the connection to the Redis cluster (`rediss://` scheme for root nodes and `socket.tls` for all cluster nodes)
+  ## Used if `connections.redisClusterNodes` is set
+  redisClusterTLSEnabled: false
   ## connections.redisExistingSecret Name of existing secret to use for Redis password
   ## Must contain the key specified in `connections.redisSecretKeyName`
   ## The password from this secret overrides the value for the password set in the `options` object in `local.json` if you add custom configuration file
