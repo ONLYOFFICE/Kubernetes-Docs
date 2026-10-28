@@ -17,6 +17,9 @@ data:
   DB_HOST: {{ .Values.connections.dbHost }}
   DB_PORT: {{ .Values.connections.dbPort | quote }}
   DB_NAME: {{ .Values.connections.dbName }}
+  {{- if and (eq .Values.connections.dbType "postgres") (ne (.Values.connections.dbSchema | default "public") "public") }}
+  DB_SCHEMA: {{ .Values.connections.dbSchema | quote }}
+  {{- end }}
   REDIS_CONNECTOR_NAME: {{ .Values.connections.redisConnectorName }}
   REDIS_SERVER_HOST: {{ .Values.connections.redisHost }}
   REDIS_SERVER_PORT: {{ .Values.connections.redisPort | quote }}

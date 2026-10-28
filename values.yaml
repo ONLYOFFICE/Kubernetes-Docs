@@ -22,6 +22,11 @@ connections:
   ## connections.dbName Name of the Database database the application will be connected with
   ## The database must already exist
   dbName: postgres
+  ## connections.dbSchema Database schema in which the Docs tables are created
+  ## Used only if `connections.dbType` is `postgres`
+  ## Use a lowercase name without special characters
+  ## The database schema must already exist
+  dbSchema: public
   ## connections.dbExistingSecret Name of existing secret to use for Database passwords
   ## Must contain the key specified in `connections.dbSecretKeyName`
   dbExistingSecret: postgresql

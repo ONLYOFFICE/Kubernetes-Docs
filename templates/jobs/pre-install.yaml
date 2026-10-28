@@ -87,6 +87,10 @@ spec:
               secretKeyRef:
                 name: {{ template "ds.db.secretName" . }}
                 key: {{ .Values.connections.dbSecretKeyName }}
+          {{- if and (eq .Values.connections.dbType "postgres") (ne (.Values.connections.dbSchema | default "public") "public") }}
+          - name: PGOPTIONS
+            value: {{ printf "-c search_path=%s" .Values.connections.dbSchema | quote }}
+          {{- end }}
           volumeMounts:
           - name: initdb-scripts
             mountPath: /scripts/initdb.sh
