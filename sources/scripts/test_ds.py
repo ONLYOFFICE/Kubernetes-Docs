@@ -12,6 +12,7 @@ redisPassword = os.environ.get('REDIS_SERVER_PWD')
 redisSentinelPassword = os.environ.get('REDIS_SENTINEL_PWD')
 redisDBNum = os.environ.get('REDIS_SERVER_DB_NUM')
 redisConnectTimeout = 15
+redisClusterTLS = os.environ.get('REDIS_CLUSTER_TLS_ENABLED', 'false') == 'true'
 if os.environ.get('REDIS_CLUSTER_NODES'):
     redisClusterNodes = list(os.environ.get('REDIS_CLUSTER_NODES').split(" "))
     redisClusterNode = redisClusterNodes[0].split(":")[0]
@@ -97,6 +98,7 @@ def get_redis_cluster_status():
             startup_nodes=nodes,
             username=redisUser,
             password=redisPassword,
+            ssl=redisClusterTLS,
             socket_connect_timeout=redisConnectTimeout,
             retry=retry_strategy
         )
