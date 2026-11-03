@@ -262,7 +262,7 @@ def check_mq_rabbitmq():
         if mq_connect_status is True:
             try:
                 mqchannel = mqc.channel()
-                mqchannel.queue_declare(queue='testDocsServer')
+                mqchannel.queue_declare(queue='testDocsServer', exclusive=True)
             except Exception as msg_check_rabbitmq_queue:
                 logger_test_ds.error(f'Error when trying to create a test queue in RabbitMQ... {msg_check_rabbitmq_queue}\n')
                 total_result['CheckRabbitMQ'] = 'Failed'
