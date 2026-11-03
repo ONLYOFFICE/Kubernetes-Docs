@@ -13,6 +13,8 @@ redisSentinelPassword = os.environ.get('REDIS_SENTINEL_PWD')
 redisDBNum = os.environ.get('REDIS_SERVER_DB_NUM')
 redisConnectTimeout = 15
 redisClusterTLS = os.environ.get('REDIS_CLUSTER_TLS_ENABLED', 'false') == 'true'
+redisServerTLS = os.environ.get('REDIS_SERVER_TLS_ENABLED', 'false') == 'true'
+redisSentinelTLS = os.environ.get('REDIS_SENTINEL_TLS_ENABLED', 'false') == 'true'
 if os.environ.get('REDIS_CLUSTER_NODES'):
     redisClusterNodes = list(os.environ.get('REDIS_CLUSTER_NODES').split(" "))
     redisClusterNode = redisClusterNodes[0].split(":")[0]
@@ -73,6 +75,7 @@ def get_redis_status():
             db=redisDBNum,
             password=redisPassword,
             username=redisUser,
+            ssl=redisServerTLS,
             socket_connect_timeout=redisConnectTimeout,
             retry=retry_strategy
         )
@@ -119,7 +122,7 @@ def get_redis_sentinel_status():
     retry_strategy = Retry(ExponentialBackoff(), retries=3)
     global rc
     try:
-        sentinel = Sentinel([(redisSentinelNode, redisSentinelPort)], socket_timeout=redisConnectTimeout, sentinel_kwargs={'password': redisSentinelPassword})
+        sentinel = Sentinel([(redisSentinelNode, redisSentinelPort)], socket_timeout=redisConnectTimeout, sentinel_kwargs={'password': redisSentinelPassword, 'ssl': redisSentinelTLS})
         master_host, master_port = sentinel.discover_master(redisSentinelGroupName)
         rc = redis.Redis(
             host=master_host,
@@ -127,6 +130,7 @@ def get_redis_sentinel_status():
             db=redisDBNum,
             password=redisPassword,
             username=redisUser,
+            ssl=redisSentinelTLS,
             socket_connect_timeout=redisConnectTimeout,
             retry=retry_strategy
         )

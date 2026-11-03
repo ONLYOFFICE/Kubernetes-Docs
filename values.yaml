@@ -54,6 +54,9 @@ connections:
   ## The value in this parameter overrides the value set in the `options` object in `local.json` if you add custom configuration file
   ## Not used if values are set in `connections.redisClusterNodes`
   redisDBNum: "0"
+  ## connections.redisTLSEnabled Enables TLS for the connection to Redis Standalone
+  ## Not used if values are set in `connections.redisClusterNodes` or `connections.redisConnectorName` is set to `ioredis`
+  redisTLSEnabled: false
   ## connections.redisClusterNodes List of nodes in the Redis cluster
   ## There is no need to specify every node in the cluster, 3 should be enough
   ## You can specify multiple values
@@ -93,6 +96,9 @@ connections:
   ## connections.redisSentinelGroupName Name of a group of Redis instances composed of a master and one or more slaves
   ## Used if `connections.redisConnectorName` is set to `ioredis`
   redisSentinelGroupName: mymaster
+  ## connections.redisSentinelTLSEnabled Enables TLS for the connection to Redis Sentinel nodes and to the master/replicas discovered via Sentinel
+  ## Used if `connections.redisConnectorName` is set to `ioredis`
+  redisSentinelTLSEnabled: false
   ## connections.redisSentinelExistingSecret Name of existing secret to use for Redis Sentinel password
   ## Must contain the key specified in `connections.redisSentinelSecretKeyName`
   ## The password from this secret overrides the value for the password set in the `iooptions` object in `local.json` if you add custom configuration file

@@ -1,5 +1,12 @@
 # Change log
 
+## 7.1.0
+
+### New Features
+
+* Added the ability to modify the PostgreSQL schema for Docs tables
+* Added the ability to connect to Redis Standalone and Redis Sentinel over TLS
+
 ## 7.0.1
 
 ### Changes
