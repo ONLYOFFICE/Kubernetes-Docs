@@ -1,0 +1,47 @@
+# Common chart values for CI runs (single node).
+# Images: .github/ci/scripts/image-values.sh, OpenShift specifics: openshift-values.sh,
+# storage class: set per platform in the workflow.
+
+# Connections exactly as in docs/DEPENDENCIES.md; dependencies live in namespace "deps"
+connections:
+  dbType: postgres
+  dbHost: postgres-pooler-rw.deps.svc.cluster.local
+  dbUser: onlyoffice
+  dbPort: "5432"
+  dbName: onlyoffice
+  dbExistingSecret: postgres-app
+  dbSecretKeyName: password
+
+  amqpType: rabbitmq
+  amqpHost: rabbitmq.deps.svc.cluster.local
+  amqpPort: "5672"
+  amqpVhost: "/"
+  amqpUser: onlyoffice
+  amqpProto: amqp
+  amqpExistingSecret: rabbitmq-default-user
+  amqpSecretKeyName: password
+
+  redisConnectorName: redis
+  redisUser: default
+  redisDBNum: "0"
+  redisClusterNodes:
+    - valkey-valkey.deps.svc.cluster.local:6379
+  redisExistingSecret: docs-valkey-cluster
+  redisSecretKeyName: valkey-password
+  redisNoPass: false
+
+persistence:
+  size: 8Gi
+  runtimeConfig:
+    size: 1Gi
+  buffer:
+    size: 5Gi
+
+# Known secret so smoke tests can sign requests
+jwt:
+  secret: "ci-jwt-secret"
+
+docservice:
+  replicas: 1
+converter:
+  replicas: 1

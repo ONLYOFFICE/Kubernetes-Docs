@@ -1,0 +1,2 @@
+ONLYOFFICE Docs smoke test.
+If you can read this in a PDF, the converter works.

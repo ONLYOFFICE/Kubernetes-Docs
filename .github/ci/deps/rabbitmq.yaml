@@ -1,0 +1,23 @@
+# docs/DEPENDENCIES.md -> "Deploy RabbitMQ", scaled down: 1 replica, no dedicated-node affinity.
+# storage must stay >= disk_free_limit.absolute (2GB by default), see DEPENDENCIES.md
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  persistence:
+    storageClassName: ${STORAGE_CLASS}
+    storage: 3Gi
+  rabbitmq:
+    additionalConfig: |
+      default_user = onlyoffice
+      cluster_partition_handling = autoheal
+      queue_leader_locator = balanced
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi

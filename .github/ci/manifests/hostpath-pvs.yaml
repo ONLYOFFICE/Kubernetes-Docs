@@ -1,0 +1,99 @@
+# OpenShift (MicroShift) run only.
+# MicroShift ships TopoLVM with a 1G volume group and RWO only, while the chart needs ReadWriteMany
+# and the dependencies need a few GB. On a single node, static hostPath PVs cover both.
+# Directories are created inside the MicroShift container by microshift-up.sh.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ci-local
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+reclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ci-pv-1
+spec:
+  storageClassName: ci-local
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce, ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath: { path: /var/ci-pv/1, type: Directory }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ci-pv-2
+spec:
+  storageClassName: ci-local
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce, ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath: { path: /var/ci-pv/2, type: Directory }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ci-pv-3
+spec:
+  storageClassName: ci-local
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce, ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath: { path: /var/ci-pv/3, type: Directory }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ci-pv-4
+spec:
+  storageClassName: ci-local
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce, ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath: { path: /var/ci-pv/4, type: Directory }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ci-pv-5
+spec:
+  storageClassName: ci-local
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce, ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath: { path: /var/ci-pv/5, type: Directory }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ci-pv-6
+spec:
+  storageClassName: ci-local
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce, ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath: { path: /var/ci-pv/6, type: Directory }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ci-pv-7
+spec:
+  storageClassName: ci-local
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce, ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath: { path: /var/ci-pv/7, type: Directory }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ci-pv-8
+spec:
+  storageClassName: ci-local
+  capacity: { storage: 10Gi }
+  accessModes: [ReadWriteOnce, ReadWriteMany]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath: { path: /var/ci-pv/8, type: Directory }

@@ -31,6 +31,14 @@ users:
 - system:serviceaccount:<namespace>:documentserver
 - system:serviceaccount:<namespace>:wopi-sa
 groups: []
-volumes: []
+# Volume types used by the chart (configMap, secret, emptyDir, persistentVolumeClaim)
+# plus projected/downwardAPI for the service account token. Same set as restricted-v2, minus csi/ephemeral.
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- persistentVolumeClaim
+- projected
+- secret
 seccompProfiles:
 - runtime/default

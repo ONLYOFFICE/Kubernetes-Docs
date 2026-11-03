@@ -1,0 +1,30 @@
+# docs/DEPENDENCIES.md -> "Deploy Valkey", scaled down: 1 shard, no replicas
+# (still cluster mode, so the chart is tested with connections.redisClusterNodes as documented).
+apiVersion: v1
+kind: Secret
+metadata:
+  name: docs-valkey-cluster
+type: Opaque
+stringData:
+  valkey-password: "ci-valkey-password"
+---
+apiVersion: valkey.io/v1alpha1
+kind: ValkeyCluster
+metadata:
+  name: valkey
+spec:
+  shards: 1
+  replicas: 0
+  persistence:
+    size: 1Gi
+    storageClassName: ${STORAGE_CLASS}
+  users:
+    - name: default
+      passwordSecret:
+        name: docs-valkey-cluster
+        keys: [valkey-password]
+      permissions: "+@all ~* &*"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi

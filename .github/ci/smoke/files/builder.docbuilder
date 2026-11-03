@@ -1,0 +1,6 @@
+builder.CreateFile("docx");
+var oDocument = Api.GetDocument();
+var oParagraph = oDocument.GetElement(0);
+oParagraph.AddText("Created by Document Builder smoke test");
+builder.SaveFile("docx", "builder.docx");
+builder.CloseFile();

@@ -1,0 +1,40 @@
+# docs/DEPENDENCIES.md -> "Deploy PostgreSQL Database", scaled down for a single CI node:
+# 1 instance, 1 pooler, small storage/resources, no dedicated-node affinity.
+# STORAGE_CLASS is substituted by install-deps.sh
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+    storageClass: ${STORAGE_CLASS}
+  bootstrap:
+    initdb:
+      database: onlyoffice
+      owner: onlyoffice
+  enableSuperuserAccess: false
+  postgresql:
+    parameters:
+      max_connections: "200"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: postgres-pooler-rw
+spec:
+  cluster:
+    name: postgres
+  instances: 1
+  type: rw
+  pgbouncer:
+    poolMode: transaction
+    parameters:
+      max_client_conn: "500"
+      default_pool_size: "20"
+      ignore_startup_parameters: "extra_float_digits,search_path"
