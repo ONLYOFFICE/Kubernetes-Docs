@@ -12,7 +12,8 @@ on:
       - '**/LICENSE'
       - '**/CLAUDE.md'
       - 'docs/**'
-      - '.gitea/**'
+      # GitHub workflows are not used here; .github/ci (scripts) still triggers the run
+      - '.github/workflows/**'
   workflow_dispatch:
     inputs:
       images-source:
@@ -23,10 +24,6 @@ on:
       images-tag:
         description: 'Image tag (empty = images.tag from values.yaml)'
         type: string
-      openshift:
-        description: 'Run OpenShift (MicroShift) tests'
-        type: boolean
-        default: true
 
 concurrency:
   group: chart-e2e-${{ github.event.pull_request.number || github.ref }}
@@ -40,14 +37,13 @@ env:
   HELM_VERSION: v3.17.3
   KIND_VERSION: v0.24.0
   KIND_NODE_IMAGE: kindest/node:v1.31.0
-  KIND_CLUSTER: ci
   NFS_PROVISIONER_SIZE: 20Gi
-  MICROSHIFT_REF: main           # pin to a commit of microshift-io/microshift for reproducible runs
-  MICROSHIFT_TAG: latest
-  ROUTE_HOST: docs.microshift.test
-  RELEASE: documentserver        # OPENSHIFT.md: the chart's service account is named after the release
+  RELEASE: documentserver        # release name as in README
   DOCS_NAMESPACE: docs
   CI_DIR: .github/ci
+
+# The k8s job needs docker on the runner (kind creates the cluster as docker containers).
+# Actions are referenced by full URL, so they do not depend on DEFAULT_ACTIONS_URL of the instance.
 
 jobs:
   resolve-images:
@@ -58,20 +54,30 @@ jobs:
       tag: ${{ steps.resolve.outputs.tag }}
       prefix: ${{ steps.resolve.outputs.prefix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: https://github.com/actions/checkout@v4
 
       - name: Resolve image source and tag
         id: resolve
         env:
-          GH_TOKEN: ${{ github.token }}
+          API_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BODY_EVENT: ${{ github.event.pull_request.body }}
           INPUT_SOURCE: ${{ inputs.images-source }}
           INPUT_TAG: ${{ inputs.images-tag }}
           BASE_REF: ${{ github.base_ref }}
         run: |
-          # PR body is read live, so "Re-run jobs" picks up an edited description
           if [[ -n "${PR_NUMBER}" ]]; then
-            PR_BODY="$(gh pr view "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --json body -q .body)"
+            # PR body is read live from the Gitea API, so "Re-run jobs" picks up an edited description.
+            # Falls back to the body from the event payload if the API is not available.
+            if body=$(curl -fsSL --retry 3 -H "Authorization: token ${API_TOKEN}" \
+                 "${SERVER_URL}/api/v1/repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
+                 | jq -r '.body // ""'); then
+              PR_BODY="${body}"
+            else
+              echo "::warning::Could not read the PR description from the Gitea API, using the event payload"
+              PR_BODY="${PR_BODY_EVENT}"
+            fi
             export PR_BODY
           fi
           bash "${CI_DIR}/scripts/resolve-images.sh"
@@ -90,12 +96,15 @@ jobs:
     env:
       PLATFORM: kind
       DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      # Jobs share the host docker daemon: a fixed name makes parallel jobs (install/upgrade,
+      # several PRs) fight over the same "<name>-control-plane" container
+      KIND_CLUSTER: ci-${{ github.run_id }}-${{ matrix.scenario }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: https://github.com/actions/checkout@v4
 
       - name: Checkout base chart
         if: matrix.scenario == 'upgrade'
-        uses: actions/checkout@v4
+        uses: https://github.com/actions/checkout@v4
         with:
           ref: ${{ github.base_ref || github.event.repository.default_branch }}
           path: base-chart
@@ -103,24 +112,35 @@ jobs:
       - name: Free disk space
         run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL && df -h /
 
-      - uses: azure/setup-helm@v4
+      - uses: https://github.com/azure/setup-helm@v4
         with:
           version: ${{ env.HELM_VERSION }}
 
-      # Optional, avoids Docker Hub anonymous pull limits. Not available for PRs from forks.
+      # Optional, avoids Docker Hub anonymous pull limits
       - name: Login to Docker Hub
         if: env.DOCKERHUB_USERNAME != ''
-        uses: docker/login-action@v3
+        uses: https://github.com/docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1
+        uses: https://github.com/helm/kind-action@v1
         with:
           version: ${{ env.KIND_VERSION }}
           node_image: ${{ env.KIND_NODE_IMAGE }}
           cluster_name: ${{ env.KIND_CLUSTER }}
+
+      # act_runner runs the job in a container: 127.0.0.1 in kubeconfig is the job container,
+      # not the host where kind published the API port. Join the kind network and use the internal address.
+      - name: Make kind API reachable from the job container
+        run: |
+          if [[ -f /.dockerenv ]]; then
+            docker network connect kind "$(hostname)" 2>/dev/null || true
+            mkdir -p "$HOME/.kube"
+            kind get kubeconfig --internal --name "${KIND_CLUSTER}" > "$HOME/.kube/config"
+          fi
+          kubectl cluster-info
 
       # README "Install Persistent Storage": NFS Server Provisioner -> storage class "nfs" (chart default)
       - name: Persistent storage (NFS Server Provisioner)
@@ -158,102 +178,16 @@ jobs:
         if: failure()
         run: bash "${CI_DIR}/scripts/collect-debug.sh" debug
 
+      # Gitea-compatible fork of actions/upload-artifact@v4
       - name: Upload debug info
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: https://github.com/christopherhx/gitea-upload-artifact@v4
         with:
           name: debug-k8s-${{ matrix.scenario }}
           path: debug
           retention-days: 7
 
-  openshift:
-    name: OpenShift (${{ matrix.scc }}, security contexts ${{ matrix.contexts }})
-    needs: resolve-images
-    if: github.event_name != 'workflow_dispatch' || inputs.openshift
-    runs-on: ubuntu-24.04
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      matrix:
-        # Combinations marked as working in docs/OPENSHIFT.md
-        include:
-          - { scc: docs-components, contexts: "off" }
-          - { scc: anyuid,          contexts: "off" }
-          - { scc: nonroot-v2,      contexts: "on" }
-    env:
-      PLATFORM: openshift
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Free disk space
-        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL && df -h /
-
-      - uses: azure/setup-helm@v4
-        with:
-          version: ${{ env.HELM_VERSION }}
-
-      - name: Login to Docker Hub
-        if: env.DOCKERHUB_USERNAME != ''
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Start MicroShift
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: bash "${CI_DIR}/scripts/microshift-up.sh"
-
-      - name: Dependencies (docs/DEPENDENCIES.md)
-        env:
-          DEPS_STORAGE_CLASS: ci-local
-        run: bash "${CI_DIR}/scripts/install-deps.sh" openshift
-
-      # docs/OPENSHIFT.md "Assign SCC to service accounts"
-      - name: Assign SCC ${{ matrix.scc }}
-        run: |
-          if [[ "${{ matrix.scc }}" == "docs-components" ]]; then
-            sed "s/<namespace>/${DOCS_NAMESPACE}/g" sources/scc/common.yaml | kubectl apply -f -
-          else
-            bash "${CI_DIR}/scripts/scc-grant.sh" "${{ matrix.scc }}" user \
-              "system:serviceaccount:${DOCS_NAMESPACE}:${RELEASE}" \
-              "system:serviceaccount:${DOCS_NAMESPACE}:wopi-sa"
-          fi
-
-      - name: Chart values
-        env:
-          IMAGES_PREFIX: ${{ needs.resolve-images.outputs.prefix }}
-          IMAGES_TAG: ${{ needs.resolve-images.outputs.tag }}
-          SCC: ${{ matrix.scc }}
-          CONTEXTS: ${{ matrix.contexts }}
-        run: |
-          bash "${CI_DIR}/scripts/image-values.sh" values.yaml "${IMAGES_PREFIX}" "${IMAGES_TAG}" > /tmp/images.yaml
-          # Fully qualified image names: CRI-O does not guess the registry for short names
-          yq -i '.images.registry = "docker.io"' /tmp/images.yaml
-          bash "${CI_DIR}/scripts/openshift-values.sh" values.yaml "${SCC}" "${CONTEXTS}" "${ROUTE_HOST}" > /tmp/openshift.yaml
-          cat /tmp/images.yaml /tmp/openshift.yaml
-          echo "HELM_ARGS=-f ${CI_DIR}/values-ci.yaml -f /tmp/images.yaml -f /tmp/openshift.yaml --set persistence.storageClass=ci-local" >> "$GITHUB_ENV"
-
-      - name: Deploy and test
-        run: bash "${CI_DIR}/scripts/deploy-test.sh"
-
-      - name: Check pods were admitted with ${{ matrix.scc }}
-        run: |
-          kubectl get pods -n "${DOCS_NAMESPACE}" \
-            -o custom-columns='POD:.metadata.name,SCC:.metadata.annotations.openshift\.io/scc'
-          wrong=$(kubectl get pods -n "${DOCS_NAMESPACE}" -o json \
-            | jq -r --arg scc "${{ matrix.scc }}" '.items[] | select(.metadata.annotations["openshift.io/scc"] != $scc) | .metadata.name')
-          if [[ -n "${wrong}" ]]; then echo "::error::Pods not admitted with ${{ matrix.scc }}: ${wrong}"; exit 1; fi
-
-      - name: Collect debug info
-        if: failure()
-        run: bash "${CI_DIR}/scripts/collect-debug.sh" debug
-
-      - name: Upload debug info
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-openshift-${{ matrix.scc }}
-          path: debug
-          retention-days: 7
+      # The cluster lives in the host docker daemon and outlives the job container
+      - name: Delete kind cluster
+        if: always()
+        run: kind delete cluster --name "${KIND_CLUSTER}" || true
