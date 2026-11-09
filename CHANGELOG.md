@@ -6,6 +6,8 @@
 
 * Added the ability to modify the PostgreSQL schema for Docs tables
 * Added the ability to connect to Redis Standalone and Redis Sentinel over TLS
+* Added the ability to disable the Redis server TLS certificate verification
+* Added the ability to specify a user name for the connection to Redis Sentinel
 
 ## 7.0.1
 

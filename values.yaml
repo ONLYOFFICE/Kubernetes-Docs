@@ -69,6 +69,9 @@ connections:
   ## connections.redisClusterTLSEnabled Enables TLS for the connection to the Redis cluster (`rediss://` scheme for root nodes and `socket.tls` for all cluster nodes)
   ## Used if `connections.redisClusterNodes` is set
   redisClusterTLSEnabled: false
+  ## connections.redisTLSVerify Defines whether the Redis server TLS certificate is verified
+  ## Used if `connections.redisTLSEnabled`, `connections.redisClusterTLSEnabled` or `connections.redisSentinelTLSEnabled` is set to `true`
+  redisTLSVerify: true
   ## connections.redisExistingSecret Name of existing secret to use for Redis password
   ## Must contain the key specified in `connections.redisSecretKeyName`
   ## The password from this secret overrides the value for the password set in the `options` object in `local.json` if you add custom configuration file
@@ -106,6 +109,11 @@ connections:
   ## connections.redisSentinelSecretKeyName The name of the key that contains the Redis Sentinel user password
   ## If you set a password in `redisSentinelPassword`, a secret will be automatically created, the key name of which will be the value set here
   redisSentinelSecretKeyName: sentinel-password
+  ## connections.redisSentinelUser The Redis Sentinel user name
+  ## ref: https://redis.io/docs/management/security/acl/
+  ## Used if `connections.redisConnectorName` is set to `ioredis`
+  ## If not set, the connection to Redis Sentinel nodes is made without a user name
+  redisSentinelUser: ""
   ## connections.redisSentinelPassword The password set for the Redis Sentinel account
   ## If set to, it takes priority over the `connections.redisSentinelExistingSecret`
   ## The value in this parameter overrides the value set in the `iooptions` object in `local.json` if you add custom configuration file

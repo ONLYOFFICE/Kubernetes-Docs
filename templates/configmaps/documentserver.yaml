@@ -26,12 +26,16 @@ data:
   REDIS_SERVER_USER: {{ .Values.connections.redisUser }}
   REDIS_SERVER_DB_NUM: {{ .Values.connections.redisDBNum | quote }}
   REDIS_SERVER_TLS_ENABLED: {{ .Values.connections.redisTLSEnabled | quote }}
+  REDIS_TLS_VERIFY: {{ .Values.connections.redisTLSVerify | quote }}
   {{- if .Values.connections.redisClusterNodes }}
   REDIS_CLUSTER_NODES: {{ join " " .Values.connections.redisClusterNodes }}
   REDIS_CLUSTER_TLS_ENABLED: {{ .Values.connections.redisClusterTLSEnabled | quote }}
   {{- end }}
   {{- if eq .Values.connections.redisConnectorName "ioredis" }}
   REDIS_SENTINEL_GROUP_NAME: {{ .Values.connections.redisSentinelGroupName }}
+  {{- if .Values.connections.redisSentinelUser }}
+  REDIS_SENTINEL_USERNAME: {{ .Values.connections.redisSentinelUser | quote }}
+  {{- end }}
   REDIS_SENTINEL_TLS_ENABLED: {{ .Values.connections.redisSentinelTLSEnabled | quote }}
   {{- if .Values.connections.redisSentinelNodes }}
   REDIS_SENTINEL_NODES: {{ join " " .Values.connections.redisSentinelNodes }}
