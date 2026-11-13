@@ -2,28 +2,33 @@
 # Decides which ONLYOFFICE Docs images from Docker Hub the chart is tested with.
 # Images are built and pushed by ONLYOFFICE/Docker-Docs; CI only uses what is already on Docker Hub.
 #
+# The version under test is appVersion from Chart.yaml (e.g. 10.0.3). Images on Docker Hub are
+# tagged <version>-<N> or <version>-rc.<N>; the most recently pushed tag that exists for ALL chart
+# images (docs-cluster-de, docs-utils) is used, release candidates included.
+#
 # Sources:
+#   auto            - most recently pushed release build of appVersion (onlyoffice/docs-*:<version>-<N>),
+#                     else most recently pushed 4testing build (rc included), else fail
 #   release         - onlyoffice/docs-*:<tag>            (public release images)
 #   4testing        - onlyoffice/4testing-docs-*:<tag>   (Docker-Docs build.yaml with test-repo=true)
-#   auto            - release if <tag> exists there, else 4testing, else fail
-#   4testing-latest - newest 4testing build of the version the chart targets:
-#                     version = images.tag from values.yaml without the build number
-#                     (10.0.0.3-1 -> 10.0.0.3), then the highest <version>-<N> tag that exists
-#                     for ALL chart images in onlyoffice/4testing-* on Docker Hub.
+#   4testing-latest - most recently pushed 4testing build of appVersion (rc included)
+#   For release / 4testing without an explicit tag, the most recently pushed build of appVersion in that repo is taken.
 #
 # Defaults: PRs into release/* and hotfix/* -> 4testing-latest (falls back to auto),
-#           everything else -> auto with <tag> = images.tag from values.yaml.
+#           everything else -> auto.
 #
 # Priority of settings: workflow_dispatch inputs > PR description directives > defaults.
 # PR description directives (one per line, anywhere in the PR body):
 #   ci-images-source: 4testing
 #   ci-images-tag: 10.0.0-12
 #
-# Env in:  INPUT_SOURCE, INPUT_TAG, PR_BODY, BASE_REF, VALUES_FILE (default values.yaml)
+# Env in:  INPUT_SOURCE, INPUT_TAG, PR_BODY, BASE_REF,
+#          CHART_FILE (default Chart.yaml), VALUES_FILE (default values.yaml, image repository names only)
 # Out:     source, tag, prefix  -> $GITHUB_OUTPUT
 
 set -euo pipefail
 
+CHART_FILE="${CHART_FILE:-Chart.yaml}"
 VALUES_FILE="${VALUES_FILE:-values.yaml}"
 OUT="${GITHUB_OUTPUT:-/dev/stdout}"
 SUMMARY="${GITHUB_STEP_SUMMARY:-/dev/null}"
@@ -34,28 +39,31 @@ directive() {
     | sed -n -E "s/^[[:space:]]*$1:[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p" | tail -n1
 }
 
-# Prints tags of a Docker Hub repo (onlyoffice/<name>) containing <filter>
+# Prints "<tag> <push time>" for tags of a Docker Hub repo (onlyoffice/<name>) containing <filter>
 hub_tags() {
   local url="https://hub.docker.com/v2/namespaces/onlyoffice/repositories/${1#onlyoffice/}/tags?page_size=100&name=$2"
   local page=0 body
   while [[ -n "$url" && "$url" != "null" && $page -lt 20 ]]; do
     body=$(curl -fsSL --retry 3 --max-time 30 "$url") || return 1
-    yq -p json -r '.results[].name' <<< "$body"
+    yq -p json -r '.results[] | .name + " " + .tag_last_pushed' <<< "$body"
     url=$(yq -p json -r '.next' <<< "$body")
     page=$((page + 1))
   done
 }
 
-# Highest <version>-<N> (optionally v-prefixed) tag present in every given repo
+# Most recently pushed <version>-<N> or <version>-rc.<N> (optionally v-prefixed) tag present in
+# every given repo. A tag counts as pushed when its last image was pushed (latest time across repos).
 latest_common_tag() {
   local version="$1"; shift
-  local re="^v?${version//./\\.}-[0-9]+$" common="" tags repo
+  local re="^v?${version//./\\.}-(rc\\.)?[0-9]+ " all="" tags repo
   for repo in "$@"; do
     tags=$(hub_tags "$repo" "$version" | grep -E "$re" | sort -u) || true
     echo "  ${repo}: $(grep -c . <<< "${tags:-}") matching tags" >&2
-    if [[ -z "$common" ]]; then common="$tags"; else common=$(comm -12 <(echo "$common") <(echo "$tags")); fi
+    all+="${tags}"$'\n'
   done
-  [[ -n "$common" ]] && awk -F- '{print $NF, $0}' <<< "$common" | sort -n | tail -n1 | cut -d' ' -f2
+  awk -v n="$#" 'NF == 2 { cnt[$1]++; if ($2 > t[$1]) t[$1] = $2 }
+       END { for (k in cnt) if (cnt[k] == n) print t[k], k }' <<< "$all" \
+    | sort | tail -n1 | cut -d' ' -f2 | grep .
 }
 
 image_exists() {
@@ -78,32 +86,58 @@ case "$source" in
   *) echo "::error::Unknown images source '${source}' (allowed: auto, release, 4testing, 4testing-latest)"; exit 1 ;;
 esac
 
-values_tag="$(yq -r '.images.tag' "$VALUES_FILE")"
 docservice_repo="$(yq -r '.docservice.image.repository' "$VALUES_FILE")"   # onlyoffice/docs-cluster-de
-# Version the chart targets: 10.0.0.3-1 -> 10.0.0.3, v10.0.0-12 -> 10.0.0
-values_version="$(sed -E 's/^v//; s/-[0-9]+$//' <<< "$values_tag")"
+# Version the chart targets: appVersion 10.0.3 (a v prefix or build number is stripped, just in case)
+app_version="$(yq -r '.appVersion' "$CHART_FILE" | sed -E 's/^v//; s/-[0-9]+$//')"
 
-if [[ "$source" == "4testing-latest" ]]; then
-  if ! [[ "$values_version" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
-    echo "::error::Cannot take a version from images.tag '${values_tag}' (expected like 10.0.0.3-1)"; exit 1
+# All onlyoffice images a default install uses (docs-cluster-de, docs-utils)
+mapfile -t release_repos < <(yq -r '.docservice.image.repository, .tests.image.repository' "$VALUES_FILE" | sort -u)
+mapfile -t testing_repos < <(printf '%s\n' "${release_repos[@]}" | sed 's#^onlyoffice/#onlyoffice/4testing-#')
+
+newest_build() {  # newest_build <release|4testing>: most recently pushed <appVersion>-[rc.]N tag present in every chart image
+  local repos
+  if [[ "$1" == release ]]; then repos=("${release_repos[@]}"); else repos=("${testing_repos[@]}"); fi
+  echo "Looking for the most recently pushed ${app_version}-[rc.]N tag in: ${repos[*]}" >&2
+  latest_common_tag "$app_version" "${repos[@]}"
+}
+
+if [[ -z "$tag" ]]; then
+  if ! [[ "$app_version" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+    echo "::error::Cannot take a version from appVersion in ${CHART_FILE} ('${app_version}', expected like 10.0.3)"; exit 1
   fi
-  # All onlyoffice images a default install uses (docs-cluster-de, docs-utils), 4testing variants
-  mapfile -t repos < <(yq -r '.docservice.image.repository, .tests.image.repository' "$VALUES_FILE" \
-                         | sed 's#^onlyoffice/#onlyoffice/4testing-#' | sort -u)
-  echo "Looking for the newest ${values_version}-N tag in: ${repos[*]}"
-  found="$(latest_common_tag "$values_version" "${repos[@]}")" || true
-  if [[ -n "$found" ]]; then
-    source="4testing"; tag="$found"
-    echo "Newest 4testing build of ${values_version}: ${tag}"
-  elif [[ "$latest_is_default" == "true" ]]; then
-    echo "::warning::No 4testing build of ${values_version} found, falling back to images.tag '${values_tag}'"
-    source="auto"
-  else
-    echo "::error::No 4testing build of ${values_version} found"; exit 1
+  case "$source" in
+    4testing-latest)
+      if tag="$(newest_build 4testing)"; then
+        source="4testing"
+      elif [[ "$latest_is_default" == "true" ]]; then
+        echo "::warning::No 4testing build of ${app_version} found, falling back to auto"
+        source="auto"
+      else
+        echo "::error::No 4testing build of ${app_version} found"; exit 1
+      fi
+      ;;
+    release|4testing)
+      tag="$(newest_build "$source")" || { echo "::error::No ${source} build of ${app_version} found"; exit 1; }
+      ;;
+  esac
+  if [[ "$source" == "auto" ]]; then
+    if tag="$(newest_build release)"; then
+      source="release"
+    elif tag="$(newest_build 4testing)"; then
+      source="4testing"
+    else
+      {
+        echo "::error::No release or 4testing images found for appVersion ${app_version} (expected tags ${app_version}-<N>)."
+        echo "::error::Push them from ONLYOFFICE/Docker-Docs (build.yaml, test-repo=true) or set 'ci-images-tag:' in the PR description."
+      }
+      exit 1
+    fi
   fi
+  echo "Newest ${source} build of ${app_version}: ${tag}"
+elif [[ "$source" == "4testing-latest" ]]; then
+  source="4testing"   # an explicit tag wins over "latest"
 fi
 
-tag="${tag:-$values_tag}"
 if ! [[ "$tag" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]; then
   echo "::error::Invalid image tag '${tag}'"; exit 1
 fi

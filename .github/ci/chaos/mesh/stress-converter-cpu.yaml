@@ -1,0 +1,16 @@
+# CPU starvation of the converter. Expected: conversions are slower but still succeed (smoke runs DURING the fault).
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: stress-converter-cpu
+  namespace: ${DOCS_NS}
+spec:
+  mode: all
+  selector:
+    namespaces: [${DOCS_NS}]
+    labelSelectors:
+      app: converter
+  stressors:
+    cpu:
+      workers: 2
+      load: 100

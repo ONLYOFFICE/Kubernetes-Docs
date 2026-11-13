@@ -1,0 +1,22 @@
+# Slow network to every dependency. Expected: Docs stays functional (smoke runs DURING the fault).
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: delay-docs-deps
+  namespace: ${DOCS_NS}
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces: [${DOCS_NS}]
+    expressionSelectors:
+      - { key: app, operator: In, values: [docservice, converter] }
+  direction: to
+  delay:
+    latency: 200ms
+    jitter: 50ms
+    correlation: "25"
+  target:
+    mode: all
+    selector:
+      namespaces: [deps]

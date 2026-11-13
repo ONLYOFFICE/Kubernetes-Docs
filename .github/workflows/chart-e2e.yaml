@@ -17,12 +17,12 @@ on:
   workflow_dispatch:
     inputs:
       images-source:
-        description: 'Images: auto (values.yaml tag: release, then 4testing), 4testing-latest (newest build of the images.tag version), release, 4testing'
+        description: 'Images: auto (newest build of Chart.yaml appVersion: release, then 4testing), 4testing-latest (newest 4testing build of appVersion), release, 4testing'
         type: choice
         options: [auto, 4testing-latest, release, 4testing]
         default: auto
       images-tag:
-        description: 'Image tag (empty = images.tag from values.yaml)'
+        description: 'Image tag (empty = newest <appVersion>-N build from Chart.yaml)'
         type: string
 
 concurrency:
@@ -92,7 +92,8 @@ jobs:
       matrix:
         # install: clean install of the PR chart
         # upgrade: install the chart from the base branch, then upgrade to the PR chart
-        scenario: [install, upgrade]
+        # chaos:   clean install, then resilience scenarios (.github/ci/chaos/chaos.sh)
+        scenario: [install, upgrade, chaos]
     env:
       PLATFORM: kind
       DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -173,6 +174,12 @@ jobs:
 
       - name: Deploy and test
         run: bash "${CI_DIR}/scripts/deploy-test.sh"
+
+      - name: Chaos scenarios
+        if: matrix.scenario == 'chaos'
+        env:
+          CHAOS_MESH: "1"
+        run: bash "${CI_DIR}/chaos/chaos.sh"
 
       - name: Collect debug info
         if: failure()

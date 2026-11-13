@@ -1,0 +1,21 @@
+# Docs loses the database (through the pooler) for the duration of the experiment.
+# Expected: healthcheck goes red, then Docs recovers on its own after the partition is removed.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: partition-docs-postgres
+  namespace: ${DOCS_NS}
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces: [${DOCS_NS}]
+    expressionSelectors:
+      - { key: app, operator: In, values: [docservice, converter] }
+  direction: both
+  target:
+    mode: all
+    selector:
+      namespaces: [deps]
+      labelSelectors:
+        cnpg.io/poolerName: postgres-pooler-rw

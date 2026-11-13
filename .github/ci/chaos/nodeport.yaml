@@ -1,0 +1,16 @@
+# kubectl port-forward is bound to one pod and dies together with it, so during chaos the
+# runner reaches Docs through this NodePort instead (same selector as the chart's
+# "documentserver" Service; the chart itself is not changed).
+apiVersion: v1
+kind: Service
+metadata:
+  name: documentserver-chaos
+spec:
+  type: NodePort
+  selector:
+    app: docservice
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 8888
+      nodePort: 30888

@@ -1,0 +1,21 @@
+# Docs loses RabbitMQ. Expected: AMQP channels are re-established after the partition,
+# conversions work again without restarting the pods.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: partition-docs-rabbitmq
+  namespace: ${DOCS_NS}
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces: [${DOCS_NS}]
+    expressionSelectors:
+      - { key: app, operator: In, values: [docservice, converter] }
+  direction: both
+  target:
+    mode: all
+    selector:
+      namespaces: [deps]
+      labelSelectors:
+        app.kubernetes.io/name: rabbitmq
