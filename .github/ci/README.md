@@ -1,6 +1,13 @@
 # Chart e2e tests
 
-Workflow: `.github/workflows/chart-e2e.yaml`. Runs on every PR and manually (Actions → Chart e2e → Run workflow).
+Workflow: `.github/workflows/chart-e2e.yaml`, runs on GitHub (github.com/ONLYOFFICE/Kubernetes-Docs, a mirror of
+git.onlyoffice.com/ONLYOFFICE/Kubernetes-Docs). Manual trigger only: Actions → Chart e2e → Run workflow.
+
+PRs into `master` from `release/v*` and `hotfix/v*` on Gitea start it automatically: `.gitea/workflows/chart-e2e.yaml`
+(`.gitea/scripts/github-e2e.sh`) waits until the PR commit is mirrored, starts the GitHub run on the PR branch at
+that commit, follows it and reports back as the Gitea job result and the `chart-e2e / github` commit status with a
+link to the run. Gitea setup: secret `E2E_GITHUB_TOKEN` (GitHub fine-grained token for the mirror repo,
+"Actions: Read and write", "Contents: Read"); optional variable `E2E_GITHUB_REPO` (default `ONLYOFFICE/Kubernetes-Docs`).
 
 | Job | Cluster | What is checked |
 |---|---|---|
@@ -24,7 +31,7 @@ CI does not build images: it uses what `ONLYOFFICE/Docker-Docs` has already push
 | `4testing-latest` (default for PRs into `release/*` and `hotfix/*`) | most recently pushed `onlyoffice/4testing-docs-*:<appVersion>-<N>` or `<appVersion>-rc.<N>` that exists for every chart image. `<appVersion>` is taken from `Chart.yaml` (`10.0.3` → `10.0.3-40` or `10.0.3-rc.36`). Falls back to `auto` if nothing is found |
 | `auto` (default for other PRs) | most recently pushed `<appVersion>-<N>` / `-rc.<N>` build of `appVersion` from `Chart.yaml`: `release` if it exists, otherwise `4testing`, otherwise the run fails |
 
-Override in the PR description (re-run the jobs after editing it):
+Override in the PR description (re-run the Gitea job after editing it):
 
 ```
 ci-images-source: 4testing

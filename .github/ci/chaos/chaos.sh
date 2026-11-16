@@ -14,13 +14,12 @@
 #   Docs lag    seconds from that moment until Docs is Ready and healthy: Docs' own recovery time
 #   smoke       duration of the smoke subset after recovery (catches hangs /healthcheck does not see)
 #
-# Runs on kind only.
-#
-# env: DOCS_NAMESPACE      (default docs)
+# env: PLATFORM            kind | openshift   (node restart and Chaos Mesh scenarios are kind only)
+#      DOCS_NAMESPACE      (default docs)
 #      KIND_CLUSTER        kind cluster name (node restart scenario)
 #      CHAOS_ONLY          regex, run only scenarios whose name matches
 #      CHAOS_SKIP          regex, skip scenarios whose name matches
-#      CHAOS_MESH          1 = install Chaos Mesh and run network/stress scenarios
+#      CHAOS_MESH          1 = install Chaos Mesh and run network/stress scenarios (kind only)
 #      CHAOS_MESH_VERSION  Chaos Mesh chart version
 #      FAULT_DURATION      seconds a network fault is held (default 60)
 #      RECOVERY_TIMEOUT    seconds to recover after the fault is removed (default 300)
@@ -32,7 +31,8 @@ set -euo pipefail
 CI_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 NS="${DOCS_NAMESPACE:-docs}"
 DEPS_NS=deps
-NFS_NS=default   # NFS Server Provisioner
+NFS_NS=default   # NFS Server Provisioner (kind); on OpenShift there is no pod there, which is fine
+PLATFORM="${PLATFORM:-kind}"
 FAULT_DURATION="${FAULT_DURATION:-60}"
 RECOVERY_TIMEOUT="${RECOVERY_TIMEOUT:-300}"
 MAX_DOWNTIME="${MAX_DOWNTIME:-}"
@@ -48,9 +48,13 @@ SMOKE_QUICK='^(healthcheck|command_version|command_unknown_document|convert_asyn
 
 # ---------------------------------------------------------------- access to Docs
 
-# node IP is re-read: it can change after a node restart
 set_ds_url() {
-  DS_URL="http://$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null):30888"
+  if [[ "$PLATFORM" == "openshift" ]]; then
+    DS_URL="http://${ROUTE_HOST:?}"
+  else
+    # node IP is re-read: it can change after a node restart
+    DS_URL="http://$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null):30888"
+  fi
   export DS_URL
 }
 
@@ -286,7 +290,7 @@ run valkey-kill               kill_pods "$DEPS_NS" '^pod/valkey-'
 run nfs-server-kill           kill_pods "$NFS_NS"  '^pod/nfs-server-nfs-server-provisioner-'
 
 # Network and resource faults
-if [[ "${CHAOS_MESH:-0}" == 1 ]]; then
+if [[ "${CHAOS_MESH:-0}" == 1 && "$PLATFORM" == kind ]]; then
   install_chaos_mesh
   run net-partition-postgres  mesh partition-docs-postgres
   run net-partition-rabbitmq  mesh partition-docs-rabbitmq
@@ -296,13 +300,13 @@ fi
 
 # Whole node power cycle: the heaviest one, last.
 # Docs restarts are expected here: kubelet restarts every container after a node reboot.
-run node-restart node_restart
+[[ "$PLATFORM" == kind ]] && run node-restart node_restart
 
 # ---------------------------------------------------------------- report
 
 sec() { [[ "$1" =~ ^[0-9]+$ ]] && echo "${1}s" || echo "$1"; }
 {
-  echo "### Chaos"
+  echo "### Chaos (${PLATFORM})"
   echo "| scenario | result | outage | infra | Docs lag | smoke | Docs restarts | took | note |"
   echo "|---|---|---|---|---|---|---|---|---|"
   for r in "${results[@]}"; do
