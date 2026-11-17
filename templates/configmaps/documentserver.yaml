@@ -47,6 +47,7 @@ data:
   AMQP_HOST: {{ .Values.connections.amqpHost }}
   AMQP_USER: {{ .Values.connections.amqpUser }}
   AMQP_PROTO: {{ .Values.connections.amqpProto }}
+  AMQP_QUEUE_TYPE: {{ .Values.connections.amqpQueueType }}
   METRICS_ENABLED: {{ .Values.metrics.enabled | quote }}
   {{- if .Values.metrics.enabled }}
   METRICS_HOST: {{ .Values.metrics.host }}
