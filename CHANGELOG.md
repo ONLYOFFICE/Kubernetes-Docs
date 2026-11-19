@@ -1,5 +1,11 @@
 # Change log
 
+## 7.0.2
+
+### Fixes
+
+* Fixed CVE-2026-123007 and related vulnerabilities
+
 ## 7.0.1
 
 ### Changes
