@@ -453,6 +453,15 @@ requestFilteringAgent:
   ## denyIPAddressList:
   ## - 10.244.0.80
   denyIPAddressList: []
+## ipFilterRules Defines the IP filter rules for ONLYOFFICE Docs (`services.CoAuthoring.ipfilter.rules`)
+## Each rule has the format `allowed <address>` or `deny <address>`, where `<address>` is an IP address, a domain name or `*`
+## If empty, the default rule `allowed *` is used
+## Example:
+## ipFilterRules:
+## - allowed my.example.com
+## - allowed 192.168.1.1
+## - deny *
+ipFilterRules: []
 ## customFonts.build Enables the addition of custom Fonts
 ## When set to `true`, the Job `customResources` will be executed
 ## Fonts should be added to the "custom-k8s" subdirectory of the `persistence.customResources` PVC root

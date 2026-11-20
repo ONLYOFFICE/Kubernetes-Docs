@@ -8,6 +8,7 @@
 * Added the ability to connect to Redis Standalone and Redis Sentinel over TLS
 * Added the ability to disable the Redis server TLS certificate verification
 * Added the ability to specify a user name for the connection to Redis Sentinel
+* Added the ability to configure the IP filter rules
 
 ## 7.0.1
 
