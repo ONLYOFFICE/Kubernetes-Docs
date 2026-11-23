@@ -134,6 +134,10 @@ connections:
   amqpUser: user
   ## connections.amqpProto The protocol for the connection to AMQP server
   amqpProto: amqp
+  ## connections.amqpQueueType The type of RabbitMQ queues used by Docs
+  ## Possible values are `classic` or `quorum`. `quorum` requires a RabbitMQ cluster and replicates queues across its nodes
+  ## Not used if `connections.amqpType` is set to `activemq`
+  amqpQueueType: classic
   ## connections.amqpExistingSecret The name of existing secret to use for AMQP server passwords
   ## Must contain the key specified in `connections.amqpSecretKeyName`
   amqpExistingSecret: rabbitmq
