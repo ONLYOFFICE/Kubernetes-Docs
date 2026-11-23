@@ -490,7 +490,7 @@ customPlugins:
 ## Global image parameters for all Onlyoffice Docs services and jobs
 images:
   ## images.tag Global image tag for all Onlyoffice Docs services and jobs
-  tag: 10.0.2-2
+  tag: 10.0.2-3
   ## images.registry Global image registry for all Onlyoffice Docs containers
   registry: ""
 
